@@ -16,6 +16,10 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->string('celular', 13);
+            $table->unsignedBigInteger('id_rol');
+            $table->foreign('id_rol')->references('id')->on('rols');
+            $table->unsignedBigInteger('id_autentication');
+            $table->foreign('id_autentication')->references('id')->on('autentications');
             //$table->timestamps();
         });
     }

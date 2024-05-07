@@ -23,7 +23,7 @@ class Empresa extends Model
         'experiencia',
         'funciones',
         'id_municipio',
-        'id_tipodocumento'
+        'id_tipo_documento'
     ];
 
     public $timestamps = false;
