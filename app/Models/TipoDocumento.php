@@ -10,8 +10,12 @@ class TipoDocumento extends Model
     use HasFactory;
 
     protected $fillable = [
-        'nombre'
+        'tipo_de_documento'
     ];
 
     public $timestamps = false;
+
+    public function users(){
+        return $this->hasMany(User::class, 'id_tipo_documento');
+    }
 }
