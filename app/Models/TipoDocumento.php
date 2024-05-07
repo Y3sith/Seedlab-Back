@@ -13,5 +13,5 @@ class TipoDocumento extends Model
         'nombre'
     ];
 
-    publis $timestamps = false;
+    public $timestamps = false;
 }
