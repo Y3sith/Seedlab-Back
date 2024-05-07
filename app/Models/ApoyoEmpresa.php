@@ -16,7 +16,7 @@ class ApoyoEmpresa extends Model
         'cargo',
         'telefono',
         'celular',
-        'email'
+        'email',
         'id_tipo_documento',
         'id_empresa'
     ];
