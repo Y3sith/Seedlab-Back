@@ -23,7 +23,6 @@ class Asesor extends Model
         return $this->belongsTo(Autentication::class, 'id_autentication');
     }
     
-
     public function aliado(){
         return $this->belongsTo(Aliado::class, 'id_aliado');
     }

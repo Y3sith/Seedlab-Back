@@ -34,4 +34,8 @@ class Emprendedor extends Model
     public function tipoDocumento(){
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
+
+    public function empresa(){
+        return $this->hasMany(Empresa::class, 'id_empresa');
+    }
 }

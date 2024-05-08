@@ -17,13 +17,18 @@ return new class extends Migration
             $table->string('apellido',50);
             $table->string('cargo',50);
             $table->string('razonSocial',50);
-            $table->string('urlPagina');
+            $table->string('urlPagina')->nullable();
             $table->string('telefono',10);
             $table->string('celular',13);
             $table->string('direccion',50);
             $table->string('profesion',50);
-            $table->text('experiencia');
-            $table->text('funciones');
+            $table->string('correo',100);
+            $table->text('experiencia')->nullable();
+            $table->text('funciones')->nullable();
+            $table->unsignedBigInteger('id_municipio');
+            $table->foreign('id_municipio')->references('id')->on('municipios');
+            $table->string('id_emprendedor', 50);
+            $table->foreign('id_emprendedor')->references('documento')->on('emprendedors');
             //$table->timestamps();
         });
     }

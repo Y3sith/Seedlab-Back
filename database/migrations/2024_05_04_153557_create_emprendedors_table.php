@@ -20,8 +20,6 @@ return new class extends Migration
             $table->date('fechaNacimiento');
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
-            $table->string('id_empresa', 50);
-            $table->foreign('id_empresa')->references('documento')->on('empresas');
             $table->unsignedBigInteger('id_tipo_documento');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documentos');
             $table->unsignedBigInteger('id_municipio');

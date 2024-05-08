@@ -23,8 +23,26 @@ class Empresa extends Model
         'experiencia',
         'funciones',
         'id_municipio',
-        'id_tipo_documento'
+        'id_tipo_documento',
+        'id_empresa',
     ];
 
+
     public $timestamps = false;
+
+    public function emprendedor(){
+        return $this->belongsTo(Emprendedor::class, 'id_emprendedor');
+    }
+
+    public function tipoDocumento(){
+        return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
+    }
+
+    public function municipio(){
+        return $this->belongsTo(Municipio::class, 'id_municipio');
+    }
+
+    public function apoyoxempresa(){
+        return $this->hasMany(ApoyoEmpresa::class, 'id_empresa');
+    }
 }

@@ -31,6 +31,10 @@ class Municipio extends Model
         return $this->hasMany(Emprendedor::class, 'id_municipio');
     }
 
+    public function empresa(){
+        return $this->hasMany(Empresa::class, 'id_municipio');
+    }
+
     
 
 }
