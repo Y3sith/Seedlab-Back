@@ -2,11 +2,11 @@
 
 namespace Database\Seeders;
 
-use App\Models\Subpreguntas;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Subpreguntas;
 
-class SubpreguntasSeeder extends Seeder
+class SubpreguntaSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -14,9 +14,16 @@ class SubpreguntasSeeder extends Seeder
     public function run(): void
     {
         $preguntasPorSubpreguntas = [
-            1.1 => [null],
-            1.2 => ['Administrativo', 'Desarrollo', 'Produción', 'Innovación y/o desarrollo tecnológico', 'Comercialización', 'Otro, cuál / cuántos?'],
-            1.3 => [null],
+            '2' => [
+                '1' => ['texto' => '¿Cuantós personas conforman su equipo de trabajo?',
+                        'puntaje' => '2'],
+                '2' => ['texto' => 'CUENTA CON PERSONAS DE APOYO EN:',
+                'puntaje' => '2'],
+                '3' => ['texto' => '¿SU EMPRENDIMIENTO ESTÁ LEGALMENTE CONSTITUIDO?',
+                'puntaje' => '2'],
+            ],
+            //'2' => ['Administrativo', 'Desarrollo', 'Produción', 'Innovación y/o desarrollo tecnológico', 'Comercialización', 'Otro, cuál / cuántos?'],
+            /*3 => [null],
             1.4 => [null],
             1.5 => [null],
             1.7 => [null],
@@ -62,13 +69,15 @@ class SubpreguntasSeeder extends Seeder
             4.3 => [null],
             4.4 => ['APOYO TÉCNICO', 'Capacitación', 'FINANCIAMIENTO', 'REDES/ALIANZA', 'MEJORA DE LA CALIDAD P/S', 'INFRAESTRUCTURA', null],
             4.5 => [null],
-            4.6 => ['APOYO TÉCNICO', 'Capacitación', 'FINANCIAMIENTO', 'REDES/ALIANZA', 'INFRAESTRUCTURA', 'AUMENTO DE CLIENTES', 'BAJAR COSTOSY/O GASTOS', 'MEJORAR BENTAS', null]
+            4.6 => ['APOYO TÉCNICO', 'Capacitación', 'FINANCIAMIENTO', 'REDES/ALIANZA', 'INFRAESTRUCTURA', 'AUMENTO DE CLIENTES', 'BAJAR COSTOSY/O GASTOS', 'MEJORAR BENTAS', null]*/
         ];
+
         foreach($preguntasPorSubpreguntas as $idPregunta =>$preguntas ){
-            foreach($preguntas as $nombrePregunta){
+            foreach($preguntas as $nombrePregunta =>$contenido){
                 Subpreguntas::create([
-                    'nombrePregunta' =>$nombrePregunta,
-                    'idPregunta' =>$idPregunta
+                    'texto' =>$contenido['texto'],
+                    'puntaje' =>$contenido['puntaje'],
+                    'id_pregunta' => $idPregunta
                 ]);
             }
         }

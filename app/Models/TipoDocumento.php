@@ -10,7 +10,7 @@ class TipoDocumento extends Model
     use HasFactory;
 
     protected $fillable = [
-        'tipo_de_documento'
+        'nombre'
     ];
 
     public $timestamps = false;

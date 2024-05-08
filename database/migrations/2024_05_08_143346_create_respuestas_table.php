@@ -18,10 +18,10 @@ return new class extends Migration
             $table->double('valor');
             $table->unsignedBigInteger('id_pregunta');
             $table->foreign('id_pregunta')->references('id')->on('preguntas');
-            $table->unsignedBigInteger('id_emprendedor');
-            $table->foreign('id_emprendedor')->references('id')->on('emprendedors');
-            $table->unsignedBigInteger('id_subpregunta');
-            $table->foreign('id_subpregunta')->references('id')->on('subpreguntas');
+            $table->string('id_empresa');
+            $table->foreign('id_empresa')->references('documento')->on('empresas');
+            /*$table->unsignedBigInteger('id_subpregunta');
+            $table->foreign('id_subpregunta')->references('id')->on('subpreguntas');*/
             //$table->timestamps();
         });
     }

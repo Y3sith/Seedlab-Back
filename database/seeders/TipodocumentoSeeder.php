@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use App\Models\TipoDocumento;
 
-class TipodecumentoSeeder extends Seeder
+class TipodocumentoSeeder extends Seeder
 {
     /**
      * Run the database seeds.
@@ -20,7 +20,7 @@ class TipodecumentoSeeder extends Seeder
         ];
 
         foreach ($tipo_de_documento  as $tipo_de_documento ) {
-            TipoDocumento::create(['tipo_de_documento' => $tipo_de_documento ]);
+            TipoDocumento::create(['nombre' => $tipo_de_documento ]);
         }
     }
 }

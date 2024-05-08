@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use App\Models\Seccion;
 
 class SeccionSeeder extends Seeder
 {
@@ -18,13 +19,11 @@ class SeccionSeeder extends Seeder
             'INFORMACIÓN DEL MERCADO',
             'INFORMACIÓN OPERATIVA TÉCNICA DE PRODUCTO Y/O SERVICIO',
         ];
-        foreach($seccionPorPregunta as $idPregunta => $pregunta){
-            foreach($seccion as $nombrePregunta){
+
+            foreach($seccionPorPregunta as $nombrePregunta){
                 Seccion::create([
                     'nombre' => $nombrePregunta,
-                    'id_pregunta' => $idPregunta,
                 ]);
             }
-        }
     }
 }
