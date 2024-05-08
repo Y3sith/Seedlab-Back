@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('celular', 13);
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
+            $table->unsignedBigInteger('id_aliado');
+            $table->foreign('id_aliado')->references('id')->on('aliados');
             //$table->timestamps();
         });
     }

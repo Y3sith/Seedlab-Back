@@ -17,7 +17,8 @@ class Emprendedor extends Model
         'genero',
         'fechaNacimiento',
         'id_municipio',
-        'id_autentication'
+        'id_autentication',
+        'id_tipo_documento',
     ];
 
     public $timestaps = false;
@@ -28,5 +29,9 @@ class Emprendedor extends Model
 
     public function auth(){
         return $this->belongsTo(Autentication::class, 'id_autentication');
+    }
+
+    public function tipoDocumento(){
+        return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 }

@@ -16,10 +16,11 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->text('descripcion');
             $table->string('logo');
-            $table->string('razonSocial',50);
             $table->string('rutaMulti');
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
+            $table->unsignedBigInteger('id_tipo_dato');
+            $table->foreign('id_tipo_dato')->references('id')->on('tipo_datos');
             //$table->timestamps();
         });
     }

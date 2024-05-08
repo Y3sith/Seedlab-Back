@@ -19,6 +19,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
             //$table->timestamps();
+        
         });
     }
 

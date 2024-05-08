@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('emprendedors', function (Blueprint $table) {
-            $table->documento();
+            $table->string('documento', 50)->primary();
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->string('celular', 13);
@@ -20,8 +20,8 @@ return new class extends Migration
             $table->date('fechaNacimiento');
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
-            $table->unsignedBigInteger('id_empresa');
-            $table->foreign('id_empresa')->references('id')->on('empresas');
+            $table->string('id_empresa', 50);
+            $table->foreign('id_empresa')->references('documento')->on('empresas');
             $table->unsignedBigInteger('id_tipo_documento');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documentos');
             $table->unsignedBigInteger('id_municipio');
