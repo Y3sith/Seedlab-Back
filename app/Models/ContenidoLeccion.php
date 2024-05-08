@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Seccion extends Model
+class ContenidoLeccion extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-       'nombre'
+        'titulo',
+        'descripcion',
+        'fuente',
+        'id_tipo_dato',
+        'id_leccion',
     ];
-
-    public function preguntas(){
-        return $this->hasMany(Pregunta::class, 'id_seccion');
-    }
 
     public $timestamps = false;
 }

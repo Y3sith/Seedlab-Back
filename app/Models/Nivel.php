@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Seccion extends Model
+class Nivel extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-       'nombre'
+        'nombre',
+        'descripcion',
+        'id_actividad'
     ];
-
-    public function preguntas(){
-        return $this->hasMany(Pregunta::class, 'id_seccion');
-    }
 
     public $timestamps = false;
 }

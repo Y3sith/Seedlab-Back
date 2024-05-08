@@ -5,17 +5,17 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class Seccion extends Model
+class PersonalizacionSistema extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-       'nombre'
+        'imagenLogo',
+        'nombre_sistema',
+        'color_principal',
+        'color_secundario',
+        'id_superadmin'
     ];
-
-    public function preguntas(){
-        return $this->hasMany(Pregunta::class, 'id_seccion');
-    }
 
     public $timestamps = false;
 }

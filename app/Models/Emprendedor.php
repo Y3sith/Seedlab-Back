@@ -38,4 +38,6 @@ class Emprendedor extends Model
     public function empresa(){
         return $this->hasMany(Empresa::class, 'id_empresa');
     }
+
+    
 }

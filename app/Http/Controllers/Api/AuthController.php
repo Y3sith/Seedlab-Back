@@ -50,7 +50,7 @@ class AuthController extends Controller
         ]);
     }
 
-    //Revisar si es necesario
+ 
     protected function existeusuario(string $numdocumento, string $correo)
     {
         $valuser = User::where('numdocumento', $numdocumento)->first();
