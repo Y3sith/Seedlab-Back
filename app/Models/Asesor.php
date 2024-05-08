@@ -13,9 +13,17 @@ class Asesor extends Model
         'nombre',
         'apellido',
         'celular',
-        'id_rol',
-        'id_autentication'
+        'id_autentication',
+        'id_aliado'
     ];
 
     public $timestamps = false;
+
+    public function auth(){
+        return $this->belongsTo(Autentication::class, 'id_autentication');
+    }
+    
+    public function aliado(){
+        return $this->belongsTo(Aliado::class, 'id_aliado');
+    }
 }

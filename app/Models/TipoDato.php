@@ -18,4 +18,8 @@ class TipoDato extends Model
     ];
 
     public $timestamps = false;
+
+    public function aliados(){
+        return $this->hasMany(Aliado::class, 'id_tipo_dato');
+    }
 }

@@ -11,18 +11,19 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('aliados', function (Blueprint $table) {
-            $table->id();
+        Schema::create('emprendedors', function (Blueprint $table) {
+            $table->string('documento', 50)->primary();
             $table->string('nombre', 50);
             $table->string('apellido', 50);
-            $table->text('descripcion');
-            $table->string('logo');
-            $table->string('razonSocial',50);
-            $table->string('rutaMulti');
-            $table->unsignedBigInteger('id_rol');
-            $table->foreign('id_rol')->references('id')->on('rols');
+            $table->string('celular', 13);
+            $table->string('genero', 20);
+            $table->date('fechaNacimiento');
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
+            $table->unsignedBigInteger('id_tipo_documento');
+            $table->foreign('id_tipo_documento')->references('id')->on('tipo_documentos');
+            $table->unsignedBigInteger('id_municipio');
+            $table->foreign('id_municipio')->references('id')->on('municipios');
             //$table->timestamps();
         });
     }
@@ -32,6 +33,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('aliados');
+        Schema::dropIfExists('emprendedors');
     }
 };

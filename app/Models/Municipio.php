@@ -18,37 +18,23 @@ use Illuminate\Database\Eloquent\Model;
  */
 class Municipio extends Model
 {
-    /**
-     * The attributes that are mass assignable.
-     *
-     * @var array
-     */
     protected $fillable = ['nombre', 'id_departamento'];
 
-    /**
-     * The table associated with the model.
-     *
-     * @var string
-     */
-    protected $table = 'municipios';
-
-    /**
-     * Indicates if the model should be timestamped.
-     *
-     * @var bool
-     */
     public $timestamps = false;
 
-    /**
-     * Get the departamento that owns the municipio.
-     */
     public function departamento()
     {
         return $this->belongsTo(Departamento::class, 'id_departamento');
     }
 
-    public function users(){
-        return $this->hasMany(User::class);
+    public function emprendedor(){
+        return $this->hasMany(Emprendedor::class, 'id_municipio');
     }
+
+    public function empresa(){
+        return $this->hasMany(Empresa::class, 'id_municipio');
+    }
+
+    
 
 }

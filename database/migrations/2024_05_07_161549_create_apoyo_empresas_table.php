@@ -12,11 +12,11 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('apoyo_empresas', function (Blueprint $table) {
-            $table->documento();
+            $table->string('documento',50)->primary();
             $table->string('nombre',50);
             $table->string('apellido',50);
             $table->string('cargo',50);
-            $table->string('telefono',10);
+            $table->string('telefono',10)->nullable();
             $table->string('celular',13);
             $table->string('email');
             //$table->timestamps();

@@ -16,7 +16,7 @@ class TipodecumentoSeeder extends Seeder
         $tipo_de_documento = [
             'Cédula de Ciudadanía',
             'Cédula de Extranjería',
-            'Permiso especial de Permanencia'
+            'Permiso especial de Permanencia'   
         ];
 
         foreach ($tipo_de_documento  as $tipo_de_documento ) {
