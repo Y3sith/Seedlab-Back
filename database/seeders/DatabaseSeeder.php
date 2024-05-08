@@ -6,6 +6,7 @@ use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
+
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -15,9 +16,12 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        $this->call(DepartamentosSeeder::class);
+        $this->call(DepartamentoSeeder::class);
         $this->call(MunicipiosSeeder::class);
-        $this->call(TipoDocumentoSeeder::class);
+        $this->call(TipodocumentoSeeder::class);
         $this->call(RolesSeeder::class); 
+        $this->call(SeccionSeeder::class);
+        $this->call(PreguntasSeeder::class);
+        $this->call(SubpreguntaSeeder::class);
     }
 }

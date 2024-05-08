@@ -5,17 +5,15 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class TipoDocumento extends Model
+class Subpreguntas extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'nombre'
+        'texto',
+        'puntaje',
+        'id_pregunta',
     ];
 
     public $timestamps = false;
-
-    public function emprendedor(){
-        return $this->hasMany(Emprendedor::class, 'id_tipo_documento');
-    }
 }
