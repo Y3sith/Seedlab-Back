@@ -11,15 +11,17 @@ class Aliado extends Model
 
     protected $fillable = [
         'nombre',
-        'apellido',
         'descripcion',
         'logo',
         'razonSocial',
         'rutaMult',
-        'id_rol',
         'id_autentication'
     ];
 
     public $timestaps = false;
+
+    public function auth(){
+        return $this->belongsTo(Autenticacion::class, 'id_autentication');
+    }
 
 }

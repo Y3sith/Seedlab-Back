@@ -16,10 +16,17 @@ class Emprendedor extends Model
         'celular',
         'genero',
         'fechaNacimiento',
-        'id_rol',
         'id_municipio',
         'id_autentication'
     ];
 
     public $timestaps = false;
+
+    public function municipios(){
+        return $this->belongsTo(Municipio::class, 'id_municipio');
+    }
+
+    public function auth(){
+        return $this->belongsTo(Autentication::class, 'id_autentication');
+    }
 }

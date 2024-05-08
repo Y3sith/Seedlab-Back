@@ -16,4 +16,28 @@ class Autentication extends Model
     ];
 
     public $timestamps = false;
+
+    public function rol(){
+        return $this->belongsTo(Rol::class, 'id_rol');
+    }
+
+    public function asesor(){
+        return $this->hasOne(Asesor::class, 'id_autentication');
+    }
+
+    public function emprendedor(){
+        return $this->hasOne(Emprendedor::class, 'id_autentication');
+    }
+
+    public function orientador(){
+        return $this->hasOne(Orientador::class, 'id_autentication');
+    }
+
+    public function superAdmin(){
+        return $this->hasOne(SuperAdmin::class, 'id_autentication');
+    }
+
+    public function aliado(){
+        return $this->hasOne(Aliado::class, 'id_autentication');
+    }
 }

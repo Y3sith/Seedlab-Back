@@ -12,9 +12,12 @@ class SuperAdmin extends Model
     protected $fillable = [
         'nombre', 
         'apellidos',
-        'id_rol',
         'id_autentication'
     ];
 
     public $timestamps = false;
+
+    public function auth(){
+        return $this->belongsTo(Autentication::class, 'id_autentication');
+    }
 }
