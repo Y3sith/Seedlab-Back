@@ -45,7 +45,7 @@ class AuthController extends Controller
  
     protected function existeusuario(string $numdocumento, string $correo)
     {
-        $valuser = User::where('numdocumento', $numdocumento)->first();
+        $valuser = User::where('documento', $numdocumento)->first();
         $valcorreo = User::where('email', $correo)->first();
 
         if ($valuser) {
@@ -57,7 +57,7 @@ class AuthController extends Controller
         }
     }
 
-    protected function register(Request $data)
+    protected function register2(Request $data)
     {
         $Response = $this->existeusuario($data['numdocumento'], $data['email']);
 
@@ -90,7 +90,7 @@ class AuthController extends Controller
         }
     }
 
-    protected function register2(Request $data)
+    protected function register(Request $data)
 {
     // Verificar si el usuario ya existe
     $Response = $this->existeusuario($data['numdocumento'], $data['correo']);
@@ -104,7 +104,7 @@ class AuthController extends Controller
         // Ejecutar procedimiento almacenado
         DB::transaction(function () use ($data, $verificationCode) {
             // Ejecutar el procedimiento almacenado para registrar el emprendedor
-            DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
                 $data['numdocumento'],
                 $data['nombretipodoc'],
                 $data['nombre'],
@@ -117,6 +117,7 @@ class AuthController extends Controller
                 $data['correo'],
                 Hash::make($data['contrasena']),
                 $data['estado'],
+                $verificationCode
             ]);
 
             // Enviar correo electrónico con el código de verificación
