@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('subpreguntas', function (Blueprint $table) {
+        Schema::create('subpregunta', function (Blueprint $table) {
             $table->id();
             $table->text('texto');
             $table->double('puntaje');
             $table->unsignedBigInteger('id_pregunta');
-            $table->foreign('id_pregunta')->references('id')->on('preguntas');
+            $table->foreign('id_pregunta')->references('id')->on('pregunta');
             //$table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('subpreguntas');
+        Schema::dropIfExists('subpregunta');
     }
 };

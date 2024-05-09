@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('actividads', function (Blueprint $table) {
+        Schema::create('actividad', function (Blueprint $table) {
             $table->id();
             $table->string('nombre',50);
             $table->text('descripcion');
             $table->string('ruta_multi');
             $table->unsignedBigInteger('id_tipo_dato');
-            $table->foreign('id_tipo_dato')->references('id')->on('tipo_datos');
+            $table->foreign('id_tipo_dato')->references('id')->on('tipo_dato');
             $table->unsignedBigInteger('id_asesor');
-            $table->foreign('id_asesor')->references('id')->on('asesors');
+            $table->foreign('id_asesor')->references('id')->on('asesor');
             $table->unsignedBigInteger('id_ruta');
-            $table->foreign('id_ruta')->references('id')->on('rutas');
+            $table->foreign('id_ruta')->references('id')->on('ruta');
             //$table->timestamps();
         });
     }

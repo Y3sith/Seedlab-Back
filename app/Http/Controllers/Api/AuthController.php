@@ -92,6 +92,8 @@ class AuthController extends Controller
 
 
 
+
+    
     protected function validate_email(Request $request)
     {
         $verificationCode = $request->input('codigo');

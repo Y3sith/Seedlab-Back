@@ -11,17 +11,17 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('respuestas', function (Blueprint $table) {
+        Schema::create('respuesta', function (Blueprint $table) {
             $table->id();
             $table->string('opcion', 10);
             $table->text('texto_res');
             $table->double('valor');
             $table->unsignedBigInteger('id_pregunta');
-            $table->foreign('id_pregunta')->references('id')->on('preguntas');
+            $table->foreign('id_pregunta')->references('id')->on('pregunta');
             $table->string('id_empresa');
-            $table->foreign('id_empresa')->references('documento')->on('empresas');
+            $table->foreign('id_empresa')->references('documento')->on('empresa');
             $table->unsignedBigInteger('id_subpregunta');
-            $table->foreign('id_subpregunta')->references('id')->on('subpreguntas');
+            $table->foreign('id_subpregunta')->references('id')->on('subpregunta');
             //$table->timestamps();
         });
     }
@@ -31,6 +31,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('respuestas');
+        Schema::dropIfExists('respuesta');
     }
 };
