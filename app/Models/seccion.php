@@ -9,6 +9,8 @@ class Seccion extends Model
 {
     use HasFactory;
 
+    protected $table = 'seccion';
+
     protected $fillable = [
        'nombre'
     ];

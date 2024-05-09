@@ -18,6 +18,8 @@ return new class extends Migration
             $table->string('celular', 13);
             $table->string('genero', 20);
             $table->date('fechaNacimiento');
+            $table->timestamp('email_verified_at')->nullable();
+            $table->string('cod_ver', 10)->nullable();
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('autentications');
             $table->unsignedBigInteger('id_tipo_documento');

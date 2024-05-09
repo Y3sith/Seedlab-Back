@@ -9,6 +9,8 @@ class Orientador extends Model
 {
     use HasFactory;
 
+    protected $table = 'orientador';
+
     protected $fillable = [
         'nombre', 
         'apellido', 
