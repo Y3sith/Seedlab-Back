@@ -48,8 +48,9 @@ class EmpresaApiController extends Controller
         $empresa->profesion = $request->profesion;
         $empresa->experiencia = $request->experiencia;
         $empresa->funciones = $request->funciones;
-        $empresa->id_municipio = $request->id_municipio;
-        $empresa->id_emprendedor = $request->id_emprendedor;
+        $empresa->id_tipo_documento = $request->id_tipo_documento;
+        $empresa->id_emprendedor= $request->id_emprendedor;
+        $empresa->id_municipio= $request->id_municipio;
         $empresa->save();
         return response()->json($empresa, 200);
     }
@@ -73,9 +74,9 @@ class EmpresaApiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $documento)
     {
-        $empresa = Empresa::find($id);
+        $empresa = Empresa::find($documento);
         if(!$empresa){
             return response()->json([
                'message' => 'Empresa no encontrada'], 404);
@@ -85,7 +86,7 @@ class EmpresaApiController extends Controller
             $empresa->cargo = $request->cargo;
             $empresa->razonSocial = $request->razonSocial;
             $empresa->urlPagina = $request->urlPagina;
-            $empresa->numeroDocumento = $request->numeroDocumento;
+            $empresa->documento = $request->documento;
             $empresa->telefono = $request->telefono;
             $empresa->celular = $request->celular;
             $empresa->direccion = $request->direccion;

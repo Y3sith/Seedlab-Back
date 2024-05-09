@@ -5,13 +5,13 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmpresaApiController;
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmpresaApiController;
 
 
 /*Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:sanctum');*/
 
-Route::get('/userProfile', [AuthController::class, 'userProfile'])->name('userProfile');
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);
@@ -24,7 +24,10 @@ Route::post('/validate_email', [AuthController::class, 'validate_email'])->name(
 
 Auth::routes();
 
-Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
-
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+
+
+
+Route::apiResource('empresa',EmpresaApiController::class);

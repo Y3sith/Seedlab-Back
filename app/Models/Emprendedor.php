@@ -11,6 +11,8 @@ class Emprendedor extends Model
 
     protected $table = 'emprendedor';
 
+    protected $primaryKey = 'documento';
+    public $incrementing = false;
     protected $fillable = [
         'nombre',
         'apellido',
@@ -30,7 +32,7 @@ class Emprendedor extends Model
     }
 
     public function auth(){
-        return $this->belongsTo(Autentication::class, 'id_autentication');
+        return $this->belongsTo(User::class, 'id_autentication');
     }
 
     public function tipoDocumento(){

@@ -42,6 +42,14 @@ return [
         ],
     ],
 
+    'guards' => [
+        'api' => [
+            'driver' => 'passport',
+            'provider' => 'users',
+        ],
+    ],
+    
+
     /*
     |--------------------------------------------------------------------------
     | User Providers
@@ -64,6 +72,14 @@ return [
             'driver' => 'eloquent',
             'model' => env('AUTH_MODEL', App\Models\User::class),
         ],
+
+        'providers' => [
+            'authentications' => [
+                'driver' => 'eloquent',
+                'model' => App\Models\Autentication::class,
+            ],
+        ],
+        
 
         // 'users' => [
         //     'driver' => 'database',
