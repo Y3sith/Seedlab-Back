@@ -16,6 +16,6 @@ class Rol extends Model
     public $timestamps = false;
 
     public function autenticacion(){
-        return $this->hasMany(Autenticacion::class);
+        return $this->hasMany(User::class);
     }
  }

@@ -22,7 +22,7 @@ class Asesor extends Model
     public $timestamps = false;
 
     public function auth(){
-        return $this->belongsTo(Autentication::class, 'id_autentication');
+        return $this->belongsTo(User::class, 'id_autentication');
     }
     
     public function aliado(){

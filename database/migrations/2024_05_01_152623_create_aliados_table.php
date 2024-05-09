@@ -18,7 +18,7 @@ return new class extends Migration
             $table->string('logo');
             $table->string('rutaMulti');
             $table->unsignedBigInteger('id_autentication');
-            $table->foreign('id_autentication')->references('id')->on('autentications');
+            $table->foreign('id_autentication')->references('id')->on('users');
             $table->unsignedBigInteger('id_tipo_dato');
             $table->foreign('id_tipo_dato')->references('id')->on('tipo_dato');
             //$table->timestamps();
