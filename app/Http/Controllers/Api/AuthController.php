@@ -30,23 +30,15 @@ class AuthController extends Controller
         ]);
     }
 
-    public function userProfile(Request $request){}
+    public function userProfile(){
+        return response()->json(["clave"=>"Hola"]);
+    }
 
     public function logout(Request $request){
         $request->user()->token()->revoke();
 
         return response()->json([
             'message' => 'Successfully logged out'
-        ]);
-    }
-
-    //Revisar si se esta utilizando
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'nombre' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:2', 'confirmed'],
         ]);
     }
 
