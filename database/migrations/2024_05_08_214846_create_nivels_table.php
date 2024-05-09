@@ -11,12 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('nivels', function (Blueprint $table) {
+        Schema::create('nivel', function (Blueprint $table) {
             $table->id();
             $table->string('nombre',50);
             $table->text('descripcion');
             $table->unsignedBigInteger('id_actividad');
-            $table->foreign('id_actividad')->references('id')->on('actividads');
+            $table->foreign('id_actividad')->references('id')->on('actividad');
             //$table->timestamps();
         });
     }
@@ -26,6 +26,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('nivels');
+        Schema::dropIfExists('nivel');
     }
 };
