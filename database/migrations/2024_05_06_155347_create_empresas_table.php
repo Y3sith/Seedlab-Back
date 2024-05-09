@@ -25,6 +25,8 @@ return new class extends Migration
             $table->string('correo',100);
             $table->text('experiencia')->nullable();
             $table->text('funciones')->nullable();
+            $table->unsignedBigInteger('id_tipo_documento');
+            $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
             $table->unsignedBigInteger('id_municipio');
             $table->foreign('id_municipio')->references('id')->on('municipios');
             $table->string('id_emprendedor', 50);
