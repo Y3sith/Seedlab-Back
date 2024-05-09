@@ -4,9 +4,10 @@ use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmpresaController;
 
 
-Route::get('/userProfile', [AuthController::class, 'userProfile'])->name('userProfile');
+Route::apiResource('empresa',EmpresaController::class);
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);
