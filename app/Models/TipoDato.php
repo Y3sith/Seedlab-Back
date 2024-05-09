@@ -9,12 +9,10 @@ class TipoDato extends Model
 {
     use HasFactory;
 
+    protected $table = 'tipo_dato';
+
     protected $fillable = [
-        'video',
-        'multimedia',
-        'imagen',
-        'pdf',
-        'texto'
+        'nombre',
     ];
 
     public $timestamps = false;

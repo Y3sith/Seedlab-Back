@@ -9,6 +9,8 @@ class ContenidoLeccion extends Model
 {
     use HasFactory;
 
+    protected $table = 'contenidoLeccion';
+
     protected $fillable = [
         'titulo',
         'descripcion',

@@ -9,6 +9,8 @@ class TipoDocumento extends Model
 {
     use HasFactory;
 
+    protected $table = 'tipo_documento';
+
     protected $fillable = [
         'nombre'
     ];
