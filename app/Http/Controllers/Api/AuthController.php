@@ -42,16 +42,6 @@ class AuthController extends Controller
         ]);
     }
 
-    //Revisar si se esta utilizando
-    protected function validator(array $data)
-    {
-        return Validator::make($data, [
-            'nombre' => ['required', 'string', 'max:255'],
-            'email' => ['required', 'string', 'email', 'max:255', 'unique:users'],
-            'password' => ['required', 'string', 'min:2', 'confirmed'],
-        ]);
-    }
-
  
     protected function existeusuario(string $numdocumento, string $correo)
     {
