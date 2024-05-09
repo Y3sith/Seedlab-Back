@@ -90,10 +90,49 @@ class AuthController extends Controller
         }
     }
 
+    protected function register2(Request $data)
+{
+    // Verificar si el usuario ya existe
+    $Response = $this->existeusuario($data['numdocumento'], $data['correo']);
+
+    if ($Response != null) {
+        return response()->json(['message' => $Response], 400);
+    } else {
+        // Generar código de verificación
+        $verificationCode = mt_rand(10000, 99999);
+
+        // Ejecutar procedimiento almacenado
+        DB::transaction(function () use ($data, $verificationCode) {
+            // Ejecutar el procedimiento almacenado para registrar el emprendedor
+            DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $data['numdocumento'],
+                $data['nombretipodoc'],
+                $data['nombre'],
+                $data['apellido'],
+                $data['celular'],
+                $data['genero'],
+                $data['fecha_nacimiento'],
+                $data['municipio'],
+                $data['direccion'],
+                $data['correo'],
+                Hash::make($data['contrasena']),
+                $data['estado'],
+            ]);
+
+            // Enviar correo electrónico con el código de verificación
+            Mail::to($data['correo'])->send(new VerificationCodeEmail($verificationCode));
+        });
+
+        // Retornar respuesta exitosa
+        return response()->json(['message' => 'Tu usuario ha sido creado con éxito'], 201);
+    }
+}
 
 
 
-    
+
+
+
     protected function validate_email(Request $request)
     {
         $verificationCode = $request->input('codigo');
