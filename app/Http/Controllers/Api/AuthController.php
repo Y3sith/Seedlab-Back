@@ -30,7 +30,9 @@ class AuthController extends Controller
         ]);
     }
 
-    public function userProfile(Request $request){}
+    public function userProfile(){
+        return response()->json(["clave"=>"Hola"]);
+    }
 
     public function logout(Request $request){
         $request->user()->token()->revoke();
