@@ -5,7 +5,6 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmpresaApiController;
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\EmpresaApiController;
 
 
 /*Route::get('/user', function (Request $request) {

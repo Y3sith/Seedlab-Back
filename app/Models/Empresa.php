@@ -16,7 +16,6 @@ class Empresa extends Model
 
     protected $fillable = [
         'nombre',
-        'apellido',
         'documento',
         'cargo',
         'razonSocial',
@@ -28,6 +27,7 @@ class Empresa extends Model
         'correo',
         'experiencia',
         'funciones',
+        'id_tipo_documento',
         'id_municipio',
         'id_emprendedor'
     ];
