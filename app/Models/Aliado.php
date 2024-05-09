@@ -23,7 +23,7 @@ class Aliado extends Model
     public $timestaps = false;
 
     public function auth(){
-        return $this->belongsTo(Autenticacion::class, 'id_autentication');
+        return $this->belongsTo(User::class, 'id_autentication');
     }
 
     public function tipoDato(){

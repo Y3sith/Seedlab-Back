@@ -23,10 +23,10 @@ class ApoyoEmpresa extends Model
         'id_empresa'
     ];
 
-    public function auth(){
-        return $this->belongsTo(User::class, 'id_autentication');
+    public function tipoDocumento(){
+        return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
-
+   
     public function empresa(){
         return $this->belongsTo(Empresa::class, 'id_empresa');
     }

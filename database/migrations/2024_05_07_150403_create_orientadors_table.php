@@ -17,9 +17,8 @@ return new class extends Migration
             $table->string('apellido', 50);
             $table->string('celular', 13);
             $table->unsignedBigInteger('id_autentication');
-            $table->foreign('id_autentication')->references('id')->on('autentications');
+            $table->foreign('id_autentication')->references('id')->on('users');
             //$table->timestamps();
-        
         });
     }
 

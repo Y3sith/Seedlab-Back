@@ -19,6 +19,10 @@ return new class extends Migration
             $table->string('telefono',10)->nullable();
             $table->string('celular',13);
             $table->string('email');
+            $table->unsignedBigInteger('id_tipo_documento');
+            $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
+            $table->string('id_empresa');
+            $table->foreign('id_empresa')->references('documento')->on('empresa');
             //$table->timestamps();
         });
     }

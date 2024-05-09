@@ -14,4 +14,8 @@ class Rol extends Model
     protected $fillable = ['nombre'];
 
     public $timestamps = false;
+
+    public function autenticacion(){
+        return $this->hasMany(User::class);
+    }
  }
