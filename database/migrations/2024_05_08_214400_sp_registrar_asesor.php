@@ -26,7 +26,7 @@ return new class extends Migration
             
             select id into v_idaliado from aliado where aliado.nombre = p_aliado;
         
-            INSERT INTO auth (correo, contrasena, estado, idrol) 
+            INSERT INTO autentications (correo, contrasena, estado, idrol) 
             VALUES (p_correo, p_contrasena, p_estado, 4);
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;

@@ -29,7 +29,7 @@ return new class extends Migration
             
             select id into v_idtipodato from tipodato where tipodato.nombre = p_tipodato;
         
-            INSERT INTO auth (correo, contrasena, estado, idrol) 
+            INSERT INTO autentications (correo, contrasena, estado, idrol) 
             VALUES (p_correo, p_contrasena, p_estado, 3);
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;

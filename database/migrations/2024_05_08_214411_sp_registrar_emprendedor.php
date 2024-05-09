@@ -38,7 +38,7 @@ return new class extends Migration
             select id into v_idmunicipio from municipios where municipios.nombre_mun = p_municipio;
             SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
         
-            INSERT INTO auth (correo, contrasena, estado, idrol) 
+            INSERT INTO autentications (correo, contrasena, estado, idrol) 
             VALUES (p_correo, p_contrasena, p_estado, 5);
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
