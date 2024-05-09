@@ -15,5 +15,9 @@ class Subpreguntas extends Model
         'id_pregunta',
     ];
 
+    public function preguntas(){
+        return $this->belongsTo(Preguntas::class, 'id_pregunta');
+    }
+
     public $timestamps = false;
 }

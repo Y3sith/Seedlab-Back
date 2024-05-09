@@ -20,8 +20,8 @@ return new class extends Migration
             $table->foreign('id_pregunta')->references('id')->on('preguntas');
             $table->string('id_empresa');
             $table->foreign('id_empresa')->references('documento')->on('empresas');
-            /*$table->unsignedBigInteger('id_subpregunta');
-            $table->foreign('id_subpregunta')->references('id')->on('subpreguntas');*/
+            $table->unsignedBigInteger('id_subpregunta');
+            $table->foreign('id_subpregunta')->references('id')->on('subpreguntas');
             //$table->timestamps();
         });
     }
