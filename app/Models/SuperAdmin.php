@@ -20,4 +20,8 @@ class SuperAdmin extends Model
     public function auth(){
         return $this->belongsTo(Autentication::class, 'id_autentication');
     }
+
+    public function personalizacionSistema(){
+        return $this->hasMany(PersonalizacionSistema::class, 'id_super_admin');
+    }
 }

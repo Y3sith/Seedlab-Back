@@ -17,5 +17,9 @@ class PersonalizacionSistema extends Model
         'id_superadmin'
     ];
 
+    public function superadmins(){
+        return $this->belongsTo(Superadmin::class, 'id_superadmin');
+    }
+
     public $timestamps = false;
 }
