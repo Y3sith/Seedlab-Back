@@ -26,4 +26,8 @@ class Asesor extends Model
     public function aliado(){
         return $this->belongsTo(Aliado::class, 'id_aliado');
     }
+
+    public function actividades(){
+        return $this->hasMany(Actividad::class, 'id_asesor');
+    }
 }

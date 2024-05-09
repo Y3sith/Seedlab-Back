@@ -45,4 +45,8 @@ class Empresa extends Model
     public function apoyoxempresa(){
         return $this->hasMany(ApoyoEmpresa::class, 'id_empresa');
     }
+
+    public function respuestas(){
+        return $this->hasMany(Respuesta::class, 'id_empresa');
+    }
 }

@@ -9,6 +9,24 @@ class Preguntas extends Model
 {
     use HasFactory;
 
+    protected $fillable = [
+        'texto',
+        'puntaje',
+        'id_seccion'
+    ];
+
+    public function seccion(){
+        return $this->belongsTo(Secciones::class, 'id_seccion');
+    }
+
+    public function respuestas(){
+        return $this->hasMany(Respuestas::class, 'id_pregunta');
+    }
+
+    public function subpreguntas(){
+        return $this->hasMany(Subpreguntas::class, 'id_pregunta');
+    }
+
     public $timestamps = false;
     
 }
