@@ -10,7 +10,8 @@ class ApoyoEmpresa extends Model
     use HasFactory;
 
     protected $table = 'apoyoEmpresa';
-
+    protected $primaryKey = 'documento';
+    public $incrementing = false;
     protected $fillable = [
         'nombre',
         'apellido',

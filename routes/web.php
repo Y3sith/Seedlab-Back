@@ -4,10 +4,7 @@ use Illuminate\Support\Facades\Route;
 
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\EmpresaApiController;
 
-
-Route::apiResource('empresa',EmpresaApiController::class);
 
 Route::post('login', [AuthController::class, 'login']);
 Route::post('logout', [AuthController::class, 'logout']);

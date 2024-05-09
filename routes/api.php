@@ -4,6 +4,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmpresaApiController;
 
 
 Route::get('/user', function (Request $request) {
@@ -24,3 +25,8 @@ Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name
 
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+
+
+
+Route::apiResource('empresa',EmpresaApiController::class);
