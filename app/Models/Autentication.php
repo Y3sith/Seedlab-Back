@@ -9,6 +9,7 @@ class Autentication extends Model
 {
     use HasFactory;
 
+
     protected $fillable = [
         'email', 
         'password',

@@ -13,11 +13,8 @@ return new class extends Migration
     {
         Schema::create('tipo_dato', function (Blueprint $table) {
             $table->id();
-            $table->string('video');
-            $table->string('mltimedia');
-            $table->string('imagen');
-            $table->string('pdf');
-            $table->text('texto');
+            $table->string('nombre');
+
             //$table->timestamps();
         });
     }

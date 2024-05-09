@@ -9,6 +9,8 @@ class SuperAdmin extends Model
 {
     use HasFactory;
 
+    protected $table = 'superadmin';
+
     protected $fillable = [
         'nombre', 
         'apellidos',

@@ -9,6 +9,8 @@ class Subpreguntas extends Model
 {
     use HasFactory;
 
+    protected $table = 'subpregunta';
+
     protected $fillable = [
         'texto',
         'puntaje',

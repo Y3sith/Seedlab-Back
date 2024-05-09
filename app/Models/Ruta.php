@@ -9,6 +9,8 @@ class Ruta extends Model
 {
     use HasFactory;
 
+    protected $table = 'ruta';
+
     protected $fillable = [
         'nombre',
         'fecha_creacion',
