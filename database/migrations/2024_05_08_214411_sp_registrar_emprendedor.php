@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_emprendedor;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_emprendedor(
             IN p_num_documento varchar(20),
             In p_nombretipodoc varchar(20),
@@ -57,6 +57,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_emprendedor;');
+
     }
 };

@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_aliado;');
-        DB::unprepared('CREATE PROCEDURE sp_registrar_aliado(
+        DB::unprepared("CREATE PROCEDURE sp_registrar_aliado(
             In p_nombre varchar(50),
             /*In p_logo varchar(50),*/
             In p_descripcion varchar(255),
@@ -39,7 +39,7 @@ return new class extends Migration
             VALUES (p_nombre,null,p_descripcion,v_idtipodato,p_ruta,@last_inserted_id);
         
             COMMIT;
-        END');
+        END");
     }
 
     /**
@@ -47,6 +47,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_aliado;');
     }
 };

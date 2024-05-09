@@ -13,7 +13,7 @@ return new class extends Migration
     public function up(): void
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
-        DB::unprepared('CREATE PROCEDURE sp_registrar_superadmin(
+        DB::unprepared("CREATE PROCEDURE sp_registrar_superadmin(
         IN p_nombre VARCHAR(50),
         IN p_apellido VARCHAR(50),
         IN p_correo VARCHAR(50),
@@ -34,7 +34,7 @@ return new class extends Migration
         VALUES (p_nombre, p_apellido, last_inserted_id);
         
         COMMIT;
-    END;');
+    END;");
     
     }
 
@@ -43,6 +43,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
     }
 };
