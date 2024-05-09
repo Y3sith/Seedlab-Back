@@ -21,7 +21,7 @@ return new class extends Migration
             $table->timestamp('email_verified_at')->nullable()->collation('utf8mb4_unicode_ci');
             $table->string('cod_ver', 10)->nullable()->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_autentication')->collation('utf8mb4_unicode_ci');
-            $table->foreign('id_autentication')->references('id')->on('autentications')->collation('utf8mb4_unicode_ci');
+            $table->foreign('id_autentication')->references('id')->on('users')->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_tipo_documento')->collation('utf8mb4_unicode_ci');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento')->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_municipio')->collation('utf8mb4_unicode_ci');
