@@ -26,7 +26,8 @@ return new class extends Migration
             In p_direccion varchar(50),
             IN p_correo VARCHAR(50),
             IN p_contrasena VARCHAR(20),
-            IN p_estado BOOLEAN
+            IN p_estado BOOLEAN,
+            IN p_cod_ver varchar(10)
         )
         BEGIN
              DECLARE v_idtipodoc VARCHAR(50); 
@@ -38,13 +39,13 @@ return new class extends Migration
             select id into v_idmunicipio from municipios where municipios.nombre_mun = p_municipio;
             SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
         
-            INSERT INTO autentications (correo, contrasena, estado, idrol) 
+            INSERT INTO autentications (correo, contrasena, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 5);
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
-            INSERT INTO emprendedor (num_documento,idtipodoc,nombre,apellido,celular,genero,fecha_nac,id_municipio,direccion,idauth) 
-            VALUES (p_num_documento,v_idtipodoc,p_nombre,p_apellido,p_celular,p_genero,v_fecha_nac,v_idmunicipio,p_direccion, @last_inserted_id);
+            INSERT INTO emprendedor (num_documento,idtipodoc,nombre,apellido,celular,genero,fecha_nac,cod_ver,id_municipio,direccion,idauth) 
+            VALUES (p_num_documento,v_idtipodoc,p_nombre,p_apellido,p_celular,p_genero,v_fecha_nac,p_cod_ver,v_idmunicipio,p_direccion, @last_inserted_id);
         
             COMMIT;
         END");
