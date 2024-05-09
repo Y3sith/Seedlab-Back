@@ -68,4 +68,6 @@ class User extends Authenticatable
     public function aliado(){
         return $this->hasOne(Aliado::class, 'id_autentication');
     }
+
+    public $timestamps = false;
 }
