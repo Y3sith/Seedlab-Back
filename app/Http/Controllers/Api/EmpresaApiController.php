@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 
-class EmpresaController extends Controller
+class EmpresaApiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -39,7 +39,7 @@ class EmpresaController extends Controller
         $empresa->cargo = $request->cargo;
         $empresa->razonSocial = $request->razonSocial;
         $empresa->urlPagina = $request->urlPagina;
-        $empresa->numeroDocumento = $request->numeroDocumento;
+        $empresa->documento = $request->documento;
         $empresa->telefono = $request->telefono;
         $empresa->celular = $request->celular;
         $empresa->direccion = $request->direccion;
@@ -48,7 +48,8 @@ class EmpresaController extends Controller
         $empresa->experiencia = $request->experiencia;
         $empresa->funciones = $request->funciones;
         $empresa->id_tipo_documento = $request->id_tipo_documento;
-        $empresa->id_user = $request->id_user;
+        $empresa->id_emprendedor= $request->id_emprendedor;
+        $empresa->id_municipio= $request->id_municipio;
         $empresa->save();
         return response()->json($empresa, 200);
     }
@@ -72,9 +73,9 @@ class EmpresaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $documento)
     {
-        $empresa = Empresa::find($id);
+        $empresa = Empresa::find($documento);
         if(!$empresa){
             return response()->json([
                'message' => 'Empresa no encontrada'], 404);
@@ -84,7 +85,7 @@ class EmpresaController extends Controller
             $empresa->cargo = $request->cargo;
             $empresa->razonSocial = $request->razonSocial;
             $empresa->urlPagina = $request->urlPagina;
-            $empresa->numeroDocumento = $request->numeroDocumento;
+            $empresa->documento = $request->documento;
             $empresa->telefono = $request->telefono;
             $empresa->celular = $request->celular;
             $empresa->direccion = $request->direccion;

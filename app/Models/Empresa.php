@@ -11,6 +11,9 @@ class Empresa extends Model
 
     protected $table = 'empresa';
 
+    protected $primaryKey = 'documento';
+    public $incrementing = false;
+
     protected $fillable = [
         'nombre',
         'apellido',
