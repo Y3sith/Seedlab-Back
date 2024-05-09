@@ -3,7 +3,12 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Emprendedor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+
 
 class AuthController extends Controller
 {
@@ -43,57 +48,22 @@ class AuthController extends Controller
     }
 
  
-    protected function existeusuario(string $numdocumento, string $correo)
+    protected function existeusuario(string $documento)
     {
-        $valuser = User::where('documento', $numdocumento)->first();
-        $valcorreo = User::where('email', $correo)->first();
+        $valuser = Emprendedor::where('documento', $documento)->first();
 
         if ($valuser) {
             return 'Tu documento ya existe en el sistema';
-        } else if ($valcorreo) {
-            return 'Tu correo ya existe en el sistema';
-        } else {
-            return null;
         }
-    }
-
-    protected function register2(Request $data)
-    {
-        $Response = $this->existeusuario($data['numdocumento'], $data['email']);
-
-        if ($Response != null) {
-            return response()->json(['message' => $Response], 400);
-        } else {
-            $verificationCode = mt_rand(10000, 99999);
-
-            $user = User::create([
-                'numdocumento' => $data['numdocumento'],
-                'nombre' => $data['nombre'],
-                'apellido' => $data['apellido'],
-                'celular' => $data['celular'],
-                'genero' => $data['genero'],
-                'email' => $data['email'],
-                'fecha_nacimiento' => $data['fecha_nacimiento'],
-                'id_departamento' => $data['id_departamento'],
-                'id_municipio' => $data['id_municipio'],
-                'password' => Hash::make($data['password']),
-                'id_estado' => $data['id_estado'],
-                'id_tipo_documento' => $data['id_tipo_documento'],
-                'id_roles' => $data['id_roles'],
-                'verification_code' => $verificationCode,
-            ]);
-
-            Mail::to($user->email)->send(new VerificationCodeEmail($verificationCode));
-
-            return response()->json(['message' => 'Tu usuario ha sido creado con exito'], 201);
-
+        else {
+            return null;
         }
     }
 
     protected function register(Request $data)
 {
     // Verificar si el usuario ya existe
-    $Response = $this->existeusuario($data['numdocumento'], $data['correo']);
+    $Response = $this->existeusuario($data['documento']);
 
     if ($Response != null) {
         return response()->json(['message' => $Response], 400);
@@ -105,7 +75,7 @@ class AuthController extends Controller
         DB::transaction(function () use ($data, $verificationCode) {
             // Ejecutar el procedimiento almacenado para registrar el emprendedor
             DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
-                $data['numdocumento'],
+                $data['documento'],
                 $data['nombretipodoc'],
                 $data['nombre'],
                 $data['apellido'],
@@ -114,14 +84,14 @@ class AuthController extends Controller
                 $data['fecha_nacimiento'],
                 $data['municipio'],
                 $data['direccion'],
-                $data['correo'],
-                Hash::make($data['contrasena']),
+                $data['email'],
+                Hash::make($data['password']),
                 $data['estado'],
                 $verificationCode
             ]);
 
             // Enviar correo electrónico con el código de verificación
-            Mail::to($data['correo'])->send(new VerificationCodeEmail($verificationCode));
+            Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
         });
 
         // Retornar respuesta exitosa

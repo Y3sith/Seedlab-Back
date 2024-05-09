@@ -12,20 +12,20 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('emprendedor', function (Blueprint $table) {
-            $table->string('documento', 50)->primary();
-            $table->string('nombre', 50);
-            $table->string('apellido', 50);
-            $table->string('celular', 13);
-            $table->string('genero', 20);
-            $table->date('fechaNacimiento');
-            $table->timestamp('email_verified_at')->nullable();
-            $table->string('cod_ver', 10)->nullable();
-            $table->unsignedBigInteger('id_autentication');
-            $table->foreign('id_autentication')->references('id')->on('users');
-            $table->unsignedBigInteger('id_tipo_documento');
-            $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
-            $table->unsignedBigInteger('id_municipio');
-            $table->foreign('id_municipio')->references('id')->on('municipios');
+            $table->string('documento', 50)->primary()->collation('utf8mb4_unicode_ci');
+            $table->string('nombre', 50)->collation('utf8mb4_unicode_ci');
+            $table->string('apellido', 50)->collation('utf8mb4_unicode_ci');
+            $table->string('celular', 13)->collation('utf8mb4_unicode_ci');
+            $table->string('genero', 20)->collation('utf8mb4_unicode_ci');
+            $table->date('fechaNacimiento')->collation('utf8mb4_unicode_ci');
+            $table->timestamp('email_verified_at')->nullable()->collation('utf8mb4_unicode_ci');
+            $table->string('cod_ver', 10)->nullable()->collation('utf8mb4_unicode_ci');
+            $table->unsignedBigInteger('id_autentication')->collation('utf8mb4_unicode_ci');
+            $table->foreign('id_autentication')->references('id')->on('autentications')->collation('utf8mb4_unicode_ci');
+            $table->unsignedBigInteger('id_tipo_documento')->collation('utf8mb4_unicode_ci');
+            $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento')->collation('utf8mb4_unicode_ci');
+            $table->unsignedBigInteger('id_municipio')->collation('utf8mb4_unicode_ci');
+            $table->foreign('id_municipio')->references('id')->on('municipios')->collation('utf8mb4_unicode_ci');
             //$table->timestamps();
         });
     }
