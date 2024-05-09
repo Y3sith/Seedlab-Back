@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 
-class EmpresaController extends Controller
+class EmpresaApiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -72,9 +72,10 @@ class EmpresaController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $documento)
     {
-        $empresa = Empresa::find($id);
+        $empresa = Empresa::find($documento);
+        dd($empresa);
         if(!$empresa){
             return response()->json([
                'message' => 'Empresa no encontrada'], 404);
