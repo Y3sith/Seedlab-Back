@@ -22,11 +22,11 @@ class Empresa extends Model
         'celular',
         'direccion',
         'profesion',
+        'correo',
         'experiencia',
         'funciones',
         'id_municipio',
-        'id_tipo_documento',
-        'id_empresa',
+        'id_emprendedor'
     ];
 
 

@@ -10,7 +10,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 
-class EmpresaController extends Controller
+class EmpresaApiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -36,10 +36,11 @@ class EmpresaController extends Controller
     {
         $empresa = new Empresa();
         $empresa->nombre = $request->nombre;
+        $empresa->apellido = $request->apellido;
+        $empresa->documento = $request->numeroDocumento;
         $empresa->cargo = $request->cargo;
         $empresa->razonSocial = $request->razonSocial;
         $empresa->urlPagina = $request->urlPagina;
-        $empresa->numeroDocumento = $request->numeroDocumento;
         $empresa->telefono = $request->telefono;
         $empresa->celular = $request->celular;
         $empresa->direccion = $request->direccion;
@@ -47,8 +48,8 @@ class EmpresaController extends Controller
         $empresa->profesion = $request->profesion;
         $empresa->experiencia = $request->experiencia;
         $empresa->funciones = $request->funciones;
-        $empresa->id_tipo_documento = $request->id_tipo_documento;
-        $empresa->id_user = $request->id_user;
+        $empresa->id_municipio = $request->id_municipio;
+        $empresa->id_emprendedor = $request->id_emprendedor;
         $empresa->save();
         return response()->json($empresa, 200);
     }
