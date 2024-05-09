@@ -11,14 +11,14 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('personalizacion_sistemas', function (Blueprint $table) {
+        Schema::create('personalizacion_sistema', function (Blueprint $table) {
             $table->id();
             $table->string('imagen_logo');
             $table->string('nombre_sistema',50);
             $table->string('color_principal',10);
             $table->string('color_secundario',10);
             $table->unsignedBigInteger('id_superadmin');
-            $table->foreign('id_superadmin')->references('id')->on('super_admins');
+            $table->foreign('id_superadmin')->references('id')->on('superadmin');
             //$table->timestamps();
         });
     }
@@ -28,6 +28,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('personalizacion_sistemas');
+        Schema::dropIfExists('personalizacion_sistema');
     }
 };

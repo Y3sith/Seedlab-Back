@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('contenido_leccions', function (Blueprint $table) {
+        Schema::create('contenido_leccion', function (Blueprint $table) {
             $table->id();
             $table->string('titulo');
             $table->text('descripcion');
             $table->text('fuente');
             $table->unsignedBigInteger('id_tipo_dato');
-            $table->foreign('id_tipo_dato')->references('id')->on('tipo_datos');
+            $table->foreign('id_tipo_dato')->references('id')->on('tipo_dato');
             $table->unsignedBigInteger('id_leccion');
-            $table->foreign('id_leccion')->references('id')->on('leccions');
+            $table->foreign('id_leccion')->references('id')->on('leccion');
             //$table->timestamps();
         });
     }
@@ -29,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('contenido_leccions');
+        Schema::dropIfExists('contenido_leccion');
     }
 };

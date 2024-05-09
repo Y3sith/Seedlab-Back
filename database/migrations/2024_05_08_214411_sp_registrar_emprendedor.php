@@ -13,7 +13,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_emprendedor;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_emprendedor(
             IN p_num_documento varchar(20),
             In p_nombretipodoc varchar(20),
@@ -38,7 +38,7 @@ return new class extends Migration
             select id into v_idmunicipio from municipios where municipios.nombre_mun = p_municipio;
             SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
         
-            INSERT INTO auth (correo, contrasena, estado, idrol) 
+            INSERT INTO autentications (correo, contrasena, estado, idrol) 
             VALUES (p_correo, p_contrasena, p_estado, 5);
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
@@ -57,6 +57,7 @@ return new class extends Migration
      */
     public function down(): void
     {
-        //
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_emprendedor;');
+
     }
 };

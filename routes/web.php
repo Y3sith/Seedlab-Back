@@ -17,3 +17,6 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 Route::post('/validate_email', [AuthController::class, 'validate_email'])->name('validate_email');
 
 Route::get('/aliados', [AliadoApiController::class, 'index'])->name('index');
+Auth::routes();
+
+Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
