@@ -37,7 +37,7 @@ class EmpresaApiController extends Controller
         $empresa = new Empresa();
         $empresa->nombre = $request->nombre;
         $empresa->apellido = $request->apellido;
-        $empresa->documento = $request->numeroDocumento;
+        $empresa->documento = $request->documento;
         $empresa->cargo = $request->cargo;
         $empresa->razonSocial = $request->razonSocial;
         $empresa->urlPagina = $request->urlPagina;
