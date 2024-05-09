@@ -15,4 +15,8 @@ class Ruta extends Model
     ];
 
     public $timestamps = false;
+
+    public function actividades(){
+        return $this->hasMany(Actividad::class, 'id_ruta');
+    }
 }

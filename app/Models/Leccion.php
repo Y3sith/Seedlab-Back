@@ -15,4 +15,12 @@ class Leccion extends Model
     ];
 
     public $timestamps = false;
+
+    public function nivel(){
+        return $this->belongsTo(Nivel::class, 'id_nivel');
+    }
+
+    public function contenidoLecciones(){
+        return $this->hasMany(ContenidoLeccion::class, 'id_leccion');
+    }
 }

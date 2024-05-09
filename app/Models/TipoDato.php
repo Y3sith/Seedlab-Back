@@ -22,4 +22,12 @@ class TipoDato extends Model
     public function aliados(){
         return $this->hasMany(Aliado::class, 'id_tipo_dato');
     }
+
+    public function actividades(){
+        return $this->hasMany(Actividad::class, 'id_tipo_dato');
+    }
+    
+    public function contenidoLecciones(){
+        return $this->hasMany(ContenidoLeccion::class, 'id_tipo_dato');
+    }
 }
