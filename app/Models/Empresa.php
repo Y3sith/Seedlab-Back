@@ -16,7 +16,6 @@ class Empresa extends Model
 
     protected $fillable = [
         'nombre',
-        'apellido',
         'documento',
         'cargo',
         'razonSocial',
@@ -25,11 +24,12 @@ class Empresa extends Model
         'celular',
         'direccion',
         'profesion',
+        'correo',
         'experiencia',
         'funciones',
-        'id_municipio',
         'id_tipo_documento',
-        'id_empresa',
+        'id_municipio',
+        'id_emprendedor'
     ];
 
 
@@ -53,5 +53,9 @@ class Empresa extends Model
 
     public function respuestas(){
         return $this->hasMany(Respuesta::class, 'id_empresa');
+    }
+
+    public function puntajes(){
+        return $this->hasMany(Puntaje::class, 'id_empresa');
     }
 }

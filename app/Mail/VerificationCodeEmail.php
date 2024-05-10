@@ -29,7 +29,7 @@ class VerificationCodeEmail extends Mailable
      */
     public function build()
     {
-        return $this->view('verification_code') 
+        return $this->view('verification-code') 
                     ->with(['verificationCode' => $this->verificationCode]);   
     }
 }

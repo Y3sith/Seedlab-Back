@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->text('descripcion');
             $table->string('logo');
-            $table->string('rutaMulti');
+            $table->string('ruta_multi');
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('users');
             $table->unsignedBigInteger('id_tipo_dato');

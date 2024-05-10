@@ -16,6 +16,9 @@ return new class extends Migration
             $table->string('opcion', 10);
             $table->text('texto_res');
             $table->double('valor');
+            $table->boolean('verform_pr')->nullable();
+            $table->boolean('verform_se')->nullable();
+            $table->timestamp('fecha_reg');
             $table->unsignedBigInteger('id_pregunta');
             $table->foreign('id_pregunta')->references('id')->on('pregunta');
             $table->string('id_empresa');
