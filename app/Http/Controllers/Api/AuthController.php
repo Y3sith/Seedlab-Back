@@ -60,10 +60,9 @@ class AuthController extends Controller
         $request->user()->token()->revoke();
 
         return response()->json([
-            'message' => 'Successfully logged out'
+            'message' => 'Successfully logged out',
         ]);
     }
-
 
     protected function existeusuario(string $documento)
     {
@@ -144,16 +143,12 @@ class AuthController extends Controller
         }
     }
 
-
-
     public function allUsers()
     {
     }
 }
 
-
 // JSON DE EJEMPLO PARA LOS ENDPOINT
-
 
 // register:
 // {
@@ -169,7 +164,7 @@ class AuthController extends Controller
 //     "password": "1234",
 //     "id_estado": 1,
 //     "id_tipo_documento": 1,
-//     "id_roles": 1 
+//     "id_roles": 1
 // }
 
 // validate_email:

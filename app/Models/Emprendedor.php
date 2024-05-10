@@ -20,6 +20,7 @@ class Emprendedor extends Model
         'celular',
         'genero',
         'fechaNacimiento',
+        'direccion',
         'id_municipio',
         'id_autentication',
         'id_tipo_documento',
