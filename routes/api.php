@@ -22,12 +22,10 @@ Route::post('/empresa', [EmpresaApiController::class, 'store'])->name('store');
 Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
 
-Route::post('/validate_email', [AuthController::class, 'validate_email'])->name('validate_email');
-
-Auth::routes();
+Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
 
 
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+Route::post('/register_em', [AuthController::class, 'register'])->name('register');
 
 
 
