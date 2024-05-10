@@ -65,15 +65,6 @@ class RutaApiController extends Controller
      */
     public function destroy(string $id)
     {
-        $ruta = Ruta::find($id);
-        if(!$ruta){
-            return response()->json([
-               'message' => 'Ruta no encontrada'], 404);
-        }
-        else{
-            $ruta->delete();
-            return response()->json([
-               'message' => 'Ruta eliminada'], 200);
-        }
+        //
     }
 }
