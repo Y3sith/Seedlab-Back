@@ -52,7 +52,6 @@ return new class extends Migration
             INSERT INTO emprendedor (documento, id_tipo_documento, nombre, apellido, celular, genero, fecha_nac, id_municipio, direccion, id_autentication, cod_ver) 
             VALUES (p_num_documento, v_idtipodoc, p_nombre, p_apellido, p_celular, p_genero, v_fecha_nac, v_idmunicipio, p_direccion, @last_inserted_id, p_cod_ver);
         
-            COMMIT;
         END");
     }
 
