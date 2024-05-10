@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
+use Carbon\Carbon;
+use App\Models\User;
+use App\Models\Emprendedor;
+use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeEmail;
-use App\Models\Emprendedor;
-use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 
 class AuthController extends Controller
@@ -25,7 +25,7 @@ class AuthController extends Controller
         ]);
 
         
-        dd(!Auth::attempt($credentials));
+        //dd(!Auth::attempt($credentials));
 
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
