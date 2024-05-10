@@ -54,4 +54,8 @@ class Empresa extends Model
     public function respuestas(){
         return $this->hasMany(Respuesta::class, 'id_empresa');
     }
+
+    public function puntajes(){
+        return $this->hasMany(Puntaje::class, 'id_empresa');
+    }
 }
