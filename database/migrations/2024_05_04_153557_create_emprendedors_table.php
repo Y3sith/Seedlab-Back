@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('celular', 13)->collation('utf8mb4_unicode_ci');
             $table->string('genero', 20)->collation('utf8mb4_unicode_ci');
             $table->date('fecha_nac')->collation('utf8mb4_unicode_ci');
+            $table->string('direccion', 50)->collation('utf8mb4_unicode_ci');
             $table->timestamp('email_verified_at')->nullable()->collation('utf8mb4_unicode_ci');
             $table->string('cod_ver', 10)->nullable()->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_autentication')->collation('utf8mb4_unicode_ci');
