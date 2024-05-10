@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 
 use App\Models\User;
 
-class EmpresaApiController extends Controller
+class EmprendedorApiController extends Controller
 {
     /**
      * Display a listing of the resource.

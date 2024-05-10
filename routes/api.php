@@ -4,7 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\AuthController;
-use App\Http\Controllers\Api\EmpresaApiController;
+use App\Http\Controllers\Api\EmprendedorApiController;
+use App\Http\Controllers\Api\SuperAdminController;
+
 
 
 Route::get('/user', function (Request $request) {
@@ -26,4 +28,5 @@ Route::post('/register', [AuthController::class, 'register'])->name('register');
 
 
 
-Route::apiResource('empresa',EmpresaApiController::class);
+Route::apiResource('emprendedor',EmprendedorApiController::class);
+Route::apiResource('superadmin',SuperAdminController::class);
