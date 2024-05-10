@@ -20,10 +20,10 @@ Route::get('/user', function (Request $request) {
 Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('logout', [AuthController::class, 'logout']);
 
-Route::get('/empresa', [EmpresaApiController::class, 'index'])->name('index');
-Route::post('/empresa', [EmpresaApiController::class, 'store'])->name('store');
+//Route::get('/empresa', [EmpresaApiController::class, 'index'])->name('index');
+//Route::post('/empresa', [EmpresaApiController::class, 'store'])->name('store');
 
-Route::get('/aliado', [AliadoApiController::class, 'inde    x'])->name('index');
+Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
 
 Route::post('/validate_email', [AuthController::class, 'validate_email'])->name('validate_email');

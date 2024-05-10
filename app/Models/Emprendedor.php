@@ -19,14 +19,14 @@ class Emprendedor extends Model
         'documento',
         'celular',
         'genero',
-        'fechaNacimiento',
+        'fecha_nac',
         'direccion',
         'id_municipio',
         'id_autentication',
         'id_tipo_documento',
     ];
 
-    public $timestaps = false;
+    public $timestamps = false;
 
     public function municipios(){
         return $this->belongsTo(Municipio::class, 'id_municipio');
