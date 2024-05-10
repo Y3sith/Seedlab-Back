@@ -26,9 +26,10 @@ Route::post('logout', [AuthController::class, 'logout']);
 Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
 
-Route::post('/validate_email', [AuthController::class, 'validate_email'])->name('validate_email');
+Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
 
-Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+Route::post('/register_em', [AuthController::class, 'register'])->name('register');
 
 Route::apiResource('/ruta',RutaApiController::class);
 
