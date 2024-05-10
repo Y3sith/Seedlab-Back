@@ -7,18 +7,13 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmpresaApiController;
 
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:sanctum');
-
-
-Route::post('login', [AuthController::class, 'login']);
+Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('logout', [AuthController::class, 'logout']);
 
 
 Route::post('/validate_email', [AuthController::class, 'validate_email'])->name('validate_email');
 
-Auth::routes();
+
 
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
