@@ -8,17 +8,21 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 
+
 use App\Models\User;
 
-class EmpresaApiController extends Controller
+class EmprendedorApiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
+        /*muestras las empresas*/
         $empresa = Empresa::paginate(5);
         return new JsonResponse($empresa->items());
+
+
     }
 
     /**
@@ -57,9 +61,14 @@ class EmpresaApiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show($id_emprendedor)
     {
-        //
+        /*muestra las empresas asociadas por el emprendedor */
+        $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
+        if($empresa){
+            return response()->json($empresa->items(), 200);
+        }
+        return response()->json(["error"=>"Empresa no encontrada",404]);
     }
 
     /**
@@ -75,6 +84,7 @@ class EmpresaApiController extends Controller
      */
     public function update(Request $request, $documento)
     {
+        /*editar la empresa */
         $empresa = Empresa::find($documento);
         if(!$empresa){
             return response()->json([

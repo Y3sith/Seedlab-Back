@@ -19,14 +19,14 @@ class Emprendedor extends Model
         'documento',
         'celular',
         'genero',
-        'fechaNacimiento',
+        'fecha_nac',
         'direccion',
         'id_municipio',
         'id_autentication',
         'id_tipo_documento',
     ];
 
-    public $timestaps = false;
+    public $timestamps = false;
 
     public function municipios(){
         return $this->belongsTo(Municipio::class, 'id_municipio');
@@ -40,8 +40,8 @@ class Emprendedor extends Model
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 
-    public function empresa(){
-        return $this->hasMany(Empresa::class, 'id_empresa');
+    public function empresas(){
+        return $this->hasMany(Empresa::class, 'id_emprendedor', 'documento');
     }
 
     

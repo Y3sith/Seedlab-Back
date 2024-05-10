@@ -2,13 +2,16 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Controllers\Controller;
+use Carbon\Carbon;
+use App\Models\User;
 use App\Models\Emprendedor;
 use Illuminate\Http\Request;
+use App\Http\Controllers\Controller;
+use App\Mail\VerificationCodeEmail;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\VerificationCodeEmail;
 
 class AuthController extends Controller
 {
@@ -18,21 +21,38 @@ class AuthController extends Controller
 
         $credentials = $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required'],
+            'password' => ['required','string'],
         ]);
+
+        
+        //dd(!Auth::attempt($credentials));
 
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $user = Auth::user();
-        $tokenResult = $user->createToken('Personal Access Token');
+        $user = $request->user();
 
-        return response()->json([
-            'access_token' => $tokenResult->plainTextToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($tokenResult->token->expires_at)->toDateTimeString(),
-        ]);
+        
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->token;
+            $token->save();
+
+            return response()->json([
+                'access_token' => $tokenResult->accessToken,
+                'token_type' => 'Bearer',
+                'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
+                'user' => $user
+            ]);
+        
+
+        
+    }
+
+
+    public function userProfile()
+    {
+        return response()->json(["clave" => "Hola"]);
     }
 
     public function logout(Request $request)
@@ -82,7 +102,7 @@ class AuthController extends Controller
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
-                    $verificationCode,
+                    $verificationCode
                 ]);
 
                 // Enviar correo electrónico con el código de verificación
@@ -93,6 +113,11 @@ class AuthController extends Controller
             return response()->json(['message' => 'Tu usuario ha sido creado con éxito'], 201);
         }
     }
+
+
+
+
+
 
     protected function validate_email(Request $request)
     {
@@ -111,19 +136,16 @@ class AuthController extends Controller
                     return response()->json(['message' => 'Correo electrónico validado correctamente'], 200);
                 } else {
                     return response()->json(['message' => 'Tu codigo de verificación es incorrecto'], 400);
-
                 }
             }
         } else {
             return response()->json(['message' => 'Tu correo no esta registrado en el sistema'], 400);
         }
-
     }
 
     public function allUsers()
     {
     }
-
 }
 
 // JSON DE EJEMPLO PARA LOS ENDPOINT

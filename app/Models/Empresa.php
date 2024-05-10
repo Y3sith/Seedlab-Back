@@ -19,7 +19,7 @@ class Empresa extends Model
         'documento',
         'cargo',
         'razonSocial',
-        'urlPagina',
+        'url_pagina',
         'telefono',
         'celular',
         'direccion',

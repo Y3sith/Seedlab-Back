@@ -1,20 +1,18 @@
 <?php
 
 namespace App\Http\Controllers\Api;
+
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Aliado;
 
-class AliadoApiController extends Controller
+class EmpresaApiContraller extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index() {
-        $aliados = Aliado::whereHas('auth', function ($query) {
-            $query->where('estado', 1);
-        })->select('nombre', 'descripcion', 'logo', 'ruta_multi')->get();
-        return response()->json($aliados);
+    public function index()
+    {
+        //
     }
 
     /**
@@ -22,7 +20,7 @@ class AliadoApiController extends Controller
      */
     public function store(Request $request)
     {
-        
+        //
     }
 
     /**
