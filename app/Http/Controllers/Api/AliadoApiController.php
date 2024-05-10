@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-
+use App\Models\Users;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Aliado;
@@ -13,7 +13,9 @@ class AliadoApiController extends Controller
      * Display a listing of the resource.
      */
     public function index() {
-        $aliados = Aliado::select('nombre', 'descripcion', 'logo', 'rutaMulti')->get();
+        $aliados = Aliado::whereHas('auth', function ($query) {
+            $query->where('estado', 1);
+        })->select('nombre', 'descripcion', 'logo', 'rutaMulti')->get();
         return response()->json($aliados);
     }
 
