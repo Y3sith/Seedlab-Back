@@ -7,27 +7,27 @@ use App\Models\Emprendedor;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-
-
+use Illuminate\Support\Facades\Mail;
+use App\Mail\VerificationCodeEmail;
 
 class AuthController extends Controller
 {
-    
-    public function login(Request $request) {
+
+    public function login(Request $request)
+    {
 
         $credentials = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
-    
+
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-    
+
         $user = Auth::user();
         $tokenResult = $user->createToken('Personal Access Token');
-    
-    
+
         return response()->json([
             'access_token' => $tokenResult->plainTextToken,
             'token_type' => 'Bearer',
@@ -35,74 +35,68 @@ class AuthController extends Controller
         ]);
     }
 
-    public function userProfile(){
-        return response()->json(["clave"=>"Hola"]);
+    public function userProfile()
+        return response()->json(["clave" => "Hola"]);
     }
 
-    public function logout(Request $request){
+    public function logout(Request $request)
+    {
         $request->user()->token()->revoke();
 
         return response()->json([
-            'message' => 'Successfully logged out'
+            'message' => 'Successfully logged out',
         ]);
     }
 
- 
     protected function existeusuario(string $documento)
     {
         $valuser = Emprendedor::where('documento', $documento)->first();
 
         if ($valuser) {
             return 'Tu documento ya existe en el sistema';
-        }
-        else {
+        } else {
             return null;
         }
     }
 
     protected function register(Request $data)
-{
-    // Verificar si el usuario ya existe
-    $Response = $this->existeusuario($data['documento']);
+    {
+        // Verificar si el usuario ya existe
+        $Response = $this->existeusuario($data['documento']);
 
-    if ($Response != null) {
-        return response()->json(['message' => $Response], 400);
-    } else {
-        // Generar código de verificación
-        $verificationCode = mt_rand(10000, 99999);
+        if ($Response != null) {
+            return response()->json(['message' => $Response], 400);
+        } else {
+            // Generar código de verificación
+            $verificationCode = mt_rand(10000, 99999);
 
-        // Ejecutar procedimiento almacenado
-        DB::transaction(function () use ($data, $verificationCode) {
-            // Ejecutar el procedimiento almacenado para registrar el emprendedor
-            DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
-                $data['documento'],
-                $data['nombretipodoc'],
-                $data['nombre'],
-                $data['apellido'],
-                $data['celular'],
-                $data['genero'],
-                $data['fecha_nacimiento'],
-                $data['municipio'],
-                $data['direccion'],
-                $data['email'],
-                Hash::make($data['password']),
-                $data['estado'],
-                $verificationCode
-            ]);
+            // Ejecutar procedimiento almacenado
+            DB::transaction(function () use ($data, $verificationCode) {
+                // Ejecutar el procedimiento almacenado para registrar el emprendedor
+                DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
+                    $data['documento'],
+                    $data['nombretipodoc'],
+                    $data['nombre'],
+                    $data['apellido'],
+                    $data['celular'],
+                    $data['genero'],
+                    $data['fecha_nacimiento'],
+                    $data['municipio'],
+                    $data['direccion'],
+                    $data['email'],
+                    Hash::make($data['password']),
+                    $data['estado'],
+                    $verificationCode,
+                ]);
 
-            // Enviar correo electrónico con el código de verificación
-            Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
-        });
+                // Enviar correo electrónico con el código de verificación
+                Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
+            });
 
-        // Retornar respuesta exitosa
-        return response()->json(['message' => 'Tu usuario ha sido creado con éxito'], 201);
+            // Retornar respuesta exitosa
+            return response()->json(['message' => 'Tu usuario ha sido creado con éxito'], 201);
+        }
     }
-}
-
-
-
-
-
 
     protected function validate_email(Request $request)
     {
@@ -111,19 +105,17 @@ class AuthController extends Controller
         $user = User::where('email', $request->input('email'))->first();
 
         if ($user) {
-            if($user->email_verified_at != null){
+            if ($user->email_verified_at != null) {
                 return response()->json(['message' => 'Tu correo electrónico ya ha sido validado'], 400);
-            }
-            else{
+            } else {
                 if ($user->verification_code === $verificationCode) {
                     $user->email_verified_at = now();
                     $user->save();
-    
+
                     return response()->json(['message' => 'Correo electrónico validado correctamente'], 200);
-                }
-                else{
+                } else {
                     return response()->json(['message' => 'Tu codigo de verificación es incorrecto'], 400);
-    
+
                 }
             }
         } else {
@@ -132,17 +124,13 @@ class AuthController extends Controller
 
     }
 
-
-
     public function allUsers()
     {
     }
 
 }
 
-
 // JSON DE EJEMPLO PARA LOS ENDPOINT
-
 
 // register:
 // {
@@ -158,7 +146,7 @@ class AuthController extends Controller
 //     "password": "1234",
 //     "id_estado": 1,
 //     "id_tipo_documento": 1,
-//     "id_roles": 1 
+//     "id_roles": 1
 // }
 
 // validate_email:
@@ -166,5 +154,3 @@ class AuthController extends Controller
 //     "email": "brayanfigueroajerez@gmail.com",
 //     "codigo": "69838"
 // }
-
-

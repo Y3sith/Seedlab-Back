@@ -15,37 +15,42 @@ return new class extends Migration
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_emprendedor;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_emprendedor(
-            IN p_num_documento varchar(20),
-            In p_nombretipodoc varchar(20),
-            In p_nombre varchar(50),
-            In p_apellido varchar(50),
-            In p_celular varchar(13),
-            In p_genero varchar(20),
-            In p_fecha_nac varchar(50),
-            In p_municipio varchar(50),
-            In p_direccion varchar(50),
-            IN p_correo VARCHAR(50),
-            IN p_contrasena VARCHAR(20),
+            IN p_num_documento VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_nombretipodoc VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_celular VARCHAR(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_genero VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_municipio VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_direccion VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN,
-            IN p_cod_ver varchar(10)
+            IN p_cod_ver VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
         )
         BEGIN
-             DECLARE v_idtipodoc VARCHAR(50); 
-             DECLARE v_idmunicipio VARCHAR(50); 
-             DECLARE v_fecha_nac DATE;
-            START TRANSACTION;
-            
-            select id into v_idtipodoc from tipo_documento where tipo_documento.nombre = p_nombretipodoc;
-            select id into v_idmunicipio from municipios where municipios.nombre_mun = p_municipio;
+            DECLARE v_idtipodoc INT;
+            DECLARE v_idmunicipio INT;
+            DECLARE v_fecha_nac DATE;
+        
+            DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+            END;
+        
+            SELECT id INTO v_idtipodoc FROM tipo_documento WHERE nombre = p_nombretipodoc LIMIT 1;
+            SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
             SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
         
-            INSERT INTO autentications (correo, contrasena, estado, id_rol) 
+            INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 5);
-            
+        
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
-            INSERT INTO emprendedor (num_documento,idtipodoc,nombre,apellido,celular,genero,fecha_nac,cod_ver,id_municipio,direccion,idauth) 
-            VALUES (p_num_documento,v_idtipodoc,p_nombre,p_apellido,p_celular,p_genero,v_fecha_nac,p_cod_ver,v_idmunicipio,p_direccion, @last_inserted_id);
+            INSERT INTO emprendedor (documento, id_tipo_documento, nombre, apellido, celular, genero, fecha_nac, id_municipio, direccion, id_autentication, cod_ver) 
+            VALUES (p_num_documento, v_idtipodoc, p_nombre, p_apellido, p_celular, p_genero, v_fecha_nac, v_idmunicipio, p_direccion, @last_inserted_id, p_cod_ver);
         
             COMMIT;
         END");

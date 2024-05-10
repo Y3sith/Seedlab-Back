@@ -22,3 +22,7 @@ Route::get('/aliados', [AliadoApiController::class, 'index'])->name('index');
 Auth::routes();
 
 Route::get('/home', [App\Http\Controllers\HomeController::class, 'index'])->name('home');
+
+Route::get('/home', function () {
+    return view('verification-code');
+})->name('home');
