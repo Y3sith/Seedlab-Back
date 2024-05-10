@@ -1,11 +1,9 @@
 <?php
 
 namespace App\Http\Controllers\Api;
-use App\Models\Users;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Aliado;
-
 
 class AliadoApiController extends Controller
 {
@@ -24,7 +22,7 @@ class AliadoApiController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        
     }
 
     /**

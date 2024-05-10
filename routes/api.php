@@ -4,8 +4,9 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\AliadoApiController;
-
+use App\Http\Controllers\Api\AliadoController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\RutaApiController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -26,4 +27,6 @@ Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 Route::post('/validate_email', [AuthController::class, 'validate_email'])->name('validate_email');
 
 Route::post('/register', [AuthController::class, 'register'])->name('register');
+
+Route::apiResource('/ruta',RutaApiController::class);
 
