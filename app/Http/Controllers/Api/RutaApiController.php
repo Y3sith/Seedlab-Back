@@ -28,6 +28,7 @@ class RutaApiController extends Controller
         if($user->rol_id != 3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }*/
+        //COLOCAR CAMPO ESTADO EN LA TABLA RUTA, PARA ACTIVAR Y DESACTIVAR RUTAS
         $ruta = new Ruta();
         $ruta->nombre = $request->nombre;
         $ruta->fecha_creacion  = Carbon::now();
