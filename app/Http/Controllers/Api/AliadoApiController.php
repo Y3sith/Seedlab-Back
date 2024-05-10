@@ -13,7 +13,7 @@ class AliadoApiController extends Controller
     public function index() {
         $aliados = Aliado::whereHas('auth', function ($query) {
             $query->where('estado', 1);
-        })->select('nombre', 'descripcion', 'logo', 'rutaMulti')->get();
+        })->select('nombre', 'descripcion', 'logo', 'ruta_multi')->get();
         return response()->json($aliados);
     }
 
