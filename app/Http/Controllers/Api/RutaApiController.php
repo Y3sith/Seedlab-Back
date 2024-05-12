@@ -29,10 +29,11 @@ class RutaApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }*/
         //COLOCAR CAMPO ESTADO EN LA TABLA RUTA, PARA ACTIVAR Y DESACTIVAR RUTAS
-        $ruta = new Ruta();
-        $ruta->nombre = $request->nombre;
-        $ruta->fecha_creacion  = Carbon::now();
-        $ruta->save();
+        
+        $ruta = Ruta::create([
+            "nombre" => $request->nombre,
+            "fecha_creacion"  => Carbon::now()
+        ]);
         return response()->json($ruta);
     }
 
@@ -47,7 +48,7 @@ class RutaApiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
         $ruta = Ruta::find($id);
         if(!$ruta){
@@ -56,6 +57,7 @@ class RutaApiController extends Controller
         }
         else{
             $ruta->nombre = $request->nombre;
+            $ruta->estado = $request->estado;
             $ruta->save();
             return response()->json($ruta, 200);
         }
