@@ -4,9 +4,10 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Empresa;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
-class EmpresaApiContraller extends Controller
+class EmpresaApiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -14,6 +15,10 @@ class EmpresaApiContraller extends Controller
     public function index()
     {
         //
+         /*muestras las empresas*/
+         $empresa = Empresa::paginate(5);
+         return new JsonResponse($empresa->items());
+        
     }
 
     /**
@@ -47,12 +52,7 @@ class EmpresaApiContraller extends Controller
      */
     public function show($id_emprendedor)
     {
-        /*muestra las empresas asociadas por el emprendedor */
-        $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
-        if($empresa){
-            return response()->json($empresa->items(), 200);
-        }
-        return response()->json(["error"=>"Empresa no encontrada",404]);
+       
     }
 
     /**
