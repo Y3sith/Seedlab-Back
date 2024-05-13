@@ -27,16 +27,12 @@ class AuthController extends Controller
 
         $user = User::where('email', $request->email)->with('emprendedor')->first();
 
-        //dd($user);
-
+        //validacion de credenciales y que el campo de verificacion de email del rol emprendedor no sea nullo
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         } elseif (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
         }
-
-        $user = $request->user();
-
 
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
