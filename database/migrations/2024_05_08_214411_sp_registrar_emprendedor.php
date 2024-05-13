@@ -39,20 +39,29 @@ return new class extends Migration
                 ROLLBACK;
                 RESIGNAL;
             END;
-        
-            SELECT id INTO v_idtipodoc FROM tipo_documento WHERE nombre = p_nombretipodoc LIMIT 1;
-            SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
-            SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
-        
-            INSERT INTO users (email, password, estado, id_rol) 
-            VALUES (p_correo, p_contrasena, p_estado, 5);
-        
-            SELECT LAST_INSERT_ID() INTO @last_inserted_id;
-        
-            INSERT INTO emprendedor (documento, id_tipo_documento, nombre, apellido, celular, genero, fecha_nac, id_municipio, direccion, id_autentication, cod_ver) 
-            VALUES (p_num_documento, v_idtipodoc, p_nombre, p_apellido, p_celular, p_genero, v_fecha_nac, v_idmunicipio, p_direccion, @last_inserted_id, p_cod_ver);
-        
-        END");
+            
+			IF EXISTS (SELECT 1 FROM emprendedor WHERE documento  = p_num_documento limit 1) THEN
+				SELECT 'El numero de documento ya ha sido registrado en el sistema' AS mensaje;
+			ELSE
+				IF EXISTS ( SELECT 1 FROM users WHERE email = p_correo limit 1) THEN
+					SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+				ELSE
+						SELECT id INTO v_idtipodoc FROM tipo_documento WHERE nombre = p_nombretipodoc LIMIT 1;
+						SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
+						SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
+						
+						INSERT INTO users (email, password, estado, id_rol) 
+						VALUES (p_correo, p_contrasena, p_estado, 5);
+						
+						SELECT LAST_INSERT_ID() INTO @last_inserted_id;
+						
+						INSERT INTO emprendedor (documento, id_tipo_documento, nombre, apellido, celular, genero, fecha_nac, id_municipio, direccion, id_autentication, cod_ver) 
+						VALUES (p_num_documento, v_idtipodoc, p_nombre, p_apellido, p_celular, p_genero, v_fecha_nac, v_idmunicipio, p_direccion, @last_inserted_id, p_cod_ver);
+
+                        SELECT 'Tu usuario ha sido creado con exito' AS mensaje;
+				END IF;
+			END IF;
+	END");
     }
 
     //

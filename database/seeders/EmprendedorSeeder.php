@@ -37,7 +37,7 @@ class EmprendedorSeeder extends Seeder
             "direccion"=>"manzaka k",
             "email_verified_at"=>null,
             "cod_ver"=> null,
-            "id_autentication"=> 1,
+            "id_autentication"=> 3,
             "id_tipo_documento"=> 1,
             "id_municipio"=> 866
         ]);
