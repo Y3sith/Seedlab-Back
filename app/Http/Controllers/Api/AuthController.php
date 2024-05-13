@@ -64,7 +64,7 @@ class AuthController extends Controller
         ]);
     }
 
-    protected function existeusuario(string $documento)
+    protected function existeusuario($documento)
     {
         $valuser = Emprendedor::where('documento', $documento)->first();
 

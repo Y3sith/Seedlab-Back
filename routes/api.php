@@ -14,11 +14,15 @@ Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
 
+//Rutas de login y registro
+Route::group([
+'prefix' => 'auth'
+], function(){
+    Route::post('login', [AuthController::class, 'login'])->name('login');
+});
 
-
-
-Route::post('login', [AuthController::class, 'login'])->name('login');
 Route::post('logout', [AuthController::class, 'logout']);
+
 
 //Route::get('/empresa', [EmpresaApiController::class, 'index'])->name('index');
 //Route::post('/empresa', [EmpresaApiController::class, 'store'])->name('store');
