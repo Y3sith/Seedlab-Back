@@ -9,9 +9,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 
-
-use App\Models\User;
-
 class EmprendedorApiController extends Controller
 {
     /**
@@ -19,11 +16,9 @@ class EmprendedorApiController extends Controller
      */
     public function index()
     {
-        /*muestras las empresas*/
-        $empresa = Empresa::paginate(5);
-        return new JsonResponse($empresa->items());
-
-
+        //muesra los emprendedores
+        $emprendedor = Emprendedor::paginate(5);
+        return new JsonResponse($emprendedor->items());
     }
 
     /**
@@ -39,24 +34,20 @@ class EmprendedorApiController extends Controller
      */
     public function store(Request $request)
     {
-        $empresa = new Empresa();
-        $empresa->nombre = $request->nombre;
-        $empresa->documento = $request->documento;
-        $empresa->cargo = $request->cargo;
-        $empresa->razonSocial = $request->razonSocial;
-        $empresa->urlPagina = $request->urlPagina;
-        $empresa->telefono = $request->telefono;
-        $empresa->celular = $request->celular;
-        $empresa->direccion = $request->direccion;
-        $empresa->correo = $request->correo;
-        $empresa->profesion = $request->profesion;
-        $empresa->experiencia = $request->experiencia;
-        $empresa->funciones = $request->funciones;
-        $empresa->id_tipo_documento = $request->id_tipo_documento;
-        $empresa->id_municipio = $request->id_municipio;
-        $empresa->id_emprendedor = $request->id_emprendedor;
-        $empresa->save();
-        return response()->json($empresa, 200);
+        //crear emprendedor
+        $emprendedor = Emprendedor::create([
+            'documento' => $request->documento,
+            'nombre' => $request->nombre,
+            'apellido' => $request->apellido,
+            'celular' => $request->celular,
+            'genero' => $request->genero,
+            'fecha_nac' => $request->fecha_nac,
+            'direccion' => $request->direccion,
+            'id_autentication' => $request->id_autentication,
+            'id_tipo_documento' => $request->id_tipo_documento,
+            'id_municipio' => $request->id_municipio,
+        ]);
+        return response()->json($emprendedor, 200);
     }
 
     /**
@@ -64,13 +55,14 @@ class EmprendedorApiController extends Controller
      */
     public function show($id_emprendedor)
     {
-        /*muestra las empresas asociadas por el emprendedor */
+        /* Muestra las empresas asociadas por el emprendedor */
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
-        if($empresa){
-            return response()->json($empresa->items(), 200);
+        if($empresa->isEmpty()) {
+            return response()->json(["error" => "Empresa no encontrada"], 404);
         }
-        return response()->json(["error"=>"Empresa no encontrada",404]);
+        return response()->json($empresa->items(), 200);
     }
+    
 
     /**
      * Show the form for editing the specified resource.
@@ -85,28 +77,25 @@ class EmprendedorApiController extends Controller
      */
     public function update(Request $request, $documento)
     {
-        /*editar la empresa */
-        $empresa = Empresa::find($documento);
-        if(!$empresa){
-            return response()->json([
-               'message' => 'Empresa no encontrada'], 404);
-        }
-        else{
-            $empresa->nombre = $request->nombre;
-            $empresa->cargo = $request->cargo;
-            $empresa->razonSocial = $request->razonSocial;
-            $empresa->urlPagina = $request->urlPagina;
-            $empresa->documento = $request->documento;
-            $empresa->telefono = $request->telefono;
-            $empresa->celular = $request->celular;
-            $empresa->direccion = $request->direccion;
-            $empresa->correo = $request->correo;
-            $empresa->profesion = $request->profesion;
-            $empresa->experiencia = $request->experiencia;
-            $empresa->funciones = $request->funciones;
-            $empresa->update();
-            return response()->json(["message"=>"Empresa acualizada"],200);
-
+        //editar el emprendedor
+        $emprendedor = Emprendedor::find($documento);
+        if (!$emprendedor) {
+            return response([
+                'message' => 'Emprendedor no encontrado'
+            ], 404);
+        } else {
+            $emprendedor->documento = $request->documento; //problemas porque es el id           
+            $emprendedor->nombre = $request->nombre;
+            $emprendedor->apellido = $request->apellido;
+            $emprendedor->celular = $request->celular;
+            $emprendedor->genero = $request->genero;
+            $emprendedor->fecha_nac = $request->fecha_nac;
+            $emprendedor->direccion = $request->direccion;
+            $emprendedor->id_autentication = $request->id_autentication; //problemas
+            $emprendedor->id_tipo_documento = $request->id_tipo_documento;
+            $emprendedor->id_municipio = $request->id_municipio;
+            $emprendedor->update();
+            return response()->json($emprendedor, 200);
         }
     }
 
@@ -129,24 +118,3 @@ class EmprendedorApiController extends Controller
          ], 200);
     }
 }
-
-/* 
-EJEMPLO CREATE EMPRESA
-{
-	"nombre": "pedro francisco villamizar almeria", 
-	"documento": "123456",
-	"cargo": "jefe",
-  "razonSocial": "pedrito sas",
-  "urlPagina": "www.panaderiadonpedro.com",
-	"telefono": "6363636",
-	"celular": "3232323233",
-	"direccion": "calle 48#25-12",
-	"profesion": "independiente",
-	"correo": "pedrito@gmail.com",
-	"experiencia": "ninguna",
-	"funciones": "panadero",
-	"id_tipo_documento": 1,
-	"id_municipio": 1,
-	"id_emprendedor": 123456
-}
-*/

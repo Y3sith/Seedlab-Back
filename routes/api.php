@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmprendedorApiController;
 use App\Http\Controllers\Api\AliadoApiController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
 
 
@@ -32,6 +33,7 @@ Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
 Route::apiResource('/ruta',RutaApiController::class);
 
+Route::apiResource('empresa',EmpresaApiController::class);
 Route::apiResource('emprendedor',EmprendedorApiController::class);
 Route::apiResource('superadmin',SuperAdminController::class);
 
