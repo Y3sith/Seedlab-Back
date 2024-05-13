@@ -6,7 +6,6 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeEmail;
-use App\Jobs\SendVerificationEmail;
 use App\Models\Emprendedor;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -26,12 +25,25 @@ class AuthController extends Controller
         ]);
 
         $user = User::where('email', $request->email)->with('emprendedor')->first();
+        $verificationCode = mt_rand(10000, 99999);
 
-        //Si el usuario no existe, validacion de credenciales y que el campo de verificacion de email del rol emprendedor no sea nullo
+        //Si el usuario no existe, validacion de credenciales 
         if (!$user || !Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
-        } elseif (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
+        }
+        //Que el campo de verificacion de email del rol emprendedor no sea nullo
+        if (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
+            $user->emprendedor->cod_ver = $verificationCode;
+            $user->emprendedor->save();
+            Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
+        }
+        //Si el estado es inactivo se enviara el email de verificacion
+        if (!$user->estado) {
+            $user->emprendedor->cod_ver = $verificationCode;
+            $user->emprendedor->save();
+            Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
+            return response()->json(['message' => 'El usuario se encuentra inactivo'], 403);
         }
 
         $tokenResult = $user->createToken('Personal Access Token');
@@ -49,7 +61,8 @@ class AuthController extends Controller
 
     public function userProfile()
     {
-        return response()->json(["clave" => "Hola"]);
+        $user = Auth::user();
+        return response()->json($user);
     }
 
     public function logout(Request $request)
@@ -137,6 +150,8 @@ class AuthController extends Controller
 
     public function allUsers()
     {
+        $users = User::with('emprendedor')->get();
+        return response()->json($users);
     }
 }
 

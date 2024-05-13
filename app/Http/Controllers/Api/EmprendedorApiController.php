@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Emprendedor;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -112,9 +113,20 @@ class EmprendedorApiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $emprendedor = Emprendedor::find($id);
+        if(!$emprendedor){
+            return response()->json([
+               'message' => 'Emprendedor no encontrado'], 404);
+        }
+        //cambiar el estado del emprendedor
+        $emprendedor->estado = false;
+        $emprendedor->save();
+
+        return response()->json([
+            'message' => 'Emprendedor desactivado exitosamente'
+         ], 200);
     }
 }
 
