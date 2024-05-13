@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeEmail;
 use App\Jobs\SendVerificationEmail;
 use App\Models\Emprendedor;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -24,11 +25,14 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+        $user = User::where('email', $request->email)->with('emprendedor')->first();
 
-        //dd(!Auth::attempt($credentials));
+        //dd($user);
 
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
+        } elseif (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
+            return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
         }
 
         $user = $request->user();
@@ -44,7 +48,6 @@ class AuthController extends Controller
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
             'user' => $user
         ]);
-
     }
 
 
@@ -97,12 +100,11 @@ class AuthController extends Controller
                 $verificationCode
             ]);
 
-            if (!empty ($results)) {
+            if (!empty($results)) {
                 $response = $results[0]->mensaje;
                 if ($response === 'El numero de documento ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
                     $statusCode = 400;
-                }
-                else{
+                } else {
                     Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
                     //el codigo de abajo ejecuta el job (aun no se ha definido si se usara ya que se necesita el comando "php artisan queue:work")
                     //dispatch(new SendVerificationEmail($data['email'], $verificationCode));
@@ -110,7 +112,7 @@ class AuthController extends Controller
             }
         });
 
-        
+
         return response()->json(['message' => $response], $statusCode);
     }
 
@@ -125,7 +127,7 @@ class AuthController extends Controller
                 $request['codigo'],
             ]);
 
-            if (!empty ($results)) {
+            if (!empty($results)) {
                 $response = $results[0]->mensaje;
                 if ($response === 'El correo electrónico no esta registrado' || $response === 'El código de verificación proporcionado no coincide') {
                     $statusCode = 400;
