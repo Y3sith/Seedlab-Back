@@ -19,6 +19,7 @@ Route::group([
 'prefix' => 'auth'
 ], function(){
     Route::post('login', [AuthController::class, 'login'])->name('login');
+    Route::post('/register_em', [AuthController::class, 'register'])->name('register');
 });
 
 Route::post('logout', [AuthController::class, 'logout']);
@@ -36,7 +37,6 @@ Route::apiResource('superadmin',SuperAdminController::class);
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
-Route::post('/register_em', [AuthController::class, 'register'])->name('register');
 
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
