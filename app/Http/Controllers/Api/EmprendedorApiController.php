@@ -83,20 +83,22 @@ class EmprendedorApiController extends Controller
             return response([
                 'message' => 'Emprendedor no encontrado'
             ], 404);
-        } else {
-            $emprendedor->documento = $request->documento; //problemas porque es el id           
-            $emprendedor->nombre = $request->nombre;
-            $emprendedor->apellido = $request->apellido;
-            $emprendedor->celular = $request->celular;
-            $emprendedor->genero = $request->genero;
-            $emprendedor->fecha_nac = $request->fecha_nac;
-            $emprendedor->direccion = $request->direccion;
-            $emprendedor->id_autentication = $request->id_autentication; //problemas
-            $emprendedor->id_tipo_documento = $request->id_tipo_documento;
-            $emprendedor->id_municipio = $request->id_municipio;
-            $emprendedor->update();
-            return response()->json($emprendedor, 200);
         }
+        $emprendedor = Emprendedor::updated([
+            "documento" => $request->documento,
+            "nombre" => $request->nombre,
+            "apellido" => $request->apellido,
+            "celular" => $request->celular,
+            "genero" => $request->genero,
+            "fecha_nac" => $request->fecha_nac,
+            "direccion" => $request->direccion,
+            "id_autentication" => $request->id_autentication,
+            "id_tipo_documento" => $request->id_tipo_documento,
+            "id_municipio" => $request->id_municipio
+        ]);
+            
+            return response()->json(['message' => 'Emprendedor actualizado', $emprendedor, 200]);
+
     }
 
     /**
