@@ -38,14 +38,7 @@ class AuthController extends Controller
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
         }
-        //Si el estado es inactivo se enviara el email de verificacion
-        if (!$user->estado) {
-            $user->emprendedor->cod_ver = $verificationCode;
-            $user->emprendedor->save();
-            Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
-            return response()->json(['message' => 'El usuario se encuentra inactivo'], 403);
-        }
-
+        
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         $token->save();

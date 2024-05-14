@@ -25,16 +25,14 @@ class RutaApiController extends Controller
     public function store(Request $request)
     {
         /*user=Auth::user();
-        if($user->rol_id != 3){
+        if($user->rol_id != 1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }*/
-        //COLOCAR CAMPO ESTADO EN LA TABLA RUTA, PARA ACTIVAR Y DESACTIVAR RUTAS
-        
-        $ruta = Ruta::create([
+            $ruta = Ruta::create([
             "nombre" => $request->nombre,
             "fecha_creacion"  => Carbon::now()
         ]);
-        return response()->json($ruta);
+        return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
     }
 
     /**
@@ -66,8 +64,19 @@ class RutaApiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+
+        $ruta = Ruta::find($id);
+        if(!$ruta){
+            return response()->json([
+               'message' => 'Ruta no encontrada'], 404);
+        }
+        $ruta = Ruta:update([
+            'estado' => 0,
+        ]);
+        return response()->json([
+            'message' => 'Ruta desactivada exitosamente'
+        ], 200);
     }
 }

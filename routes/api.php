@@ -26,16 +26,18 @@ Route::group([
 
 Route::post('logout', [AuthController::class, 'logout']);
 
-
-//Route::get('/empresa', [EmpresaApiController::class, 'index'])->name('index');
-//Route::post('/empresa', [EmpresaApiController::class, 'store'])->name('store');
-
 Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
+//Rutas
 Route::apiResource('/ruta',RutaApiController::class);
 
+//Empresa
 Route::apiResource('empresa',EmpresaApiController::class);
+
+//Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class);
+
+//Super Admin
 Route::apiResource('/superadmin',SuperAdminController::class);
 
 //AuthController
