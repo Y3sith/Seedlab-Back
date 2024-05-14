@@ -28,9 +28,10 @@ class AuthController extends Controller
         $verificationCode = mt_rand(10000, 99999);
 
         //Si el usuario no existe, validacion de credenciales 
-        if (!$user || !Auth::attempt($credentials)) {
+        if (Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
         if (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
             $user->emprendedor->cod_ver = $verificationCode;
