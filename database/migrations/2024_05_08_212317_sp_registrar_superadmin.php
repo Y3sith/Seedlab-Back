@@ -14,27 +14,27 @@ return new class extends Migration
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_superadmin(
-        IN p_nombre VARCHAR(50),
-        IN p_apellido VARCHAR(50),
-        IN p_correo VARCHAR(50),
-        IN p_contrasena VARCHAR(20),
+        IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_contrasena VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_estado BOOLEAN  
     )
     BEGIN
-        DECLARE last_inserted_id INT;
-    
-        START TRANSACTION;
-        
-        INSERT INTO autentications (correo, contrasena, estado, idrol) 
-        VALUES (p_correo, p_contrasena, p_estado, 1);
-        
+    DECLARE last_inserted_id INT;
+
+    IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
+        SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+    ELSE
+        INSERT INTO users (email, password, estado, id_rol) 
+        VALUES (p_correo, p_contrasena, p_estado, 1); 
+
         SELECT LAST_INSERT_ID() INTO last_inserted_id;
-        
-        INSERT INTO superadmin (nombre, apellido, idauth) 
+
+        INSERT INTO superadmin (nombre, apellido, id_autentication) 
         VALUES (p_nombre, p_apellido, last_inserted_id);
-        
-        COMMIT;
-    END;");
+    END IF;
+END");
     
     }
 
