@@ -106,26 +106,6 @@ class EmprendedorApiController extends Controller
      */
     public function destroy($documento)
     {
-        //Se busca emprendedor por documento
-        $emprendedor = Emprendedor::find($documento);
-        //dd($emprendedor);
-        if (!$emprendedor) {
-            return response()->json([
-                'message' => 'Emprendedor no encontrado'
-            ], 404);
-        }
-
-        // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
-        $user = $emprendedor->auth;
-        //dd($user);
-        $user->estado = 0;
-        $user->save();
-
-        $emprendedor->email_verified_at = null;
-        $emprendedor->save();
-
-        return response()->json([
-            'message' => 'Emprendedor desactivado exitosamente'
-        ], 200);
+        //
     }
 }

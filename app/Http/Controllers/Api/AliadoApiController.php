@@ -44,8 +44,19 @@ class AliadoApiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        $aliado = Aliado::find($id);
+        if(!$aliado){
+            return response()->json([
+               'message' => 'Aliado no encontrado'
+            ], 404);
+        }
+        $aliado->update([
+            'estado' => 0,
+        ])
+        return response()->json([
+            'message' => 'Aliado desactivado'
+         ], 404);
     }
 }
