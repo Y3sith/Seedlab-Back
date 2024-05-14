@@ -35,8 +35,8 @@ Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 Route::apiResource('/ruta',RutaApiController::class);
 
 Route::apiResource('empresa',EmpresaApiController::class);
-Route::apiResource('emprendedor',EmprendedorApiController::class);
-Route::apiResource('superadmin',SuperAdminController::class);
+Route::apiResource('/emprendedor',EmprendedorApiController::class);
+Route::apiResource('/superadmin',SuperAdminController::class);
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
