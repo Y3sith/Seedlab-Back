@@ -33,7 +33,7 @@ class Emprendedor extends Model
     }
 
     public function auth(){
-        return $this->belongsTo(User::class, 'id_autentication');
+        return $this->belongsTo(User::class, 'id_autentication', 'id');
     }
 
     public function tipoDocumento(){

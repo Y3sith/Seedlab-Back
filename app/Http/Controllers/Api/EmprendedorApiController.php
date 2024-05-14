@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -57,12 +58,12 @@ class EmprendedorApiController extends Controller
     {
         /* Muestra las empresas asociadas por el emprendedor */
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
-        if($empresa->isEmpty()) {
+        if ($empresa->isEmpty()) {
             return response()->json(["error" => "Empresa no encontrada"], 404);
         }
         return response()->json($empresa->items(), 200);
     }
-    
+
 
     /**
      * Show the form for editing the specified resource.
@@ -84,7 +85,7 @@ class EmprendedorApiController extends Controller
                 'message' => 'Emprendedor no encontrado'
             ], 404);
         }
-        $emprendedor = Emprendedor::updated([
+        $emprendedor->update([
             "documento" => $request->documento,
             "nombre" => $request->nombre,
             "apellido" => $request->apellido,
@@ -96,27 +97,35 @@ class EmprendedorApiController extends Controller
             "id_tipo_documento" => $request->id_tipo_documento,
             "id_municipio" => $request->id_municipio
         ]);
-            
-            return response()->json(['message' => 'Emprendedor actualizado', $emprendedor, 200]);
 
+        return response()->json(['message' => 'Emprendedor actualizado', $emprendedor, 200]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
+    public function destroy($documento)
     {
-        $emprendedor = Emprendedor::find($id);
-        if(!$emprendedor){
+        //Se busca emprendedor por documento
+        $emprendedor = Emprendedor::find($documento);
+        //dd($emprendedor);
+        if (!$emprendedor) {
             return response()->json([
-               'message' => 'Emprendedor no encontrado'], 404);
+                'message' => 'Emprendedor no encontrado'
+            ], 404);
         }
-        //cambiar el estado del emprendedor
-        $emprendedor->estado = false;
+
+        // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
+        $user = $emprendedor->auth;
+        //dd($user);
+        $user->estado = 0;
+        $user->save();
+
+        $emprendedor->email_verified_at = null;
         $emprendedor->save();
 
         return response()->json([
             'message' => 'Emprendedor desactivado exitosamente'
-         ], 200);
+        ], 200);
     }
 }
