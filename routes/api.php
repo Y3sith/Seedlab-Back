@@ -26,7 +26,6 @@ Route::group([
 
 Route::post('logout', [AuthController::class, 'logout']);
 
-Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class);
@@ -46,6 +45,13 @@ Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->na
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
+
+//AliadoController
+Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
+Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado');
+Route::get('/aliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
+
+
 
 
 

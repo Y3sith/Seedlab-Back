@@ -15,12 +15,12 @@ class Aliado extends Model
         'nombre',
         'descripcion',
         'logo',
-        'rutaMult',
+        'ruta_multi',
         'id_autentication',
         'id_tipo_dato'
     ];
 
-    public $timestaps = false;
+    public $timestamps = false;
 
     public function auth(){
         return $this->belongsTo(User::class, 'id_autentication');
