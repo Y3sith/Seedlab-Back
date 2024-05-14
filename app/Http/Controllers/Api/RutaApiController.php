@@ -30,7 +30,8 @@ class RutaApiController extends Controller
         }*/
             $ruta = Ruta::create([
             "nombre" => $request->nombre,
-            "fecha_creacion"  => Carbon::now()
+            "fecha_creacion"  => Carbon::now(),
+            "estado" => 1
         ]);
         return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
     }
@@ -72,7 +73,7 @@ class RutaApiController extends Controller
             return response()->json([
                'message' => 'Ruta no encontrada'], 404);
         }
-        $ruta = Ruta:update([
+        $ruta->update([
             'estado' => 0,
         ]);
         return response()->json([
