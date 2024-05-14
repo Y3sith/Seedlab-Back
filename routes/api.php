@@ -1,11 +1,13 @@
 <?php
 
+
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmprendedorApiController;
 use App\Http\Controllers\Api\AliadoApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmpresaApiController;
+use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
 use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
 
 
@@ -33,4 +35,5 @@ Route::apiResource('/ruta',RutaApiController::class);
 
 Route::apiResource('empresa',EmpresaApiController::class);
 Route::apiResource('emprendedor',EmprendedorApiController::class);
+Route::apiResource('apoyoxempresa',Apoyo_por_EmpresaController::class);
 Route::apiResource('superadmin',SuperAdminController::class);
