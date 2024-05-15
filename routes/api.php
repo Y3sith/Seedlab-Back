@@ -49,7 +49,7 @@ Route::apiResource('/superadmin',SuperAdminController::class);
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
-
+    
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');

@@ -36,19 +36,7 @@ class EmprendedorApiController extends Controller
     public function store(Request $request)
     {
         //crear emprendedor
-        $emprendedor = Emprendedor::create([
-            'documento' => $request->documento,
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'celular' => $request->celular,
-            'genero' => $request->genero,
-            'fecha_nac' => $request->fecha_nac,
-            'direccion' => $request->direccion,
-            'id_autentication' => $request->id_autentication,
-            'id_tipo_documento' => $request->id_tipo_documento,
-            'id_municipio' => $request->id_municipio,
-        ]);
-        return response()->json($emprendedor, 200);
+        
     }
 
     /**

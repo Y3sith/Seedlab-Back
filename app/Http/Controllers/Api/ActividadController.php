@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ActividadController extends Controller
 {
@@ -14,8 +15,10 @@ class ActividadController extends Controller
     public function index()
     {
         //ver todas las actividades (asesor/aliado/emprendedor por hacer)
-        $actividad = Actividad::all();
-        return response()->json($actividad);
+        if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4 | Auth::user()->id_rol == 5) {
+            $actividad = Actividad::all();
+            return response()->json($actividad);
+        }
     }
 
     /**
@@ -32,15 +35,19 @@ class ActividadController extends Controller
     public function store(Request $request)
     {
         //crear actividad (solo el aliado)
-        $actividad =Actividad::create([
-            'nombre'=>$request->nombre,
-            'descripcion'=>$request->descripcion,
-            'ruta_multi'=>$request->ruta_multi,
-            'id_tipo_dato'=>$request->id_tipo_dato,
-            'id_asesor'=>$request->id_asesor,
-            'id_ruta'=>$request->id_ruta
-        ]);
-        return response()->json($actividad,201);
+        if (Auth::user()->id_rol == 3) {
+            $actividad = Actividad::create([
+                'nombre' => $request->nombre,
+                'descripcion' => $request->descripcion,
+                'ruta_multi' => $request->ruta_multi,
+                'id_tipo_dato' => $request->id_tipo_dato,
+                'id_asesor' => $request->id_asesor,
+                'id_ruta' => $request->id_ruta,
+            ]);
+            return response()->json($actividad, 201);
+        } else {
+            return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
+        }
     }
 
     /** 
@@ -49,13 +56,12 @@ class ActividadController extends Controller
     public function show(string $id)
     {
         //muestra actividad especifica
-        $actividad =Actividad::find($id);
-        if(!$actividad){
-            return response()->json(["error"=>"Actividad no encontrada"],404);
-        }else{
-            return response()->json($actividad,200);
+        $actividad = Actividad::find($id);
+        if (!$actividad) {
+            return response()->json(["error" => "Actividad no encontrada"], 404);
+        } else {
+            return response()->json($actividad, 200);
         }
-
     }
 
     /**
@@ -71,20 +77,22 @@ class ActividadController extends Controller
      */
     public function update(Request $request, string $id)
     {
-       //editar actividad (solo el aliado)
-       $actividad =Actividad::find($id);
-       if(!$actividad){
-        return response()->json(["error"=>"Actividad no encontrada"],404);
-       }else{
-        $actividad->nombre=$request->nombre;
-        $actividad->descripcion=$request->descripcion;
-        $actividad->ruta_multi=$request->ruta_multi;
-        $actividad->id_tipo_dato=$request->id_tipo_dato;
-        $actividad->id_asesor=$request->id_asesor;
-        $actividad->id_ruta=$request->id_ruta;
-        $actividad->update();
-        return response(["message"=>"Actividad actualizada"],200);
-       }
+        //editar actividad (solo el aliado y asesor)
+        if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4) {
+            $actividad = Actividad::find($id);
+            if (!$actividad) {
+                return response()->json(["error" => "Actividad no encontrada"], 404);
+            } else {
+                $actividad->nombre = $request->nombre;
+                $actividad->descripcion = $request->descripcion;
+                $actividad->ruta_multi = $request->ruta_multi;
+                $actividad->id_tipo_dato = $request->id_tipo_dato;
+                $actividad->id_asesor = $request->id_asesor;
+                $actividad->id_ruta = $request->id_ruta;
+                $actividad->update();
+                return response(["message" => "Actividad actualizada"], 200);
+            }
+        }
     }
 
     /**
