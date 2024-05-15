@@ -51,6 +51,7 @@ Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar
 Route::get('/aliado', [AliadoApiController::class, 'Traeraliadosactivos'])->name('Traeraliadosactivos');
 Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado');
 Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
+Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado');
 
 
 

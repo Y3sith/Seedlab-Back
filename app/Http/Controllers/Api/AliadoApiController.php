@@ -61,34 +61,52 @@ class AliadoApiController extends Controller
     }
 
     public function mostrarAliado(Request $request)
-{
-    $aliado = Aliado::with(['auth', 'tipoDato'])->find($request->input('id'));
+    {
+        $aliado = Aliado::with(['auth', 'tipoDato'])->find($request->input('id'));
 
-    if ($aliado) {
-        $logoBase64 = $aliado->logo ? 'data:image/png;base64,' . $aliado->logo : null;
+        if ($aliado) {
+            $logoBase64 = $aliado->logo ? 'data:image/png;base64,' . $aliado->logo : null;
 
-        $estado = $aliado->auth ? $aliado->auth->estado : null;
+            $estado = $aliado->auth ? $aliado->auth->estado : null;
 
-        $tipoDato = $aliado->tipoDato ? $aliado->tipoDato->nombre : null;
+            $tipoDato = $aliado->tipoDato ? $aliado->tipoDato->nombre : null;
 
-        return response()->json([
-            'nombre' => $aliado->nombre,
-            'descripcion' => $aliado->descripcion,
-            'logo' => $logoBase64,
-            'ruta_multi' => $aliado->ruta_multi,
-            'id_autentication' => $aliado->id_autentication,
-            'id_tipo_dato' => $tipoDato,
-            'estado' => $estado == 1 ? "Activo" : "Inactivo",
-        ]);
-    } else {
-        return response()->json(['message' => 'Aliado no encontrado'], 404);
+            return response()->json([
+                'nombre' => $aliado->nombre,
+                'descripcion' => $aliado->descripcion,
+                'logo' => $logoBase64,
+                'ruta_multi' => $aliado->ruta_multi,
+                'id_autentication' => $aliado->id_autentication,
+                'id_tipo_dato' => $tipoDato,
+                'estado' => $estado == 1 ? "Activo" : "Inactivo",
+            ]);
+        } else {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
     }
-}
-
 
     public function Editaraliado(Request $request)
     {
+        $aliado = Aliado::find($request->input('id'));
 
+        if ($aliado) {
+            $aliado->nombre = $request->input('nombre');
+            $aliado->descripcion = $request->input('descripcion');
+            $aliado->logo = $request->input('logo');
+            $aliado->ruta_multi = $request->input('ruta_multi');
+            $aliado->save();
+    
+            if ($aliado->auth) {
+                $user = $aliado->auth;
+                $user->email = $request->input('email');
+                $user->password = Hash::make($request->input('password')); 
+                $user->estado = $request->input('estado'); 
+                $user->save();
+            }
+            return response()->json(['message' => 'Aliado actualizado correctamente']);
+        } else {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
     }
 
     /**

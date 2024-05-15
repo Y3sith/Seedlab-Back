@@ -14,9 +14,9 @@ class TipodocumentoSeeder extends Seeder
     public function run(): void
     {
         $tipo_de_documento = [
-            'Cédula de Ciudadanía',
-            'Cédula de Extranjería',
-            'Permiso especial de Permanencia'   
+            'Cedula de ciudadania',
+            'Cedula de extranjeria',
+            'Permiso especial de permanencia'   
         ];
 
         foreach ($tipo_de_documento  as $tipo_de_documento ) {
