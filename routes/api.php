@@ -38,7 +38,9 @@ Route::apiResource('empresa',EmpresaApiController::class);
 Route::apiResource('/emprendedor',EmprendedorApiController::class);
 
 //Super Admin
-Route::apiResource('/superadmin',SuperAdminController::class);
+Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa']);
+Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis']);
+
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
