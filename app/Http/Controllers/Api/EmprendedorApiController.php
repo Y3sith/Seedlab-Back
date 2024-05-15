@@ -83,15 +83,13 @@ class EmprendedorApiController extends Controller
             return response([
                 'message' => 'Emprendedor no encontrado'
             ], 404);
-        } else {
-            $emprendedor->documento = $request->documento; //problemas porque es el id           
+        } else {        
             $emprendedor->nombre = $request->nombre;
             $emprendedor->apellido = $request->apellido;
             $emprendedor->celular = $request->celular;
             $emprendedor->genero = $request->genero;
             $emprendedor->fecha_nac = $request->fecha_nac;
             $emprendedor->direccion = $request->direccion;
-            $emprendedor->id_autentication = $request->id_autentication; //problemas
             $emprendedor->id_tipo_documento = $request->id_tipo_documento;
             $emprendedor->id_municipio = $request->id_municipio;
             $emprendedor->update();

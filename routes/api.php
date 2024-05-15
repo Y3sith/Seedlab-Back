@@ -8,6 +8,7 @@ use App\Http\Controllers\Api\AliadoApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
+use App\Http\Controllers\Api\ActividadController;
 use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
 
 
@@ -37,3 +38,5 @@ Route::apiResource('empresa',EmpresaApiController::class);
 Route::apiResource('emprendedor',EmprendedorApiController::class);
 Route::apiResource('apoyoxempresa',Apoyo_por_EmpresaController::class);
 Route::apiResource('superadmin',SuperAdminController::class);
+
+Route::apiResource('actividades',ActividadController::class)->middleware('auth:api');
