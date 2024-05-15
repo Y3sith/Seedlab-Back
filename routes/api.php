@@ -31,7 +31,7 @@ Route::post('logout', [AuthController::class, 'logout']);
 Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
 
 //Rutas
-Route::apiResource('/ruta',RutaApiController::class);
+Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
 
 //Empresa
 Route::apiResource('empresa',EmpresaApiController::class);
