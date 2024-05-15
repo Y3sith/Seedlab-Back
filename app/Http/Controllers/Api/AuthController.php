@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use Carbon\Carbon;
-use App\Models\User;
-use App\Models\Emprendedor;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Mail\VerificationCodeEmail;
+use App\Models\Emprendedor;
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
@@ -21,38 +21,42 @@ class AuthController extends Controller
 
         $credentials = $request->validate([
             'email' => ['required', 'email'],
-            'password' => ['required','string'],
+            'password' => ['required', 'string'],
         ]);
 
-        
-        //dd(!Auth::attempt($credentials));
+        $user = User::where('email', $request->email)->with('emprendedor')->first();
+        $verificationCode = mt_rand(10000, 99999);
 
-        if (!Auth::attempt($credentials)) {
+        //Si el usuario no existe, validacion de credenciales 
+        if (Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 
-        $user = $request->user();
-
+        //Que el campo de verificacion de email del rol emprendedor no sea nullo
+        if (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
+            $user->emprendedor->cod_ver = $verificationCode;
+            $user->emprendedor->save();
+            Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
+            return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
+        }
         
-            $tokenResult = $user->createToken('Personal Access Token');
-            $token = $tokenResult->token;
-            $token->save();
+        $tokenResult = $user->createToken('Personal Access Token');
+        $token = $tokenResult->token;
+        $token->save();
 
-            return response()->json([
-                'access_token' => $tokenResult->accessToken,
-                'token_type' => 'Bearer',
-                'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-                'user' => $user
-            ]);
-        
-
-        
+        return response()->json([
+            'access_token' => $tokenResult->accessToken,
+            'token_type' => 'Bearer',
+            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
+            'user' => $user
+        ]);
     }
 
 
     public function userProfile()
     {
-        return response()->json(["clave" => "Hola"]);
+        $user = Auth::user();
+        return response()->json($user);
     }
 
     public function logout(Request $request)
@@ -64,7 +68,7 @@ class AuthController extends Controller
         ]);
     }
 
-    protected function existeusuario(string $documento)
+    protected function existeusuario($documento)
     {
         $valuser = Emprendedor::where('documento', $documento)->first();
 
@@ -77,94 +81,90 @@ class AuthController extends Controller
 
     protected function register(Request $data)
     {
-        // Verificar si el usuario ya existe
-        $Response = $this->existeusuario($data['documento']);
+        $response = null;
+        $statusCode = 200;
 
-        if ($Response != null) {
-            return response()->json(['message' => $Response], 400);
-        } else {
-            // Generar código de verificación
-            $verificationCode = mt_rand(10000, 99999);
+        $verificationCode = mt_rand(10000, 99999);
 
-            // Ejecutar procedimiento almacenado
-            DB::transaction(function () use ($data, $verificationCode) {
-                // Ejecutar el procedimiento almacenado para registrar el emprendedor
-                DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
-                    $data['documento'],
-                    $data['nombretipodoc'],
-                    $data['nombre'],
-                    $data['apellido'],
-                    $data['celular'],
-                    $data['genero'],
-                    $data['fecha_nacimiento'],
-                    $data['municipio'],
-                    $data['direccion'],
-                    $data['email'],
-                    Hash::make($data['password']),
-                    $data['estado'],
-                    $verificationCode
-                ]);
+        DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
+            $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
+                $data['documento'],
+                $data['nombretipodoc'],
+                $data['nombre'],
+                $data['apellido'],
+                $data['celular'],
+                $data['genero'],
+                $data['fecha_nacimiento'],
+                $data['municipio'],
+                $data['direccion'],
+                $data['email'],
+                Hash::make($data['password']),
+                $data['estado'],
+                $verificationCode
+            ]);
 
-                // Enviar correo electrónico con el código de verificación
-                Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
-            });
+            if (!empty($results)) {
+                $response = $results[0]->mensaje;
+                if ($response === 'El numero de documento ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                    $statusCode = 400;
+                } else {
+                    Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
+                    //el codigo de abajo ejecuta el job (aun no se ha definido si se usara ya que se necesita el comando "php artisan queue:work")
+                    //dispatch(new SendVerificationEmail($data['email'], $verificationCode));
+                }
+            }
+        });
 
-            // Retornar respuesta exitosa
-            return response()->json(['message' => 'Tu usuario ha sido creado con éxito'], 201);
-        }
+
+        return response()->json(['message' => $response], $statusCode);
     }
-
-
-
-
-
 
     protected function validate_email(Request $request)
     {
-        $verificationCode = $request->input('codigo');
+        $response = null;
+        $statusCode = 200;
 
-        $user = User::where('email', $request->input('email'))->first();
+        DB::transaction(function () use ($request, &$response, &$statusCode) {
+            $results = DB::select('CALL sp_validar_correo(?,?)', [
+                $request['email'],
+                $request['codigo'],
+            ]);
 
-        if ($user) {
-            if ($user->email_verified_at != null) {
-                return response()->json(['message' => 'Tu correo electrónico ya ha sido validado'], 400);
-            } else {
-                if ($user->verification_code === $verificationCode) {
-                    $user->email_verified_at = now();
-                    $user->save();
-
-                    return response()->json(['message' => 'Correo electrónico validado correctamente'], 200);
-                } else {
-                    return response()->json(['message' => 'Tu codigo de verificación es incorrecto'], 400);
+            if (!empty($results)) {
+                $response = $results[0]->mensaje;
+                if ($response === 'El correo electrónico no esta registrado' || $response === 'El código de verificación proporcionado no coincide') {
+                    $statusCode = 400;
+                } elseif ($response === 'El correo electrónico ya ha sido verificado anteriormente') {
+                    $statusCode = 409;
                 }
             }
-        } else {
-            return response()->json(['message' => 'Tu correo no esta registrado en el sistema'], 400);
-        }
+        });
+        return response()->json(['message' => $response], $statusCode);
     }
 
     public function allUsers()
     {
+        $users = User::with('emprendedor')->get();
+        return response()->json($users);
     }
 }
 
 // JSON DE EJEMPLO PARA LOS ENDPOINT
 
 // register:
-// {
-//     "numdocumento": "123",
-//     "nombre": "Brayan Esneider",
-//     "apellido": "Figueroa Jerez",
-//     "celular": "3146599453",
+//  {
+//     "documento": "1000",
+//     "nombretipodoc": "Cédula de Ciudadanía",
+//     "nombre": "Juancamilo",
+//     "apellido": "DavidHernandez",
+//     "celular": "31465994442",
 //     "genero": "Masculino",
+//     "fecha_nacimiento": "1990-01-01",
+//     "municipio": "Argelia",
+//     "direccion": "cra 34 34-12",
 //     "email": "brayanfigueroajerez@gmail.com",
-//     "fecha_nacimiento": "2005-04-07",
-//     "id_departamento": 1,
-//     "id_municipio": 1,
-//     "password": "1234",
-//     "id_estado": 1,
-//     "id_tipo_documento": 1,
-//     "id_roles": 1
+//     "contrasena": "1",
+//     "estado": true
 // }
 
 // validate_email:

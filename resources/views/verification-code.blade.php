@@ -11,9 +11,7 @@
             font-family: Arial, sans-serif;
             line-height: 1.6;
             color: #000;
-            /* Color de texto negro */
             text-align: center;
-            /* Centrar todo el contenido */
         }
 
         .container {
@@ -25,18 +23,12 @@
             justify-content: center;
         }
 
-        h1 {
-            font-size: 24px;
-            margin-bottom: 25px;
+        .verification-box {
             text-align: center;
         }
 
-        h5{
-            font-size: 14px;
-            margin-top: -25px;
-            text-align: center;
-        }
-        h2{
+        .code-box {
+            display: inline-block;
             text-align: center;
             width: 40px;
             height: 40px;
@@ -49,29 +41,26 @@
         }
 
         .code-container {
-            display: flex;
             justify-content: center;
             align-items: center;
             text-align: center;
+            margin-top: 20px; /* Añadido para separar los cuadros del texto */
         }
 
-
-
-        strong {
-            color: #007bff;
-        }
     </style>
 </head>
 
 <body>
     <div class="container">
-        <h1>Código de Verificación</h1> <!-- Texto del título centrado -->
-        <h5>Estimado/a Usuario/a,</h5>
-        <h5 >Su código de verificación es:</h5>
-        <div class="code-container">
-            @foreach (str_split($verificationCode) as $number)
-                <h2 class="code-box">{{ $number }}</h2>
-            @endforeach
+        <div class="verification-box">
+            <h1>Código de Verificación</h1>
+            <h5>Estimado/a Usuario/a,</h5>
+            <h5>Su código de verificación es:</h5>
+            <div class="code-container">
+                @foreach (str_split($verificationCode) as $number)
+                <div style="display:inline-block" class="code-box">{{ $number }}</div>
+                @endforeach
+            </div>
         </div>
     </div>
 </body>

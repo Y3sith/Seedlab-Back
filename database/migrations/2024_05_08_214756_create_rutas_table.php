@@ -15,6 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre',100);
             $table->date('fecha_creacion');
+            $table->boolean('estado');
             //$table->timestamps();
         });
     }

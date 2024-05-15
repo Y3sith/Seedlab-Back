@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -57,12 +58,12 @@ class EmprendedorApiController extends Controller
     {
         /* Muestra las empresas asociadas por el emprendedor */
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
-        if($empresa->isEmpty()) {
+        if ($empresa->isEmpty()) {
             return response()->json(["error" => "Empresa no encontrada"], 404);
         }
         return response()->json($empresa->items(), 200);
     }
-    
+
 
     /**
      * Show the form for editing the specified resource.
@@ -83,24 +84,27 @@ class EmprendedorApiController extends Controller
             return response([
                 'message' => 'Emprendedor no encontrado'
             ], 404);
-        } else {        
-            $emprendedor->nombre = $request->nombre;
-            $emprendedor->apellido = $request->apellido;
-            $emprendedor->celular = $request->celular;
-            $emprendedor->genero = $request->genero;
-            $emprendedor->fecha_nac = $request->fecha_nac;
-            $emprendedor->direccion = $request->direccion;
-            $emprendedor->id_tipo_documento = $request->id_tipo_documento;
-            $emprendedor->id_municipio = $request->id_municipio;
-            $emprendedor->update();
-            return response()->json($emprendedor, 200);
         }
+        $emprendedor->update([
+            "documento" => $request->documento,
+            "nombre" => $request->nombre,
+            "apellido" => $request->apellido,
+            "celular" => $request->celular,
+            "genero" => $request->genero,
+            "fecha_nac" => $request->fecha_nac,
+            "direccion" => $request->direccion,
+            "id_autentication" => $request->id_autentication,
+            "id_tipo_documento" => $request->id_tipo_documento,
+            "id_municipio" => $request->id_municipio
+        ]);
+
+        return response()->json(['message' => 'Emprendedor actualizado', $emprendedor, 200]);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($documento)
     {
         //
     }
