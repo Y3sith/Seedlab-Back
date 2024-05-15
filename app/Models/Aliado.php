@@ -26,7 +26,8 @@ class Aliado extends Model
         return $this->belongsTo(User::class, 'id_autentication');
     }
 
-    public function tipoDato(){
+    public function tipoDato()
+    {
         return $this->belongsTo(TipoDato::class, 'id_tipo_dato');
     }
 
