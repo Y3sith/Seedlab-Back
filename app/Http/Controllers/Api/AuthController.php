@@ -28,7 +28,7 @@ class AuthController extends Controller
         $verificationCode = mt_rand(10000, 99999);
 
         //Si el usuario no existe, validacion de credenciales 
-        if (Auth::attempt($credentials)) {
+        if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
 

@@ -54,7 +54,7 @@ class AliadoApiController extends Controller
         }
         $aliado->update([
             'estado' => 0,
-        ])
+        ]);
         return response()->json([
             'message' => 'Aliado desactivado'
          ], 404);
