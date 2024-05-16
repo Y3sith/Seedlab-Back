@@ -25,7 +25,7 @@ Route::group([
     
 });
 
-Route::post('logout', [AuthController::class, 'logout']);
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index')->middleware('auth:api');
 

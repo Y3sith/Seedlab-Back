@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Emprendedor;
 use Illuminate\Http\Request;
 use App\Models\Empresa;
@@ -16,6 +17,11 @@ class SuperAdminController extends Controller
      */
     public function index()
     {
+        if(Auth::user()->id_rol != 1){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
         $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
         return response()->json($emprendedoresConEmpresas);
     }
