@@ -1,7 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\Contenido_por_LeccionController;
-                                               use App\Http\Controllers\Api\UbicacionController;
+use App\Http\Controllers\Api\UbicacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmprendedorApiController;
@@ -60,6 +60,11 @@ Route::get('/aliado', [AliadoApiController::class, 'Traeraliadosactivos'])->name
 Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado')->middleware('auth:api');
 Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado')->middleware('auth:api');
 Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado')->middleware('auth:api');
+
+Route::apiResource('/actividad',ActividadController::class)->middleware('auth:api');
+Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
+Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
+Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
 
 

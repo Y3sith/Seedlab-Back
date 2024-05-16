@@ -18,11 +18,11 @@ class RutaApiController extends Controller
     {
 
  
-        /*if(Auth::user()->id_rol!=1){
+        if(Auth::user()->id_rol!=1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         $ruta = Ruta::all();
-        return response()->json($ruta);*/
+        return response()->json($ruta);
     }
 
     /**
