@@ -122,4 +122,16 @@ class AliadoApiController extends Controller
         ], 200); // Cambiado el código de estado a 200, que indica éxito en lugar de 404
     }
 
+    public function MostrarAsesorAliado($id)
+    {
+        $aliado = Aliado::find($id);  
+
+        if(!$aliado) {
+        return response()->json(['message' => 'No se encontró ningún aliado este ID'], 404);
+        }
+
+        $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
+        return response()->json($asesores);
+    }
+
 }
