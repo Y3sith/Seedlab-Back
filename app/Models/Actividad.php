@@ -31,6 +31,7 @@ class Actividad extends Model
     public function rutas(){
         return $this->belongsTo(Ruta::class, 'id_ruta');
     }
-
+    
+    
     public $timestamps = false;
 }
