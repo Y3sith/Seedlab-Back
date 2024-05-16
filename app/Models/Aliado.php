@@ -35,5 +35,9 @@ class Aliado extends Model
        return $this->hasMany(Asesor::class, 'id_aliado');
     }
 
+    public function asesoria()
+    {
+        return $this->hasMany(Asesoria::class, 'id_aliado');
+    }
 
 }

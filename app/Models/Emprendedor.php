@@ -44,5 +44,11 @@ class Emprendedor extends Model
         return $this->hasMany(Empresa::class, 'id_emprendedor', 'documento');
     }
 
+    public function asesoria()
+    {
+        return $this->hasMany(Asesoria::class, 'doc_emprendedor', 'documento');
+    }
+
+
     
 }
