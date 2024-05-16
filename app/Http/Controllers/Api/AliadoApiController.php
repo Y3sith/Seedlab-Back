@@ -8,19 +8,27 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 
-
-
 class AliadoApiController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function Traeraliadosactivos()
     {
-        $aliados = Aliado::whereHas('auth', function ($query) {
-            $query->where('estado', 1);
-        })->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato')->get();
-        return response()->json($aliados);
+        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
+            ->with('tipoDato:id,nombre')
+            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato')
+            ->get();
+
+        $aliadosTransformados = $aliados->map(fn($aliado) => [
+            'nombre' => $aliado->nombre,
+            'descripcion' => $aliado->descripcion,
+            'logo' => $aliado->logo,
+            'ruta_multi' => $aliado->ruta_multi,
+            'tipo_dato' => $aliado->tipoDato->nombre,
+        ]);
+
+        return response()->json($aliadosTransformados);
     }
 
     public function crearaliado(Request $data)
@@ -38,29 +46,30 @@ class AliadoApiController extends Controller
                 $data['email'],
                 Hash::make($data['password']),
                 $data['estado'],
-            ]); 
+            ]);
 
             if (!empty($results)) {
                 $response = $results[0]->mensaje;
                 if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
                     $statusCode = 400;
-                } 
+                }
             }
         });
 
         return response()->json(['message' => $response], $statusCode);
 
-        
     }
 
     public function mostrarAliado(Request $request)
     {
-
-        $aliado = Aliado::find($request->input('id'));
+        $aliado = Aliado::with(['auth', 'tipoDato'])->find($request->input('id'));
 
         if ($aliado) {
-            // Codificar el logo en base64 si está presente
             $logoBase64 = $aliado->logo ? 'data:image/png;base64,' . $aliado->logo : null;
+
+            $estado = $aliado->auth ? $aliado->auth->estado : null;
+
+            $tipoDato = $aliado->tipoDato ? $aliado->tipoDato->nombre : null;
 
             return response()->json([
                 'nombre' => $aliado->nombre,
@@ -68,9 +77,33 @@ class AliadoApiController extends Controller
                 'logo' => $logoBase64,
                 'ruta_multi' => $aliado->ruta_multi,
                 'id_autentication' => $aliado->id_autentication,
-                'id_tipo_dato' => $aliado->id_tipo_dato,
-                'estado' => $aliado->estado,
+                'id_tipo_dato' => $tipoDato,
+                'estado' => $estado == 1 ? "Activo" : "Inactivo",
             ]);
+        } else {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
+    }
+
+    public function Editaraliado(Request $request)
+    {
+        $aliado = Aliado::find($request->input('id'));
+
+        if ($aliado) {
+            $aliado->nombre = $request->input('nombre');
+            $aliado->descripcion = $request->input('descripcion');
+            $aliado->logo = $request->input('logo');
+            $aliado->ruta_multi = $request->input('ruta_multi');
+            $aliado->save();
+    
+            if ($aliado->auth) {
+                $user = $aliado->auth;
+                $user->email = $request->input('email');
+                $user->password = Hash::make($request->input('password')); 
+                $user->estado = $request->input('estado'); 
+                $user->save();
+            }
+            return response()->json(['message' => 'Aliado actualizado correctamente']);
         } else {
             return response()->json(['message' => 'Aliado no encontrado'], 404);
         }

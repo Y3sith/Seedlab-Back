@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('personalizacion_sistema', function (Blueprint $table) {
             $table->id();
-            $table->string('imagen_logo');
+            $table->longBinary('imagen_logo');
             $table->string('nombre_sistema',50);
             $table->string('color_principal',10);
             $table->string('color_secundario',10);
