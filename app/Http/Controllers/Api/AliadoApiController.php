@@ -39,6 +39,7 @@ class AliadoApiController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        if()
     }
 
     /**
@@ -46,6 +47,11 @@ class AliadoApiController extends Controller
      */
     public function destroy($id)
     {
+        if(Auth::user()->id_rol != 3){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'
+            ], 403);
+        }
         $aliado = Aliado::find($id);
         if(!$aliado){
             return response()->json([

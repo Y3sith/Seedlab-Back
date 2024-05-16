@@ -16,6 +16,11 @@ class Apoyo_por_EmpresaController extends Controller
     public function index()
     {
         //muestra los apoyos 
+        if(Auth::user()->id_rol != 1){
+            return response()->json([
+               'message' => 'No tiene permisos para acceder a este recurso'
+            ], 403);
+        }
         $apoyoxempresa = ApoyoEmpresa::paginate(5);
         return new JsonResponse($apoyoxempresa->items());
     }
@@ -32,7 +37,7 @@ class Apoyo_por_EmpresaController extends Controller
      */
     public function store(Request $request)
     {
-        //crear 
+        //crear- NO se esta usando por el momento
         $apoyoxempresa = ApoyoEmpresa::create([
             'documento' => $request->documento,
             'nombre' => $request->nombre,
@@ -53,6 +58,9 @@ class Apoyo_por_EmpresaController extends Controller
     public function show($id_empresa)
     {
         //mostrar empresa con apoyos 
+        if(Auth::user()->id_rol != 5){
+            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 403);
+        }
         $empresa = Empresa::with('apoyoxempresa')->find($id_empresa);
 
         return new JsonResponse($empresa);
@@ -73,6 +81,9 @@ class Apoyo_por_EmpresaController extends Controller
     public function update(Request $request, $documento)
     {
         //edita el apoyo
+        if(Auth::user()->id_rol != 5){
+            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 403);
+        }
         $apoyoxempresa = ApoyoEmpresa::find($documento);
         if (!$apoyoxempresa) {
             return response([

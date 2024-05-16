@@ -17,7 +17,10 @@ class EmprendedorApiController extends Controller
      */
     public function index()
     {
-        //muesra los emprendedores
+        //muestra los emprendedores
+        if(Auth::user()->id_rol =!1){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $emprendedor = Emprendedor::paginate(5);
         return new JsonResponse($emprendedor->items());
     }
@@ -45,6 +48,9 @@ class EmprendedorApiController extends Controller
     public function show($id_emprendedor)
     {
         /* Muestra las empresas asociadas por el emprendedor */
+        if(Auth::user()->id_rol !=5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
         if ($empresa->isEmpty()) {
             return response()->json(["error" => "Empresa no encontrada"], 404);
@@ -67,6 +73,9 @@ class EmprendedorApiController extends Controller
     public function update(Request $request, $documento)
     {
         //editar el emprendedor
+        if(Auth::user()->id_rol != 5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $emprendedor = Emprendedor::find($documento);
         if (!$emprendedor) {
             return response([
@@ -94,6 +103,20 @@ class EmprendedorApiController extends Controller
      */
     public function destroy($documento)
     {
-        //
+        if(Auth::user()->id_rol != 5){
+            return response()->json(["error" => "No tienes permisos para desactivar la cuenta"], 401);
+        }
+        $emprendedor = Emprendedor::find($documento);
+        if(!$emprendedor){
+            return response()->json([
+               'message' => 'Emprendedor no encontrado'
+            ], 404);
+        }
+        $emprendedor->update([
+            'estado' => 0,
+        ]);
+        return response()->json([
+           'message' => 'Emprendedor desactivado'
+        ], 200);
     }
 }

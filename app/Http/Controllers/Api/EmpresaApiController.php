@@ -17,7 +17,7 @@ class EmpresaApiController extends Controller
     {
         //
          /*muestras las empresas*/
-         if(Auth::user()->id_rol !=5){
+         if(Auth::user()->id_rol !=1){
              return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
          }
          $empresa = Empresa::paginate(5);
