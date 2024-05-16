@@ -12,7 +12,9 @@ use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
 use App\Http\Controllers\Api\ActividadController;
 use App\Http\Controllers\Api\LeccionController;
 use App\Http\Controllers\Api\NivelesController;
-use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
+use App\Http\Controllers\Api\AsesorApiController;
+use App\Http\Controllers\Api\RutaApiController;
+use App\Http\Controllers\Api\SuperAdminController;
 
 
 
@@ -65,6 +67,8 @@ Route::apiResource('/actividad',ActividadController::class)->middleware('auth:ap
 Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
 Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
 Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
+
+Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
 
 
 

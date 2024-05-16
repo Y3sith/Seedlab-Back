@@ -3,9 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use App\Models\Asesor;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 
-class AsesorApiContraller extends Controller
+class AsesorApiController extends Controller
 {
     /**
      * Display a listing of the resource.
@@ -18,7 +22,7 @@ class AsesorApiContraller extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $data)
     {
         $response = null;
         $statusCode = 200;
