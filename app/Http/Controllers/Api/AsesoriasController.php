@@ -33,8 +33,14 @@ class AsesoriasController extends Controller
     }
 
     public function asignarasesoria(){
+        $newasesoria = Asesoriaxasesor::create([
+            'id_asesoria' => $request->input('id_asesoria'),
+            'id_asesor' => $request->input('id_asesor'),
+        ]);
 
+        return response()->json(['insercion' => $newasesoria], 201);
     }
+
 
     public function definirhorarioasesoria(){
 

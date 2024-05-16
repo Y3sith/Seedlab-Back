@@ -36,7 +36,6 @@ Route::apiResource('empresa',EmpresaApiController::class);
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class);
-Route::post('/solictud_asesoria',[EmprendedorApiController::class,'Guardarasesoria']);
 
 
 
@@ -58,6 +57,9 @@ Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name
 Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
 Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado');
 
+//asesorias
+Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']);
+Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria'])->name('crearaliado');
 
 
 
