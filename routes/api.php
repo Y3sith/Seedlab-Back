@@ -27,19 +27,19 @@ Route::group([
 
 Route::post('logout', [AuthController::class, 'logout']);
 
-Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index');
+Route::get('/aliado', [AliadoApiController::class, 'index'])->name('index')->middleware('auth:api');
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
 
 //Empresa
-Route::apiResource('empresa',EmpresaApiController::class);
+Route::apiResource('empresa',EmpresaApiController::class)->middleware('auth:api');
 
 //Emprendedor
-Route::apiResource('/emprendedor',EmprendedorApiController::class);
+Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
 
 //Super Admin
-Route::apiResource('/superadmin',SuperAdminController::class);
+Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:api');
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
