@@ -12,7 +12,7 @@ class Asesoria extends Model
     protected $table = 'asesoria';
 
     protected $fillable = [
-        'Nombre_solicitud',
+        'Nombre_sol',
         'notas',
         'isorientador',
         'asignacion',

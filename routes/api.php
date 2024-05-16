@@ -36,6 +36,9 @@ Route::apiResource('empresa',EmpresaApiController::class);
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class);
+Route::post('/solictud_asesoria',[EmprendedorApiController::class,'Guardarasesoria']);
+
+
 
 //Super Admin
 Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa']);

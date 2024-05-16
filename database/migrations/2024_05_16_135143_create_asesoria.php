@@ -15,8 +15,8 @@ return new class extends Migration
             $table->id();
             $table->string('Nombre_sol', 100);
             $table->string('notas', 255)->nullable();
-            $table->boolean('isorientador');
-            $table->boolean('asignacion');
+            $table->boolean('isorientador')->nullable();
+            $table->boolean('asignacion')->default(false);;
             $table->dateTime('fecha');
             $table->unsignedBigInteger('id_aliado')->nullable();
             $table->foreign('id_aliado')->references('id')->on('aliado');
