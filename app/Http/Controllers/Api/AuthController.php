@@ -31,10 +31,9 @@ class AuthController extends Controller
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
-        if (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
-            $user->emprendedor->cod_ver = $verificationCode;
+        if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
+            $user->emprendedor->cod_ver = $verificationCode; 
             $user->emprendedor->save();
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);

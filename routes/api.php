@@ -1,6 +1,7 @@
 <?php
 
-use App\Http\Controllers\Api\UbicacionController;
+use App\Http\Controllers\Api\Contenido_por_LeccionController;
+                                               use App\Http\Controllers\Api\UbicacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmprendedorApiController;
@@ -8,6 +9,9 @@ use App\Http\Controllers\Api\AliadoApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
+use App\Http\Controllers\Api\ActividadController;
+use App\Http\Controllers\Api\LeccionController;
+use App\Http\Controllers\Api\NivelesController;
 use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
 
 
@@ -43,7 +47,7 @@ Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
-
+    
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
