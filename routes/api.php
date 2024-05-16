@@ -62,6 +62,8 @@ Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name(
 //asesorias
 Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']);
 Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria'])->name('crearaliado');
+Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioasesoria'])->name('definirhorarioasesoria');
+
 
 
 

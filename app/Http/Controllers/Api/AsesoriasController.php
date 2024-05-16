@@ -8,6 +8,7 @@ use App\Models\AsesoriaxAsesor;
 use App\Models\Aliado;
 use App\Models\Emprendedor;
 use App\Models\Asesoria;
+use App\Models\HorarioAsesoria;
 use App\Models\Asesor;
 
 
@@ -60,8 +61,15 @@ class AsesoriasController extends Controller
     }
 
 
-    public function definirhorarioasesoria(){
+    public function definirhorarioasesoria(Request $request){
 
+            $horarioAsesoria = HorarioAsesoria::create([
+                'observacion' => $request -> input('observacion'),
+                'fecha' => $request -> input('fecha'),
+                'estado' => $request -> input('estado'),
+                'id_asesoria' => $request -> input('id_asesoria'),
+            ]);
+            return response()->json($horarioAsesoria);
     }
 
     public function editarasignacionasesoria(){
