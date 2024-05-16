@@ -72,10 +72,31 @@ class AsesoriasController extends Controller
             return response()->json($horarioAsesoria);
     }
 
-    public function editarasignacionasesoria(){
-
+    public function editarasignacionasesoria(Request $request){
+      
+        $asignacion = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
+        if (!$asignacion) {
+            return response()->json(['message' => 'La asignación no existe en el sistema'], 404);
+        }
+    
+        $asesor = Asesor::find($request->input('id_asesor'));
+        if (!$asesor) {
+            return response()->json(['message' => 'El asesor no existe en el sistema'], 404);
+        }
+    
+        $asignacion->id_asesor = $request->input('id_asesor');
+        $asignacion->save();
+    
+        return response()->json(['message' => 'Se ha actualizado el asesor para esta asignación'], 200);
     }
 
 
+    public function traerasesoriasxaliado(){
+
+    }
+
+    public function traerasesoriasxemprendedor(){
+        
+    }
 
 }
