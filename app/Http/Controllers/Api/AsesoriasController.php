@@ -63,13 +63,26 @@ class AsesoriasController extends Controller
 
     public function definirhorarioasesoria(Request $request){
 
+        $idAsesoria = $request->input('id_asesoria');
+        $fecha = $request->input('fecha');
+
+        $asesoria = Asesoria::find($idAsesoria);
+        if (!$asesoria) {
+            return response()->json(['message' => 'La asesoría no existe'], 404);
+        }
+
+        $existingHorario = HorarioAsesoria::where('id_asesoria', $idAsesoria)->first();
+        if ($existingHorario) {
+            return response()->json(['message' => 'La asesoría ya tiene una fecha asignada'], 400);
+        }
+
             $horarioAsesoria = HorarioAsesoria::create([
                 'observacion' => $request -> input('observacion'),
                 'fecha' => $request -> input('fecha'),
                 'estado' => $request -> input('estado'),
                 'id_asesoria' => $request -> input('id_asesoria'),
             ]);
-            return response()->json($horarioAsesoria);
+            return response()->json(['mesage'=>'Se le a asignado un horario a su Asesoria'], 201);
     }
 
     public function editarasignacionasesoria(Request $request){
