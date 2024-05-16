@@ -14,27 +14,28 @@ return new class extends Migration
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_orientador;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_orientador(
-            IN p_nombre varchar(50),
-            In p_apellido varchar(50),
-            In p_celular varchar(13),
-            IN p_correo VARCHAR(50),
-            IN p_contrasena VARCHAR(20),
+            IN p_nombre varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_apellido varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_contrasena VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN  -- Sin coma aquí
         )
         BEGIN
-            START TRANSACTION;
+        DECLARE last_inserted_id INT;
         
-            INSERT INTO autentications (correo, contrasena, estado, idrol) 
+        IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
+        SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+    ELSE
+            INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 2);
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
-            INSERT INTO orientador (nombre, apellido,celular,idauth) 
+            INSERT INTO orientador (nombre, apellido, celular, id_autentication) 
             VALUES (p_nombre,p_apellido,p_celular, @last_inserted_id);
-        
-            -- Confirmar la transacción
-            COMMIT;
-        END");
+    END IF;            
+END");
     }
 
     /**

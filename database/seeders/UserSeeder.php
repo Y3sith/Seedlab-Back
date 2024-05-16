@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             'email' => 'superadmin@admin.com',
             'password' => bcrypt('123456'),
             'estado' => 1,
-            'id_rol' => 1,
+            'id_rol' => 5,
         ]);
 
         User::create([
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             'email' => 'aliado@aliado.com',
             'password' => bcrypt('123456'),
             'estado' => 1,
-            'id_rol' => 3,
+            'id_rol' => 5,
         ]);
 
         User::create([
@@ -46,6 +46,68 @@ class UserSeeder extends Seeder
             'password' => bcrypt('123456'),
             'estado' => 1,
             'id_rol' => 5,
+            'id_rol' => 5,
+        ]);
+
+        //aliados auth
+        User::create([
+            'email' => 'Ecopetrol@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+
+        User::create([
+            'email' => 'Imebu@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+
+        User::create([
+            'email' => 'Camaradecomercio@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+
+        User::create([
+            'email' => 'Otri@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+        User::create([
+            'email' => 'Unab@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+
+        User::create([
+            'email' => 'Ucc@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+        User::create([
+            'email' => 'C-emprende@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+
+        User::create([
+            'email' => 'Tecnoparque@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
+        ]);
+        User::create([
+            'email' => 'Innpulsa@admin.com',
+            'password' => bcrypt('123456'),
+            'estado' => 1,
+            'id_rol' => 3,
         ]);
     }
 }

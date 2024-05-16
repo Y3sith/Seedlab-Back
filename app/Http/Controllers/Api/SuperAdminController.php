@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Models\Emprendedor;
 use Illuminate\Http\Request;
 use App\Models\Empresa;
+use App\Models\PersonalizacionSistema;
 
 
 
@@ -15,7 +16,7 @@ class SuperAdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function ver_emprendedoresxempresa()
     {
         if(Auth::user()->id_rol != 1){
             return response()->json([
@@ -25,6 +26,23 @@ class SuperAdminController extends Controller
         $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
         return response()->json($emprendedoresConEmpresas);
     }
+
+
+    public function Personalizacion_sis(Request $request)
+    {
+        $personalizacion = PersonalizacionSistema::create([
+            'imagen_Logo' => $request->input('imagen_Logo'),
+            'nombre_sistema' => $request->input('nombre_sistema'),
+            'color_principal' => $request->input('color_principal'),
+            'color_secundario' => $request->input('color_secundario'),
+            'id_superadmin' => $request->input('id_superadmin'),
+        ]);
+    
+        return response()->json(['message' => 'Personalización del sistema creada correctamente'], 201);
+    }
+
+
+
 
     /**
      * Store a newly created resource in storage.

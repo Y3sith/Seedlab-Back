@@ -15,18 +15,19 @@ class Aliado extends Model
         'nombre',
         'descripcion',
         'logo',
-        'rutaMult',
+        'ruta_multi',
         'id_autentication',
         'id_tipo_dato'
     ];
 
-    public $timestaps = false;
+    public $timestamps = false;
 
     public function auth(){
         return $this->belongsTo(User::class, 'id_autentication');
     }
 
-    public function tipoDato(){
+    public function tipoDato()
+    {
         return $this->belongsTo(TipoDato::class, 'id_tipo_dato');
     }
 
@@ -34,5 +35,9 @@ class Aliado extends Model
        return $this->hasMany(Asesor::class, 'id_aliado');
     }
 
+    public function asesoria()
+    {
+        return $this->hasMany(Asesoria::class, 'id_aliado');
+    }
 
 }

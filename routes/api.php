@@ -44,6 +44,9 @@ Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('
 
 //Super Admin
 Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:api');
+Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa']);
+Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis']);
+
 
 //AuthController
 Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
@@ -51,6 +54,14 @@ Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->na
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
+
+//AliadoController
+Route::get('/aliado', [AliadoApiController::class, 'Traeraliadosactivos'])->name('Traeraliadosactivos');
+Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado');
+Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
+Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado');
+
+
 
 
 

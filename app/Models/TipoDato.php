@@ -28,4 +28,7 @@ class TipoDato extends Model
     public function contenidoLecciones(){
         return $this->hasMany(ContenidoLeccion::class, 'id_tipo_dato');
     }
+
+    
+
 }

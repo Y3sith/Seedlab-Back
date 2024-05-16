@@ -14,31 +14,37 @@ return new class extends Migration
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_aliado;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_aliado(
-            In p_nombre varchar(50),
-            /*In p_logo varchar(50),*/
-            In p_descripcion varchar(255),
-            In p_tipodato varchar(20),
-            In p_ruta varchar(50),
-            IN p_correo VARCHAR(50),
-            IN p_contrasena VARCHAR(20),
-            IN p_estado BOOLEAN  
+            IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_logo BLOB ,
+            IN p_descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_tipodato VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_ruta TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_estado BOOLEAN
         )
         BEGIN
-             DECLARE v_idtipodato VARCHAR(50); 
-            START TRANSACTION;
-            
-            select id into v_idtipodato from tipodato where tipodato.nombre = p_tipodato;
+            DECLARE v_idtipodato INT;
         
-            INSERT INTO autentications (correo, contrasena, estado, idrol) 
-            VALUES (p_correo, p_contrasena, p_estado, 3);
-            
-            SELECT LAST_INSERT_ID() INTO @last_inserted_id;
+                    IF EXISTS (SELECT 1 FROM aliado WHERE nombre  = p_nombre limit 1) THEN
+                        SELECT 'El nombre del aliado ya se encuentra registrado' AS mensaje;
+                    ELSE
+                        IF EXISTS ( SELECT 1 FROM users WHERE email = p_correo limit 1) THEN
+                            SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+                        ELSE
+                            SELECT id INTO v_idtipodato FROM tipo_dato WHERE tipo_dato.nombre = p_tipodato;
         
+                            INSERT INTO users (email, password, estado, id_rol)
+                            VALUES (p_correo, p_contrasena, p_estado, 3);
         
-            INSERT INTO aliado (nombre,logo,descripcion,idtipodato,ruta,idauth) 
-            VALUES (p_nombre,null,p_descripcion,v_idtipodato,p_ruta,@last_inserted_id);
+                            SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
-            COMMIT;
+                            INSERT INTO aliado (nombre, logo, descripcion, id_tipo_dato, ruta_multi, id_autentication)
+                            VALUES (p_nombre, p_logo, p_descripcion, v_idtipodato, p_ruta, @last_inserted_id);
+                            
+                            SELECT 'Se ha registrado exitosamente el aliado' AS mensaje;
+                        END IF;
+                    END IF;
         END");
     }
 

@@ -9,10 +9,10 @@ class PersonalizacionSistema extends Model
 {
     use HasFactory;
 
-    protected $table = 'personalizacionSistema';
+    protected $table = 'personalizacion_sistema';
 
     protected $fillable = [
-        'imagenLogo',
+        'imagen_Logo',
         'nombre_sistema',
         'color_principal',
         'color_secundario',
