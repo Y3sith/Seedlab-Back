@@ -14,6 +14,7 @@ class UbicacionController extends Controller
         $nombresDepartamentos = Departamento::pluck('name');
         return response()->json($nombresDepartamentos, 200, [], JSON_UNESCAPED_UNICODE);
     }
+    
     public function listar_munxdep(Request $request)
     {
         $nombreDepartamento = $request->input('dep_name');
@@ -21,6 +22,7 @@ class UbicacionController extends Controller
         $municipios = Municipio::where('id_departamento', $departamento->id)->pluck('nombre');
         return response()->json($municipios);
     }
+
 }
 
 // ejemplo de usar el listar municipios por departamento
