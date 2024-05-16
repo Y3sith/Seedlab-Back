@@ -5,6 +5,11 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\AsesoriaxAsesor;
+use App\Models\Aliado;
+use App\Models\Emprendedor;
+use App\Models\Asesoria;
+use App\Models\Asesor;
+
 
 
 class AsesoriasController extends Controller
@@ -35,12 +40,23 @@ class AsesoriasController extends Controller
     }
 
     public function asignarasesoria(Request $request){
+
+        $asesoriaexiste = Asesoriaxasesor::where('id_asesoria',$request->input('id_asesoria'))->first();
+
+        $asesorexiste = Asesor::where('id',$request->input('id_asesor'))->first();
+
+        if(!$asesorexiste){
+            return response()->json(['message' => 'Este asesor no existe en el sistema'], 201);
+        }
+        if($asesoriaexiste){
+            return response()->json(['message' => 'Esta asesoria ya se ha asignado, edita la asignación'], 201);
+        }
         $newasesoria = Asesoriaxasesor::create([
             'id_asesoria' => $request->input('id_asesoria'),
             'id_asesor' => $request->input('id_asesor'),
         ]);
 
-        return response()->json(['insercion' => $newasesoria], 201);
+        return response()->json(['message' => 'se ha asignado el asesor para esta asesoria'], 201);
     }
 
 
