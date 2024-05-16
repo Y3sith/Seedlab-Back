@@ -21,11 +21,13 @@ class ContenidoLeccion extends Model
 
     public $timestamps = false;
 
-    public function leccion(){
-        return $this->belongsTo(Leccion::class, 'id_leccion');
-    }
+
     
     public function tipoDato(){
         return $this->belongsTo(TipoDato::class, 'id_tipo_dato');
+    }
+
+    public function leccion(){
+        return $this->belongsTo(Leccion::class, 'id_leccion');
     }
 }

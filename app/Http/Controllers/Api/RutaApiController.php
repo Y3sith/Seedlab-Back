@@ -18,11 +18,11 @@ class RutaApiController extends Controller
     {
 
  
-        if(Auth::user()->id_rol!=1){
+        /*if(Auth::user()->id_rol!=1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         $ruta = Ruta::all();
-        return response()->json($ruta);
+        return response()->json($ruta);*/
     }
 
     /**
@@ -51,7 +51,7 @@ class RutaApiController extends Controller
      public function show($id)
 {
     // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
-    $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->findOrFail($id);
+    $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->get();
 
     // Retornar la ruta con todas las relaciones cargadas
     return response()->json($ruta);
