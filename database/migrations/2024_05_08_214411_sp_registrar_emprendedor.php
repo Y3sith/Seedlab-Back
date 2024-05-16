@@ -25,7 +25,7 @@ return new class extends Migration
             IN p_municipio VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_direccion VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_password VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN,
             IN p_cod_ver VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
         )
@@ -51,7 +51,7 @@ return new class extends Migration
 						SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
 						
 						INSERT INTO users (email, password, estado, id_rol) 
-						VALUES (p_correo, p_contrasena, p_estado, 5);
+						VALUES (p_correo, p_password, p_estado, 5);
 						
 						SELECT LAST_INSERT_ID() INTO @last_inserted_id;
 						

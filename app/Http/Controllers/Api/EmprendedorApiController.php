@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 use App\Models\Emprendedor;
 use App\Models\Empresa;
 use App\Models\User;
@@ -17,7 +19,7 @@ class EmprendedorApiController extends Controller
      */
     public function index()
     {
-        //muestra los emprendedores
+        //muestra los emprendedores - super administrator
         if(Auth::user()->id_rol =!1){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }

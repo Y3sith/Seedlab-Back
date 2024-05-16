@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 use App\Models\ApoyoEmpresa;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
@@ -34,22 +36,23 @@ class EmpresaApiController extends Controller
     if(Auth::user()->id_rol!=5){
         return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
     }
-    $empresa->create([
-        "nombre" => $request->nombre;
-        "documento" => $request->documento;
-        "cargo" => $request->cargo;
-        "razonSocial" => $request->razonSocial;
-        "url_pagina" => $request->url_pagina;
-        "telefono" => $request->telefono;
-        "celular" => $request->celular;
-        "direccion" => $request->direccion;
-        "correo" => $request->correo;
-        "profesion" => $request->profesion;
-        "experiencia" => $request->experiencia;
-        "funciones" => $request->funciones;
-        "id_tipo_documento" => $request->id_tipo_documento;
-        "id_municipio" => $request->id_municipio;
-        "id_emprendedor" => $request->id_emprendedor;
+
+    $empresa= Empresa::create([
+        "nombre" => $request->nombre,
+        "documento" => $request->documento,
+        "cargo" => $request->cargo,
+        "razonSocial" => $request->razonSocial,
+        "url_pagina" => $request->url_pagina,
+        "telefono" => $request->telefono,
+        "celular" => $request->celular,
+        "direccion" => $request->direccion,
+        "correo" => $request->correo,
+        "profesion" => $request->profesion,
+        "experiencia" => $request->experiencia,
+        "funciones" => $request->funciones,
+        "id_tipo_documento" => $request->id_tipo_documento,
+        "id_municipio" => $request->id_municipio,
+        "id_emprendedor" => $request->id_emprendedor,
 
     ]);
    
@@ -134,3 +137,41 @@ class EmpresaApiController extends Controller
         //
     }
 }
+
+/**
+ * creacion empresa
+ *{"nombre":"Gamer Oscar",
+ * "documento":"123456789",
+ * "cargo":"Gerente",
+ * "razonSocial":"Gamer Oscar",
+ * "url_pagina":"www.gameroscar.com",
+ * "telefono":"123456789",
+ * "celular":"3215897631",
+ * "direccion":"123456789",
+ * "correo":"oscar@gmail.com",
+ * "profesion":"Gamer",
+ * "experiencia":"Jugar juegos",
+ * "funciones":"Jugar fifa",
+ * "id_tipo_documento":"1",
+ * "id_municipio":"866",
+ * "id_emprendedor":"1000",
+ * 
+ * "apoyos":[
+ * {
+ * "documento":"1",
+ * "nombre":"Marly",
+ * "apellido":"Rangel",
+ * "cargo":"Diseñadora de juegos",
+ * "telefono:" null,
+ * "celular":"3214269607",
+ * "email":"rangel@gmail.com",
+ * "id_tipo_documento":"1",
+ * "id_empresa":"1000",
+ * }
+ * ]
+ * 
+ * }
+ * 
+ * 
+*/
+
