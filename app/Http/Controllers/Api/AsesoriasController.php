@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
+use App\Models\AsesoriaxAsesor;
+
 
 class AsesoriasController extends Controller
 {
@@ -32,7 +34,7 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'La asesoria se ha solicitado con exito'], 201);
     }
 
-    public function asignarasesoria(){
+    public function asignarasesoria(Request $request){
         $newasesoria = Asesoriaxasesor::create([
             'id_asesoria' => $request->input('id_asesoria'),
             'id_asesor' => $request->input('id_asesor'),

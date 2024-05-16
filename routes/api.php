@@ -6,6 +6,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\EmprendedorApiController;
 use App\Http\Controllers\Api\AliadoApiController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\AsesoriasController;
 use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
 use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
