@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Actividad;
 use App\Models\Ruta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -39,10 +40,24 @@ class RutaApiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+
+     
+     public function show($id)
+{
+    // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
+    $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->findOrFail($id);
+
+    // Retornar la ruta con todas las relaciones cargadas
+    return response()->json($ruta);
+}
+
+
+    
+    
+     
+
+     
+
 
     /**
      * Update the specified resource in storage.

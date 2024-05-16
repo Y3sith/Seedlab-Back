@@ -56,13 +56,13 @@ class ActividadController extends Controller
     public function show(string $id)
     {
         //muestra actividad especifica
-        //proximamente mostrar niveles/lecciones y contenido por lecciones asociados 
         $actividad = Actividad::find($id);
         if (!$actividad) {
             return response()->json(["error" => "Actividad no encontrada"], 404);
         } else {
             return response()->json($actividad, 200);
         }
+        
     }
 
     /**
