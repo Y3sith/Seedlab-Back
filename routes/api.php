@@ -63,6 +63,8 @@ Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name
 Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'MostrarAsesorAliado'])->name('MostrarAsesorAliado');
 Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
 Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado');
+Route::get('/mostrarAsesorias/{id}', [AliadoApiController::class, 'MostrarAsesorias'])->name('MostrarAsesorias');
+
 
 //asesorias
 Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']);
