@@ -27,7 +27,9 @@ class SuperAdminController extends Controller
                'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
+
         $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
+        
         return response()->json($emprendedoresConEmpresas);
     }
 
