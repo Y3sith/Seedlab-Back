@@ -24,18 +24,27 @@ class AsesorApiController extends Controller
      */
     public function store(Request $data)
     {
+        
         $response = null;
         $statusCode = 200;
-
+        
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
+        
         DB::transaction(function () use ($data, &$response, &$statusCode) {
-            $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?)', [
+        $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?,?)', [
                 $data['nombre'],
                 $data['apellido'],
                 $data['celular'],
+                $data['aliado'],
                 $data['email'],
                 Hash::make($data['password']),
                 $data['estado'],
             ]);
+
 
             if (!empty($results)) {
                 $response = $results[0]->mensaje;

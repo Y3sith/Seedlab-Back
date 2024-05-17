@@ -19,7 +19,7 @@ return new class extends Migration
             In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_contrasena VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN  
         )
         BEGIN
@@ -43,10 +43,11 @@ return new class extends Migration
             
                 SELECT LAST_INSERT_ID() INTO @last_inserted_id;
 
-                select id into v_idaliado from aliado where aliado.nombre = p_aliado;
+                select id into v_idaliado from aliado where aliado.nombre = p_aliado; 
         
                 INSERT INTO asesor(nombre, apellido, celular, id_aliado, id_autentication) 
                 VALUES (p_nombre, p_apellido, p_celular, v_idaliado , @last_inserted_id);
+                SELECT 'Se ha registrado exitosamente el asesor' AS mensaje;
             END IF;
         END IF;
     END");

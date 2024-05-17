@@ -36,6 +36,12 @@ class AliadoApiController extends Controller
         $response = null;
         $statusCode = 200;
 
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
+
         DB::transaction(function () use ($data, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
                 $data['nombre'],

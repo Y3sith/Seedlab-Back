@@ -85,6 +85,12 @@ class AuthController extends Controller
 
         $verificationCode = mt_rand(10000, 99999);
 
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
+
         DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
                 $data['documento'],
