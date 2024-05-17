@@ -17,7 +17,7 @@ class UserSeeder extends Seeder
             'email' => 'superadmin@admin.com',
             'password' => bcrypt('12345678'),
             'estado' => 1,
-            'id_rol' => 5,
+            'id_rol' => 1,
         ]);
 
         User::create([
@@ -31,7 +31,7 @@ class UserSeeder extends Seeder
             'email' => 'aliado@aliado.com',
             'password' => bcrypt('12345678'),
             'estado' => 1,
-            'id_rol' => 5,
+            'id_rol' => 3,
         ]);
 
         User::create([

@@ -105,9 +105,9 @@ class AsesorApiController extends Controller
                'message' => 'Asesor no encontrado',
             ], 404);
         }
-        $asesor->update([
-            'estado' => 0,
-        ]);
+        $user = $asesor->auth;
+        $user->estado = 0;
+        $user->save();
         return response()->json([
            'message' => 'Asesor desactivado',
         ], 200);
