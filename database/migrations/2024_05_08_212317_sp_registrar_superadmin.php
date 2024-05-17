@@ -17,7 +17,7 @@ return new class extends Migration
         IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        IN p_contrasena VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_estado BOOLEAN  
     )
     BEGIN
@@ -33,6 +33,8 @@ return new class extends Migration
 
         INSERT INTO superadmin (nombre, apellido, id_autentication) 
         VALUES (p_nombre, p_apellido, last_inserted_id);
+
+        SELECT 'Tu SuperAdmin ha sido creado con exito' AS mensaje;
     END IF;
 END");
     
