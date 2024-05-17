@@ -9,7 +9,9 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AsesoriasController;
 use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
-use App\Http\Controllers\Api\RutaApiController;use App\Http\Controllers\Api\SuperAdminController;
+use App\Http\Controllers\Api\RutaApiController;
+use App\Http\Controllers\Api\SuperAdminController;
+use App\Http\Controllers\Api\OrientadorApiController;
 
 
 
@@ -38,11 +40,14 @@ Route::apiResource('empresa',EmpresaApiController::class);
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class);
 
+//Orientador
+Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
 
 
 //Super Admin
 Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa']);
 Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis']);
+Route::post('/crearsuper_admin',[SuperAdminController::class,'crearsuperAdmin']);
 
 
 //AuthController

@@ -19,7 +19,7 @@ return new class extends Migration
             IN p_celular VARCHAR(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_aliado VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_contrasena VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN  
         )
         BEGIN

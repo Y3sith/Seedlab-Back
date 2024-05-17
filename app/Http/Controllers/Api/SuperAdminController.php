@@ -7,6 +7,10 @@ use App\Models\Emprendedor;
 use Illuminate\Http\Request;
 use App\Models\Empresa;
 use App\Models\PersonalizacionSistema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+
+
 
 
 
@@ -41,9 +45,30 @@ class SuperAdminController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function crearsuperAdmin(Request $data)
     {
-        //
+        $response = null;
+        $statusCode = 200;
+
+        DB::transaction(function()use ($data, &$response, &$statusCode) {
+            $results = DB::select('CALL sp_registrar_superadmin(?,?,?,?,?)', [
+                $data['nombre'],
+                $data['apellido'],
+                $data['email'],
+                Hash::make($data['password']),
+                $data['estado'],
+            ]);
+
+            if (!empty($results)) {
+                $response = $results[0]->mensaje;
+                if ($response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                    $statusCode = 400;
+                }
+            }
+        });
+
+        return response()->json(['message' => $response], $statusCode);
+        
     }
 
     /**
