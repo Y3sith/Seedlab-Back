@@ -64,7 +64,7 @@ class NivelesController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //crear solo el asesor
+        //Edita solo el asesor
         if (Auth::user()->id_rol==4) {
             $niveles = Nivel::find($id);
             if (!$niveles) {

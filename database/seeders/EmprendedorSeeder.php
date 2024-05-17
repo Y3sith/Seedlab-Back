@@ -21,9 +21,9 @@ class EmprendedorSeeder extends Seeder
             "genero"=> "f",
             "fecha_nac"=> "1998-06-03",
             "direccion"=>"manzaka k",
-            "email_verified_at"=>null,
+            "email_verified_at"=>"2024/05/17",
             "cod_ver"=> null,
-            "id_autentication"=> 1,
+            "id_autentication"=> 5,
             "id_tipo_documento"=> 1,
             "id_municipio"=> 866
         ]);

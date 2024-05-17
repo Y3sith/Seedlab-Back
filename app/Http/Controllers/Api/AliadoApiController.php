@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Auth;
+
 
 class AliadoApiController extends Controller
 {
@@ -36,6 +38,10 @@ class AliadoApiController extends Controller
     {
         $response = null;
         $statusCode = 200;
+
+        if(Auth::user()->id_rol != 1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
 
         if(strlen($data['password']) <8) {
             $statusCode = 400;
