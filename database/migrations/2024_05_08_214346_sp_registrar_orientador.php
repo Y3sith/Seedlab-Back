@@ -18,7 +18,7 @@ return new class extends Migration
             In p_apellido varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_contrasena VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN  -- Sin coma aquí
         )
         BEGIN
@@ -26,7 +26,10 @@ return new class extends Migration
         
         IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
         SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
-    ELSE
+            
+        ELSEIF EXISTS (SELECT 1 FROM orientador WHERE celular  = p_celular limit 1) THEN
+			 SELECT 'El numero de celular ya ha sido registrado en el sistema' AS mensaje;
+        ELSE
             INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 2);
             
@@ -34,6 +37,8 @@ return new class extends Migration
         
             INSERT INTO orientador (nombre, apellido, celular, id_autentication) 
             VALUES (p_nombre,p_apellido,p_celular, @last_inserted_id);
+            SELECT 'Tu Orientador ha sido creado con exito' AS mensaje;
+
     END IF;            
 END");
     }
