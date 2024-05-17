@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Emprendedor;
+use App\Models\SuperAdmin;
 use Illuminate\Http\Request;
 use App\Models\Empresa;
 use App\Models\PersonalizacionSistema;
@@ -100,14 +101,24 @@ class SuperAdminController extends Controller
      */
     public function destroy($id)
     {
+        if(Auth::user()->id_rol !=1){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+
         $superAdmin = SuperAdmin::find($id);
         if(!$superAdmin){
             return response()->json([
                'message' => 'SuperAdmin no encontrado'
             ], 404);
         }
-        $superAdmin->update([
-            'estado' => 0,
-        ]);
+
+        $user = $superAdmin->auth;
+        $user->estado = 0;
+        $user->save();
+
+        return response()->json(['message' =>'SuperAdmin desactivado'], 200);
+       
     }
 }
