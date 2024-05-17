@@ -27,7 +27,11 @@ class AsesorApiController extends Controller
         
         $response = null;
         $statusCode = 200;
-        
+        if(Auth::user()->id_rol !=3){
+            $statusCode = 400;
+            $response = 'Solo los aliados pueden crear asesores';
+            return response()->json(['message' => $response], $statusCode);
+        }
         if(strlen($data['password']) <8) {
             $statusCode = 400;
             $response = 'La contraseña debe tener al menos 8 caracteres';
@@ -48,7 +52,7 @@ class AsesorApiController extends Controller
 
             if (!empty($results)) {
                 $response = $results[0]->mensaje;
-                if ($response === 'El nombre del asesor ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                if ($response === 'El numero de celular ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
                     $statusCode = 400;
                 }
             } 
@@ -88,8 +92,24 @@ class AsesorApiController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        if(Auth::user()->id_rol != 3){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'
+            ], 403);
+        }
+        $asesor = Asesor::find($id);
+        if (!$asesor) {
+            return response()->json([
+               'message' => 'Asesor no encontrado',
+            ], 404);
+        }
+        $asesor->update([
+            'estado' => 0,
+        ]);
+        return response()->json([
+           'message' => 'Asesor desactivado',
+        ], 200);
     }
 }
