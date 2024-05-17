@@ -23,6 +23,12 @@ return new class extends Migration
         )
         BEGIN
         DECLARE last_inserted_id INT;
+
+        DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+            BEGIN
+                ROLLBACK;
+                RESIGNAL;
+        END;
         
         IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
         SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
@@ -37,8 +43,8 @@ return new class extends Migration
         
             INSERT INTO orientador (nombre, apellido, celular, id_autentication) 
             VALUES (p_nombre,p_apellido,p_celular, @last_inserted_id);
-            SELECT 'Tu Orientador ha sido creado con exito' AS mensaje;
 
+            SELECT 'El orientador ha sido creado con exito' AS mensaje;
     END IF;            
 END");
     }
