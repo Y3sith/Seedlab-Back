@@ -152,25 +152,26 @@ class AliadoApiController extends Controller
      */
     public function destroy($id)
     {
-        if(Auth::user()->id_rol != 3){
+        if(Auth::user()->id_rol == 3 || Auth::user()->id_rol ==1){
+            
+            $aliado = Aliado::find($id);
+            if (!$aliado) {
+                return response()->json([
+                    'message' => 'Aliado no encontrado',
+                ], 404);
+            }
+            $user = $aliado->auth;
+            $user->estado = 0;
+            $user->save();
+    
             return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'
-            ], 403);
-        }
-        $aliado = Aliado::find($id);
-
-        if (!$aliado) {
-            return response()->json([
-                'message' => 'Aliado no encontrado',
-            ], 404);
+                'message' => 'Aliado desactivado',
+            ], 200); 
         }
 
-        $aliado->update([
-            'estado' => 0,
-        ]);
         return response()->json([
-            'message' => 'Aliado desactivado',
-        ], 200); // Cambiado el código de estado a 200, que indica éxito en lugar de 404
+            'message' => 'No tienes permisos para realizar esta acción'
+         ], 403);
     }
 
     public function MostrarAsesorAliado($id)
