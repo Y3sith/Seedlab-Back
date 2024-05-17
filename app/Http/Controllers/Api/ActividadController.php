@@ -89,7 +89,6 @@ class ActividadController extends Controller
                 $actividad->ruta_multi = $request->ruta_multi;
                 $actividad->id_tipo_dato = $request->id_tipo_dato;
                 $actividad->id_asesor = $request->id_asesor;
-                $actividad->id_ruta = $request->id_ruta;
                 $actividad->update();
                 return response(["message" => "Actividad actualizada"], 200);
             }
