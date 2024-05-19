@@ -18,8 +18,8 @@ class AliadoApiController extends Controller
     public function Traeraliadosactivos()
     {
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
-            ->with('tipoDato:id,nombre')
-            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato')
+            ->with(['tipoDato:id,nombre', 'auth:id,email'])
+            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(fn($aliado) => [
@@ -28,6 +28,7 @@ class AliadoApiController extends Controller
             'logo' => $aliado->logo,
             'ruta_multi' => $aliado->ruta_multi,
             'tipo_dato' => $aliado->tipoDato->nombre,
+            'email' => $aliado->auth->email,
         ]);
 
         return response()->json($aliadosTransformados);
