@@ -153,10 +153,11 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
-
     public function traerasesoriasorientador(Request $request){
 
-    }   
+        $asesoriasOrientador = Asesoria::where('isorientador', true)->get();
+        
+        return response()->json($asesoriasOrientador);
 
-
+    } 
 }

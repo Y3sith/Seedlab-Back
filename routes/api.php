@@ -87,6 +87,8 @@ Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria']
 Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioasesoria'])->name('definirhorarioasesoria');
 Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'editarasignacionasesoria'])->name('editarasignacionasesoria');
 Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');
+Route::get('/asesoriaOrientador',[AsesoriasController::class, 'traerasesoriasorientador']);
+
 
 
 
