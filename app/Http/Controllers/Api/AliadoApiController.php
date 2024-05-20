@@ -18,7 +18,8 @@ class AliadoApiController extends Controller
      */
     public function Traeraliadosactivos()
     {
-        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
+        if (Auth::user()->id_rol !=1) {
+            $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
             ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
             ->get();
@@ -32,8 +33,11 @@ class AliadoApiController extends Controller
             'email' => $aliado->auth->email,
             'estado_usuario' => $aliado->auth->estado
         ]);
-
         return response()->json($aliadosTransformados);
+        }else {
+            return response()->json(["message"=>"No tienes permisos para ver el contenido"],401);
+        }
+        
     }
 
     public function crearaliado(Request $data)

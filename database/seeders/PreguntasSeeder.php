@@ -16,7 +16,7 @@ class PreguntasSeeder extends Seeder
         $preguntas = [
             
             '1' => [
-                '1' => ['nombre' => '¿Cuantós personas conforman su equipo de trabajo?','puntaje' => '2'],
+                '1' => ['nombre' => '¿Cuantós personas conforman su equipo de trabajo?','puntaje' => '0'],
                 '2' => ['nombre' => 'Cuenta con personas de apoyo en:','puntaje' => '0'],
                 '3' => ['nombre' => '¿Su emprendimiento esta legalmente constituido?','puntaje' => '2'],
                 '4' =>['nombre' => '¿Cumple con las normas tributarias, contables, laborales, comerciales y/o legales para desempeñar la actividad?','puntaje' => '2'],
