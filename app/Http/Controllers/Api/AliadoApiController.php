@@ -18,7 +18,7 @@ class AliadoApiController extends Controller
     public function Traeraliadosactivos()
     {
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
-            ->with(['tipoDato:id,nombre', 'auth:id,email'])
+            ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
             ->get();
 
@@ -29,6 +29,7 @@ class AliadoApiController extends Controller
             'ruta_multi' => $aliado->ruta_multi,
             'tipo_dato' => $aliado->tipoDato->nombre,
             'email' => $aliado->auth->email,
+            'estado_usuario' => $aliado->auth->estado
         ]);
 
         return response()->json($aliadosTransformados);
