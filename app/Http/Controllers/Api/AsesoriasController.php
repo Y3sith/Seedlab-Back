@@ -150,7 +150,7 @@ class AsesoriasController extends Controller
     }
 
 
-    public function traerasesoriasorientador(Request $request){
+    public function traerAsesoriasOrientador(Request $request){
 
     }   
 

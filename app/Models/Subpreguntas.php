@@ -21,5 +21,9 @@ class Subpreguntas extends Model
         return $this->belongsTo(Preguntas::class, 'id_pregunta');
     }
 
+    public function respuestas(){
+        return $this->hasMany(Respuesta::class, 'id_subpregunta');
+    }
+
     public $timestamps = false;
 }
