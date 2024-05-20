@@ -17,8 +17,7 @@ use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
-
-
+use App\Http\Controllers\Api\RespuestasApiController;
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -86,7 +85,7 @@ Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioases
 Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'editarasignacionasesoria'])->name('editarasignacionasesoria');
 Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');
 
-
+Route::post('/respuestas', [RespuestasApiController::class, 'store']);
 
 
 
