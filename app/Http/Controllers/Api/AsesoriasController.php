@@ -106,10 +106,6 @@ class AsesoriasController extends Controller
     }
 
 
-    public function traerasesoriasxaliado(){
-
-    }
-
     public function traerAsesoriasPorEmprendedor(Request $request)
     {
         $documento = $request->input('documento');
