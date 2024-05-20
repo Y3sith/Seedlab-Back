@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 use App\Models\Aliado;
 use App\Models\Asesoria;
 use App\Models\Emprendedor;
@@ -17,7 +19,10 @@ class EmprendedorApiController extends Controller
      */
     public function index()
     {
-        //muesra los emprendedores
+        //muestra los emprendedores - super administrator
+        if(Auth::user()->id_rol =!1){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $emprendedor = Emprendedor::paginate(5);
         return new JsonResponse($emprendedor->items());
     }
@@ -25,19 +30,7 @@ class EmprendedorApiController extends Controller
     public function store(Request $request)
     {
         //crear emprendedor
-        $emprendedor = Emprendedor::create([
-            'documento' => $request->documento,
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'celular' => $request->celular,
-            'genero' => $request->genero,
-            'fecha_nac' => $request->fecha_nac,
-            'direccion' => $request->direccion,
-            'id_autentication' => $request->id_autentication,
-            'id_tipo_documento' => $request->id_tipo_documento,
-            'id_municipio' => $request->id_municipio,
-        ]);
-        return response()->json($emprendedor, 200);
+        
     }
 
     /**
@@ -46,6 +39,9 @@ class EmprendedorApiController extends Controller
     public function show($id_emprendedor)
     {
         /* Muestra las empresas asociadas por el emprendedor */
+        if(Auth::user()->id_rol !=5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
         if ($empresa->isEmpty()) {
             return response()->json(["error" => "Empresa no encontrada"], 404);
@@ -56,6 +52,9 @@ class EmprendedorApiController extends Controller
     public function update(Request $request, $documento)
     {
         //editar el emprendedor
+        if(Auth::user()->id_rol != 5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $emprendedor = Emprendedor::find($documento);
         if (!$emprendedor) {
             return response([
@@ -63,15 +62,11 @@ class EmprendedorApiController extends Controller
             ], 404);
         }
         $emprendedor->update([
-            "documento" => $request->documento,
             "nombre" => $request->nombre,
             "apellido" => $request->apellido,
             "celular" => $request->celular,
             "genero" => $request->genero,
-            "fecha_nac" => $request->fecha_nac,
             "direccion" => $request->direccion,
-            "id_autentication" => $request->id_autentication,
-            "id_tipo_documento" => $request->id_tipo_documento,
             "id_municipio" => $request->id_municipio,
         ]);
 
@@ -80,6 +75,29 @@ class EmprendedorApiController extends Controller
 
     public function destroy($documento)
     {
-        //
-    }
+        if(Auth::user()->id_rol != 5){
+            return response()->json(["error" => "No tienes permisos para desactivar la cuenta"], 401);
+        }
+         //Se busca emprendedor por documento
+         $emprendedor = Emprendedor::find($documento);
+         //dd($emprendedor);
+         if (!$emprendedor) {
+             return response()->json([
+                 'message' => 'Emprendedor no encontrado'
+             ], 404);
+         }
+ 
+         // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
+         $user = $emprendedor->auth;
+         //dd($user);
+         $user->estado = 0;
+         $user->save();
+ 
+         $emprendedor->email_verified_at = null;
+         $emprendedor->save();
+ 
+         return response()->json([
+             'message' => 'Emprendedor desactivado exitosamente'
+         ], 200);
+        }
 }

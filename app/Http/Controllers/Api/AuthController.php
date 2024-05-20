@@ -28,13 +28,12 @@ class AuthController extends Controller
         $verificationCode = mt_rand(10000, 99999);
 
         //Si el usuario no existe, validacion de credenciales 
-        if (Auth::attempt($credentials)) {
+        if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
-
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
-        if (!$user->emprendedor->email_verified_at && $user->id_rol == 5) {
-            $user->emprendedor->cod_ver = $verificationCode;
+        if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
+            $user->emprendedor->cod_ver = $verificationCode; 
             $user->emprendedor->save();
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
@@ -86,6 +85,12 @@ class AuthController extends Controller
 
         $verificationCode = mt_rand(10000, 99999);
 
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
+
         DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
                 $data['documento'],
@@ -116,7 +121,7 @@ class AuthController extends Controller
         });
 
 
-        return response()->json(['message' => $response], $statusCode);
+        return response()->json(['message' => $response, 'email' => $data->email],  $statusCode);
     }
 
     protected function validate_email(Request $request)

@@ -22,6 +22,10 @@ class Nivel extends Model
     public function actividad(){
         return $this->belongsTo(Actividad::class, 'id_actividad');
     }
+    
+    public function lecciones(){
+        return $this->hasMany(Leccion::class, 'id_nivel');
+    }
 
     
 }

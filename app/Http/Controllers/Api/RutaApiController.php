@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Actividad;
 use App\Models\Ruta;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -15,6 +16,11 @@ class RutaApiController extends Controller
      */
     public function index()
     {
+
+ 
+        if(Auth::user()->id_rol!=1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
         $ruta = Ruta::all();
         return response()->json($ruta);
     }
@@ -24,10 +30,11 @@ class RutaApiController extends Controller
      */
     public function store(Request $request)
     {
-        /*user=Auth::user();
-        if($user->rol_id != 1){
+
+       
+        if(Auth::user()->id_rol != 1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }*/
+        }
             $ruta = Ruta::create([
             "nombre" => $request->nombre,
             "fecha_creacion"  => Carbon::now(),
@@ -39,27 +46,47 @@ class RutaApiController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
-    {
-        //
-    }
+
+     
+     public function show($id)
+{
+    // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
+    $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->get();
+
+    // Retornar la ruta con todas las relaciones cargadas
+    return response()->json($ruta);
+}
+
+
+    
+    
+     
+
+     
+
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $id)
     {
+  
+        if(Auth::user()->id_rol!=1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
         $ruta = Ruta::find($id);
         if(!$ruta){
             return response()->json([
                'message' => 'Ruta no encontrada'], 404);
         }
-        else{
-            $ruta->nombre = $request->nombre;
-            $ruta->estado = $request->estado;
-            $ruta->save();
+            $ruta->update([
+                'nombre' => $request->nombre,
+                'estado' => $request->estado,
+            ]);
+
             return response()->json($ruta, 200);
-        }
+        
     }
 
     /**
@@ -67,6 +94,9 @@ class RutaApiController extends Controller
      */
     public function destroy($id)
     {
+        if(Auth::user()->id_rol!=1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
 
         $ruta = Ruta::find($id);
         if(!$ruta){

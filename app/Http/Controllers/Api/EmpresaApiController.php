@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+
 use App\Models\ApoyoEmpresa;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
@@ -17,6 +19,9 @@ class EmpresaApiController extends Controller
     {
         //
          /*muestras las empresas*/
+         if(Auth::user()->id_rol !=1){
+             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+         }
          $empresa = Empresa::paginate(5);
          return new JsonResponse($empresa->items());
         
@@ -28,24 +33,29 @@ class EmpresaApiController extends Controller
     public function store(Request $request)
 {
     // Crear empresa
-    $empresa = new Empresa();
-    $empresa->nombre = $request->nombre;
-    $empresa->documento = $request->documento;
-    $empresa->cargo = $request->cargo;
-    $empresa->razonSocial = $request->razonSocial;
-    $empresa->url_pagina = $request->url_pagina;
-    $empresa->telefono = $request->telefono;
-    $empresa->celular = $request->celular;
-    $empresa->direccion = $request->direccion;
-    $empresa->correo = $request->correo;
-    $empresa->profesion = $request->profesion;
-    $empresa->experiencia = $request->experiencia;
-    $empresa->funciones = $request->funciones;
-    $empresa->id_tipo_documento = $request->id_tipo_documento;
-    $empresa->id_municipio = $request->id_municipio;
-    $empresa->id_emprendedor = $request->id_emprendedor;
-    $empresa->save();
-    
+    if(Auth::user()->id_rol!=5){
+        return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+    }
+
+    $empresa= Empresa::create([
+        "nombre" => $request->nombre,
+        "documento" => $request->documento,
+        "cargo" => $request->cargo,
+        "razonSocial" => $request->razonSocial,
+        "url_pagina" => $request->url_pagina,
+        "telefono" => $request->telefono,
+        "celular" => $request->celular,
+        "direccion" => $request->direccion,
+        "correo" => $request->correo,
+        "profesion" => $request->profesion,
+        "experiencia" => $request->experiencia,
+        "funciones" => $request->funciones,
+        "id_tipo_documento" => $request->id_tipo_documento,
+        "id_municipio" => $request->id_municipio,
+        "id_emprendedor" => $request->id_emprendedor,
+
+    ]);
+   
     if ($request->filled('apoyos')){
         $apoyos = $request->apoyos;
         foreach ($apoyos as $apoyo){
@@ -61,8 +71,6 @@ class EmpresaApiController extends Controller
             $nuevoApoyo->id_empresa = $empresa->documento;
             $nuevoApoyo->save();
         }
-    }else{
-
     }
     return response()->json($empresa, 200);
 }
@@ -83,16 +91,18 @@ class EmpresaApiController extends Controller
     public function update(Request $request, $documento)
     {
         // edita la empresa/edita y agrega apoyos 
+        if(Auth::user()->id_rol !=5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
+
         $empresa = Empresa::find($documento);
-    
-    
+      
         if (!$empresa) {
             return response()->json([
                 'message' => 'Empresa no encontrada'
             ], 404);
         }
-    
-        
+           
         $empresa->update($request->all());
     
         
@@ -127,3 +137,41 @@ class EmpresaApiController extends Controller
         //
     }
 }
+
+/**
+ * creacion empresa
+ *{"nombre":"Gamer Oscar",
+ * "documento":"123456789",
+ * "cargo":"Gerente",
+ * "razonSocial":"Gamer Oscar",
+ * "url_pagina":"www.gameroscar.com",
+ * "telefono":"123456789",
+ * "celular":"3215897631",
+ * "direccion":"123456789",
+ * "correo":"oscar@gmail.com",
+ * "profesion":"Gamer",
+ * "experiencia":"Jugar juegos",
+ * "funciones":"Jugar fifa",
+ * "id_tipo_documento":"1",
+ * "id_municipio":"866",
+ * "id_emprendedor":"1000",
+ * 
+ * "apoyos":[
+ * {
+ * "documento":"1",
+ * "nombre":"Marly",
+ * "apellido":"Rangel",
+ * "cargo":"Diseñadora de juegos",
+ * "telefono:" null,
+ * "celular":"3214269607",
+ * "email":"rangel@gmail.com",
+ * "id_tipo_documento":"1",
+ * "id_empresa":"1000",
+ * }
+ * ]
+ * 
+ * }
+ * 
+ * 
+*/
+

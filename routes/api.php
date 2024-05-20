@@ -1,14 +1,19 @@
 <?php
 
-use App\Http\Controllers\Api\UbicacionController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\Api\Contenido_por_LeccionController;
+use App\Http\Controllers\Api\UbicacionController;
 use App\Http\Controllers\Api\EmprendedorApiController;
 use App\Http\Controllers\Api\AliadoApiController;
 use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\AsesoriasController;
 use App\Http\Controllers\Api\EmpresaApiController;
 use App\Http\Controllers\Api\Apoyo_por_EmpresaController;
+use App\Http\Controllers\Api\ActividadController;
+use App\Http\Controllers\Api\LeccionController;
+use App\Http\Controllers\Api\NivelesController;
+use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
@@ -21,56 +26,68 @@ Route::get('/user', function (Request $request) {
 
 //Rutas de login y registro
 Route::group([
-'prefix' => 'auth'
+    'prefix' => 'auth'
 ], function(){
     Route::post('login', [AuthController::class, 'login'])->name('login');
     Route::post('/register_em', [AuthController::class, 'register'])->name('register');
+    Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
     
 });
 
-Route::post('logout', [AuthController::class, 'logout']);
+Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 
 //Rutas
-Route::apiResource('/ruta',RutaApiController::class);
+Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
 
 //Empresa
-Route::apiResource('empresa',EmpresaApiController::class);
+Route::apiResource('empresa',EmpresaApiController::class)->middleware('auth:api');
 
 //Emprendedor
-Route::apiResource('/emprendedor',EmprendedorApiController::class);
+Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
 
 //Orientador
-Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
-
+Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador'])->middleware('auth:api');
 
 //Super Admin
-Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa']);
-Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis']);
-Route::post('/crearsuper_admin',[SuperAdminController::class,'crearsuperAdmin']);
-
-
-//AuthController
-Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
-
+Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:api');
+Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa'])->middleware('auth:api');
+Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis'])->middleware('auth:api');
+Route::post('/crearsuper_admin',[SuperAdminController::class,'crearsuperAdmin'])->middleware('auth:api');
+   
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
 
 //AliadoController
-Route::get('/aliado', [AliadoApiController::class, 'Traeraliadosactivos'])->name('Traeraliadosactivos');
-Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado');
-Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'MostrarAsesorAliado'])->name('MostrarAsesorAliado');
-Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
-Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado');
+Route::get('/aliado', [AliadoApiController::class, 'Traeraliadosactivos'])->name('Traeraliadosactivos')->middleware('auth:api');
+Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado')->middleware('auth:api');
+Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado')->middleware('auth:api');
+Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado')->middleware('auth:api');
+Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'MostrarAsesorAliado'])->name('MostrarAsesorAliado')->middleware('auth:api');
+Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy'])->middleware('auth:api');
 Route::get('/mostrarAsesorias/{id}', [AliadoApiController::class, 'MostrarAsesorias'])->name('MostrarAsesorias');
 
+
+//Actividad
+Route::apiResource('/actividad',ActividadController::class)->middleware('auth:api');
+//Leccion
+Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
+//Nivel
+Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
+//Contenido_por_Leccion
+Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
+
+//Asesor
+Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
 
 //asesorias
 Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']);
 Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria'])->name('asignarasesoria');
 Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioasesoria'])->name('definirhorarioasesoria');
 Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'editarasignacionasesoria'])->name('editarasignacionasesoria');
+Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');
+
 
 
 

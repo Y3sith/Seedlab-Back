@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 
+use Illuminate\Support\Facades\Auth;
 
 
 class AliadoApiController extends Controller
@@ -19,8 +20,8 @@ class AliadoApiController extends Controller
     public function Traeraliadosactivos()
     {
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
-            ->with('tipoDato:id,nombre')
-            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato')
+            ->with(['tipoDato:id,nombre', 'auth'])
+            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(fn($aliado) => [
@@ -29,6 +30,8 @@ class AliadoApiController extends Controller
             'logo' => $aliado->logo,
             'ruta_multi' => $aliado->ruta_multi,
             'tipo_dato' => $aliado->tipoDato->nombre,
+            'email' => $aliado->auth->email,
+            'estado_usuario' => $aliado->auth->estado
         ]);
 
         return response()->json($aliadosTransformados);
@@ -38,6 +41,16 @@ class AliadoApiController extends Controller
     {
         $response = null;
         $statusCode = 200;
+
+        if(Auth::user()->id_rol != 1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
 
         DB::transaction(function () use ($data, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
@@ -134,6 +147,7 @@ class AliadoApiController extends Controller
     public function update(Request $request, string $id)
     {
         //
+        
     }
 
     /**
@@ -141,21 +155,26 @@ class AliadoApiController extends Controller
      */
     public function destroy($id)
     {
-        $aliado = Aliado::find($id);
-
-        if (!$aliado) {
+        if(Auth::user()->id_rol == 3 || Auth::user()->id_rol ==1){
+            
+            $aliado = Aliado::find($id);
+            if (!$aliado) {
+                return response()->json([
+                    'message' => 'Aliado no encontrado',
+                ], 404);
+            }
+            $user = $aliado->auth;
+            $user->estado = 0;
+            $user->save();
+    
             return response()->json([
-                'message' => 'Aliado no encontrado',
-            ], 404);
+                'message' => 'Aliado desactivado',
+            ], 200); 
         }
 
-        $aliado->update([
-            'estado' => 0,
-        ]);
-
         return response()->json([
-            'message' => 'Aliado desactivado',
-        ], 200); // Cambiado el código de estado a 200, que indica éxito en lugar de 404
+            'message' => 'No tienes permisos para realizar esta acción'
+         ], 403);
     }
 
     public function MostrarAsesorAliado($id)

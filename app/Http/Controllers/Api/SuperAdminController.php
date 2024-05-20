@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Emprendedor;
+use App\Models\SuperAdmin;
 use Illuminate\Http\Request;
 use App\Models\Empresa;
 use App\Models\PersonalizacionSistema;
@@ -21,7 +23,14 @@ class SuperAdminController extends Controller
      */
     public function ver_emprendedoresxempresa()
     {
+        if(Auth::user()->id_rol != 1){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+
         $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
+        
         return response()->json($emprendedoresConEmpresas);
     }
 
@@ -82,16 +91,34 @@ class SuperAdminController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(Request $request, $id)
     {
-        //
+     //
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy($id)
     {
-        //
+        if(Auth::user()->id_rol !=1){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+
+        $superAdmin = SuperAdmin::find($id);
+        if(!$superAdmin){
+            return response()->json([
+               'message' => 'SuperAdmin no encontrado'
+            ], 404);
+        }
+
+        $user = $superAdmin->auth;
+        $user->estado = 0;
+        $user->save();
+
+        return response()->json(['message' =>'SuperAdmin desactivado'], 200);
+       
     }
 }
