@@ -12,7 +12,8 @@ class Seccion extends Model
     protected $table = 'seccion';
 
     protected $fillable = [
-       'nombre'
+       'nombre',
+       'puntaje'
     ];
 
     public function preguntas(){
