@@ -121,7 +121,7 @@ class AuthController extends Controller
         });
 
 
-        return response()->json(['message' => $response], $statusCode);
+        return response()->json(['message' => $response, 'email' => $data->email],  $statusCode);
     }
 
     protected function validate_email(Request $request)
