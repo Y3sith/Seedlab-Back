@@ -7,6 +7,8 @@ use App\Models\Aliado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Asesoria;
+
 use Illuminate\Support\Facades\Auth;
 
 
@@ -185,6 +187,25 @@ class AliadoApiController extends Controller
 
         $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
         return response()->json($asesores);
+    }
+
+    public function  MostrarAsesorias($id) {
+        
+        $aliado = Aliado::find($id);
+
+        if (!$aliado) {
+            return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
+        }
+
+        $asesoriasConAsignacion = Asesoria::where('id_aliado', $aliado->id)->where('asignacion', true)->get();
+        $asesoriasSinAsignacion = Asesoria::where('id_aliado', $aliado->id)->where('asignacion', false)->get();        
+
+        return response()->json([
+            'con_asignacion' => $asesoriasConAsignacion,
+            'sin_asignacion' => $asesoriasSinAsignacion
+        ]);
+    
+
     }
 
 }

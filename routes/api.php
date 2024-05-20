@@ -66,6 +66,8 @@ Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->nam
 Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado')->middleware('auth:api');
 Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'MostrarAsesorAliado'])->name('MostrarAsesorAliado')->middleware('auth:api');
 Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy'])->middleware('auth:api');
+Route::get('/mostrarAsesorias/{id}', [AliadoApiController::class, 'MostrarAsesorias'])->name('MostrarAsesorias');
+
 
 //Actividad
 Route::apiResource('/actividad',ActividadController::class)->middleware('auth:api');
