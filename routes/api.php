@@ -80,10 +80,12 @@ Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::cla
 Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
 
 //asesorias
-Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria'])->middleware('auth:api');
-Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria'])->name('asignarasesoria')->middleware('auth:api');
-Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioasesoria'])->name('definirhorarioasesoria')->middleware('auth:api');
-Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'editarasignacionasesoria'])->name('editarasignacionasesoria')->middleware('auth:api');
+Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']);
+Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria'])->name('asignarasesoria');
+Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioasesoria'])->name('definirhorarioasesoria');
+Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'editarasignacionasesoria'])->name('editarasignacionasesoria');
+Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');
+
 
 
 

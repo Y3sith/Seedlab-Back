@@ -10,6 +10,8 @@ use App\Models\Emprendedor;
 use App\Models\Asesoria;
 use App\Models\HorarioAsesoria;
 use App\Models\Asesor;
+use Illuminate\Support\Facades\DB;
+
 
 
 
@@ -108,8 +110,53 @@ class AsesoriasController extends Controller
 
     }
 
-    public function traerasesoriasxemprendedor(){
-        
+    public function traerAsesoriasPorEmprendedor(Request $request)
+    {
+        $documento = $request->input('documento');
+        $asignacion = $request->input('asignacion');
+
+        $query = DB::table('asesoria as o')
+            ->leftJoin('asesoriaxasesor as a', 'o.id', '=', 'a.id_asesoria')
+            ->leftJoin('asesor as e', 'a.id_asesor', '=', 'e.id')
+            ->leftJoin('aliado as ali', 'ali.id', '=', 'o.id_aliado')
+            ->leftJoin('emprendedor as em', 'o.doc_emprendedor', '=', 'em.documento')
+            ->leftJoin('horarioasesoria as hr', 'o.id', '=', 'hr.id_asesoria')
+            ->where('em.documento', '=', $documento)
+            ->where('o.asignacion', '=', $asignacion)
+            ->orderBy('o.fecha', 'desc');
+
+        if ($asignacion) {
+            $query->select(
+                'o.id as id_asesoria',
+                'o.Nombre_sol',
+                'o.notas',
+                'o.fecha as fecha_solicitud',
+                'ali.nombre',
+                'a.id_asesor',
+                DB::raw('CONCAT(e.nombre, " ", e.apellido) as Asesor'),
+                'hr.fecha',
+                'hr.estado',
+                'hr.observaciones as observaciones_asesor'
+            );
+        } else {
+            $query->select(
+                'o.id as id_asesoria',
+                'o.Nombre_sol',
+                'o.notas',
+                'o.fecha as fecha_solicitud',
+                DB::raw('IFNULL(ali.nombre, "Orientador - En espera de redireccionamiento") as nombre')
+            );
+        }
+
+        $asesorias = $query->get();
+
+        return response()->json($asesorias);
     }
+
+
+    public function traerasesoriasorientador(Request $request){
+
+    }   
+
 
 }
