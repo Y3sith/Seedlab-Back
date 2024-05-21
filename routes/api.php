@@ -60,7 +60,7 @@ Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('lista
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
 
 //AliadoController
-Route::get('/aliado', [AliadoApiController::class, 'Traeraliadosactivos'])->name('Traeraliadosactivos')->middleware('auth:api');
+Route::get('/aliado/{status}', [AliadoApiController::class,'Traeraliadosactivos'])->name('Traeraliadosactivos')->middleware('auth:api');
 Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado')->middleware('auth:api');
 Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado')->middleware('auth:api');
 Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado')->middleware('auth:api');

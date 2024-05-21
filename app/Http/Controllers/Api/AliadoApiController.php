@@ -17,9 +17,9 @@ class AliadoApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function Traeraliadosactivos(Request $request)
+    public function Traeraliadosactivos($status)
     {
-        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $request->input('status')))
+        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
             ->get();
