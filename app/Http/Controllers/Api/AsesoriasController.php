@@ -3,17 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
-use App\Models\AsesoriaxAsesor;
 use App\Models\Aliado;
-use App\Models\Emprendedor;
-use App\Models\Asesoria;
-use App\Models\HorarioAsesoria;
 use App\Models\Asesor;
+use App\Models\Asesoria;
+use App\Models\AsesoriaxAsesor;
+use App\Models\Emprendedor;
+use App\Models\HorarioAsesoria;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
-
-
-
 
 class AsesoriasController extends Controller
 {
@@ -23,7 +21,7 @@ class AsesoriasController extends Controller
         $aliado = Aliado::where('nombre', $request->input('nom_aliado'))->first();
         $emprendedor = Emprendedor::find($request->input('doc_emprendedor'))->first();
         if (!$emprendedor) {
-            return response(['message' => 'Emprendedor no encontrado',], 404);
+            return response(['message' => 'Emprendedor no encontrado'], 404);
         }
         if (!$aliado) {
             return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
@@ -42,16 +40,17 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'La asesoria se ha solicitado con exito'], 201);
     }
 
-    public function asignarasesoria(Request $request){
+    public function asignarasesoria(Request $request)
+    {
 
-        $asesoriaexiste = Asesoriaxasesor::where('id_asesoria',$request->input('id_asesoria'))->first();
+        $asesoriaexiste = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
 
-        $asesorexiste = Asesor::where('id',$request->input('id_asesor'))->first();
+        $asesorexiste = Asesor::where('id', $request->input('id_asesor'))->first();
 
-        if(!$asesorexiste){
+        if (!$asesorexiste) {
             return response()->json(['message' => 'Este asesor no existe en el sistema'], 201);
         }
-        if($asesoriaexiste){
+        if ($asesoriaexiste) {
             return response()->json(['message' => 'Esta asesoria ya se ha asignado, edita la asignación'], 201);
         }
         $newasesoria = Asesoriaxasesor::create([
@@ -62,8 +61,8 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'se ha asignado el asesor para esta asesoria'], 201);
     }
 
-
-    public function definirhorarioasesoria(Request $request){
+    public function definirhorarioasesoria(Request $request)
+    {
 
         $idAsesoria = $request->input('id_asesoria');
         $fecha = $request->input('fecha');
@@ -78,35 +77,36 @@ class AsesoriasController extends Controller
             return response()->json(['message' => 'La asesoría ya tiene una fecha asignada'], 400);
         }
 
-            $horarioAsesoria = HorarioAsesoria::create([
-                'observacion' => $request -> input('observacion'),
-                'fecha' => $request -> input('fecha'),
-                'estado' => $request -> input('estado'),
-                'id_asesoria' => $request -> input('id_asesoria'),
-            ]);
-            return response()->json(['mesage'=>'Se le a asignado un horario a su Asesoria'], 201);
+        $horarioAsesoria = HorarioAsesoria::create([
+            'observacion' => $request->input('observacion'),
+            'fecha' => $request->input('fecha'),
+            'estado' => $request->input('estado'),
+            'id_asesoria' => $request->input('id_asesoria'),
+        ]);
+        return response()->json(['mesage' => 'Se le a asignado un horario a su Asesoria'], 201);
     }
 
-    public function editarasignacionasesoria(Request $request){
-      
+    public function editarasignacionasesoria(Request $request)
+    {
+
         $asignacion = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
         if (!$asignacion) {
             return response()->json(['message' => 'La asignación no existe en el sistema'], 404);
         }
-    
+
         $asesor = Asesor::find($request->input('id_asesor'));
         if (!$asesor) {
             return response()->json(['message' => 'El asesor no existe en el sistema'], 404);
         }
-    
+
         $asignacion->id_asesor = $request->input('id_asesor');
         $asignacion->save();
-    
+
         return response()->json(['message' => 'Se ha actualizado el asesor para esta asignación'], 200);
     }
 
-
-    public function traerasesoriasxaliado(){
+    public function traerasesoriasxaliado()
+    {
 
     }
 
@@ -122,7 +122,8 @@ class AsesoriasController extends Controller
             ->leftJoin('emprendedor as em', 'o.doc_emprendedor', '=', 'em.documento')
             ->leftJoin('horarioasesoria as hr', 'o.id', '=', 'hr.id_asesoria')
             ->where('em.documento', '=', $documento)
-            ->where('o.asignacion', '=', $asignacion)
+            ->where('o.asignacion', '=', $_COOKIE
+            )
             ->orderBy('o.fecha', 'desc');
 
         if ($asignacion) {
@@ -153,11 +154,65 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
-    public function traerasesoriasorientador(Request $request){
+    public function traerasesoriasorientador(Request $request)
+    {
 
-        $asesoriasOrientador = Asesoria::where('isorientador', true)->get();
-        
-        return response()->json($asesoriasOrientador);
+        $isNull = $request->input('is_null', true);
 
-    } 
+        $cacheKey = 'asesorias_orientador_' . ($isNull ? 'null' : 'not_null');
+
+        $asesorias = Cache::remember($cacheKey, 60, function () use ($isNull) {
+            $query = Asesoria::with(['emprendedor.auth'])
+                ->where('isorientador', true)
+                ->when($isNull, function ($query) {
+                    $query->whereNull('id_aliado');
+                }, function ($query) {
+                    $query->whereNotNull('id_aliado');
+                });
+
+            return $query->get()->map(function ($asesoria) {
+                return [
+                    'id' => $asesoria->id,
+                    'Nombre_sol' => $asesoria->Nombre_sol,
+                    'notas' => $asesoria->notas,
+                    'fecha' => $asesoria->fecha,
+                    'documento' => $asesoria->emprendedor->documento,
+                    'nombres' => $asesoria->emprendedor->nombres,
+                    'celular' => $asesoria->emprendedor->celular,
+                    'email' => $asesoria->emprendedor->auth->email,
+                ];
+            });
+        });
+
+        return response()->json($asesorias);
+
+    }
+    
+    // public function traersasesoriasori(Request $request){
+
+    //     $isNull = $request->input('is_null', true);
+    //     $query = DB::table('asesoria as a')
+    //         ->leftJoin('emprendedor as em', 'em.documento', '=', 'a.doc_emprendedor')
+    //         ->leftJoin('users as u', 'em.id_autentication', '=', 'u.id')
+    //         ->select(
+    //             'a.id',
+    //             'a.Nombre_sol',
+    //             'a.notas',
+    //             'a.fecha',
+    //             'em.documento',
+    //             DB::raw('concat(em.nombre, " ", em.apellido) as nombres'),
+    //             'em.celular',
+    //             'u.email'
+    //         )
+    //         ->where('isorientador', true);
+    //     if ($isNull) {
+    //         $query->whereNull('id_aliado');
+    //     } else {
+    //         $query->whereNotNull('id_aliado');
+    //     }
+    //     $asesorias = $query->get();
+    //     return response()->json($asesorias);
+
+    // }
+
 }
