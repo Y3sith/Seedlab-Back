@@ -79,6 +79,7 @@ Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::cla
 
 //Asesor
 Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
+Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
 
 //asesorias
 Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']); //guardar asesoria - emprendedor
