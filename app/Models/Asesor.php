@@ -37,4 +37,8 @@ class Asesor extends Model
     {
         return "{$this->nombre} {$this->apellido}";
     }
+
+    public function asesorias() {
+        return $this->belongsToMany(Asesoria::class, 'asesoriaxasesor', 'id_asesor', 'id_asesoria');
+    }
 }
