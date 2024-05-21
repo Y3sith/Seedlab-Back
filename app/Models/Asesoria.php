@@ -42,4 +42,9 @@ class Asesoria extends Model
     {
         return $this->hasMany(HorarioAsesoria::class, 'id_asesoria');
     }
+
+    public function asesoriaxAsesor()
+    {
+        return $this->hasMany(AsesoriaxAsesor::class, 'id_asesoria');
+    }
 }

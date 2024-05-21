@@ -188,31 +188,45 @@ class AsesoriasController extends Controller
 
     }
     
-    // public function traersasesoriasori(Request $request){
+    public function MostrarAsesorias($aliadoId, $asignacion) {
+        $aliado = Aliado::find($aliadoId);
 
-    //     $isNull = $request->input('is_null', true);
-    //     $query = DB::table('asesoria as a')
-    //         ->leftJoin('emprendedor as em', 'em.documento', '=', 'a.doc_emprendedor')
-    //         ->leftJoin('users as u', 'em.id_autentication', '=', 'u.id')
-    //         ->select(
-    //             'a.id',
-    //             'a.Nombre_sol',
-    //             'a.notas',
-    //             'a.fecha',
-    //             'em.documento',
-    //             DB::raw('concat(em.nombre, " ", em.apellido) as nombres'),
-    //             'em.celular',
-    //             'u.email'
-    //         )
-    //         ->where('isorientador', true);
-    //     if ($isNull) {
-    //         $query->whereNull('id_aliado');
-    //     } else {
-    //         $query->whereNotNull('id_aliado');
-    //     }
-    //     $asesorias = $query->get();
-    //     return response()->json($asesorias);
+        if (!$aliado) {
+            return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
+        }
 
-    // }
+        $asesorias = Asesoria::with(['emprendedor', 'asesoriaxAsesor.asesor', 'horarios'])
+            ->where('id_aliado', $aliado->id)
+            ->where('asignacion', $asignacion)
+            ->get()
+            ->map(function ($asesoria) {
+                
+                $asesor = $asesoria->asesoriaxAsesor->first() ? $asesoria->asesoriaxAsesor->first()->asesor : null;
+                $horario = $asesoria->horarios->first();
+                
+                $data = [
+                    'id_asesoria' => $asesoria->id,
+                    'Nombre_sol' => $asesoria->Nombre_sol,
+                    'notas' => $asesoria->notas,
+                    'fecha_solicitud' => $asesoria->fecha,
+                    'Emprendedor' => $asesoria->emprendedor ? $asesoria->emprendedor->nombre . ' ' . $asesoria->emprendedor->apellido : null,
+                ];
+
+                if ($horario && $horario->fecha) {
+                    $data['Asesor'] = $asesor ? $asesor->nombre . ' ' . $asesor->apellido : null;
+                    $data['fecha_horario'] = $horario->fecha;
+                    $data['estado'] = $horario->estado;
+                    $data['observaciones_asesor'] = $horario->observaciones;
+
+                } else if($asesor) {
+                    $data['Asesor'] = $asesor ? $asesor->nombre . ' ' . $asesor->apellido : null;
+                    $data['mensaje'] = 'El asesor aún no ha asignado horario';
+                }
+
+                return $data;
+            });
+
+        return response()->json($asesorias);
+    }
 
 }

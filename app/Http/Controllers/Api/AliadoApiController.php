@@ -189,23 +189,9 @@ class AliadoApiController extends Controller
         return response()->json($asesores);
     }
 
-    public function  MostrarAsesorias($id) {
-        
-        $aliado = Aliado::find($id);
 
-        if (!$aliado) {
-            return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
-        }
 
-        $asesoriasConAsignacion = Asesoria::where('id_aliado', $aliado->id)->where('asignacion', true)->get();
-        $asesoriasSinAsignacion = Asesoria::where('id_aliado', $aliado->id)->where('asignacion', false)->get();        
 
-        return response()->json([
-            'con_asignacion' => $asesoriasConAsignacion,
-            'sin_asignacion' => $asesoriasSinAsignacion
-        ]);
     
-
-    }
 
 }
