@@ -49,9 +49,9 @@ Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador
 
 //Super Admin
 Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:api');
-Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa'])->middleware('auth:api');
-Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis'])->middleware('auth:api');
-Route::post('/crearsuper_admin',[SuperAdminController::class,'crearsuperAdmin'])->middleware('auth:api');
+Route::get('/emprendedores&empresa',[SuperAdminController::class,'verEmprendedoresxEmpresa'])->middleware('auth:api');
+Route::post('/personalizacion',[SuperAdminController::class,'personalizacionSis'])->middleware('auth:api');
+Route::post('/crearsuper_admin',[SuperAdminController::class,'crearSuperAdmin'])->middleware('auth:api');
    
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
@@ -62,7 +62,7 @@ Route::group([
     'prefix' => 'aliado',
     'middleware' => 'auth:api',
 ], function(){
-    Route::get('/aliado/{status}', [AliadoApiController::class,'TraerAliadosActivos'])->name('Traeraliadosactivos');
+    Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');

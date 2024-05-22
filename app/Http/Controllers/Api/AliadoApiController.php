@@ -18,7 +18,7 @@ class AliadoApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function TraerAliadosActivos($status)
+    public function traerAliadosActivos($status)
     {
         if(Auth::user()->id_rol !=1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
