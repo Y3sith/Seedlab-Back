@@ -20,12 +20,15 @@ class AliadoApiController extends Controller
      */
     public function Traeraliadosactivos($status)
     {
-        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
+        if(Auth::user()->id_rol !=1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
+            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
 
-        $aliadosTransformados = $aliados->map(fn($aliado) => [
+        $aliadosTransformados = $aliados->map(fn ($aliado) => [
             'nombre' => $aliado->nombre,
             'descripcion' => $aliado->descripcion,
             'logo' => $aliado->logo,
@@ -35,22 +38,19 @@ class AliadoApiController extends Controller
             'estado_usuario' => $aliado->auth->estado
         ]);
         return response()->json($aliadosTransformados);
-        }else {
-            return response()->json(["message"=>"No tienes permisos para ver el contenido"],401);
-        }
-        
     }
+
 
     public function crearaliado(Request $data)
     {
         $response = null;
         $statusCode = 200;
 
-        if(Auth::user()->id_rol != 1){
+        if (Auth::user()->id_rol != 1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if(strlen($data['password']) <8) {
+        if (strlen($data['password']) < 8) {
             $statusCode = 400;
             $response = 'La contraseña debe tener al menos 8 caracteres';
             return response()->json(['message' => $response], $statusCode);
@@ -77,7 +77,6 @@ class AliadoApiController extends Controller
         });
 
         return response()->json(['message' => $response], $statusCode);
-
     }
 
     public function mostrarAliado(Request $request)
@@ -107,6 +106,9 @@ class AliadoApiController extends Controller
 
     public function Editaraliado(Request $request)
     {
+        if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $aliado = Aliado::find($request->input('id'));
 
         if ($aliado) {
@@ -115,12 +117,12 @@ class AliadoApiController extends Controller
             $aliado->logo = $request->input('logo');
             $aliado->ruta_multi = $request->input('ruta_multi');
             $aliado->save();
-    
+
             if ($aliado->auth) {
                 $user = $aliado->auth;
                 $user->email = $request->input('email');
-                $user->password = Hash::make($request->input('password')); 
-                $user->estado = $request->input('estado'); 
+                $user->password = Hash::make($request->input('password'));
+                $user->estado = $request->input('estado');
                 $user->save();
             }
             return response()->json(['message' => 'Aliado actualizado correctamente']);
@@ -134,7 +136,6 @@ class AliadoApiController extends Controller
      */
     public function store(Request $request)
     {
-
     }
 
     /**
@@ -151,7 +152,7 @@ class AliadoApiController extends Controller
     public function update(Request $request, string $id)
     {
         //
-        
+
     }
 
     /**
@@ -159,8 +160,8 @@ class AliadoApiController extends Controller
      */
     public function destroy($id)
     {
-        if(Auth::user()->id_rol == 3 || Auth::user()->id_rol ==1){
-            
+        if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 1) {
+
             $aliado = Aliado::find($id);
             if (!$aliado) {
                 return response()->json([
@@ -170,32 +171,29 @@ class AliadoApiController extends Controller
             $user = $aliado->auth;
             $user->estado = 0;
             $user->save();
-    
+
             return response()->json([
                 'message' => 'Aliado desactivado',
-            ], 200); 
+            ], 200);
         }
 
         return response()->json([
             'message' => 'No tienes permisos para realizar esta acción'
-         ], 403);
+        ], 403);
     }
 
     public function MostrarAsesorAliado($id)
     {
-        $aliado = Aliado::find($id);  
+        if(Auth::user()->is_rol != 3){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        $aliado = Aliado::find($id);
 
-        if(!$aliado) {
-        return response()->json(['message' => 'No se encontró ningún aliado este ID'], 404);
+        if (!$aliado) {
+            return response()->json(['message' => 'No se encontró ningún aliado este ID'], 404);
         }
 
         $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
         return response()->json($asesores);
     }
-
-
-
-
-    
-
 }
