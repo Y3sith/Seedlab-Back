@@ -122,8 +122,7 @@ class AsesoriasController extends Controller
             ->leftJoin('emprendedor as em', 'o.doc_emprendedor', '=', 'em.documento')
             ->leftJoin('horarioasesoria as hr', 'o.id', '=', 'hr.id_asesoria')
             ->where('em.documento', '=', $documento)
-            ->where('o.asignacion', '=', $_COOKIE
-            )
+            ->where('o.asignacion', '=', $asignacion)
             ->orderBy('o.fecha', 'desc');
 
         if ($asignacion) {
