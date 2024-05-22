@@ -14,16 +14,17 @@ class SeccionSeeder extends Seeder
     public function run(): void
     {
         $seccionPorPregunta=[
-            'DATOS DE LOS EMPRENDEDORES E INFORMACIÓN GENERAL',
-            'INFORMACIÓN FINANCIERA',
-            'INFORMACIÓN DEL MERCADO',
-            'INFORMACIÓN OPERATIVA TÉCNICA DE PRODUCTO Y/O SERVICIO',
+            ['nombre'=>'DATOS DE LOS EMPRENDEDORES E INFORMACIÓN GENERAL','puntaje'=>0],
+            ['nombre'=>'INFORMACIÓN FINANCIERA','puntaje'=>0],
+            ['nombre'=> 'INFORMACIÓN DEL MERCADO','puntaje'=>0],
+            ['nombre'=>'INFORMACIÓN OPERATIVA TÉCNICA DE PRODUCTO Y/O SERVICIO','puntaje'=>0],
         ];
 
-            foreach($seccionPorPregunta as $nombrePregunta){
-                Seccion::create([
-                    'nombre' => $nombrePregunta,
-                ]);
-            }
+        foreach ($seccionPorPregunta as $seccion) {
+            Seccion::create([
+                'nombre' => $seccion['nombre'],
+                'puntaje' => $seccion['puntaje'],
+            ]);
+        }
     }
 }
