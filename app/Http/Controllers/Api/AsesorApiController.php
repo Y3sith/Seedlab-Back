@@ -112,4 +112,50 @@ class AsesorApiController extends Controller
            'message' => 'Asesor desactivado',
         ], 200);
     }
+
+    public function mostrarAsesoriasAsesor($id, $conHorario) {
+        $asesor = Asesor::find($id);
+    
+        if (!$asesor) {
+            return response()->json([
+                'message' => 'El asesor no existe en el sistema'], 404);
+        }
+    
+        $asesoriasAsesor = $asesor->asesorias()->with('emprendedor', 'horarios')->get();
+    
+        if ($conHorario === 'true') {
+            $asesoriasFiltradas = $asesoriasAsesor->filter(function ($asesoria) {
+                return $asesoria->horarios->isNotEmpty();
+            });
+        } else {
+            $asesoriasFiltradas = $asesoriasAsesor->filter(function ($asesoria) {
+                return $asesoria->horarios->isEmpty();
+            });
+        }
+    
+        $resultado = $asesoriasFiltradas->map(function ($asesoria) {
+            $data =[
+                'Nombre_sol' => $asesoria->Nombre_sol,
+                'notas' => $asesoria->notas,
+                'fecha' => $asesoria->fecha,
+                'nombre' => $asesoria->emprendedor->nombre,
+                'apellido' => $asesoria->emprendedor->apellido,
+                'celular' => $asesoria->emprendedor->celular,
+                'correo' => $asesoria->emprendedor->auth->email,
+            ];
+            if($asesoria->horarios->isNotEmpty()){
+                $data['observaciones'] = $asesoria->horarios->first()->observaciones;
+                $data['fecha_asignacion'] = $asesoria->horarios->first()->fecha;
+                $data['estado'] = $asesoria->horarios->first()->estado;
+            }
+            else{
+                $data['mensaje'] = 'No tiene horario asignado';
+
+            }
+            return $data;   
+        })->values();
+    
+        return response()->json($resultado, 200);
+    }
+    
 }

@@ -8,6 +8,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Asesoria;
+
 
 
 
@@ -16,10 +18,9 @@ class AliadoApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function Traeraliadosactivos()
+    public function Traeraliadosactivos($status)
     {
-        if (Auth::user()->id_rol !=1) {
-            $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', 1))
+        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato','id_autentication')
             ->get();
@@ -191,5 +192,10 @@ class AliadoApiController extends Controller
         $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
         return response()->json($asesores);
     }
+
+
+
+
+    
 
 }
