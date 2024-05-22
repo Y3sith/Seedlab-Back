@@ -17,7 +17,7 @@ use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
-use App\Http\Controllers\Api\RespuestasApiController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -62,11 +62,11 @@ Route::group([
     'prefix' => 'aliado',
     'middleware' => 'auth:api',
 ], function(){
-    Route::get('/aliado/{status}', [AliadoApiController::class,'Traeraliadosactivos'])->name('Traeraliadosactivos');
-    Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado');
+    Route::get('/aliado/{status}', [AliadoApiController::class,'TraerAliadosActivos'])->name('Traeraliadosactivos');
+    Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
-    Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado');
-    Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'MostrarAsesorAliado'])->name('MostrarAsesorAliado');
+    Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
+    Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
     Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy']);
 });
 

@@ -18,7 +18,7 @@ class AliadoApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function Traeraliadosactivos($status)
+    public function TraerAliadosActivos($status)
     {
         if(Auth::user()->id_rol !=1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
@@ -41,7 +41,7 @@ class AliadoApiController extends Controller
     }
 
 
-    public function crearaliado(Request $data)
+    public function crearAliado(Request $data)
     {
         $response = null;
         $statusCode = 200;
@@ -104,7 +104,7 @@ class AliadoApiController extends Controller
         }
     }
 
-    public function Editaraliado(Request $request)
+    public function editarAliado(Request $request)
     {
         if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
@@ -182,7 +182,7 @@ class AliadoApiController extends Controller
         ], 403);
     }
 
-    public function MostrarAsesorAliado($id)
+    public function mostrarAsesorAliado($id)
     {
         if(Auth::user()->is_rol != 3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
