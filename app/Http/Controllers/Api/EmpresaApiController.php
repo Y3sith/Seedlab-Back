@@ -39,27 +39,16 @@ class EmpresaApiController extends Controller
         return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
     }
 
-    // Obtener el nombre del departamento desde el request
-    $nombreDepartamento = $request->input('nombre_departamento');
+    $nombreMunicipio = $request->input('id_municipio');
+    $municipio = Municipio::where('nombre', $nombreMunicipio)->first();
+    //dd($municipio);
 
-    // Buscar el departamento en la base de datos
-    $departamento = Departamento::where('name', $nombreDepartamento)->first();
-    if (!$departamento) {
-        return response()->json(["error" => "Departamento no encontrado"], 404);
+    if ($municipio) {
+    $id_municipio = $municipio->id;
+    } else {
+    // Manejar el caso en el que el municipio no se encuentre
+    return response()->json(["error" => "Municipio no encontrado"], 404);
     }
-
-    // Obtener municipios del departamento
-    $municipios = Municipio::where('id_departamento', $departamento->id)->get();
-
-    // Validar si se encontraron municipios
-    if ($municipios->isEmpty()) {
-        return response()->json(["error" => "No se encontraron municipios para el departamento proporcionado"], 404);
-    }
-
-    // Suponiendo que seleccionas el primer municipio encontrado para asignarlo a la empresa
-    // Esto podría ajustarse según tus necesidades
-    $id_municipio = $municipios->first()->id;
-
     // Crear empresa
     $empresa = Empresa::create([
         "nombre" => $request->nombre,
