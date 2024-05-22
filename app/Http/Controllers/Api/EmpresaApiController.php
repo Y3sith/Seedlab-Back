@@ -72,7 +72,7 @@ class EmpresaApiController extends Controller
             $nuevoApoyo->save();
         }
     }
-    return response()->json($empresa, 200);
+    return response()->json(['message' => 'Epresa Creada exitosamente',$empresa, 200]);
 }
 
 
