@@ -20,17 +20,20 @@ class EmprendedorApiController extends Controller
     public function index()
     {
         //muestra los emprendedores - super administrator
-        if(Auth::user()->id_rol =!1){
+        /* if(Auth::user()->id_rol =!1){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }
-        $emprendedor = Emprendedor::paginate(5);
-        return new JsonResponse($emprendedor->items());
+        }*/
+        //muestra los emprendedores por su id
+        if (Auth::user()->id_rol = !5) {
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        } $emprendedor = Emprendedor::all();
+        return response()->json($emprendedor);
     }
 
     public function store(Request $request)
     {
         //crear emprendedor
-        
+
     }
 
     /**
@@ -39,7 +42,7 @@ class EmprendedorApiController extends Controller
     public function show($id_emprendedor)
     {
         /* Muestra las empresas asociadas por el emprendedor */
-        if(Auth::user()->id_rol !=5){
+        if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
@@ -52,7 +55,7 @@ class EmprendedorApiController extends Controller
     public function update(Request $request, $documento)
     {
         //editar el emprendedor
-        if(Auth::user()->id_rol != 5){
+        if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $emprendedor = Emprendedor::find($documento);
@@ -75,29 +78,29 @@ class EmprendedorApiController extends Controller
 
     public function destroy($documento)
     {
-        if(Auth::user()->id_rol != 5){
+        if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para desactivar la cuenta"], 401);
         }
-         //Se busca emprendedor por documento
-         $emprendedor = Emprendedor::find($documento);
-         //dd($emprendedor);
-         if (!$emprendedor) {
-             return response()->json([
-                 'message' => 'Emprendedor no encontrado'
-             ], 404);
-         }
- 
-         // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
-         $user = $emprendedor->auth;
-         //dd($user);
-         $user->estado = 0;
-         $user->save();
- 
-         $emprendedor->email_verified_at = null;
-         $emprendedor->save();
- 
-         return response()->json([
-             'message' => 'Emprendedor desactivado exitosamente'
-         ], 200);
+        //Se busca emprendedor por documento
+        $emprendedor = Emprendedor::find($documento);
+        //dd($emprendedor);
+        if (!$emprendedor) {
+            return response()->json([
+                'message' => 'Emprendedor no encontrado'
+            ], 404);
         }
+
+        // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
+        $user = $emprendedor->auth;
+        //dd($user);
+        $user->estado = 0;
+        $user->save();
+
+        $emprendedor->email_verified_at = null;
+        $emprendedor->save();
+
+        return response()->json([
+            'message' => 'Emprendedor desactivado exitosamente'
+        ], 200);
+    }
 }
