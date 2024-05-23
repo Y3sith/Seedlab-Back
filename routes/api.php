@@ -36,7 +36,7 @@ Route::group([
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 //Empresa
-Route::apiResource('empresa',EmpresaApiController::class)->middleware('auth:api');
+Route::apiResource('/empresa',EmpresaApiController::class)->middleware('auth:api');
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
