@@ -32,4 +32,13 @@ class Asesor extends Model
     public function actividades(){
         return $this->hasMany(Actividad::class, 'id_asesor');
     }
+
+    public function getNombresAttribute()
+    {
+        return "{$this->nombre} {$this->apellido}";
+    }
+
+    public function asesorias() {
+        return $this->belongsToMany(Asesoria::class, 'asesoriaxasesor', 'id_asesor', 'id_asesoria');
+    }
 }

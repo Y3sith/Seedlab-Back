@@ -40,6 +40,11 @@ class Asesoria extends Model
 
     public function horarios()
     {
-        return $this->hasMany(HorarioAsesoria::class, 'id_asesoria');
+        return $this->hasMany(HorarioAsesoria::class, 'id_asesoria', 'id');
+    }
+
+    public function asesoriaxAsesor()
+    {
+        return $this->hasMany(AsesoriaxAsesor::class, 'id_asesoria');
     }
 }

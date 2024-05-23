@@ -49,6 +49,10 @@ class Emprendedor extends Model
         return $this->hasMany(Asesoria::class, 'doc_emprendedor', 'documento');
     }
 
+    public function getNombresAttribute()
+    {
+        return "{$this->nombre} {$this->apellido}";
+    }
 
     
 }

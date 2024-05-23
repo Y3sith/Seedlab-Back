@@ -26,7 +26,9 @@ class AsesoriaxAsesor extends Model
 
     public function asesor()
     {
-        return $this->belongsTo(Aliado::class, 'id_asesor');
+        return $this->belongsTo(Asesor::class, 'id_asesor');
     }
+
+  
 
 }
