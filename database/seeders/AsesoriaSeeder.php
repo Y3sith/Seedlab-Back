@@ -56,25 +56,5 @@ class AsesoriaSeeder extends Seeder
             "id_aliado" => "1",
             "doc_emprendedor" => "1098476011",
         ]);
-        Asesoria::create([
-            "id" => "5",
-            "Nombre_sol" => "listado de semilla",
-            "notas" => "Quiero listar una semilla de asesoria",
-            "isorientador" => true,
-            "asignacion" => false,
-            "fecha" => "2024-05-20 14:30:00",
-            "id_aliado" => "1",
-            "doc_emprendedor" => "1111111111",
-        ]);
-        Asesoria::create([
-            "id" => "6",
-            "Nombre_sol" => "listado de semilla",
-            "notas" => "Quiero listar una semilla de asesoria",
-            "isorientador" => true,
-            "asignacion" => false,
-            "fecha" => "2024-05-20 14:30:00",
-            "id_aliado" => "1",
-            "doc_emprendedor" => "1111111111",
-        ]);
     }
 }

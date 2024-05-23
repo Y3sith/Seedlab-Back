@@ -92,7 +92,7 @@ Route::group([
     'prefix' => 'asesorias',
     'middleware' =>'auth:api'
 ], function(){
-    Route::post('/solictud_asesoria',[AsesoriasController::class,'guardarAsesoria']); //guardar asesoria - emprendedor
+    Route::post('/solicitud_asesoria',[AsesoriasController::class,'guardarAsesoria']); //guardar asesoria - emprendedor
     Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarAsesoria'])->name('asignarasesoria'); //asignar asesoria - aliado
     Route::post('/horario_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('definirhorarioasesoria'); //asignar horario - asesor
     Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('editarasignacionasesoria'); //editar asesor - aliado
