@@ -27,7 +27,7 @@ Route::get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'auth'
 ], function(){
-    Route::post('login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register_em', [AuthController::class, 'register'])->name('register');
     Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
     
@@ -62,12 +62,12 @@ Route::group([
     'prefix' => 'aliado',
     'middleware' => 'auth:api',
 ], function(){
-    Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
+    Route::get('/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
-    Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
+    Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
 });
 
 //Actividad
