@@ -17,7 +17,7 @@ use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
-use App\Http\Controllers\Api\RespuestasApiController;
+
 
 Route::get('/user', function (Request $request) {
     return $request->user();
@@ -27,14 +27,13 @@ Route::get('/user', function (Request $request) {
 Route::group([
     'prefix' => 'auth'
 ], function(){
-    Route::post('login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register_em', [AuthController::class, 'register'])->name('register');
     Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
     
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
-
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
@@ -50,22 +49,26 @@ Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador
 
 //Super Admin
 Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:api');
-Route::get('/emprendedores&empresa',[SuperAdminController::class,'ver_emprendedoresxempresa'])->middleware('auth:api');
-Route::post('/personalizacion',[SuperAdminController::class,'Personalizacion_sis'])->middleware('auth:api');
-Route::post('/crearsuper_admin',[SuperAdminController::class,'crearsuperAdmin'])->middleware('auth:api');
+Route::get('/emprendedores&empresa',[SuperAdminController::class,'verEmprendedoresxEmpresa'])->middleware('auth:api');
+Route::post('/personalizacion',[SuperAdminController::class,'personalizacionSis'])->middleware('auth:api');
+Route::post('/crearsuper_admin',[SuperAdminController::class,'crearSuperAdmin'])->middleware('auth:api');
    
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
 
 //AliadoController
-Route::get('/aliado/{status}', [AliadoApiController::class,'Traeraliadosactivos'])->name('Traeraliadosactivos')->middleware('auth:api');
-Route::post('/create_aliado', [AliadoApiController::class, 'crearaliado'])->name('crearaliado')->middleware('auth:api');
-Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado')->middleware('auth:api');
-Route::put('/editaraliado', [AliadoApiController::class, 'Editaraliado'])->name('Editaraliado')->middleware('auth:api');
-Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'MostrarAsesorAliado'])->name('MostrarAsesorAliado')->middleware('auth:api');
-Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy'])->middleware('auth:api');
-
+Route::group([
+    'prefix' => 'aliado',
+    'middleware' => 'auth:api',
+], function(){
+    Route::get('/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
+    Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
+    Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
+    Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
+    Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
+    Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
+});
 
 //Actividad
 Route::apiResource('/actividad',ActividadController::class)->middleware('auth:api');
@@ -81,19 +84,24 @@ Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api'
 Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
 
 //asesorias
-Route::post('/solictud_asesoria',[AsesoriasController::class,'Guardarasesoria']); //guardar asesoria - emprendedor
-Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarasesoria'])->name('asignarasesoria'); //asignar asesoria - aliado
-Route::post('/horario_asesoria',[AsesoriasController::class, 'definirhorarioasesoria'])->name('definirhorarioasesoria'); //asignar horario - aliado
-Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'editarasignacionasesoria'])->name('editarasignacionasesoria'); //editar asesor - aliado
-Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');// ver asesorias - emprendedor
-Route::get('/asesoriaOrientador',[AsesoriasController::class, 'traerasesoriasorientador']); // ver asesorias - orientador
-Route::get('/mostrarAsesorias/{id}/{asignacion}', [AsesoriasController::class, 'MostrarAsesorias'])->name('MostrarAsesorias'); //ver asesorias de aliado
+Route::group([
+    'prefix' => 'asesorias',
+    'middleware' =>'auth:api'
+], function(){
+    Route::post('/solictud_asesoria',[AsesoriasController::class,'guardarAsesoria']); //guardar asesoria - emprendedor
+    Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarAsesoria'])->name('asignarasesoria'); //asignar asesoria - aliado
+    Route::post('/horario_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('definirhorarioasesoria'); //asignar horario - asesor
+    Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('editarasignacionasesoria'); //editar asesor - aliado
+    Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');// ver asesorias - emprendedor
+    Route::get('/asesoriaOrientador',[AsesoriasController::class, 'traerAsesoriasOrientador']); // ver asesorias - orientador
+    Route::get('/mostrarAsesorias/{id}/{asignacion}', [AsesoriasController::class, 'MostrarAsesorias'])->name('MostrarAsesorias'); //ver asesorias de aliado
+});
 
 
 
 
 
-Route::post('/respuestas', [RespuestasApiController::class, 'store']);
+
 
 
 

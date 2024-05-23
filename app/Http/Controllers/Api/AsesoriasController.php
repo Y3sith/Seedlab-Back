@@ -10,14 +10,18 @@ use App\Models\AsesoriaxAsesor;
 use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AsesoriasController extends Controller
 {
 
-    public function Guardarasesoria(Request $request)
+    public function guardarAsesoria(Request $request)
     {
+        if(Auth::user()->id_rol!=5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $aliado = Aliado::where('nombre', $request->input('nom_aliado'))->first();
         $emprendedor = Emprendedor::find($request->input('doc_emprendedor'))->first();
         if (!$emprendedor) {
@@ -40,9 +44,12 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'La asesoria se ha solicitado con exito'], 201);
     }
 
-    public function asignarasesoria(Request $request)
+    public function asignarAsesoria(Request $request)
     {
-
+        if(Auth::user()->id_rol != 3){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
         $asesoriaexiste = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
 
         $asesorexiste = Asesor::where('id', $request->input('id_asesor'))->first();
@@ -61,8 +68,12 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'se ha asignado el asesor para esta asesoria'], 201);
     }
 
-    public function definirhorarioasesoria(Request $request)
+    public function definirHorarioAsesoria(Request $request)
     {
+        if(Auth::user()->id_rol != 4){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
 
         $idAsesoria = $request->input('id_asesoria');
         $fecha = $request->input('fecha');
@@ -86,9 +97,12 @@ class AsesoriasController extends Controller
         return response()->json(['mesage' => 'Se le a asignado un horario a su Asesoria'], 201);
     }
 
-    public function editarasignacionasesoria(Request $request)
+    public function editarAsignacionAsesoria(Request $request)
     {
-
+        if(Auth::user()-> id_rol != 3 || Auth::user()-> id_rol !=4){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
         $asignacion = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
         if (!$asignacion) {
             return response()->json(['message' => 'La asignación no existe en el sistema'], 404);
@@ -105,13 +119,12 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'Se ha actualizado el asesor para esta asignación'], 200);
     }
 
-    public function traerasesoriasxaliado()
-    {
-
-    }
 
     public function traerAsesoriasPorEmprendedor(Request $request)
     {
+        if(Auth::user()->id_rol!=5){
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
         $documento = $request->input('documento');
         $asignacion = $request->input('asignacion');
 
@@ -122,8 +135,7 @@ class AsesoriasController extends Controller
             ->leftJoin('emprendedor as em', 'o.doc_emprendedor', '=', 'em.documento')
             ->leftJoin('horarioasesoria as hr', 'o.id', '=', 'hr.id_asesoria')
             ->where('em.documento', '=', $documento)
-            ->where('o.asignacion', '=', $_COOKIE
-            )
+            ->where('o.asignacion', '=', $asignacion)
             ->orderBy('o.fecha', 'desc');
 
         if ($asignacion) {
@@ -154,9 +166,12 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
-    public function traerasesoriasorientador(Request $request)
+    public function traerAsesoriasOrientador(Request $request)
     {
-
+        if(Auth::user()->id_rol != 2){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
         $isNull = $request->input('is_null', true);
 
         $cacheKey = 'asesorias_orientador_' . ($isNull ? 'null' : 'not_null');
@@ -189,6 +204,10 @@ class AsesoriasController extends Controller
     }
     
     public function MostrarAsesorias($aliadoId, $asignacion) {
+        if(Auth::user()->id_rol != 3){
+            return response()->json([
+               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
         $aliado = Aliado::find($aliadoId);
 
         if (!$aliado) {

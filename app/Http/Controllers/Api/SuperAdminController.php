@@ -21,7 +21,7 @@ class SuperAdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function ver_emprendedoresxempresa()
+    public function verEmprendedoresxEmpresa()
     {
         if(Auth::user()->id_rol != 1){
             return response()->json([
@@ -35,7 +35,7 @@ class SuperAdminController extends Controller
     }
 
 
-    public function Personalizacion_sis(Request $request)
+    public function personalizacionSis(Request $request)
     {
         $personalizacion = PersonalizacionSistema::create([
             'imagen_Logo' => $request->input('imagen_Logo'),
@@ -54,7 +54,7 @@ class SuperAdminController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function crearsuperAdmin(Request $data)
+    public function crearSuperAdmin(Request $data)
     {
         $response = null;
         $statusCode = 200;
