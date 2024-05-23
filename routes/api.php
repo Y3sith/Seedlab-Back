@@ -67,7 +67,7 @@ Route::group([
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
-    Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy']);
+    Route::delete('aliado/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
 });
 
 //Actividad
