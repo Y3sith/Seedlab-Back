@@ -102,7 +102,7 @@ Route::group([
 });
 
 
-
+Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
 
 
 

@@ -52,10 +52,13 @@ class AuthController extends Controller
     }
 
 
-    public function userProfile()
+    public function userProfile($documento)
     {
-        $user = Auth::user();
-        return response()->json($user);
+        $emprendedor = Emprendedor::where('documento', $documento)
+            ->with('auth:id,email,password') 
+            ->select('nombre', 'apellido', 'documento', 'celular', 'genero', 'fecha_nac', 'direccion', 'id_municipio', 'id_autentication', 'id_tipo_documento')
+            ->first();
+        return response()->json($emprendedor);
     }
 
     public function logout(Request $request)
