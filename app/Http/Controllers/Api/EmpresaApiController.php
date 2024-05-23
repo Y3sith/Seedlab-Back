@@ -6,7 +6,9 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 
 use App\Models\ApoyoEmpresa;
+use App\Models\Departamento;
 use App\Models\Empresa;
+use App\Models\Municipio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -32,12 +34,23 @@ class EmpresaApiController extends Controller
      */
     public function store(Request $request)
 {
-    // Crear empresa
-    if(Auth::user()->id_rol!=5){
+    // Verificar permisos
+    if(Auth::user()->id_rol != 5){
         return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
     }
 
-    $empresa= Empresa::create([
+    $nombreMunicipio = $request->input('id_municipio');
+    $municipio = Municipio::where('nombre', $nombreMunicipio)->first();
+    //dd($municipio);
+
+    if ($municipio) {
+    $id_municipio = $municipio->id;
+    } else {
+    // Manejar el caso en el que el municipio no se encuentre
+    return response()->json(["error" => "Municipio no encontrado"], 404);
+    }
+    // Crear empresa
+    $empresa = Empresa::create([
         "nombre" => $request->nombre,
         "documento" => $request->documento,
         "cargo" => $request->cargo,
@@ -51,14 +64,14 @@ class EmpresaApiController extends Controller
         "experiencia" => $request->experiencia,
         "funciones" => $request->funciones,
         "id_tipo_documento" => $request->id_tipo_documento,
-        "id_municipio" => $request->id_municipio,
+        "id_municipio" => $id_municipio,
         "id_emprendedor" => $request->id_emprendedor,
-
     ]);
-   
-    if ($request->filled('apoyos')){
-        $apoyos = $request->apoyos;
-        foreach ($apoyos as $apoyo){
+
+    // Manejar apoyos
+    if ($request->filled('apoyos')) {
+        $apoyos = $request->input('apoyos');
+        foreach ($apoyos as $apoyo) {
             $nuevoApoyo = new ApoyoEmpresa();
             $nuevoApoyo->documento = $apoyo['documento'];
             $nuevoApoyo->nombre = $apoyo['nombre'];
@@ -68,12 +81,14 @@ class EmpresaApiController extends Controller
             $nuevoApoyo->celular = $apoyo['celular'];
             $nuevoApoyo->email = $apoyo['email'];
             $nuevoApoyo->id_tipo_documento = $apoyo['id_tipo_documento'];
-            $nuevoApoyo->id_empresa = $empresa->documento;
+            $nuevoApoyo->id_empresa = $empresa->id;
             $nuevoApoyo->save();
         }
     }
-    return response()->json($empresa, 200);
+
+    return response()->json(['message' => 'Empresa creada exitosamente', 'empresa' => $empresa], 200);
 }
+
 
 
     /**

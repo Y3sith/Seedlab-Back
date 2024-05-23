@@ -7,6 +7,7 @@ use App\Models\ApoyoEmpresa;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class Apoyo_por_EmpresaController extends Controller
 {

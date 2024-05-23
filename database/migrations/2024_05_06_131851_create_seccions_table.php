@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('seccion',function(Blueprint $table){
             $table->id();
             $table->text('nombre');
+            $table->double('puntaje');
         });
     }
 
