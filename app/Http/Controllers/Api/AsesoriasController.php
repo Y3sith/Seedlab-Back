@@ -200,6 +200,31 @@ class AsesoriasController extends Controller
 
     }
     
+    public function asignarAliado(Request $request, $idAsesoria) {
+        $nombreAliado = $request->input('nombreAliado');
+
+        $asesoria = Asesoria::find($idAsesoria);
+        if (!$asesoria) {
+            return response()->json(['message' => 'Asesoría no encontrada'], 404);
+        }
+
+        $aliado = Aliado::where('nombre', $nombreAliado)->first();
+        if (!$aliado) {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
+
+        $asesoria->id_aliado = $aliado->id;
+        $asesoria->save();
+
+        return response()->json(['message' => 'Aliado asignado correctamente'], 200);
+    }
+    /*
+    EJ de Json para "asignarAliado"
+    {
+	"nombreAliado": "Ecopetrol"
+    } 
+    */
+
     public function MostrarAsesorias($aliadoId, $asignacion) {
         if(Auth::user()->id_rol != 3){
             return response()->json([
