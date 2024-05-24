@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-
-use App\Models\Aliado;
-use App\Models\Asesoria;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
