@@ -163,13 +163,13 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
-    public function traerAsesoriasOrientador(Request $request)
+    public function traerasesoriasorientador(Request $request)
     {
         if(Auth::user()->id_rol != 2){
             return response()->json([
                'message' => 'No tienes permisos para realizar esta acción'], 403);
         }
-        $isNull = $request->input('is_null', true);
+        $isNull = $request->input('is_null');
 
         $cacheKey = 'asesorias_orientador_' . ($isNull ? 'null' : 'not_null');
 
