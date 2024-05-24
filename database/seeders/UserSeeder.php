@@ -109,5 +109,18 @@ class UserSeeder extends Seeder
             'estado' => 1,
             'id_rol' => 3,
         ]);
+
+        User::create([
+            'email' => 'uriel@emp.com',
+            'password' => bcrypt('12345678'),
+            'estado' => 1,
+            'id_rol' => 5,
+        ]);
+        User::create([
+            'email' => 'heidy@emp.com',
+            'password' => bcrypt('12345678'),
+            'estado' => 1,
+            'id_rol' => 5,
+        ]);
     }
 }
