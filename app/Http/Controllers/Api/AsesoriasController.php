@@ -163,43 +163,66 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
-    public function traerAsesoriasOrientador(Request $request)
-    {
-        if(Auth::user()->id_rol != 2){
-            return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'], 403);
-        }
-        $isNull = $request->input('is_null', true);
-
-        $cacheKey = 'asesorias_orientador_' . ($isNull ? 'null' : 'not_null');
-
-        $asesorias = Cache::remember($cacheKey, 60, function () use ($isNull) {
-            $query = Asesoria::with(['emprendedor.auth'])
-                ->where('isorientador', true)
-                ->when($isNull, function ($query) {
-                    $query->whereNull('id_aliado');
-                }, function ($query) {
-                    $query->whereNotNull('id_aliado');
-                });
-
-            return $query->get()->map(function ($asesoria) {
-                return [
-                    'id' => $asesoria->id,
-                    'Nombre_sol' => $asesoria->Nombre_sol,
-                    'notas' => $asesoria->notas,
-                    'fecha' => $asesoria->fecha,
-                    'documento' => $asesoria->emprendedor->documento,
-                    'nombres' => $asesoria->emprendedor->nombres,
-                    'celular' => $asesoria->emprendedor->celular,
-                    'email' => $asesoria->emprendedor->auth->email,
-                ];
-            });
-        });
-
-        return response()->json($asesorias);
-
+    public function traerasesoriasorientador(Request $request)
+{
+    if(Auth::user()->id_rol != 2){
+        return response()->json([
+           'message' => 'No tienes permisos para realizar esta acción'], 403);
     }
+    $Asignado = $request->input('pendiente');
+
+    $asesorias = Asesoria::with(['emprendedor.auth'])
+        ->where('isorientador', true)
+        ->when($Asignado, function ($query) {
+            $query->whereNull('id_aliado');
+        }, function ($query) {
+            $query->whereNotNull('id_aliado');
+        })
+        ->get()
+        ->map(function ($asesoria) {
+            $data=[
+                'id' => $asesoria->id,
+                'Nombre_sol' => $asesoria->Nombre_sol,
+                'notas' => $asesoria->notas,
+                'fecha' => $asesoria->fecha,
+                'documento' => $asesoria->emprendedor->documento,
+                'nombres' => $asesoria->emprendedor->nombres,
+                'celular' => $asesoria->emprendedor->celular,
+                'email' => $asesoria->emprendedor->auth->email
+            ];
+            if ($asesoria->aliado && $asesoria->aliado->nombre) {
+                $data['aliado_redirigido'] = $asesoria->aliado->nombre;
+            } 
+            return $data;
+        });
+    return response()->json($asesorias);
+}
     
+    public function asignarAliado(Request $request, $idAsesoria) {
+        $nombreAliado = $request->input('nombreAliado');
+
+        $asesoria = Asesoria::find($idAsesoria);
+        if (!$asesoria) {
+            return response()->json(['message' => 'Asesoría no encontrada'], 404);
+        }
+
+        $aliado = Aliado::where('nombre', $nombreAliado)->first();
+        if (!$aliado) {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
+
+        $asesoria->id_aliado = $aliado->id;
+        $asesoria->save();
+
+        return response()->json(['message' => 'Aliado asignado correctamente'], 200);
+    }
+    /*
+    EJ de Json para "asignarAliado"
+    {
+	"nombreAliado": "Ecopetrol"
+    } 
+    */
+
     public function MostrarAsesorias($aliadoId, $asignacion) {
         if(Auth::user()->id_rol != 3){
             return response()->json([
