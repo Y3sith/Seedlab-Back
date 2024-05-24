@@ -77,34 +77,29 @@ class EmprendedorApiController extends Controller
     $emprendedor->fecha_nac = $request->fecha_nac;
     $emprendedor->direccion = $request->direccion;
     $emprendedor->id_municipio = $request->id_municipio;
-    // $emprendedor->id_autentication = $request->id_autentication;
     $emprendedor->id_tipo_documento = $request->id_tipo_documento;
 
-    // Verificar si se proporcionó una contraseña para actualizar
-    if ($request->has('password')) {
-        // Validar la longitud de la contraseña
-        if (strlen($request->password) < 8) {
-            return response()->json(["error" => "La contraseña debe tener al menos 8 caracteres"], 400);
-        }
-        
-        // Cargar la relación user
-        $emprendedor->load('auth');
-
-        // Verificar si existe un usuario asociado al emprendedor
-        if ($emprendedor->auth) {
-            // Actualizar la contraseña en el modelo User asociado al Emprendedor
-            $user = $emprendedor->auth;
-            $user->password = Hash::make($request->password);
-            $user->save();
-        } else {
-            return response()->json(["error" => "No se encontró un usuario asociado al emprendedor"], 404);
-        }
+// Verificar si se proporcionó una contraseña para actualizar
+if ($request->has('password')) {
+    if (strlen($request->password) < 8) {
+        return response()->json(["error" => "La contraseña debe tener al menos 8 caracteres"], 400);
     }
-
-    // Guardar los cambios en el emprendedor
+    $emprendedor->load('auth');
+    // Verificar si existe un usuario asociado al emprendedor
+    if ($emprendedor->auth) {
+        $user = $emprendedor->auth;
+        // Verificar si la nueva contraseña es diferente de la contraseña actual
+        if (Hash::check($request->password, $user->password)) {
+            return response()->json(["error" => "La nueva contraseña no puede ser igual a la contraseña actual"], 400);
+        }
+        // Actualizar la contraseña en el modelo User asociado al Emprendedor
+        $user->password = Hash::make($request->password);
+        $user->save();
+    } else {
+        return response()->json(["error" => "No se encontró un usuario asociado al emprendedor"], 404);
+    }
+}
     $emprendedor->save();
-
-    // Devolver una respuesta de éxito
     return response()->json(['message' => 'Datos del emprendedor actualizados correctamente'], 200);
 }
 
