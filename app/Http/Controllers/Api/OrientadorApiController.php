@@ -6,6 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Asesoria;
+use App\Models\Aliado;
+use App\Models\User;
+
+
 
 class OrientadorApiController extends Controller
 {
@@ -69,4 +74,42 @@ class OrientadorApiController extends Controller
     {
         //
     }
+
+    public function asignarAliado(Request $request, $idAsesoria) {
+        $nombreAliado = $request->input('nombreAliado');
+
+        $asesoria = Asesoria::find($idAsesoria);
+        if (!$asesoria) {
+            return response()->json(['message' => 'Asesoría no encontrada'], 404);
+        }
+
+        $aliado = Aliado::where('nombre', $nombreAliado)->first();
+        if (!$aliado) {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
+
+        $asesoria->id_aliado = $aliado->id;
+        $asesoria->save();
+
+        return response()->json(['message' => 'Aliado asignado correctamente'], 200);
+    }
+    /*
+    EJ de Json para "asignarAliado"
+    {
+	"nombreAliado": "Ecopetrol"
+    } 
+    */
+
+    public function listarAliados()
+{
+    $usuarios = User::where('estado', true)
+                    ->where('id_rol', 3)
+                    ->pluck('id');
+
+    $aliados = Aliado::whereIn('id_autentication', $usuarios)
+                    ->get(['nombre']);
+    
+    return response()->json($aliados, 200);
+}
+
 }

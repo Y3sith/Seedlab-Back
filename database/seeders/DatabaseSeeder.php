@@ -27,6 +27,8 @@ class DatabaseSeeder extends Seeder
         $this->call(EmprendedorSeeder::class);
         $this->call(EmpresaSeeder::class);
         $this->call(AliadoSeeder::class);
+        $this->call(AsesoriaSeeder::class);
+
 
         
     }
