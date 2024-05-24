@@ -46,13 +46,14 @@ Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('
 
 //Orientador
 Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador'])->middleware('auth:api');
+Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAliado']);
 
 //Super Admin
 Route::apiResource('/superadmin',SuperAdminController::class)->middleware('auth:api');
 Route::get('/emprendedores&empresa',[SuperAdminController::class,'verEmprendedoresxEmpresa'])->middleware('auth:api');
 Route::post('/personalizacion',[SuperAdminController::class,'personalizacionSis'])->middleware('auth:api');
 Route::post('/crearsuper_admin',[SuperAdminController::class,'crearSuperAdmin'])->middleware('auth:api');
-   
+
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
