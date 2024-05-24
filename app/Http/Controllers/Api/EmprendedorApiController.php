@@ -11,6 +11,7 @@ use App\Models\Emprendedor;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class EmprendedorApiController extends Controller
 {
@@ -53,9 +54,65 @@ class EmprendedorApiController extends Controller
     }
 
 
-    public function update(){
-        
+    public function update(Request $request, $documento)
+{
+    // Verificar si el usuario autenticado tiene el rol adecuado
+    if (Auth::user()->id_rol != 5) {
+        return response()->json(["error" => "No tienes permisos para editar el perfil"], 401);
     }
+
+    // Obtener el emprendedor actual basado en el documento proporcionado
+    $emprendedor = Emprendedor::where('documento', $documento)->first();
+
+    // Validar si se encontró el emprendedor
+    if (!$emprendedor) {
+        return response()->json(["error" => "El emprendedor no fue encontrado"], 404);
+    }
+
+    // Actualizar los datos del emprendedor con los valores proporcionados en la solicitud
+    $emprendedor->nombre = $request->nombre;
+    $emprendedor->apellido = $request->apellido;
+    $emprendedor->celular = $request->celular;
+    $emprendedor->genero = $request->genero;
+    $emprendedor->fecha_nac = $request->fecha_nac;
+    $emprendedor->direccion = $request->direccion;
+    $emprendedor->id_municipio = $request->id_municipio;
+    // $emprendedor->id_autentication = $request->id_autentication;
+    $emprendedor->id_tipo_documento = $request->id_tipo_documento;
+
+    // Verificar si se proporcionó una contraseña para actualizar
+    if ($request->has('password')) {
+        // Validar la longitud de la contraseña
+        if (strlen($request->password) < 8) {
+            return response()->json(["error" => "La contraseña debe tener al menos 8 caracteres"], 400);
+        }
+        
+        // Cargar la relación user
+        $emprendedor->load('auth');
+
+        // Verificar si existe un usuario asociado al emprendedor
+        if ($emprendedor->auth) {
+            // Actualizar la contraseña en el modelo User asociado al Emprendedor
+            $user = $emprendedor->auth;
+            $user->password = Hash::make($request->password);
+            $user->save();
+        } else {
+            return response()->json(["error" => "No se encontró un usuario asociado al emprendedor"], 404);
+        }
+    }
+
+    // Guardar los cambios en el emprendedor
+    $emprendedor->save();
+
+    // Devolver una respuesta de éxito
+    return response()->json(['message' => 'Datos del emprendedor actualizados correctamente'], 200);
+}
+
+
+
+
+
+
 
 
 

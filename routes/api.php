@@ -40,6 +40,8 @@ Route::apiResource('/empresa',EmpresaApiController::class)->middleware('auth:api
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
+Route::put('/emprendedor/{documento}', [EmprendedorApiController::class, 'update'])->middleware('auth:api');
+
 
 //Orientador
 Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador'])->middleware('auth:api');
