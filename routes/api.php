@@ -45,6 +45,7 @@ Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('
 Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador'])->middleware('auth:api');
 Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAliado']);
 Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
+Route::get('/contarEmprendedores', [OrientadorApiController::class,'contarEmprendedores']);
 
 //Super Admin
 Route::group([
@@ -56,6 +57,8 @@ Route::group([
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
 });
+Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
+
    
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');

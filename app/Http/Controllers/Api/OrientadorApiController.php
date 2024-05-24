@@ -112,4 +112,10 @@ class OrientadorApiController extends Controller
     return response()->json($aliados, 200);
 }
 
+    public function contarEmprendedores() {
+        $enumerar = User::where('id_rol', 5)->where('estado', true)->count();
+
+        return response()->json(['Emprendedores activos' => $enumerar]);
+    }
+
 }
