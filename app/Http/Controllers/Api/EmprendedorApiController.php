@@ -52,29 +52,28 @@ class EmprendedorApiController extends Controller
         return response()->json($empresa->items(), 200);
     }
 
-    public function update(Request $request, $documento)
-    {
-        //editar el emprendedor
-        if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }
-        $emprendedor = Emprendedor::find($documento);
-        if (!$emprendedor) {
-            return response([
-                'message' => 'Emprendedor no encontrado',
-            ], 404);
-        }
-        $emprendedor->update([
-            "nombre" => $request->nombre,
-            "apellido" => $request->apellido,
-            "celular" => $request->celular,
-            "genero" => $request->genero,
-            "direccion" => $request->direccion,
-            "id_municipio" => $request->id_municipio,
-        ]);
 
-        return response()->json(['message' => 'Emprendedor actualizado', $emprendedor, 200]);
+    public function update(){
+        
     }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+   
+
+
+
 
     public function destroy($documento)
     {
