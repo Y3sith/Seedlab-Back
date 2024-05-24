@@ -8,6 +8,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Aliado;
+use App\Models\User;
+
 
 
 class OrientadorApiController extends Controller
@@ -97,4 +99,17 @@ class OrientadorApiController extends Controller
 	"nombreAliado": "Ecopetrol"
     } 
     */
+
+    public function listarAliados()
+{
+    $usuarios = User::where('estado', true)
+                    ->where('id_rol', 3)
+                    ->pluck('id');
+
+    $aliados = Aliado::whereIn('id_autentication', $usuarios)
+                    ->get(['nombre']);
+    
+    return response()->json($aliados, 200);
+}
+
 }

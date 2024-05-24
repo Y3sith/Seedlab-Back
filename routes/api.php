@@ -44,6 +44,7 @@ Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('
 //Orientador
 Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador'])->middleware('auth:api');
 Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAliado']);
+Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
 
 //Super Admin
 Route::group([
