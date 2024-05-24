@@ -27,9 +27,6 @@ class AsesoriasController extends Controller
         if (!$emprendedor) {
             return response(['message' => 'Emprendedor no encontrado'], 404);
         }
-        if (!$aliado) {
-            return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
-        }
 
         $asesoria = Asesoria::create([
             'Nombre_sol' => $request->input('nombre'),
@@ -37,7 +34,7 @@ class AsesoriasController extends Controller
             'isorientador' => $request->input('isorientador'),
             'asignacion' => $request->input('asignacion'),
             'fecha' => $request->input('fecha'),
-            'id_aliado' => $aliado->id,
+            'id_aliado' => $aliado ? $aliado->id : null,
             'doc_emprendedor' => $request->input('doc_emprendedor'),
         ]);
 
