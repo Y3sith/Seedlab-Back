@@ -28,6 +28,14 @@ class DatabaseSeeder extends Seeder
         $this->call(EmpresaSeeder::class);
         $this->call(AliadoSeeder::class);
         $this->call(AsesoriaSeeder::class);
+        $this->call(AsesorSeedeer::class);
+        $this->call(AsesoriasxAsesorSeeder::class);
+        $this->call(HorarioxAsesoriaSeeder::class);
+        $this->call(OrientadorSeeder::class);
+        $this->call(SuperadminSeeder::class);
+
+
+
 
 
         

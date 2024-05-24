@@ -9,6 +9,8 @@ class Orientador extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $table = 'orientador';
 
     protected $fillable = [
@@ -18,7 +20,6 @@ class Orientador extends Model
         'id_autentication'
     ];
 
-    public $timestaps = false;
 
     public function auth(){
         return $this->belongsTo(Autentication::class, 'id_autentication');
