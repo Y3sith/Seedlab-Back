@@ -9,6 +9,8 @@ class puntaje extends Model
 {
     use HasFactory;
 
+    public $timestamps = false;
+
     protected $table = 'puntaje';
 
     protected $fillable = [
