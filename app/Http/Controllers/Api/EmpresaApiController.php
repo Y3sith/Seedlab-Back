@@ -39,60 +39,94 @@ class EmpresaApiController extends Controller
         if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
         }
-        try {
-            // Buscar el municipio por nombre
-            $nombreMunicipio = $request->id_municipio;
-            $municipio = Municipio::where('nombre', $nombreMunicipio)->first();
-            //dd($municipio);
-            if (!$municipio) {
-                return response()->json(["error" => "Municipio no encontrado"], 404);
-            }
 
-            // Crear la empresa
-            $empresa = Empresa::create([
-                "nombre" => $request->nombre,
-                "documento" => $request->documento,
-                "cargo" => $request->cargo,
-                "razonSocial" => $request->razonSocial,
-                "url_pagina" => $request->url_pagina,
-                "telefono" => $request->telefono,
-                "celular" => $request->celular,
-                "direccion" => $request->direccion,
-                "correo" => $request->correo,
-                "profesion" => $request->profesion,
-                "experiencia" => $request->experiencia,
-                "funciones" => $request->funciones,
-                "id_tipo_documento" => $request->id_tipo_documento,
-                "id_municipio" => $municipio->id,
-                "id_emprendedor" => $request->id_emprendedor,
-            ]);
+        
+        // Buscar el municipio por nombre
+        $municipio = Municipio::where('nombre', $request->id_municipio)->first();
 
-            // Procesar apoyoEmpresa si existe
-            if ($request->apoyoEmpresa) {
-                ApoyoEmpresa::create([
-                    "nombre" => $request->nombre,
-                    "documento" => $request->documento,
-                    "apellido" => $request->apellido,
-                    "cargo" => $request->cargo,
-                    "telefono" => $request->telefono,
-                    "celular" => $request->celular,
-                    "email" => $request->email,
-                    "id_tipo_documento" => $request->id_tipo_documento,
-                    "id_empresa" => $empresa->documento,
-                ]);
-            }
-
-            // Confirmar la transacción
-            DB::commit();
-
-            return response()->json(["message" => "Empresa y apoyoEmpresa creados exitosamente", "empresa" => $empresa, "id" => $empresa->id], 200);
-        } catch (\Exception $e) {
-            // Deshacer la transacción
-            DB::rollBack();
-            return response()->json(["error" => "Ocurrió un error al crear la empresa y el apoyoEmpresa", "detalle" => $e->getMessage()], 500);
+        if (!$municipio) {
+            return response()->json(["message" => "Municipio no encontrado"], 404);
         }
+
+
+        // Crear la empresa
+        $empresa = Empresa::create([
+            "nombre" => $request->empresa['nombre'],
+            "documento" => $request->empresa['documento'],
+            "cargo" => $request->empresa['cargo'],
+            "razonSocial" => $request->empresa['razonSocial'],
+            "url_pagina" => $request->empresa['url_pagina'],
+            "telefono" => $request->empresa['telefono'],
+            "celular" => $request->empresa['celular'],
+            "direccion" => $request->empresa['direccion'],
+            "correo" => $request->empresa['correo'],
+            "profesion" => $request->empresa['profesion'],
+            "experiencia" => $request->empresa['experiencia'],
+            "funciones" => $request->empresa['funciones'],
+            "id_tipo_documento" => $request->empresa['id_tipo_documento'],
+            "id_municipio" => $municipio->id,
+            "id_emprendedor" => $request->empresa['id_emprendedor'],
+        ]);
+
+        // Procesar apoyoEmpresa si existe
+        if ($request->apoyoEmpresa) {
+            ApoyoEmpresa::create([
+                "nombre" => $request->apoyoEmpresa['nombre'],
+                "documento" => $request->apoyoEmpresa['documento'],
+                "apellido" => $request->apoyoEmpresa['apellido'],
+                "cargo" => $request->apoyoEmpresa['cargo'],
+                "telefono" => $request->apoyoEmpresa['telefono'],
+                "celular" => $request->apoyoEmpresa['celular'],
+                "email" => $request->apoyoEmpresa['email'],
+                "id_tipo_documento" => $request->apoyoEmpresa['id_tipo_documento'],
+                "id_empresa" => $empresa->documento,
+            ]);
+        }
+        return response()->json(["message" => "Empresa y apoyoEmpresa creados exitosamente", "empresa" => $empresa], 200);
     }
 
+    public function crearEmpresaconAliado(Request $data){
+        $response = null;
+        $statusCode = 200;
+
+        DB::transaction(function() use($data, &$response, &$statusCode ){
+        $results = DB::select('CALL crearEmpresaYApoyo(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $data['documentoEmpresa'],
+                $data['nombreEmpresa'],
+                $data['cargoEmpresa'],
+                $data['razonSocial'],
+                $data['urlPagina'],
+                $data['telefonoEmpresa'],
+                $data['celularEmpresa'],
+                $data['direccionEmpresa'],
+                $data['profesion'],
+                $data['correoEmpresa'],
+                $data['experiencia'],
+                $data['funciones'],
+                $data['idTipoDocumentoEmpresa'],
+                $data['documentoApoyo'],
+                $data['nombreApoyo'],
+                $data['apellidoApoyo'],
+                $data['cargoApoyo'],
+                $data['telefonoApoyo'],
+                $data['celularApoyo'],
+                $data['correoApoyo'],
+                $data['idTipoApoyo'],
+                $data['municipio'],
+                $data['id_emprendedor']
+            ]);
+
+            if(!empty($results)){
+                $response = $results[0]->mensaje;
+                if ($response === 'La empresa ya ha sido registrada') {
+                    $statusCode = 400;
+                }
+            }
+        });
+
+        return response()->json(["message" => $response], $statusCode);
+
+    }
 
 
     /**
