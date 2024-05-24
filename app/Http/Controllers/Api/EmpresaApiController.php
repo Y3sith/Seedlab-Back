@@ -36,9 +36,9 @@ class EmpresaApiController extends Controller
     public function store(Request $request)
     {
         // Verificar permisos de usuario
-        if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-        }
+        // if (Auth::user()->id_rol != 5) {
+        //     return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+        // }
 
         
         // Buscar el municipio por nombre
@@ -51,36 +51,38 @@ class EmpresaApiController extends Controller
 
         // Crear la empresa
         $empresa = Empresa::create([
-            "nombre" => $request->empresa['nombre'],
-            "documento" => $request->empresa['documento'],
-            "cargo" => $request->empresa['cargo'],
-            "razonSocial" => $request->empresa['razonSocial'],
-            "url_pagina" => $request->empresa['url_pagina'],
-            "telefono" => $request->empresa['telefono'],
-            "celular" => $request->empresa['celular'],
-            "direccion" => $request->empresa['direccion'],
-            "correo" => $request->empresa['correo'],
-            "profesion" => $request->empresa['profesion'],
-            "experiencia" => $request->empresa['experiencia'],
-            "funciones" => $request->empresa['funciones'],
-            "id_tipo_documento" => $request->empresa['id_tipo_documento'],
-            "id_municipio" => $municipio->id,
-            "id_emprendedor" => $request->empresa['id_emprendedor'],
+            "nombre" => $request->input('nombre'),
+            "documento" =>$request->input('documento'),
+            "cargo" =>$request->input('cargo'),
+            "razonSocial" =>$request->input('razonSocial'),
+            "url_pagina" => $request->input('url_pagina'),
+            "telefono" =>$request->input('telefono'),
+            "celular" => $request->input('celular'),
+            "direccion" => $request->input('direccion'),
+            "correo" => $request->input('correo'),
+            "profesion" =>$request->input('profesion'),
+            "experiencia" =>$request->input('experiencia'),
+            "funciones" =>$request->input('funciones'),
+            "id_tipo_documento" => $request->input('id_tipo_documento'),
+            "id_municipio" => $municipio->id, 
+            "id_emprendedor" =>$request->input('id_emprendedor'),
         ]);
 
         // Procesar apoyoEmpresa si existe
-        if ($request->apoyoEmpresa) {
-            ApoyoEmpresa::create([
-                "nombre" => $request->apoyoEmpresa['nombre'],
-                "documento" => $request->apoyoEmpresa['documento'],
-                "apellido" => $request->apoyoEmpresa['apellido'],
-                "cargo" => $request->apoyoEmpresa['cargo'],
-                "telefono" => $request->apoyoEmpresa['telefono'],
-                "celular" => $request->apoyoEmpresa['celular'],
-                "email" => $request->apoyoEmpresa['email'],
-                "id_tipo_documento" => $request->apoyoEmpresa['id_tipo_documento'],
-                "id_empresa" => $empresa->documento,
-            ]);
+        if ($request->has('apoyoEmpresa') && is_array($request->input('apoyoEmpresa'))) {
+            foreach ($request->input('apoyoEmpresa') as $apoyo) {
+                ApoyoEmpresa::create([
+                    "documento" => $apoyo['documento'],
+                    "nombre" => $apoyo['nombre'],
+                    "apellido" => $apoyo['apellido'],
+                    "cargo" => $apoyo['cargo'],
+                    "telefono" => $apoyo['telefono'],
+                    "celular" => $apoyo['celular'],
+                    "email" => $apoyo['email'],
+                    "id_tipo_documento" => $apoyo['id_tipo_documento'],
+                    "id_empresa" => $empresa->documento,
+                ]);
+            }
         }
         return response()->json(["message" => "Empresa y apoyoEmpresa creados exitosamente", "empresa" => $empresa], 200);
     }
