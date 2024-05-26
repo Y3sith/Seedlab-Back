@@ -36,8 +36,8 @@ Route::group([
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 //Empresa
-Route::post('/createEmpresa', [EmpresaApiController::class, 'crearEmpresaconAliado'])->middleware('auth:api');
 Route::apiResource('/empresa',EmpresaApiController::class)->middleware('auth:api');
+Route::post('/createEmpresa', [EmpresaApiController::class, 'store'])->middleware('auth:api');
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
