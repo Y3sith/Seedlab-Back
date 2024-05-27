@@ -42,13 +42,73 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         $token->save();
-
+        $additionalInfo = $this->getAdditionalInfo($user);
+        $info = [];
         return response()->json([
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            'user' => $user
+            'additional_info' => $additionalInfo
         ]);
+    }
+
+    protected function getAdditionalInfo($user)
+    {
+        $info = [];
+
+        if ($user->id_rol == 3) {
+            $info = [
+                'id'=>$user->aliado->id,
+                'nombre' => $user->aliado->nombre,
+                'id_autentication' => $user->aliado->id_autentication,
+                'id_rol' => $user->id_rol
+                
+            ];
+        } elseif ($user->id_rol == 4) {
+            $info = [
+                'id'=>$user->asesor->id,
+                'id_autentication' => $user->asesor->id_autentication,
+                'id_aliado' => $user->asesor->id_aliado,
+                'id_rol' => $user->id_rol
+                
+            ];
+        } elseif ($user->id_rol == 5){
+            $info = [
+                'nombre' => $user->emprendedor->nombre,
+                'apellido' => $user->emprendedor->apellido,
+                'documento' => $user->emprendedor->documento,
+                'celular' => $user->emprendedor->celular,
+                'genero' => $user->emprendedor->genero,
+                'fecha_nac' => $user->emprendedor->fecha_nac,
+                'direccion' => $user->emprendedor->direccion,
+                'id_autentication' => $user->emprendedor->id_autentication,
+                'id_tipo_documento' => $user->emprendedor->id_tipo_documento,
+                'id_municipio' => $user->emprendedor->id_municipio,
+                'id_rol' => $user->id_rol
+                
+            ];
+        } elseif ($user->id_rol == 1){
+            $info = [
+                'id'=>$user->superadmin->id,
+                'nombre'=>$user->superadmin->nombre,
+                'apellido' => $user->superadmin->apellido,
+                'id_autentication' => $user->superadmin->id_autentication,
+                'id_rol' => $user->id_rol
+                
+                
+            ];
+        } elseif ($user->id_rol == 2){
+            $info = [
+                'id'=>$user->organizador->id,
+                'nombre'=>$user->organizador->nombre,
+                'apellido' => $user->organizador->apellido,
+                'id_autentication' => $user->organizador->id_autentication,
+                'id_rol' => $user->id_rol
+            ];
+        }
+    
+
+        return $info;
     }
 
 
