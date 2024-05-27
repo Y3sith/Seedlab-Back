@@ -36,9 +36,9 @@ class EmpresaApiController extends Controller
     public function store(Request $request)
     {
         // Verificar permisos de usuario
-        if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-        }
+        // if (Auth::user()->id_rol != 5) {
+        //     return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+        // }
 
         // Validar datos de entrada
         $validatedData = $request->validate([
