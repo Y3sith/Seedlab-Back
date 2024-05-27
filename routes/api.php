@@ -30,7 +30,6 @@ Route::group([
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register_em', [AuthController::class, 'register'])->name('register');
     Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
-    
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
@@ -41,11 +40,17 @@ Route::post('/createEmpresa', [EmpresaApiController::class, 'store'])->middlewar
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
+Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
 
 //Orientador
-Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador'])->middleware('auth:api');
-Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAliado']);
-Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
+Route::group([
+    'prefix' => 'orientador',
+    'middelware' => 'auth:api'
+], function(){
+    Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
+    Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAsesoriaAliado']);
+    Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
+});
 
 //Super Admin
 Route::group([
@@ -108,7 +113,6 @@ Route::group([
 });
 
 
-Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
 
 
 

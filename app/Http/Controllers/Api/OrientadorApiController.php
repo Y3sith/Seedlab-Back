@@ -30,6 +30,12 @@ class OrientadorApiController extends Controller
         $response = null;
         $statusCode = 200;
 
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
+
         DB::transaction(function()use ($data, &$response, &$statusCode){
              $results = DB::select('CALL sp_registrar_orientador(?,?,?,?,?,?)', [
                   $data['nombre'],
@@ -75,7 +81,13 @@ class OrientadorApiController extends Controller
         //
     }
 
-    public function asignarAliado(Request $request, $idAsesoria) {
+    public function asignarAsesoriaAliado(Request $request, $idAsesoria) {
+
+        if(Auth::user()->id_rol != 2){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
         $nombreAliado = $request->input('nombreAliado');
 
         $asesoria = Asesoria::find($idAsesoria);
@@ -101,7 +113,10 @@ class OrientadorApiController extends Controller
     */
 
     public function listarAliados()
-{
+{   
+    if(Auth::user()->id_rol!=2){
+        return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+    }
     $usuarios = User::where('estado', true)
                     ->where('id_rol', 3)
                     ->pluck('id');

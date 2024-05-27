@@ -47,11 +47,11 @@ class EmpresaApiController extends Controller
             'empresa.cargo' => 'required|string',
             'empresa.razonSocial' => 'required|string',
             'empresa.url_pagina' => 'nullable|string',
-            'empresa.telefono' => 'nullable|string|max:20',
-            'empresa.celular' => 'nullable|string|max:20',
-            'empresa.direccion' => 'nullable|string|',
+            'empresa.telefono' => 'required|string|max:10',
+            'empresa.celular' => 'required|string|max:13',
+            'empresa.direccion' => 'required|string|',
             'empresa.correo' => 'required|string|email',
-            'empresa.profesion' => 'nullable|string',
+            'empresa.profesion' => 'required|string',
             'empresa.experiencia' => 'nullable|string',
             'empresa.funciones' => 'nullable|string',
             'empresa.id_tipo_documento' => 'required|integer',
@@ -61,8 +61,8 @@ class EmpresaApiController extends Controller
             'apoyos.*.nombre' => 'nullable|string',
             'apoyos.*.apellido' => 'nullable|string',
             'apoyos.*.cargo' => 'nullable|string',
-            'apoyos.*.telefono' => 'nullable|string|max:20',
-            'apoyos.*.celular' => 'nullable|string|max:20',
+            'apoyos.*.telefono' => 'nullable|string|max:10',
+            'apoyos.*.celular' => 'nullable|string|max:13',
             'apoyos.*.email' => 'nullable|string|email',
             'apoyos.*.id_tipo_documento' => 'nullable|integer',
         ]);
@@ -120,53 +120,6 @@ class EmpresaApiController extends Controller
         ], 200);
     }
 
-
-
-
-    public function crearEmpresaconAliado(Request $data)
-    {
-        $response = null;
-        $statusCode = 200;
-
-        DB::transaction(function () use ($data, &$response, &$statusCode) {
-
-            $results = DB::select('CALL crearEmpresaYApoyo(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
-                $data['documento'],
-                $data['nombre'],
-                $data['cargo'],
-                $data['razonSocial'],
-                $data['url_Pagina'],
-                $data['telefono'],
-                $data['celular'],
-                $data['direccion'],
-                $data['profesion'],
-                $data['correo'],
-                $data['experiencia'],
-                $data['funciones'],
-                $data['id_tipo_documento'],
-                $data['id_municipio'],
-                $data['id_emprendedor'],
-                $data['documento'],
-                $data['nombre'],
-                $data['apellido'],
-                $data['cargo'],
-                $data['telefono'],
-                $data['celular'],
-                $data['correo'],
-                $data['id_tipo_documento'],
-                $data['id_empresa']
-            ]);
-
-            if (!empty($results)) {
-                $response = $results[0]->mensaje;
-                if ($response === 'La empresa ya ha sido registrada') {
-                    $statusCode = 400;
-                }
-            }
-        });
-
-        return response()->json(["message" => $response], $statusCode);
-    }
 
 
     /**

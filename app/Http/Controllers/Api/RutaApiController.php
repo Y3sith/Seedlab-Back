@@ -48,6 +48,9 @@ class RutaApiController extends Controller
      
      public function mostrarRutaConContenido($id)
     {
+        if(!Auth::user()){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
         // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
         $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->get();
 
