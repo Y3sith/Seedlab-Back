@@ -34,14 +34,23 @@ class AsesoriasController extends Controller
             return response(['message' => 'Emprendedor no encontrado'], 404);
         }
 
+        $validatedData = $request->validate([
+            'asesoria.Nombre_sol'=>'required|string',
+            'asesoria.notas'=>'required|string',
+            'asesoria.isorientador'=>'required|string',
+            'asesoria.asignacion'=>'required|string',
+            'asesoria.fecha'=>'required|string',
+            'asesoria.id_aliado'=>'required|integer',
+            'asesoria.doc_emprendedor'=>'required|string'
+        ]);
         $asesoria = Asesoria::create([
-            'Nombre_sol' => $request->input('nombre'),
-            'notas' => $request->input('notas'),
-            'isorientador' => $request->input('isorientador'),
-            'asignacion' => $request->input('asignacion'),
-            'fecha' => $request->input('fecha'),
+            'Nombre_sol' => $validatedData['asesoria']['Nombre_sol'],
+            'notas' => $validatedData['asesoria']['notas'],
+            'isorientador' => $validatedData['asesoria']['isorientador'],
+            'asignacion' => $validatedData['asesoria']['asignacion'],
+            'fecha' => $validatedData['asesoria']['fecha'],
             'id_aliado' => $aliado ? $aliado->id : null,
-            'doc_emprendedor' => $request->input('doc_emprendedor'),
+            'doc_emprendedor' => $validatedData['asesoria']['doc_emprendedor'],
         ]);
 
         return response()->json(['message' => 'La asesoria se ha solicitado con exito'], 201);
