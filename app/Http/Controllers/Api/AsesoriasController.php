@@ -22,22 +22,24 @@ class AsesoriasController extends Controller
         if(Auth::user()->id_rol!=5){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
-        $aliado = Aliado::where('nombre', $request->input('nom_aliado'))->first();
+        $aliado = null;
+        if ($request->filled('nom_aliado')) { //verificar si el campo nom_aliado está presente y no está vacío. Solo busca el aliado si este campo está lleno.
+            $aliado = Aliado::where('nombre', $request->input('nom_aliado'))->first();
+            if (!$aliado) {
+                return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
+            }
+        }
         $emprendedor = Emprendedor::find($request->input('doc_emprendedor'))->first();
         if (!$emprendedor) {
             return response(['message' => 'Emprendedor no encontrado'], 404);
         }
-        if (!$aliado) {
-            return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
-        }
-
         $asesoria = Asesoria::create([
             'Nombre_sol' => $request->input('nombre'),
             'notas' => $request->input('notas'),
             'isorientador' => $request->input('isorientador'),
             'asignacion' => $request->input('asignacion'),
             'fecha' => $request->input('fecha'),
-            'id_aliado' => $aliado->id,
+            'id_aliado' => $aliado ? $aliado->id : null,
             'doc_emprendedor' => $request->input('doc_emprendedor'),
         ]);
 
@@ -247,5 +249,32 @@ class AsesoriasController extends Controller
 
         return response()->json($asesorias);
     }
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+    public function traerAsesoriasParaAliado(Request $request)
+    {
+        if (Auth::user()->id_rol != 3) {
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
+
+        $idAliado = Auth::user()->aliado->id;  // Asumiendo que el usuario autenticado tiene una relación con el modelo Aliado
+        $estado = $request->input('estado', 'pendiente'); // Estado de la asesoría: pendiente, aceptada, rechazada
+
+        $asesorias = Asesoria::with(['emprendedor', 'horarios'])
+            ->where('id_aliado', $idAliado)
+            ->whereHas('horarios', function ($query) use ($estado) {
+                $query->where('estado', $estado);
+            })
+            ->get();
+            //dd($asesorias);
+        return response()->json($asesorias);
+    }
+
+
+
+
 
 }

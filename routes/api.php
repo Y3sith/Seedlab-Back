@@ -72,6 +72,7 @@ Route::group([
     Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
+    Route::post('/asesoria/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
 });
 
 //Rutas
@@ -94,13 +95,17 @@ Route::group([
     'prefix' => 'asesorias',
     'middleware' =>'auth:api'
 ], function(){
-    Route::post('/solictud_asesoria',[AsesoriasController::class,'guardarAsesoria']); //guardar asesoria - emprendedor
+    
+    Route::post('/solictud_asesoria',[AsesoriasController::class,'guardarAsesoria']);//guardar asesoria - emprendedor
     Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarAsesoria'])->name('asignarasesoria'); //asignar asesoria - aliado
     Route::post('/horario_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('definirhorarioasesoria'); //asignar horario - asesor
     Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('editarasignacionasesoria'); //editar asesor - aliado
     Route::post('/mis_asesorias',[AsesoriasController::class, 'traerAsesoriasPorEmprendedor'])->name('traerAsesoriasPorEmprendedor');// ver asesorias - emprendedor
     Route::get('/asesoriaOrientador',[AsesoriasController::class, 'traerAsesoriasOrientador']); // ver asesorias - orientador
     Route::get('/mostrarAsesorias/{id}/{asignacion}', [AsesoriasController::class, 'MostrarAsesorias'])->name('MostrarAsesorias'); //ver asesorias de aliado
+
+    
+
 });
 
 
