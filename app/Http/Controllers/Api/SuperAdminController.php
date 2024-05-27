@@ -37,6 +37,12 @@ class SuperAdminController extends Controller
 
     public function personalizacionSis(Request $request)
     {
+        if(Auth::user()->id_rol != 1){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+        
         $personalizacion = PersonalizacionSistema::create([
             'imagen_Logo' => $request->input('imagen_Logo'),
             'nombre_sistema' => $request->input('nombre_sistema'),
@@ -58,6 +64,16 @@ class SuperAdminController extends Controller
     {
         $response = null;
         $statusCode = 200;
+
+        if(Auth::user()->id_rol != 1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
 
         DB::transaction(function()use ($data, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_superadmin(?,?,?,?,?)', [

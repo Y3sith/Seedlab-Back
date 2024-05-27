@@ -7,6 +7,11 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\Asesoria;
+use App\Models\Aliado;
+use App\Models\User;
+
+
 
 class OrientadorApiController extends Controller
 {
@@ -25,6 +30,12 @@ class OrientadorApiController extends Controller
     {
         $response = null;
         $statusCode = 200;
+
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
         if (Auth::user()->id_rol !== 1) {
             return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
         }
@@ -72,4 +83,51 @@ class OrientadorApiController extends Controller
     {
         //
     }
+
+    public function asignarAsesoriaAliado(Request $request, $idAsesoria) {
+
+        if(Auth::user()->id_rol != 2){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+        $nombreAliado = $request->input('nombreAliado');
+
+        $asesoria = Asesoria::find($idAsesoria);
+        if (!$asesoria) {
+            return response()->json(['message' => 'Asesoría no encontrada'], 404);
+        }
+
+        $aliado = Aliado::where('nombre', $nombreAliado)->first();
+        if (!$aliado) {
+            return response()->json(['message' => 'Aliado no encontrado'], 404);
+        }
+
+        $asesoria->id_aliado = $aliado->id;
+        $asesoria->save();
+
+        return response()->json(['message' => 'Aliado asignado correctamente'], 200);
+    }
+    /*
+    EJ de Json para "asignarAliado"
+    {
+	"nombreAliado": "Ecopetrol"
+    } 
+    */
+
+    public function listarAliados()
+{   
+    if(Auth::user()->id_rol!=2){
+        return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+    }
+    $usuarios = User::where('estado', true)
+                    ->where('id_rol', 3)
+                    ->pluck('id');
+
+    $aliados = Aliado::whereIn('id_autentication', $usuarios)
+                    ->get(['nombre']);
+    
+    return response()->json($aliados, 200);
+}
+
 }

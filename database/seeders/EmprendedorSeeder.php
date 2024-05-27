@@ -22,7 +22,7 @@ class EmprendedorSeeder extends Seeder
             "fecha_nac"=> "1998-06-03",
             "direccion"=>"manzaka k",
             "email_verified_at"=>"2024/05/17",
-            "cod_ver"=> null,
+            "cod_ver"=> "153567",
             "id_autentication"=> 5,
             "id_tipo_documento"=> 1,
             "id_municipio"=> 866
@@ -35,9 +35,9 @@ class EmprendedorSeeder extends Seeder
             "genero"=> "f",
             "fecha_nac"=> "1998-06-03",
             "direccion"=>"manzaka k",
-            "email_verified_at"=>null,
-            "cod_ver"=> null,
-            "id_autentication"=> 3,
+            "email_verified_at"=>"2024/05/17",
+            "cod_ver"=> "183567",
+            "id_autentication"=> 16,
             "id_tipo_documento"=> 1,
             "id_municipio"=> 866
         ]);
@@ -49,9 +49,9 @@ class EmprendedorSeeder extends Seeder
             "genero"=> "f",
             "fecha_nac"=> "1998-06-03",
             "direccion"=>"manzaka k",
-            "email_verified_at"=>null,
-            "cod_ver"=> null,
-            "id_autentication"=> 2,
+            "email_verified_at"=>"2024/05/17",
+            "cod_ver"=> "113562",
+            "id_autentication"=> 15,
             "id_tipo_documento"=> 1,
             "id_municipio"=> 866
         ]);
