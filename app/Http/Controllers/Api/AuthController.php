@@ -70,11 +70,11 @@ class AuthController extends Controller
             ];
         } elseif ($user->id_rol == 4) {
             $info = [
+                
                 'id'=>$user->asesor->id,
                 'id_autentication' => $user->asesor->id_autentication,
                 'id_aliado' => $user->asesor->id_aliado,
                 'id_rol' => $user->id_rol
-                
             ];
         } elseif ($user->id_rol == 5){
             $info = $user;
@@ -89,10 +89,11 @@ class AuthController extends Controller
             ];
         } elseif ($user->id_rol == 2){
             $info = [
-                'id'=>$user->organizador->id,
-                'nombre'=>$user->organizador->nombre,
-                'apellido' => $user->organizador->apellido,
-                'id_autentication' => $user->organizador->id_autentication,
+                $user,
+                'id'=>$user->orientador->id,
+                'nombre'=>$user->orientador->nombre,
+                'apellido' => $user->orientador->apellido,
+                'id_autentication' => $user->orientador->id_autentication,
                 'id_rol' => $user->id_rol
             ];
         }
