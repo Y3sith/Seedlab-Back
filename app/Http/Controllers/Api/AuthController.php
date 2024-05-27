@@ -62,7 +62,7 @@ class AuthController extends Controller
 
         if ($user->id_rol == 3) {
             $info = [
-                $user,
+
                 'id'=>$user->aliado->id,
                 'nombre' => $user->aliado->nombre,
                 'id_autentication' => $user->aliado->id_autentication,
@@ -89,7 +89,7 @@ class AuthController extends Controller
             ];
         } elseif ($user->id_rol == 2){
             $info = [
-                $user,
+                //$user,
                 'id'=>$user->orientador->id,
                 'nombre'=>$user->orientador->nombre,
                 'apellido' => $user->orientador->apellido,
