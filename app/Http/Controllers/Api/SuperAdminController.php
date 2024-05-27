@@ -11,6 +11,9 @@ use App\Models\Empresa;
 use App\Models\PersonalizacionSistema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Rol;
+
 
 
 
@@ -136,5 +139,33 @@ class SuperAdminController extends Controller
 
         return response()->json(['message' =>'SuperAdmin desactivado'], 200);
        
+    }
+
+    public function enumerarUsuarios() {
+        $roles = Rol::all();
+        $result = [];
+
+        $totalUsers = User::count();
+
+        foreach ($roles as $rol) {
+            $countActive = User::where('id_rol', $rol->id)->where('estado', true)->count();
+            $percentageActive = $totalUsers > 0 ? ($countActive / $totalUsers) * 100 : 0;
+
+            $result[$rol->nombre] = [
+                '# de usuarios activos' => $countActive,
+                'Porcentaje del total' => round($percentageActive, 2) . '%'
+            ];
+        }
+
+        $activeUsersCount = User::where('estado', true)->count();
+        $inactiveUsersCount = User::where('estado', false)->count();
+
+        $activePercentage = $totalUsers > 0 ? ($activeUsersCount / $totalUsers) * 100 : 0;
+        $inactivePercentage = $totalUsers > 0 ? ($inactiveUsersCount / $totalUsers) * 100 : 0;
+
+        $result['activos'] = round($activePercentage, 2) . '%';
+        $result['inactivos'] = round($inactivePercentage, 2) . '%';
+
+        return response()->json($result);
     }
 }

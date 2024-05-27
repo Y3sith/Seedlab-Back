@@ -62,6 +62,8 @@ Route::group([
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
 });
+Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
+
    
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
