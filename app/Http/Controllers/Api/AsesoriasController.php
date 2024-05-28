@@ -66,7 +66,7 @@ class AsesoriasController extends Controller
         $asesorexiste = Asesor::where('id', $request->input('id_asesor'))->first();
 
         if (!$asesorexiste) {
-            return response()->json(['message' => 'Este asesor no existe en el sistema'], 201);
+            return response()->json(['message' => 'Este asesor no existe en el sistema'], 404);
         }
         if ($asesoriaexiste) {
             return response()->json(['message' => 'Esta asesoria ya se ha asignado, edita la asignación'], 201);
