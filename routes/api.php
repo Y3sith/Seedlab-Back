@@ -103,8 +103,7 @@ Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAses
 
 //asesorias
 Route::group([
-    'prefix' => 'asesorias',
-    'middleware' =>'auth:api'
+    'prefix' => 'asesorias'
 ], function(){
     
     Route::post('/solicitud_asesoria',[AsesoriasController::class,'guardarAsesoria']);//guardar asesoria - emprendedor
