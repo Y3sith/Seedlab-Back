@@ -245,6 +245,7 @@ class AliadoApiController extends Controller
     elseif ($accion === 'rechazar') {
         //$horario->estado = 'rechazada';
         $asesoria->id_aliado = null;  // Establecer id_aliado a null
+        $asesoria->isorientador = true;
         $asesoria->save(); // Guardar cambios en la asesoria
         $mensaje = 'Asesoría rechazada correctamente';
     } else {
