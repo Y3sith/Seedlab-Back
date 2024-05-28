@@ -316,10 +316,10 @@ class AsesoriasController extends Controller
 
     public function listarasesoresdisponibles($idaliado)
     {
-        // if (Auth::user()->id_rol != 3) {
-        //     return response()->json([
-        //         'message' => 'No tienes permisos para realizar esta acción'], 403);
-        // }
+        if (Auth::user()->id_rol != 3) {
+            return response()->json([
+                'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
         $asesores = Asesor::selectRaw(
             'asesor.id as id_asesor,
             CONCAT(asesor.nombre, " ",asesor.apellido) as nombre_completo,
@@ -334,7 +334,7 @@ class AsesoriasController extends Controller
         ->leftJoin('horarioasesoria', 'asesoriaxasesor.id_asesoria', '=', 'horarioasesoria.id_asesoria')
         ->where('asesor.id_aliado', $idaliado)
         ->whereRaw('users.estado = true')
-        ->groupBy('asesor.id')
+        ->groupBy('asesor.id','nombre_completo')
         ->get();
     
         return $asesores;
