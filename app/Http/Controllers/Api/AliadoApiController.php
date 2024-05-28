@@ -9,7 +9,11 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
-use App\Models\HorarioAsesoria;
+use App\Models\Asesor;
+
+
+
+
 
 class AliadoApiController extends Controller
 {
@@ -195,41 +199,24 @@ class AliadoApiController extends Controller
         return response()->json($asesores);
     }
 
-   public function gestionarAsesoria(Request $request)
-    {
-        if (Auth::user()->id_rol != 3) {
-            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-        }
+    public function dashboardAliado($idAliado){
+        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
+        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Finalizada');
+        })->count();
 
-        $asesoriaId = $request->input('id_asesoria');
-        $accion = $request->input('accion'); // aceptar o rechazar
+        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Activa');
+        })->count();
+        
+        //CONTAR # DE ASESORES DE ESE ALIADO
+        $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
 
-        $asesoria = Asesoria::find($asesoriaId);
+        return response()->json([
+            'Asesorias Finalizadas' => $finalizadas,
+            'Asesorias Activas' => $activas,
+            'Mis Asesores' => $numAsesores,
+        ]);
 
-        if (!$asesoria || $asesoria->id_aliado != Auth::user()->aliado->id) {
-            return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
-        }
-
-        /*$horario = HorarioAsesoria::where('id_asesoria', $asesoriaId)->first(); innesesario pero si quiere cambiarle el estado en horario
-        if (!$horario) {
-            return response()->json(['message' => 'No se encontró un horario para esta asesoría'], 404);
-        }*/
-
-       /* if ($accion === 'aceptar') {
-            $horario->estado = 'aceptada';
-            $mensaje = 'Asesoría aceptada correctamente';
-        } */
-        elseif ($accion === 'rechazar') {
-           // $horario->estado = 'rechazada';
-            $asesoria->id_aliado= null;
-            $asesoria->save();
-            $mensaje = 'Asesoría rechazada correctamente';
-        } else {
-            return response()->json(['message' => 'Acción no válida'], 400);
-        }
-
-       //$horario->save();
-
-        return response()->json(['message' => $mensaje], 200);
     }
 }
