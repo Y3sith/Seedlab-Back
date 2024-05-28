@@ -75,19 +75,18 @@ class AsesorApiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $asesor = Asesor::find($id);
-        if(Auth::user()->id_rol != 3 ){
-            return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        if(Auth::user()-> id_rol == 3 || Auth::user()-> id_rol ==4){
+            $asesor = Asesor::find($id);
+            $asesor->update([
+                'nombre' => $request->nombre,
+                'apellido' => $request->apellido,
+                'celular' => $request->celular,
+                //'email' => $request->email, no se sabe si pueda editar 
+            ]);
+            return response()->json(['message' => 'Asesor actualizado', 200]);
         }
-
-        $asesor->update([
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'celular' => $request->celular,
-            'email' => $request->email,
-        ]);
-        return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
+        return response()->json([
+            'message' => 'No tienes permisos para realizar esta acción'], 403);   
     }
 
     /**
