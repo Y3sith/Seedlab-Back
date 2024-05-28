@@ -22,7 +22,6 @@ use App\Models\Asesoria;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
-Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
 //Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
@@ -84,6 +83,8 @@ Route::group([
 
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
 Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
+Route::get('/topAliados', [SuperAdminController::class,'topAliados']);
+
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
