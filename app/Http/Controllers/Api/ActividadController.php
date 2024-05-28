@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -35,7 +36,8 @@ class ActividadController extends Controller
     public function store(Request $request)
     {
         // Crear actividad (solo el aliado)
-        if (Auth::user()->id_rol !== 3) {
+        try {
+            if (Auth::user()->id_rol !== 3) {
             return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
         }
 
@@ -72,6 +74,10 @@ class ActividadController extends Controller
         ]);
 
         return response()->json(['message' => 'Actividad creada con éxito'], 201);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /** 
@@ -102,7 +108,8 @@ class ActividadController extends Controller
     public function update(Request $request, string $id)
 {
     // Solo pueden editar la actividad los usuarios con roles 3 (aliado) o 4 (asesor)
-    if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4) {
+    try {
+        if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4) {
         $actividad = Actividad::find($id);
         if (!$actividad) {
             return response()->json(["error" => "Actividad no encontrada"], 404);
@@ -148,6 +155,10 @@ class ActividadController extends Controller
     } else {
         return response()->json(["error" => "No tienes permisos para editar esta actividad"], 403);
     }
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+    
 }
 
 
