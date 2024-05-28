@@ -11,6 +11,11 @@ use App\Models\Empresa;
 use App\Models\PersonalizacionSistema;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use App\Models\Rol;
+use App\Models\Asesoria;
+
+
 
 
 
@@ -37,6 +42,12 @@ class SuperAdminController extends Controller
 
     public function personalizacionSis(Request $request)
     {
+        if(Auth::user()->id_rol != 1){
+            return response()->json([
+               'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+        
         $personalizacion = PersonalizacionSistema::create([
             'imagen_Logo' => $request->input('imagen_Logo'),
             'nombre_sistema' => $request->input('nombre_sistema'),
@@ -58,6 +69,16 @@ class SuperAdminController extends Controller
     {
         $response = null;
         $statusCode = 200;
+
+        if(Auth::user()->id_rol != 1){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        if(strlen($data['password']) <8) {
+            $statusCode = 400;
+            $response = 'La contraseña debe tener al menos 8 caracteres';
+            return response()->json(['message' => $response], $statusCode);
+        }
 
         DB::transaction(function()use ($data, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_superadmin(?,?,?,?,?)', [
@@ -120,5 +141,53 @@ class SuperAdminController extends Controller
 
         return response()->json(['message' =>'SuperAdmin desactivado'], 200);
        
+    }
+
+    public function enumerarUsuarios() {
+        $roles = Rol::all();
+        $result = [];
+
+        $totalUsers = User::count();
+
+        foreach ($roles as $rol) {
+            $countActive = User::where('id_rol', $rol->id)->where('estado', true)->count();
+            $percentageActive = $totalUsers > 0 ? ($countActive / $totalUsers) * 100 : 0;
+
+            $result[$rol->nombre] = [
+                '# de usuarios activos' => $countActive,
+                'Porcentaje del total' => round($percentageActive, 2) . '%'
+            ];
+        }
+
+        $activeUsersCount = User::where('estado', true)->count();
+        $inactiveUsersCount = User::where('estado', false)->count();
+
+        $activePercentage = $totalUsers > 0 ? ($activeUsersCount / $totalUsers) * 100 : 0;
+        $inactivePercentage = $totalUsers > 0 ? ($inactiveUsersCount / $totalUsers) * 100 : 0;
+
+        $result['activos'] = round($activePercentage, 2) . '%';
+        $result['inactivos'] = round($inactivePercentage, 2) . '%';
+
+        return response()->json($result);
+    }
+
+    public function averageAsesorias2024()
+    {
+        $averageAsesorias = Asesoria::whereYear('fecha', 2024)//quedad modificar la variable desde front para el filtrado
+            ->select(DB::raw('AVG(asesoria_count) as average_asesorias'))
+            ->joinSub(
+                Asesoria::select('doc_emprendedor', DB::raw('COUNT(*) as asesoria_count'))
+                    ->whereYear('fecha', 2024)
+                    ->groupBy('doc_emprendedor'),
+                'asesoria_counts',
+                'asesoria_counts.doc_emprendedor',
+                '=',
+                'asesoria.doc_emprendedor'
+            )
+            ->value('average_asesorias');
+
+        return response()->json([
+            'average_asesorias' => $averageAsesorias,
+        ]);
     }
 }

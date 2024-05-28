@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
-
-use App\Models\Aliado;
-use App\Models\Asesoria;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
@@ -46,7 +43,7 @@ class EmprendedorApiController extends Controller
         if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
-        $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate(5);
+        $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate();
         if ($empresa->isEmpty()) {
             return response()->json(["error" => "Empresa no encontrada"], 404);
         }

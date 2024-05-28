@@ -24,6 +24,7 @@ class AuthController extends Controller
             'password' => ['required', 'string'],
         ]);
 
+
         $user = User::where('email', $request->email)->with('emprendedor')->first();
         $verificationCode = mt_rand(10000, 99999);
 
@@ -31,6 +32,8 @@ class AuthController extends Controller
         if (!Auth::attempt($credentials)) {
             return response()->json(['message' => 'Unauthorized'], 401);
         }
+
+
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
         if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
             $user->emprendedor->cod_ver = $verificationCode; 
@@ -42,13 +45,61 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         $token->save();
-
+        $additionalInfo = $this->getAdditionalInfo($user);
+        $info = [];
         return response()->json([
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            'user' => $user
+            //'user' => $user,
+            'user' => $additionalInfo
         ]);
+    }
+
+    protected function getAdditionalInfo($user)
+    {
+        $info = [];
+
+        if ($user->id_rol == 3) {
+            $info = [
+
+                'id'=>$user->aliado->id,
+                'nombre' => $user->aliado->nombre,
+                'id_autentication' => $user->aliado->id_autentication,
+                'id_rol' => $user->id_rol   
+            ];
+        } elseif ($user->id_rol == 4) {
+            $info = [
+                
+                'id'=>$user->asesor->id,
+                'id_autentication' => $user->asesor->id_autentication,
+                'id_aliado' => $user->asesor->id_aliado,
+                'id_rol' => $user->id_rol
+            ];
+        } elseif ($user->id_rol == 5){
+            $info = $user;
+            
+        } elseif ($user->id_rol == 1){
+            $info = [
+                'id'=>$user->superadmin->id,
+                'nombre'=>$user->superadmin->nombre,
+                'apellido' => $user->superadmin->apellido,
+                'id_autentication' => $user->superadmin->id_autentication,
+                'id_rol' => $user->id_rol                
+            ];
+        } elseif ($user->id_rol == 2){
+            $info = [
+                //$user,
+                'id'=>$user->orientador->id,
+                'nombre'=>$user->orientador->nombre,
+                'apellido' => $user->orientador->apellido,
+                'id_autentication' => $user->orientador->id_autentication,
+                'id_rol' => $user->id_rol
+            ];
+        }
+    
+
+        return $info;
     }
 
 

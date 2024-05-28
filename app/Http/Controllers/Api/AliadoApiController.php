@@ -9,6 +9,8 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
+use App\Models\Asesor;
+
 
 
 
@@ -20,9 +22,9 @@ class AliadoApiController extends Controller
      */
     public function traerAliadosActivos($status)
     {
-        if(Auth::user()->id_rol !=1){
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
+        // if(Auth::user()->id_rol !=1){
+        //     return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        // }
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
@@ -195,5 +197,26 @@ class AliadoApiController extends Controller
 
         $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
         return response()->json($asesores);
+    }
+
+    public function dashboardAliado($idAliado){
+        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
+        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Finalizada');
+        })->count();
+
+        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Activa');
+        })->count();
+        
+        //CONTAR # DE ASESORES DE ESE ALIADO
+        $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
+
+        return response()->json([
+            'Asesorias Finalizadas' => $finalizadas,
+            'Asesorias Activas' => $activas,
+            'Mis Asesores' => $numAsesores,
+        ]);
+
     }
 }

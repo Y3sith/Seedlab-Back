@@ -8,6 +8,7 @@ use App\Models\Asesor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Models\HorarioAsesoria;
 
 class AsesorApiController extends Controller
 {
@@ -156,6 +157,30 @@ class AsesorApiController extends Controller
         })->values();
     
         return response()->json($resultado, 200);
+    }
+
+    public function contarAsesorias($idAsesor) {
+        
+        $asesor = Asesor::find($idAsesor);
+
+        if (!$asesor) {
+            return response()->json([
+                'error' => 'Asesor no encontrado'
+            ], 404);
+        }
+
+        $finalizadas = $asesor->asesorias()->whereHas('horarios', function($query) {
+                $query->where('estado', 'Finalizada');
+        })->count();
+
+        $activas = $asesor->asesorias()->whereHas('horarios', function($query) {
+            $query->where('estado', 'Activa');
+        })->count();
+
+        return response()->json([
+            'Asesorias finalizadas' => $finalizadas,
+            'Asesorias activas' => $activas,
+        ]);
     }
     
 }
