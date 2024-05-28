@@ -14,12 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Rol;
 use App\Models\Asesoria;
-
-
-
-
-
-
+use App\Models\Aliado;
 
 class SuperAdminController extends Controller
 {
@@ -146,48 +141,74 @@ class SuperAdminController extends Controller
     public function enumerarUsuarios() {
         $roles = Rol::all();
         $result = [];
-
+    
         $totalUsers = User::count();
-
+    
         foreach ($roles as $rol) {
             $countActive = User::where('id_rol', $rol->id)->where('estado', true)->count();
             $percentageActive = $totalUsers > 0 ? ($countActive / $totalUsers) * 100 : 0;
-
+    
             $result[$rol->nombre] = [
                 '# de usuarios activos' => $countActive,
                 'Porcentaje del total' => round($percentageActive, 2) . '%'
             ];
         }
-
+    
         $activeUsersCount = User::where('estado', true)->count();
         $inactiveUsersCount = User::where('estado', false)->count();
-
+    
         $activePercentage = $totalUsers > 0 ? ($activeUsersCount / $totalUsers) * 100 : 0;
         $inactivePercentage = $totalUsers > 0 ? ($inactiveUsersCount / $totalUsers) * 100 : 0;
-
+    
         $result['activos'] = round($activePercentage, 2) . '%';
         $result['inactivos'] = round($inactivePercentage, 2) . '%';
+    
+        $averageAsesorias = $this->averageAsesorias2024();
+    
 
+        $result['Promedio Anual de AsesoriasxEmprendedor'] = round($averageAsesorias, 2);
+
+        $top = $this->topAliados();
+
+        $result['Top Aliados'] = $top;
+
+    
         return response()->json($result);
     }
-
+    
     public function averageAsesorias2024()
     {
-        $averageAsesorias = Asesoria::whereYear('fecha', 2024)//quedad modificar la variable desde front para el filtrado
-            ->select(DB::raw('AVG(asesoria_count) as average_asesorias'))
-            ->joinSub(
-                Asesoria::select('doc_emprendedor', DB::raw('COUNT(*) as asesoria_count'))
-                    ->whereYear('fecha', 2024)
-                    ->groupBy('doc_emprendedor'),
-                'asesoria_counts',
+        $averageAsesorias = Asesoria::whereRaw('YEAR(fecha) = 2024') // Cambiar aquí el año desde el front
+            ->join(
+                DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = 2024 GROUP BY doc_emprendedor) as asesoria_counts'), // Cambiar aquí el año desde el front
                 'asesoria_counts.doc_emprendedor',
                 '=',
                 'asesoria.doc_emprendedor'
-            )
-            ->value('average_asesorias');
+            )->selectRaw('AVG(asesoria_counts.asesoria_count) as average_asesorias')->value('average_asesorias');
+    
+        return $averageAsesorias;
+    }
 
-        return response()->json([
-            'average_asesorias' => $averageAsesorias,
-        ]);
+    public function topAliados(){
+       
+        $totalAsesorias = Asesoria::count();
+
+// Obtener los top 5 aliados con el número de asesorías
+$topAliados = Aliado::withCount('asesoria')
+    ->orderByDesc('asesoria_count')
+    ->take(5)
+    ->get(['nombre', 'asesoria_count']);
+
+// Calcular y añadir el porcentaje para cada aliado
+$topAliados->transform(function ($aliado) use ($totalAsesorias) {
+    $porcentaje = ($aliado->asesoria_count / $totalAsesorias) * 100;
+    $aliado->porcentaje = round($porcentaje, 2) . '%'; // Concatenamos el símbolo '%' al porcentaje
+    return [
+        'nombre' => $aliado->nombre,
+        'asesorias' => $aliado->asesoria_count,
+        'porcentaje' => $aliado->porcentaje,
+    ];
+});    
+    return $topAliados;
     }
 }
