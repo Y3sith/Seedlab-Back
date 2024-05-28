@@ -6,9 +6,11 @@ use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
+use App\Models\Municipio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 
 class EmprendedorApiController extends Controller
 {
@@ -66,6 +68,27 @@ class EmprendedorApiController extends Controller
         return response()->json(["error" => "El emprendedor no fue encontrado"], 404);
     }
 
+    $validator = Validator::make($request->all(), [
+        'nombre' => 'required|string|max:255',
+        'apellido' => 'required|string|max:255',
+        'celular' => 'required|string|max:15',
+        'genero' => 'required|string|',
+        'fecha_nac' => 'required|date',
+        'direccion' => 'required|string|max:255',
+        'id_municipio' => 'required|string|max:255',  // Validar el nombre del municipio
+        'id_tipo_documento' => 'required|integer',
+        'password' => 'nullable|string|min:8',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['errors' => $validator->errors()], 400);
+    }
+
+    $municipio = Municipio::where('nombre', $request->id_municipio)->first();
+    if (!$municipio) {
+        return response()->json(["error" => "El municipio no fue encontrado"], 404);
+    }
+
     // Actualizar los datos del emprendedor con los valores proporcionados en la solicitud
     $emprendedor->nombre = $request->nombre;
     $emprendedor->apellido = $request->apellido;
@@ -73,7 +96,7 @@ class EmprendedorApiController extends Controller
     $emprendedor->genero = $request->genero;
     $emprendedor->fecha_nac = $request->fecha_nac;
     $emprendedor->direccion = $request->direccion;
-    $emprendedor->id_municipio = $request->id_municipio;
+    $emprendedor->id_municipio = $municipio->id;
     $emprendedor->id_tipo_documento = $request->id_tipo_documento;
 
 // Verificar si se proporcionó una contraseña para actualizar
