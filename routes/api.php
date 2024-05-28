@@ -40,7 +40,7 @@ Route::post('/createEmpresa', [EmpresaApiController::class, 'store'])->middlewar
 
 //Emprendedor
 Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
-Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
+Route::get('userProfile/{documento}', [AuthController::class, 'userProfile'])->middleware('auth:api');
 
 //Orientador
 Route::group([
