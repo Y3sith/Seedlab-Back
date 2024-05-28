@@ -132,18 +132,6 @@ class AsesoriasController extends Controller
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
     public function editarAsignacionAsesoria(Request $request)
     {
         if (Auth::user()->id_rol != 3 || Auth::user()->id_rol != 4) {
@@ -341,7 +329,6 @@ class AsesoriasController extends Controller
                 $query->where('estado', $estado);
             })
             ->get();
-        //dd($asesorias);
         return response()->json($asesorias);
     }
 }
