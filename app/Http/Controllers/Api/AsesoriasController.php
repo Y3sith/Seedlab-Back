@@ -11,7 +11,6 @@ use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 
 class AsesoriasController extends Controller
@@ -19,7 +18,7 @@ class AsesoriasController extends Controller
 
     public function guardarAsesoria(Request $request)
     {
-        if(Auth::user()->id_rol!=5){
+        if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $aliado = null;
@@ -58,9 +57,9 @@ class AsesoriasController extends Controller
 
     public function asignarAsesoria(Request $request)
     {
-        if(Auth::user()->id_rol != 3){
+        if (Auth::user()->id_rol != 3) {
             return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'], 403);
+                'message' => 'No tienes permisos para realizar esta acción'], 403);
         }
         $asesoriaexiste = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
 
@@ -86,10 +85,10 @@ class AsesoriasController extends Controller
 
     public function definirHorarioAsesoria(Request $request)
     {
-       /* if(Auth::user()->id_rol != 4){
+        if (Auth::user()->id_rol != 4) {
             return response()->json([
                'message' => 'No tienes permisos para realizar esta acción'], 403);
-        }*/
+        }
 
         $idAsesoria = $request->input('id_asesoria');
         $fecha = $request->input('fecha');
@@ -119,9 +118,9 @@ class AsesoriasController extends Controller
 
     public function editarAsignacionAsesoria(Request $request)
     {
-        if(Auth::user()-> id_rol != 3 || Auth::user()-> id_rol !=4){
+        if (Auth::user()->id_rol != 3 || Auth::user()->id_rol != 4) {
             return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'], 403);
+                'message' => 'No tienes permisos para realizar esta acción'], 403);
         }
         $asignacion = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
         if (!$asignacion) {
@@ -139,10 +138,9 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'Se ha actualizado el asesor para esta asignación'], 200);
     }
 
-
     public function traerAsesoriasPorEmprendedor(Request $request)
     {
-        if(Auth::user()->id_rol!=5){
+        if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $documento = $request->input('documento');
@@ -187,41 +185,42 @@ class AsesoriasController extends Controller
     }
 
     public function traerasesoriasorientador(Request $request)
-{
-    if(Auth::user()->id_rol != 2){
-        return response()->json([
-           'message' => 'No tienes permisos para realizar esta acción'], 403);
-    }
-    $Asignado = $request->input('pendiente');
+    {
+        if (Auth::user()->id_rol != 2) {
+            return response()->json([
+                'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
+        $Asignado = $request->input('pendiente');
 
-    $asesorias = Asesoria::with(['emprendedor.auth'])
-        ->where('isorientador', true)
-        ->when($Asignado, function ($query) {
-            $query->whereNull('id_aliado');
-        }, function ($query) {
-            $query->whereNotNull('id_aliado');
-        })
-        ->get()
-        ->map(function ($asesoria) {
-            $data=[
-                'id' => $asesoria->id,
-                'Nombre_sol' => $asesoria->Nombre_sol,
-                'notas' => $asesoria->notas,
-                'fecha' => $asesoria->fecha,
-                'documento' => $asesoria->emprendedor->documento,
-                'nombres' => $asesoria->emprendedor->nombres,
-                'celular' => $asesoria->emprendedor->celular,
-                'email' => $asesoria->emprendedor->auth->email
-            ];
-            if ($asesoria->aliado && $asesoria->aliado->nombre) {
-                $data['aliado_redirigido'] = $asesoria->aliado->nombre;
-            } 
-            return $data;
-        });
-    return response()->json($asesorias);
-}
-    
-    public function asignarAliado(Request $request, $idAsesoria) {
+        $asesorias = Asesoria::with(['emprendedor.auth'])
+            ->where('isorientador', true)
+            ->when($Asignado, function ($query) {
+                $query->whereNull('id_aliado');
+            }, function ($query) {
+                $query->whereNotNull('id_aliado');
+            })
+            ->get()
+            ->map(function ($asesoria) {
+                $data = [
+                    'id' => $asesoria->id,
+                    'Nombre_sol' => $asesoria->Nombre_sol,
+                    'notas' => $asesoria->notas,
+                    'fecha' => $asesoria->fecha,
+                    'documento' => $asesoria->emprendedor->documento,
+                    'nombres' => $asesoria->emprendedor->nombres,
+                    'celular' => $asesoria->emprendedor->celular,
+                    'email' => $asesoria->emprendedor->auth->email,
+                ];
+                if ($asesoria->aliado && $asesoria->aliado->nombre) {
+                    $data['aliado_redirigido'] = $asesoria->aliado->nombre;
+                }
+                return $data;
+            });
+        return response()->json($asesorias);
+    }
+
+    public function asignarAliado(Request $request, $idAsesoria)
+    {
         $nombreAliado = $request->input('nombreAliado');
 
         $asesoria = Asesoria::find($idAsesoria);
@@ -242,14 +241,15 @@ class AsesoriasController extends Controller
     /*
     EJ de Json para "asignarAliado"
     {
-	"nombreAliado": "Ecopetrol"
-    } 
-    */
+    "nombreAliado": "Ecopetrol"
+    }
+     */
 
-    public function MostrarAsesorias($aliadoId, $asignacion) {
-        if(Auth::user()->id_rol != 3){
+    public function MostrarAsesorias($aliadoId, $asignacion)
+    {
+        if (Auth::user()->id_rol != 3) {
             return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'], 403);
+                'message' => 'No tienes permisos para realizar esta acción'], 403);
         }
         $aliado = Aliado::find($aliadoId);
 
@@ -262,10 +262,10 @@ class AsesoriasController extends Controller
             ->where('asignacion', $asignacion)
             ->get()
             ->map(function ($asesoria) {
-                
+
                 $asesor = $asesoria->asesoriaxAsesor->first() ? $asesoria->asesoriaxAsesor->first()->asesor : null;
                 $horario = $asesoria->horarios->first();
-                
+
                 $data = [
                     'id_asesoria' => $asesoria->id,
                     'Nombre_sol' => $asesoria->Nombre_sol,
@@ -280,7 +280,7 @@ class AsesoriasController extends Controller
                     $data['estado'] = $horario->estado;
                     $data['observaciones_asesor'] = $horario->observaciones;
 
-                } else if($asesor) {
+                } else if ($asesor) {
                     $data['Asesor'] = $asesor ? $asesor->nombre . ' ' . $asesor->apellido : null;
                     $data['mensaje'] = 'El asesor aún no ha asignado horario';
                 }
@@ -314,8 +314,41 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
+    public function listarasesoresdisponibles($idaliado)
+    {
+        if (Auth::user()->id_rol != 3) {
+            return response()->json([
+                'message' => 'No tienes permisos para realizar esta acción'], 403);
+        }
+        $asesores = Asesor::selectRaw(
+            'asesor.id as id_asesor,
+            CONCAT(asesor.nombre, " ", asesor.apellido) as nombres,
+            MAX(horarioasesoria.fecha) as ultima_fecha_asesoria,
+            CONCAT(
+                TIMESTAMPDIFF(DAY, MAX(horarioasesoria.fecha), NOW()), " días con ", 
+                TIMESTAMPDIFF(HOUR, MAX(horarioasesoria.fecha), NOW()) % 24, " horas"
+            ) as tiempo_desde_ultima_asesoria'
+        )
+        ->leftJoin('users', 'asesor.id_autentication', '=', 'users.id')
+        ->leftJoin('asesoriaxasesor', 'asesoriaxasesor.id_asesor', '=', 'asesor.id')
+        ->leftJoin('horarioasesoria', 'asesoriaxasesor.id_asesoria', '=', 'horarioasesoria.id_asesoria')
+        ->where('asesor.id_aliado', $idaliado)
+        ->whereRaw('users.estado = true')
+        ->groupBy('asesor.id', 'nombres')
+        ->get();
+    
+    return $asesores;
+    }
 
-
-
+    // http://127.0.0.1:8000/api/asesorias/asesores_disponibles/2
+    // respuesta de ejemplo
+    // [
+    //     {
+    //         "id_asesor": 1,
+    //         "nombres": " ",
+    //         "ultima_fecha_asesoria": "2024-04-23 14:30:00",
+    //         "tiempo_desde_ultima_asesoria": "34 días con 20 horas"
+    //     }
+    // ]
 
 }

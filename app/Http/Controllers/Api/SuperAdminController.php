@@ -173,7 +173,7 @@ class SuperAdminController extends Controller
 
     public function averageAsesorias2024()
     {
-        $averageAsesorias = Asesoria::whereYear('fecha', 2024)//quedad modificar la variable desde front para el filtrado
+        $averageAsesorias = Asesoria::whereYear('fecha', 2024)
             ->select(DB::raw('AVG(asesoria_count) as average_asesorias'))
             ->joinSub(
                 Asesoria::select('doc_emprendedor', DB::raw('COUNT(*) as asesoria_count'))
@@ -190,4 +190,8 @@ class SuperAdminController extends Controller
             'average_asesorias' => $averageAsesorias,
         ]);
     }
+
+
+
+    
 }
