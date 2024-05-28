@@ -40,38 +40,65 @@ class EmpresaApiController extends Controller
         //     return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
         // }
 
-        
+        // Validar datos de entrada
+        $validatedData = $request->validate([
+            'empresa.nombre' => 'required|string',
+            'empresa.documento' => 'required|string',
+            'empresa.cargo' => 'required|string',
+            'empresa.razonSocial' => 'required|string',
+            'empresa.url_pagina' => 'nullable|string',
+            'empresa.telefono' => 'required|string|max:10',
+            'empresa.celular' => 'required|string|max:13',
+            'empresa.direccion' => 'required|string|',
+            'empresa.correo' => 'required|string|email',
+            'empresa.profesion' => 'required|string',
+            'empresa.experiencia' => 'nullable|string',
+            'empresa.funciones' => 'nullable|string',
+            'empresa.id_tipo_documento' => 'required|integer',
+            'empresa.id_municipio' => 'required|string',
+            'empresa.id_emprendedor' => 'required|string',
+            'apoyos.*.documento' => 'nullable|string',
+            'apoyos.*.nombre' => 'nullable|string',
+            'apoyos.*.apellido' => 'nullable|string',
+            'apoyos.*.cargo' => 'nullable|string',
+            'apoyos.*.telefono' => 'nullable|string|max:10',
+            'apoyos.*.celular' => 'nullable|string|max:13',
+            'apoyos.*.email' => 'nullable|string|email',
+            'apoyos.*.id_tipo_documento' => 'nullable|integer',
+        ]);
+
         // Buscar el municipio por nombre
-        $municipio = Municipio::where('nombre', $request->id_municipio)->first();
+        $nombreMunicipio = $validatedData['empresa']['id_municipio'];
+        $municipio = Municipio::where('nombre', $nombreMunicipio)->first();
 
         if (!$municipio) {
-            return response()->json(["message" => "Municipio no encontrado"], 404);
+            return response()->json(["error" => "Municipio no encontrado"], 404);
         }
-
 
         // Crear la empresa
         $empresa = Empresa::create([
-            "nombre" => $request->input('nombre'),
-            "documento" =>$request->input('documento'),
-            "cargo" =>$request->input('cargo'),
-            "razonSocial" =>$request->input('razonSocial'),
-            "url_pagina" => $request->input('url_pagina'),
-            "telefono" =>$request->input('telefono'),
-            "celular" => $request->input('celular'),
-            "direccion" => $request->input('direccion'),
-            "correo" => $request->input('correo'),
-            "profesion" =>$request->input('profesion'),
-            "experiencia" =>$request->input('experiencia'),
-            "funciones" =>$request->input('funciones'),
-            "id_tipo_documento" => $request->input('id_tipo_documento'),
-            "id_municipio" => $municipio->id, 
-            "id_emprendedor" =>$request->input('id_emprendedor'),
+            "nombre" => $validatedData['empresa']['nombre'],
+            "documento" => $validatedData['empresa']['documento'],
+            "cargo" => $validatedData['empresa']['cargo'],
+            "razonSocial" => $validatedData['empresa']['razonSocial'],
+            "url_pagina" => $validatedData['empresa']['url_pagina'],
+            "telefono" => $validatedData['empresa']['telefono'],
+            "celular" => $validatedData['empresa']['celular'],
+            "direccion" => $validatedData['empresa']['direccion'],
+            "correo" => $validatedData['empresa']['correo'],
+            "profesion" => $validatedData['empresa']['profesion'],
+            "experiencia" => $validatedData['empresa']['experiencia'],
+            "funciones" => $validatedData['empresa']['funciones'],
+            "id_tipo_documento" => $validatedData['empresa']['id_tipo_documento'],
+            "id_municipio" => $municipio->id,
+            "id_emprendedor" => $validatedData['empresa']['id_emprendedor'],
         ]);
 
-        // Procesar apoyoEmpresa si existe
-        if ($request->has('apoyoEmpresa') && is_array($request->input('apoyoEmpresa'))) {
-            foreach ($request->input('apoyoEmpresa') as $apoyo) {
-                ApoyoEmpresa::create([
+        // Manejar apoyos
+        $apoyos = [];
+        if ($request->has('apoyos')) {
+            foreach ($validatedData['apoyos'] as $apoyo) {
+                $nuevoApoyo = ApoyoEmpresa::create([
                     "documento" => $apoyo['documento'],
                     "nombre" => $apoyo['nombre'],
                     "apellido" => $apoyo['apellido'],
@@ -82,53 +109,17 @@ class EmpresaApiController extends Controller
                     "id_tipo_documento" => $apoyo['id_tipo_documento'],
                     "id_empresa" => $empresa->documento,
                 ]);
+                $apoyos[] = $nuevoApoyo;
             }
         }
-        return response()->json(["message" => "Empresa y apoyoEmpresa creados exitosamente", "empresa" => $empresa], 200);
+
+        return response()->json([
+            'message' => 'Empresa y apoyoEmpresa creados exitosamente',
+            'empresa' => $empresa,
+            'apoyos' => $apoyos
+        ], 200);
     }
 
-    public function crearEmpresaconAliado(Request $data){
-        $response = null;
-        $statusCode = 200;
-
-        DB::transaction(function() use($data, &$response, &$statusCode ){
-        $results = DB::select('CALL crearEmpresaYApoyo(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-                $data['documentoEmpresa'],
-                $data['nombreEmpresa'],
-                $data['cargoEmpresa'],
-                $data['razonSocial'],
-                $data['urlPagina'],
-                $data['telefonoEmpresa'],
-                $data['celularEmpresa'],
-                $data['direccionEmpresa'],
-                $data['profesion'],
-                $data['correoEmpresa'],
-                $data['experiencia'],
-                $data['funciones'],
-                $data['idTipoDocumentoEmpresa'],
-                $data['documentoApoyo'],
-                $data['nombreApoyo'],
-                $data['apellidoApoyo'],
-                $data['cargoApoyo'],
-                $data['telefonoApoyo'],
-                $data['celularApoyo'],
-                $data['correoApoyo'],
-                $data['idTipoApoyo'],
-                $data['municipio'],
-                $data['id_emprendedor']
-            ]);
-
-            if(!empty($results)){
-                $response = $results[0]->mensaje;
-                if ($response === 'La empresa ya ha sido registrada') {
-                    $statusCode = 400;
-                }
-            }
-        });
-
-        return response()->json(["message" => $response], $statusCode);
-
-    }
 
 
     /**
