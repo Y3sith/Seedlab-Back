@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\User;
 use App\Models\Rol;
+use App\Models\Asesoria;
+
 
 
 
@@ -167,5 +169,25 @@ class SuperAdminController extends Controller
         $result['inactivos'] = round($inactivePercentage, 2) . '%';
 
         return response()->json($result);
+    }
+
+    public function averageAsesorias2024()
+    {
+        $averageAsesorias = Asesoria::whereYear('fecha', 2024)//quedad modificar la variable desde front para el filtrado
+            ->select(DB::raw('AVG(asesoria_count) as average_asesorias'))
+            ->joinSub(
+                Asesoria::select('doc_emprendedor', DB::raw('COUNT(*) as asesoria_count'))
+                    ->whereYear('fecha', 2024)
+                    ->groupBy('doc_emprendedor'),
+                'asesoria_counts',
+                'asesoria_counts.doc_emprendedor',
+                '=',
+                'asesoria.doc_emprendedor'
+            )
+            ->value('average_asesorias');
+
+        return response()->json([
+            'average_asesorias' => $averageAsesorias,
+        ]);
     }
 }

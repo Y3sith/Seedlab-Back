@@ -8,6 +8,7 @@ use App\Models\Asesor;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
+use App\Models\HorarioAsesoria;
 
 class AsesorApiController extends Controller
 {
@@ -74,19 +75,18 @@ class AsesorApiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $asesor = Asesor::find($id);
-        if(Auth::user()->id_rol != 3 ){
-            return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'], 403);
+        if(Auth::user()-> id_rol == 3 || Auth::user()-> id_rol ==4){
+            $asesor = Asesor::find($id);
+            $asesor->update([
+                'nombre' => $request->nombre,
+                'apellido' => $request->apellido,
+                'celular' => $request->celular,
+                //'email' => $request->email, no se sabe si pueda editar 
+            ]);
+            return response()->json(['message' => 'Asesor actualizado', 200]);
         }
-
-        $asesor->update([
-            'nombre' => $request->nombre,
-            'apellido' => $request->apellido,
-            'celular' => $request->celular,
-            'email' => $request->email,
-        ]);
-        return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
+        return response()->json([
+            'message' => 'No tienes permisos para realizar esta acción'], 403);   
     }
 
     /**
@@ -156,6 +156,30 @@ class AsesorApiController extends Controller
         })->values();
     
         return response()->json($resultado, 200);
+    }
+
+    public function contarAsesorias($idAsesor) {
+        
+        $asesor = Asesor::find($idAsesor);
+
+        if (!$asesor) {
+            return response()->json([
+                'error' => 'Asesor no encontrado'
+            ], 404);
+        }
+
+        $finalizadas = $asesor->asesorias()->whereHas('horarios', function($query) {
+                $query->where('estado', 'Finalizada');
+        })->count();
+
+        $activas = $asesor->asesorias()->whereHas('horarios', function($query) {
+            $query->where('estado', 'Activa');
+        })->count();
+
+        return response()->json([
+            'Asesorias finalizadas' => $finalizadas,
+            'Asesorias activas' => $activas,
+        ]);
     }
     
 }

@@ -22,7 +22,7 @@ use App\Models\Asesoria;
 Route::get('/user', function (Request $request) {
     return $request->user();
 })->middleware('auth:api');
-
+Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
 //Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
@@ -79,10 +79,11 @@ Route::group([
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
+    Route::post('/asesoria/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
 });
 
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
-
+Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
@@ -98,13 +99,15 @@ Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::cla
 //Asesor
 Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
 Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
+Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
 
 //asesorias
 Route::group([
     'prefix' => 'asesorias',
     'middleware' =>'auth:api'
 ], function(){
-    Route::post('/solicitud_asesoria',[AsesoriasController::class,'guardarAsesoria']); //guardar asesoria - emprendedor
+    
+    Route::post('/solicitud_asesoria',[AsesoriasController::class,'guardarAsesoria']);//guardar asesoria - emprendedor
     Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarAsesoria'])->name('asignarasesoria'); //asignar asesoria - aliado
     Route::post('/horario_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('definirhorarioasesoria'); //asignar horario - asesor
     Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('editarasignacionasesoria'); //editar asesor - aliado
