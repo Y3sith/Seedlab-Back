@@ -80,12 +80,16 @@ class AsesoriasController extends Controller
         return response()->json(['message' => 'se ha asignado el asesor para esta asesoria'], 201);
     }
 
+
+
+
+
     public function definirHorarioAsesoria(Request $request)
     {
-        if(Auth::user()->id_rol != 4){
+       /* if(Auth::user()->id_rol != 4){
             return response()->json([
                'message' => 'No tienes permisos para realizar esta acción'], 403);
-        }
+        }*/
 
         $idAsesoria = $request->input('id_asesoria');
         $fecha = $request->input('fecha');
@@ -108,6 +112,10 @@ class AsesoriasController extends Controller
         ]);
         return response()->json(['mesage' => 'Se le a asignado un horario a su Asesoria'], 201);
     }
+
+
+
+
 
     public function editarAsignacionAsesoria(Request $request)
     {
