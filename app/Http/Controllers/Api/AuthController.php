@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -257,29 +258,52 @@ class AuthController extends Controller
 
 
     public function resetPassword(Request $request)
-    {
-        $request->validate([
-            'password' => 'required',
-            'token' => 'required',
-        ]);
+{
+    $request->merge(['password' => trim($request->password)]);
 
-        try {
-            $email = DB::table('password_resets')->where(['token' => $request->token])->first()->email;
-            $user = User::where('email', $email)->first();
+    $validator = Validator::make($request->all(), [
+        'password' => ['required', 'min:8','regex:/^\S*(\s\S*)?$/'],
+        'token' => 'required',
+    ]);
 
-            $emprendedor = $user->emprendedor;
-
-            $user->password = Hash::make($request->password);
-            $emprendedor->contrasena = $user->password;
-            $user->update();
-            $emprendedor->update();
-
-            return response()->json(['message' => 'contraseña restablecida correctamente']);
-        } catch (\Throwable $th) {
-            return response()->json(['error' => 'Error al restablecer la contraseña'], 400);
-        }
+    if ($validator->fails()) {
+        return response()->json(['error' => 'La contraseña debe tener al menos 8 caracteres y no puede contener espacios en medio'], 400);
     }
 
+    try {
+        // Buscar el usuario usando el token en la tabla users
+        $user = User::where('reset_token', $request->token)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Token inválido o expirado'], 400);
+        }
+
+        // Verificar si el token no ha expirado (por ejemplo, 1 hora de validez)
+        $tokenCreationTime = new Carbon($user->token_created_at);
+        if ($tokenCreationTime->addHour() < now()) {
+            return response()->json(['error' => 'Token expirado'], 400);
+        }
+
+        // Actualizar la contraseña del usuario
+        $user->password = Hash::make($request->password);
+
+        // Si tienes una relación con otra tabla, asegúrate de que el campo existe
+        if ($user->emprendedor) {
+            $emprendedor = $user->emprendedor;
+            $user->password;
+            $emprendedor->save();
+        }
+
+        // Limpiar el token y la fecha de creación del token
+        $user->reset_token = null;
+        $user->token_created_at = null;
+        $user->save();
+
+        return response()->json(['message' => 'Contraseña restablecida correctamente']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error al restablecer la contraseña: ' . $e->getMessage()], 400);
+    }
+}
 
     public function sendVerificationEmail(Request $request){
         $request->validate([
@@ -298,43 +322,6 @@ class AuthController extends Controller
             'code' => $code
         ], 200);
     }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 }
 
