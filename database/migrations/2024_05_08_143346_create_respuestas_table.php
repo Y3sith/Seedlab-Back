@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('respuesta', function (Blueprint $table) {
             $table->id();
             $table->string('opcion', 10);
-            $table->text('texto_res');
+            $table->text('texto_res')->nullable();
             $table->double('valor');
             $table->boolean('verform_pr')->nullable();
             $table->boolean('verform_se')->nullable();
@@ -24,7 +24,7 @@ return new class extends Migration
             $table->string('id_empresa');
             $table->foreign('id_empresa')->references('documento')->on('empresa');
             $table->unsignedBigInteger('id_subpregunta');
-            $table->foreign('id_subpregunta')->references('id')->on('subpregunta');
+            $table->foreign('id_subpregunta')->references('id')->on('subpregunta')->nullable();
             //$table->timestamps();
         });
     }
