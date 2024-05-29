@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordReset;
 use App\Mail\VerificationCodeEmail;
 use App\Models\Emprendedor;
 use App\Models\User;
@@ -209,6 +210,132 @@ class AuthController extends Controller
         $users = User::with('emprendedor')->get();
         return response()->json($users);
     }
+
+
+    /*Metodo que maneja el envio del correo para restablecer la contraseña
+    */
+    public function enviarRecuperarContrasena(Request $request)
+    {
+        // Validar el campo de email
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $email = $request->email;
+        if (!$email) {
+            return response()->json(['error' => 'Proporciona un email válido'], 400);
+        }
+
+        // Verificar si la cuenta existe
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Cuenta no existe'], 400);
+        }
+
+        // Generar un token único
+        $token = null;
+        $unico = false;
+        while (!$unico) {
+            $token = rand(100000, 999999);
+            $existeToken = User::where('reset_token', $token)->exists();
+            if (!$existeToken) {
+                $unico = true;
+            }
+        }
+
+        // Actualizar el usuario con el nuevo token y timestamp
+        $user->reset_token = $token;
+        $user->token_created_at = Carbon::now();
+        $user->save();
+
+        // Enviar el correo electrónico
+        Mail::to($email)->send(new PasswordReset($token));
+
+        return response()->json(['message' => 'Te hemos enviado un email con las instrucciones para que recuperes tu contraseña', 'code' => $token], 200);
+    }
+
+
+    public function resetPassword(Request $request)
+    {
+        $request->validate([
+            'password' => 'required',
+            'token' => 'required',
+        ]);
+
+        try {
+            $email = DB::table('password_resets')->where(['token' => $request->token])->first()->email;
+            $user = User::where('email', $email)->first();
+
+            $emprendedor = $user->emprendedor;
+
+            $user->password = Hash::make($request->password);
+            $emprendedor->contrasena = $user->password;
+            $user->update();
+            $emprendedor->update();
+
+            return response()->json(['message' => 'contraseña restablecida correctamente']);
+        } catch (\Throwable $th) {
+            return response()->json(['error' => 'Error al restablecer la contraseña'], 400);
+        }
+    }
+
+
+    public function sendVerificationEmail(Request $request){
+        $request->validate([
+            'email' => 'required',
+        ]);
+
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json(['error' => 'Existing email'], 400);
+        }
+
+        $code = rand(100000, 999999);
+        Mail::to($request->email)->send(new VerificationCodeEmail($code));
+
+        return response()->json([
+            'message' => 'Mail sent',
+            'code' => $code
+        ], 200);
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
 
 // JSON DE EJEMPLO PARA LOS ENDPOINT
