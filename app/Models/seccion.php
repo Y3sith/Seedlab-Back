@@ -17,7 +17,7 @@ class Seccion extends Model
     ];
 
     public function preguntas(){
-        return $this->hasMany(Pregunta::class, 'id_seccion');
+        return $this->hasMany(Preguntas::class, 'id_seccion');
     }
 
     public $timestamps = false;

@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
+use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
 Route::get('/user', function (Request $request) {
@@ -118,8 +119,8 @@ Route::group([
 });
 
 
-
-
+Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
+Route::apiResource('/respuestas',RespuestasApiController::class);
 
 
 
