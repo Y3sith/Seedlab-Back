@@ -31,7 +31,7 @@ class AuthController extends Controller
 
         //Si el usuario no existe, validacion de credenciales 
         if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'Unauthorized'], 401);
+            return response()->json(['message' => 'No se encuentra registrado'], 401);
         }
 
 

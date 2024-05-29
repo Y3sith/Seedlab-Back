@@ -18,11 +18,11 @@ class Preguntas extends Model
     ];
 
     public function seccion(){
-        return $this->belongsTo(Secciones::class, 'id_seccion');
+        return $this->belongsTo(Seccion::class, 'id_seccion');
     }
 
     public function respuestas(){
-        return $this->hasMany(Respuestas::class, 'id_pregunta');
+        return $this->hasMany(Respuesta::class, 'id_pregunta');
     }
 
     public function subpreguntas(){

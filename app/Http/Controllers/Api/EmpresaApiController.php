@@ -36,12 +36,12 @@ class EmpresaApiController extends Controller
     public function store(Request $request)
     {
         // Verificar permisos de usuario
-        // if (Auth::user()->id_rol != 5) {
-        //     return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-        // }
+         if (Auth::user()->id_rol != 5) {
+             return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+        }
 
         // Validar datos de entrada
-        $validatedData = $request->validate([
+       /* $validatedData = $request->validate([
             'empresa.nombre' => 'required|string',
             'empresa.documento' => 'required|string',
             'empresa.cargo' => 'required|string',
@@ -65,10 +65,10 @@ class EmpresaApiController extends Controller
             'apoyos.*.celular' => 'nullable|string|max:13',
             'apoyos.*.email' => 'nullable|string|email',
             'apoyos.*.id_tipo_documento' => 'nullable|integer',
-        ]);
+        ]);*/
 
         // Buscar el municipio por nombre
-        $nombreMunicipio = $validatedData['empresa']['id_municipio'];
+        $nombreMunicipio = $request['empresa']['id_municipio'];
         $municipio = Municipio::where('nombre', $nombreMunicipio)->first();
 
         if (!$municipio) {
@@ -77,27 +77,27 @@ class EmpresaApiController extends Controller
 
         // Crear la empresa
         $empresa = Empresa::create([
-            "nombre" => $validatedData['empresa']['nombre'],
-            "documento" => $validatedData['empresa']['documento'],
-            "cargo" => $validatedData['empresa']['cargo'],
-            "razonSocial" => $validatedData['empresa']['razonSocial'],
-            "url_pagina" => $validatedData['empresa']['url_pagina'],
-            "telefono" => $validatedData['empresa']['telefono'],
-            "celular" => $validatedData['empresa']['celular'],
-            "direccion" => $validatedData['empresa']['direccion'],
-            "correo" => $validatedData['empresa']['correo'],
-            "profesion" => $validatedData['empresa']['profesion'],
-            "experiencia" => $validatedData['empresa']['experiencia'],
-            "funciones" => $validatedData['empresa']['funciones'],
-            "id_tipo_documento" => $validatedData['empresa']['id_tipo_documento'],
+            "nombre" => $request['empresa']['nombre'],
+            "documento" => $request['empresa']['documento'],
+            "cargo" => $request['empresa']['cargo'],
+            "razonSocial" => $request['empresa']['razonSocial'],
+            "url_pagina" => $request['empresa']['url_pagina'],
+            "telefono" => $request['empresa']['telefono'],
+            "celular" => $request['empresa']['celular'],
+            "direccion" => $request['empresa']['direccion'],
+            "correo" => $request['empresa']['correo'],
+            "profesion" => $request['empresa']['profesion'],
+            "experiencia" => $request['empresa']['experiencia'],
+            "funciones" => $request['empresa']['funciones'],
+            "id_tipo_documento" => $request['empresa']['id_tipo_documento'],
             "id_municipio" => $municipio->id,
-            "id_emprendedor" => $validatedData['empresa']['id_emprendedor'],
+            "id_emprendedor" => $request['empresa']['id_emprendedor'],
         ]);
 
         // Manejar apoyos
         $apoyos = [];
         if ($request->has('apoyos')) {
-            foreach ($validatedData['apoyos'] as $apoyo) {
+            foreach ($request['apoyos'] as $apoyo) {
                 $nuevoApoyo = ApoyoEmpresa::create([
                     "documento" => $apoyo['documento'],
                     "nombre" => $apoyo['nombre'],

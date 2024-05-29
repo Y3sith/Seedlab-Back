@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
+use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
 Route::get('/user', function (Request $request) {
@@ -74,11 +75,11 @@ Route::group([
     'prefix' => 'aliado',
     'middleware' => 'auth:api',
 ], function(){
-    Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
+    Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::post('/asesoria/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
 });
 
@@ -118,8 +119,8 @@ Route::group([
 });
 
 
-
-
+Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
+Route::apiResource('/respuestas',RespuestasApiController::class);
 
 Route::group(['prefix' => 'auth'], function (){
 
