@@ -21,11 +21,11 @@ class Respuesta extends Model
     ];
 
     public function preguntas(){
-        return $this->belongsTo(Pregunta::class, 'id_pregunta');
+        return $this->belongsTo(Preguntas::class, 'id_pregunta');
     }
 
     public function subpreguntas(){
-        return $this->belongsTo(Subpregunta::class, 'id_subpregunta');
+        return $this->belongsTo(Subpreguntas::class, 'id_subpregunta');
     }
     
     public function empresas(){
