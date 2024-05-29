@@ -83,7 +83,7 @@ class RespuestasApiController extends Controller
             Respuesta::create($respuesta->toArray());
         }*/
 
-        return response()->json(['message' => 'Respuestas obtenidas'], 200);
+        return response()->json($seccion, 200);
     }
 
     public function guardarRespuestas(Request $request)
