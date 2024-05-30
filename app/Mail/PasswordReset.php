@@ -29,7 +29,10 @@ class PasswordReset extends Mailable
         $content .= "Si no realizaste esta solicitud, puedes ignorar este correo.</html>";
 
         return $this
-            ->subject('Restablecer contraseña')
-            ->html($content);
+                    ->view('temporary-password')
+                   ->with(['temporaryPassword'=> $this->temporaryPassword]);
+        
+                    //->subject('Restablecer contraseña')
+                   //  ->html($content);
     }
 }
