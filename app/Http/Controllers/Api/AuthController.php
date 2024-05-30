@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordReset;
 use App\Mail\VerificationCodeEmail;
 use App\Models\Emprendedor;
 use App\Models\User;
@@ -12,6 +13,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Validator;
 
 class AuthController extends Controller
 {
@@ -209,6 +211,118 @@ class AuthController extends Controller
         $users = User::with('emprendedor')->get();
         return response()->json($users);
     }
+
+
+    /*Metodo que maneja el envio del correo para restablecer la contraseña
+    */
+    public function enviarRecuperarContrasena(Request $request)
+    {
+        // Validar el campo de email
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $email = $request->email;
+        if (!$email) {
+            return response()->json(['error' => 'Proporciona un email válido'], 400);
+        }
+
+        // Verificar si la cuenta existe
+        $user = User::where('email', $email)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Cuenta no existe'], 400);
+        }
+
+        // Generar un token único
+        $token = null;
+        $unico = false;
+        while (!$unico) {
+            $token = rand(100000, 999999);
+            $existeToken = User::where('reset_token', $token)->exists();
+            if (!$existeToken) {
+                $unico = true;
+            }
+        }
+
+        // Actualizar el usuario con el nuevo token y timestamp
+        $user->reset_token = $token;
+        $user->token_created_at = Carbon::now();
+        $user->save();
+
+        // Enviar el correo electrónico
+        Mail::to($email)->send(new PasswordReset($token));
+
+        return response()->json(['message' => 'Te hemos enviado un email con las instrucciones para que recuperes tu contraseña', 'code' => $token], 200);
+    }
+
+
+    public function resetPassword(Request $request)
+{
+    $request->merge(['password' => trim($request->password)]);
+
+    $validator = Validator::make($request->all(), [
+        'password' => ['required', 'min:8','regex:/^\S*(\s\S*)?$/'],
+        'token' => 'required',
+    ]);
+
+    if ($validator->fails()) {
+        return response()->json(['error' => 'La contraseña debe tener al menos 8 caracteres y no puede contener espacios en medio'], 400);
+    }
+
+    try {
+        // Buscar el usuario usando el token en la tabla users
+        $user = User::where('reset_token', $request->token)->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Token inválido o expirado'], 400);
+        }
+
+        // Verificar si el token no ha expirado (por ejemplo, 1 hora de validez)
+        $tokenCreationTime = new Carbon($user->token_created_at);
+        if ($tokenCreationTime->addHour() < now()) {
+            return response()->json(['error' => 'Token expirado'], 400);
+        }
+
+        // Actualizar la contraseña del usuario
+        $user->password = Hash::make($request->password);
+
+        // Si tienes una relación con otra tabla, asegúrate de que el campo existe
+        if ($user->emprendedor) {
+            $emprendedor = $user->emprendedor;
+            $user->password;
+            $emprendedor->save();
+        }
+
+        // Limpiar el token y la fecha de creación del token
+        $user->reset_token = null;
+        $user->token_created_at = null;
+        $user->save();
+
+        return response()->json(['message' => 'Contraseña restablecida correctamente']);
+    } catch (\Exception $e) {
+        return response()->json(['error' => 'Error al restablecer la contraseña: ' . $e->getMessage()], 400);
+    }
+}
+
+    public function sendVerificationEmail(Request $request){
+        $request->validate([
+            'email' => 'required',
+        ]);
+
+        if (User::where('email', $request->email)->exists()) {
+            return response()->json(['error' => 'Existing email'], 400);
+        }
+
+        $code = rand(100000, 999999);
+        Mail::to($request->email)->send(new VerificationCodeEmail($code));
+
+        return response()->json([
+            'message' => 'Mail sent',
+            'code' => $code
+        ], 200);
+    }
+
 }
 
 // JSON DE EJEMPLO PARA LOS ENDPOINT

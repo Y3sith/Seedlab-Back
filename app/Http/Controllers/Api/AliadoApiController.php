@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Asesor;
 use App\Models\HorarioAsesoria;
+use Exception;
 
 class AliadoApiController extends Controller
 {
@@ -42,7 +43,8 @@ class AliadoApiController extends Controller
 
     public function crearAliado(Request $data)
     {
-        $response = null;
+        try {
+            $response = null;
         $statusCode = 200;
 
         if (Auth::user()->id_rol != 1) {
@@ -76,6 +78,10 @@ class AliadoApiController extends Controller
         });
 
         return response()->json(['message' => $response], $statusCode);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     public function mostrarAliado(Request $request)
@@ -105,7 +111,8 @@ class AliadoApiController extends Controller
 
     public function editarAliado(Request $request)
     {
-        if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
+        try {
+            if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $aliado = Aliado::find($request->input('id'));
@@ -128,6 +135,10 @@ class AliadoApiController extends Controller
         } else {
             return response()->json(['message' => 'Aliado no encontrado'], 404);
         }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**
@@ -219,7 +230,8 @@ class AliadoApiController extends Controller
 
     public function gestionarAsesoria(Request $request)
 {
-    if (Auth::user()->id_rol != 3) {
+    try {
+        if (Auth::user()->id_rol != 3) {
         return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
     }
 
@@ -255,6 +267,10 @@ class AliadoApiController extends Controller
     //$horario->save();
 
     return response()->json(['message' => $mensaje], 200);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+    
 }
 
 }

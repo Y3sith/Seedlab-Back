@@ -37,6 +37,7 @@ class SuperAdminController extends Controller
 
     public function personalizacionSis(Request $request)
     {
+        
         if(Auth::user()->id_rol != 1){
             return response()->json([
                'message' => 'No tienes permiso para acceder a esta ruta'

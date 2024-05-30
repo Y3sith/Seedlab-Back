@@ -17,6 +17,7 @@ use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
+use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
 Route::get('/user', function (Request $request) {
@@ -119,9 +120,19 @@ Route::group([
 });
 
 
+Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
+Route::apiResource('/respuestas',RespuestasApiController::class);
 
+Route::group(['prefix' => 'auth'], function (){
 
+    /** Maneja la verificacion de correo electronico */
+    Route::post('/verify-email', [AuthController::class, "sendVerificationEmail"]);
+    /** Maneja el envio del correo para restablecer la contraseña */
+    Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
+    /** Restablece la contraseña */
+    Route::post('/reset-password', [AuthController::class, "resetPassword"]);
 
+});
 
 
 
