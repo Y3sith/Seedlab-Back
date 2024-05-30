@@ -11,34 +11,25 @@ class PasswordReset extends Mailable
 {
     use Queueable, SerializesModels;
 
-    private $token;
+    private $temporaryPassword;
 
-    /**
-     * Create a new message instance.
-     *
-     * @return void
-     */
-    public function __construct($token)
+    public function __construct($temporaryPassword)
     {
-        $this->token = $token;
+        $this->temporaryPassword = $temporaryPassword;
     }
 
-    /**
-     * Build the message.
-     *
-     * @return $this
-     */
     public function build()
     {
         $greeting = '<html> Hola <br>';
 
         $content = "$greeting <br>";
         $content .= "Recibes este correo electrónico porque hemos recibido una solicitud de restablecimiento de contraseña para tu cuenta.<br>";
-        $content .= "Restablecer contraseña con el siguiente codigo: <b> $this->token </b><br>";
+        $content .= "Tu nueva contraseña temporal es: <b> $this->temporaryPassword </b><br>";
+        $content .= "Por favor, utiliza esta contraseña para iniciar sesión y asegúrate de cambiarla después.<br>";
         $content .= "Si no realizaste esta solicitud, puedes ignorar este correo.</html>";
 
         return $this
-            ->subject('Restablecer contraseña') // Asunto del correo
-            ->html($content); // Contenido del correo
+            ->subject('Restablecer contraseña')
+            ->html($content);
     }
 }

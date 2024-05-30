@@ -130,7 +130,7 @@ Route::group(['prefix' => 'auth'], function (){
     /** Maneja el envio del correo para restablecer la contraseña */
     Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
     /** Restablece la contraseña */
-    Route::post('/reset-password', [AuthController::class, "resetPassword"]);
+    //Route::post('/reset-password', [AuthController::class, "resetPassword"]);
 
 });
 
