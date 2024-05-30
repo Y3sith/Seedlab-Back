@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\HorarioAsesoria;
+use Exception;
 
 class AsesorApiController extends Controller
 {
@@ -25,8 +26,8 @@ class AsesorApiController extends Controller
      */
     public function store(Request $data)
     {
-        
-        $response = null;
+        try {
+            $response = null;
         $statusCode = 200;
         if(Auth::user()->id_rol !=3){
             $statusCode = 400;
@@ -60,6 +61,10 @@ class AsesorApiController extends Controller
         });
 
             return response()->json(['message' => $response], $statusCode);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**
@@ -75,7 +80,8 @@ class AsesorApiController extends Controller
      */
     public function update(Request $request, $id)
     {
-        if(Auth::user()-> id_rol == 3 || Auth::user()-> id_rol ==4){
+        try {
+            if(Auth::user()-> id_rol == 3 || Auth::user()-> id_rol ==4){
             $asesor = Asesor::find($id);
             $asesor->update([
                 'nombre' => $request->nombre,
@@ -87,6 +93,10 @@ class AsesorApiController extends Controller
         }
         return response()->json([
             'message' => 'No tienes permisos para realizar esta acción'], 403);   
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**

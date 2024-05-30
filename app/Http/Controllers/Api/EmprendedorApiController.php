@@ -3,12 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
 use App\Models\Municipio;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 
@@ -19,14 +18,10 @@ class EmprendedorApiController extends Controller
      */
     public function index()
     {
-        //muestra los emprendedores - super administrator
-        /* if(Auth::user()->id_rol =!1){
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }*/
-        //muestra los emprendedores por su id
+
         if (Auth::user()->id_rol = !5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        } $emprendedor = Emprendedor::all();
+        }$emprendedor = Emprendedor::all();
         return response()->json($emprendedor);
     }
 
@@ -52,52 +47,51 @@ class EmprendedorApiController extends Controller
         return response()->json($empresa->items(), 200);
     }
 
-
     public function update(Request $request, $documento)
-{
-    // Verificar si el usuario autenticado tiene el rol adecuado
-    if (Auth::user()->id_rol != 5) {
-        return response()->json(["error" => "No tienes permisos para editar el perfil"], 401);
-    }
+    {
+        // Verificar si el usuario autenticado tiene el rol adecuado
+        if (Auth::user()->id_rol != 5) {
+            return response()->json(["error" => "No tienes permisos para editar el perfil"], 401);
+        }
 
-    // Obtener el emprendedor actual basado en el documento proporcionado
-    $emprendedor = Emprendedor::where('documento', $documento)->first();
+        // Obtener el emprendedor actual basado en el documento proporcionado
+        $emprendedor = Emprendedor::where('documento', $documento)->first();
 
-    // Validar si se encontró el emprendedor
-    if (!$emprendedor) {
-        return response()->json(["error" => "El emprendedor no fue encontrado"], 404);
-    }
+        // Validar si se encontró el emprendedor
+        if (!$emprendedor) {
+            return response()->json(["error" => "El emprendedor no fue encontrado"], 404);
+        }
 
-    $validator = Validator::make($request->all(), [
-        'nombre' => 'required|string|max:255',
-        'apellido' => 'required|string|max:255',
-        'celular' => 'required|string|max:15',
-        'genero' => 'required|string|',
-        'fecha_nac' => 'required|date',
-        'direccion' => 'required|string|max:255',
-        'id_municipio' => 'required|string|max:255',  // Validar el nombre del municipio
-        'id_tipo_documento' => 'required|integer',
-        'password' => 'nullable|string|min:8',
-    ]);
+        $validator = Validator::make($request->all(), [
+            'nombre' => 'required|string|max:255',
+            'apellido' => 'required|string|max:255',
+            'celular' => 'required|string|max:15',
+            'genero' => 'required|string|',
+            'fecha_nac' => 'required|date',
+            'direccion' => 'required|string|max:255',
+            'id_municipio' => 'required|string|max:255', // Validar el nombre del municipio
+            'id_tipo_documento' => 'required|integer',
+            'password' => 'nullable|string|min:8',
+        ]);
 
-    if ($validator->fails()) {
-        return response()->json(['errors' => $validator->errors()], 400);
-    }
+        if ($validator->fails()) {
+            return response()->json(['errors' => $validator->errors()], 400);
+        }
 
-    $municipio = Municipio::where('nombre', $request->id_municipio)->first();
-    if (!$municipio) {
-        return response()->json(["error" => "El municipio no fue encontrado"], 404);
-    }
+        $municipio = Municipio::where('nombre', $request->id_municipio)->first();
+        if (!$municipio) {
+            return response()->json(["error" => "El municipio no fue encontrado"], 404);
+        }
 
-    // Actualizar los datos del emprendedor con los valores proporcionados en la solicitud
-    $emprendedor->nombre = $request->nombre;
-    $emprendedor->apellido = $request->apellido;
-    $emprendedor->celular = $request->celular;
-    $emprendedor->genero = $request->genero;
-    $emprendedor->fecha_nac = $request->fecha_nac;
-    $emprendedor->direccion = $request->direccion;
-    $emprendedor->id_municipio = $municipio->id;
-    $emprendedor->id_tipo_documento = $request->id_tipo_documento;
+        // Actualizar los datos del emprendedor con los valores proporcionados en la solicitud
+        $emprendedor->nombre = $request->nombre;
+        $emprendedor->apellido = $request->apellido;
+        $emprendedor->celular = $request->celular;
+        $emprendedor->genero = $request->genero;
+        $emprendedor->fecha_nac = $request->fecha_nac;
+        $emprendedor->direccion = $request->direccion;
+        $emprendedor->id_municipio = $municipio->id;
+        $emprendedor->id_tipo_documento = $request->id_tipo_documento;
 
 // Verificar si se proporcionó una contraseña para actualizar
 if ($request->has('password')) {
@@ -127,21 +121,6 @@ if ($request->has('password')) {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
    
 
 
@@ -157,7 +136,7 @@ if ($request->has('password')) {
         //dd($emprendedor);
         if (!$emprendedor) {
             return response()->json([
-                'message' => 'Emprendedor no encontrado'
+                'message' => 'Emprendedor no encontrado',
             ], 404);
         }
 
@@ -171,7 +150,7 @@ if ($request->has('password')) {
         $emprendedor->save();
 
         return response()->json([
-            'message' => 'Emprendedor desactivado exitosamente'
+            'message' => 'Emprendedor desactivado exitosamente',
         ], 200);
     }
 }
