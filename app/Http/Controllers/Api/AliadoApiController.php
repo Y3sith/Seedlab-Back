@@ -197,24 +197,32 @@ class AliadoApiController extends Controller
     }
 
     public function dashboardAliado($idAliado){
-        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
+        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (PENDIENTES O FINALIZADAS)
         $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
             $query->where('estado', 'Finalizada');
         })->count();
 
-        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
-            $query->where('estado', 'Activa');
+        $pendientes = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Pendiente');
         })->count();
         
         //CONTAR # DE ASESORES DE ESE ALIADO
         $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
 
+        $totalAsesorias = $finalizadas + $pendientes;
+
+        // Calcular los porcentajes
+         // Calcular los porcentajes
+    $porcentajeFinalizadas = $totalAsesorias > 0 ? round(($finalizadas / $totalAsesorias) * 100, 2) . '%' : 0;
+    $porcentajePendientes = $totalAsesorias > 0 ? round(($pendientes / $totalAsesorias) * 100, 2) .'%' : 0;
+    
         return response()->json([
+            'Asesorias Pendientes' => $pendientes,
+            'Porcentaje Pendientes' => $porcentajePendientes,
             'Asesorias Finalizadas' => $finalizadas,
-            'Asesorias Activas' => $activas,
+            'Porcentaje Finalizadas' => $porcentajeFinalizadas,
             'Mis Asesores' => $numAsesores,
         ]);
-
     }
 
     public function gestionarAsesoria(Request $request)
@@ -256,5 +264,9 @@ class AliadoApiController extends Controller
 
     return response()->json(['message' => $mensaje], 200);
 }
+
+    public function eliminarAsesoria(){
+
+    }
 
 }
