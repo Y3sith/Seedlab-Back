@@ -10,8 +10,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Aliado;
 use App\Models\User;
-
-
+use Exception;
 
 class OrientadorApiController extends Controller
 {
@@ -28,7 +27,8 @@ class OrientadorApiController extends Controller
      */
     public function createOrientador(Request $data)
     {
-        $response = null;
+        try {
+            $response = null;
         $statusCode = 200;
 
         if(strlen($data['password']) <8) {
@@ -57,6 +57,10 @@ class OrientadorApiController extends Controller
             }
         });
         return response()->json(['message' => $response], $statusCode);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
 
     }
 
@@ -84,9 +88,10 @@ class OrientadorApiController extends Controller
         //
     }
 
-    public function asignarAsesoriaAliado(Request $request, $idAsesoria) {
-
-        if(Auth::user()->id_rol != 2){
+    public function asignarAsesoriaAliado(Request $request, $idAsesoria)
+{
+        try {
+            if(Auth::user()->id_rol != 2){
             return response()->json([
                'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
@@ -107,6 +112,10 @@ class OrientadorApiController extends Controller
         $asesoria->save();
 
         return response()->json(['message' => 'Aliado asignado correctamente'], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
     /*
     EJ de Json para "asignarAliado"

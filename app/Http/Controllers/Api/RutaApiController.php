@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Actividad;
 use App\Models\Ruta;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,9 +29,8 @@ class RutaApiController extends Controller
      */
     public function store(Request $request)
     {
-
-       
-        if(Auth::user()->id_rol != 1){
+        try {
+            if(Auth::user()->id_rol != 1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
             $ruta = Ruta::create([
@@ -39,6 +39,10 @@ class RutaApiController extends Controller
             "estado" => 1
         ]);
         return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**
@@ -65,8 +69,8 @@ class RutaApiController extends Controller
      */
     public function update(Request $request, $id)
     {
-  
-        if(Auth::user()->id_rol!=1){
+        try {
+             if(Auth::user()->id_rol!=1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
@@ -81,6 +85,10 @@ class RutaApiController extends Controller
             ]);
 
             return response()->json($ruta, 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+       
         
     }
 

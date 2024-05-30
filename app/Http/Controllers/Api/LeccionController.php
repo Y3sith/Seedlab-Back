@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Leccion;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,7 +32,8 @@ class LeccionController extends Controller
     public function store(Request $request)
     {
         //crear leccion (solo el asesor)
-        if (Auth::user()->id_rol==4) {
+        try {
+            if (Auth::user()->id_rol==4) {
             $leccion = Leccion::create([
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,
@@ -40,6 +42,10 @@ class LeccionController extends Controller
         }else {
             return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
         }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**
@@ -64,7 +70,8 @@ class LeccionController extends Controller
     public function update(Request $request, string $id)
     {
         //editar solo el asesor
-        if (Auth::user()->id_rol==4) {
+        try {
+            if (Auth::user()->id_rol==4) {
             $leccion = Leccion::find($id);
             if (!$leccion) {
                 return response()->json(['error' => 'Leccion no encontrada'], 404);
@@ -75,6 +82,9 @@ class LeccionController extends Controller
             }
         }else {
             return response()->json(['error' => 'No tienes permisos para editar lecciones'], 401);
+        }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
