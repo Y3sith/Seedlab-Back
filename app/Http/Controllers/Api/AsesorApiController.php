@@ -135,6 +135,7 @@ class AsesorApiController extends Controller
     
         $resultado = $asesoriasFiltradas->map(function ($asesoria) {
             $data =[
+                'id' => $asesoria->id,
                 'Nombre_sol' => $asesoria->Nombre_sol,
                 'notas' => $asesoria->notas,
                 'fecha' => $asesoria->fecha,
