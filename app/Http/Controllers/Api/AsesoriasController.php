@@ -102,11 +102,6 @@ class AsesoriasController extends Controller
             $idAsesoria = $request->input('id_asesoria');
             $fecha = $request->input('fecha');
 
-            if (!$request->filled(['observaciones', 'fecha', 'estado', 'id_asesoria'])) {
-                return response()->json(['message' => 'Faltan campos en la solicitud'], 400);
-            }
-
-
             $asesoria = Asesoria::find($idAsesoria);
             if (!$asesoria) {
                 return response()->json(['message' => 'La asesoría no existe'], 404);
@@ -117,13 +112,14 @@ class AsesoriasController extends Controller
                 return response()->json(['message' => 'La asesoría ya tiene una fecha asignada'], 400);
             }
 
-            $horarioAsesoria = HorarioAsesoria::create($request->all());
-            /*$horarioAsesoria = HorarioAsesoria::create([
-                'observacion' => $request->input('observacion'),
+     
+            $horarioAsesoria = HorarioAsesoria::create([
+                'observaciones' => $request->input('observaciones') ?  $request->input('observaciones') :"Ninguna observación",
                 'fecha' => $request->input('fecha'),
-                'estado' => $request->input('estado'),
+                'estado' => "Pendiente",
                 'id_asesoria' => $request->input('id_asesoria'),
-            ]);*/
+            ]);
+
             return response()->json(['mesage' => 'Se le a asignado un horario a su Asesoria'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
