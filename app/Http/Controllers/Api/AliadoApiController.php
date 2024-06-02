@@ -194,7 +194,7 @@ class AliadoApiController extends Controller
 
     public function mostrarAsesorAliado($id)
     {
-        if(Auth::user()->is_rol != 3){
+        if(Auth::user()->id_rol != 3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         $aliado = Aliado::find($id);
@@ -205,7 +205,7 @@ class AliadoApiController extends Controller
 
         $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
         return response()->json($asesores);
-    }
+    }    
 
     public function dashboardAliado($idAliado){
         //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
