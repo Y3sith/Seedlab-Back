@@ -10,10 +10,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Asesor;
-
-
-
-
+use App\Models\HorarioAsesoria;
+use Exception;
 
 class AliadoApiController extends Controller
 {
@@ -45,7 +43,8 @@ class AliadoApiController extends Controller
 
     public function crearAliado(Request $data)
     {
-        $response = null;
+        try {
+            $response = null;
         $statusCode = 200;
 
         if (Auth::user()->id_rol != 1) {
@@ -79,6 +78,10 @@ class AliadoApiController extends Controller
         });
 
         return response()->json(['message' => $response], $statusCode);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     public function mostrarAliado(Request $request)
@@ -108,7 +111,8 @@ class AliadoApiController extends Controller
 
     public function editarAliado(Request $request)
     {
-        if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
+        try {
+            if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $aliado = Aliado::find($request->input('id'));
@@ -131,6 +135,10 @@ class AliadoApiController extends Controller
         } else {
             return response()->json(['message' => 'Aliado no encontrado'], 404);
         }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**
@@ -219,4 +227,50 @@ class AliadoApiController extends Controller
         ]);
 
     }
+
+    public function gestionarAsesoria(Request $request)
+{
+    try {
+        if (Auth::user()->id_rol != 3) {
+        return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+    }
+
+    $asesoriaId = $request->input('id_asesoria');
+    $accion = $request->input('accion'); // aceptar o rechazar
+
+    $asesoria = Asesoria::find($asesoriaId);
+
+    if (!$asesoria || $asesoria->id_aliado != Auth::user()->aliado->id) {
+        return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
+    }
+
+    /*$horario = HorarioAsesoria::where('id_asesoria', $asesoriaId)->first();
+    if (!$horario) {
+        return response()->json(['message' => 'No se encontró un horario para esta asesoría'], 404);
+    }*/
+
+    /*if ($accion === 'aceptar') {
+        $horario->estado = 'aceptada';
+        $mensaje = 'Asesoría aceptada correctamente';
+    } 
+    */
+    elseif ($accion === 'rechazar') {
+        //$horario->estado = 'rechazada';
+        $asesoria->id_aliado = null;  // Establecer id_aliado a null
+        $asesoria->isorientador = true;
+        $asesoria->save(); // Guardar cambios en la asesoria
+        $mensaje = 'Asesoría rechazada correctamente';
+    } else {
+        return response()->json(['message' => 'Acción no válida'], 400);
+    }
+
+    //$horario->save();
+
+    return response()->json(['message' => $mensaje], 200);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+    
+}
+
 }

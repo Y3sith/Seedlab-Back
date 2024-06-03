@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Nivel;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -31,7 +32,8 @@ class NivelesController extends Controller
     public function store(Request $request)
     {
         //crear nivel solo asesor
-        if (Auth::user()->id_rol==4) {
+        try {
+             if (Auth::user()->id_rol==4) {
             $niveles = Nivel::create([
                 'nombre'=>$request->nombre,
                 'descripcion'=>$request->descripcion,
@@ -41,6 +43,10 @@ class NivelesController extends Controller
         }else {
             return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
         }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+       
     }
 
     /**
@@ -65,7 +71,8 @@ class NivelesController extends Controller
     public function update(Request $request, string $id)
     {
         //Edita solo el asesor
-        if (Auth::user()->id_rol==4) {
+        try {
+            if (Auth::user()->id_rol==4) {
             $niveles = Nivel::find($id);
             if (!$niveles) {
                 return response()->json(["error"=>"Nivel no encontrado"],404);
@@ -78,6 +85,10 @@ class NivelesController extends Controller
         }else {
             return response()->json(["error"=>"no estas autorizado para editar"],401);
         }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 
     /**
