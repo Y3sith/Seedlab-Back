@@ -209,11 +209,12 @@ class AliadoApiController extends Controller
 
     $asesoresConEstado = $asesores->map(function ($asesor) {
         $user = User::find($asesor->id_autentication);
+        
         return [
             'nombre' => $asesor->nombre,
             'apellido' => $asesor->apellido,
             'celular' => $asesor->celular,
-            'estado' => $user->estado
+            'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
         ];
     });
 
