@@ -25,6 +25,7 @@ COPY . .
 
 
 # Instala las dependencias de Laravel
+RUN composer install
 
 # Expone el puerto en el que se ejecutará la aplicación
 EXPOSE 8000
