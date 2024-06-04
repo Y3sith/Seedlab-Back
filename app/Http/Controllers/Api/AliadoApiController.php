@@ -46,43 +46,42 @@ class AliadoApiController extends Controller
     {
         try {
             $response = null;
-        $statusCode = 200;
+            $statusCode = 200;
 
-        if (Auth::user()->id_rol != 1) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-
-        if (strlen($data['password']) < 8) {
-            $statusCode = 400;
-            $response = 'La contraseña debe tener al menos 8 caracteres';
-            return response()->json(['message' => $response], $statusCode);
-        }
-
-        DB::transaction(function () use ($data, &$response, &$statusCode) {
-            $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
-                $data['nombre'],
-                $data['logo'],
-                $data['descripcion'],
-                $data['tipodato'],
-                $data['ruta'],
-                $data['email'],
-                Hash::make($data['password']),
-                $data['estado'],
-            ]);
-
-            if (!empty($results)) {
-                $response = $results[0]->mensaje;
-                if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    $statusCode = 400;
-                }
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-        });
 
-        return response()->json(['message' => $response], $statusCode);
+            if (strlen($data['password']) < 8) {
+                $statusCode = 400;
+                $response = 'La contraseña debe tener al menos 8 caracteres';
+                return response()->json(['message' => $response], $statusCode);
+            }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
+                    $data['nombre'],
+                    $data['logo'],
+                    $data['descripcion'],
+                    $data['tipodato'],
+                    $data['ruta'],
+                    $data['email'],
+                    Hash::make($data['password']),
+                    $data['estado'],
+                ]);
+
+                if (!empty($results)) {
+                    $response = $results[0]->mensaje;
+                    if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                        $statusCode = 400;
+                    }
+                }
+            });
+
+            return response()->json(['message' => $response], $statusCode);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     public function mostrarAliado(Request $request)
@@ -113,33 +112,32 @@ class AliadoApiController extends Controller
     public function editarAliado(Request $request)
     {
         try {
-            if(Auth::user()->id_rol!=1 || Auth::user()->id_rol != 3){
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }
-        $aliado = Aliado::find($request->input('id'));
-
-        if ($aliado) {
-            $aliado->nombre = $request->input('nombre');
-            $aliado->descripcion = $request->input('descripcion');
-            $aliado->logo = $request->input('logo');
-            $aliado->ruta_multi = $request->input('ruta_multi');
-            $aliado->save();
-
-            if ($aliado->auth) {
-                $user = $aliado->auth;
-                $user->email = $request->input('email');
-                $user->password = Hash::make($request->input('password'));
-                $user->estado = $request->input('estado');
-                $user->save();
+            if (Auth::user()->id_rol != 1 || Auth::user()->id_rol != 3) {
+                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
-            return response()->json(['message' => 'Aliado actualizado correctamente']);
-        } else {
-            return response()->json(['message' => 'Aliado no encontrado'], 404);
-        }
+            $aliado = Aliado::find($request->input('id'));
+
+            if ($aliado) {
+                $aliado->nombre = $request->input('nombre');
+                $aliado->descripcion = $request->input('descripcion');
+                $aliado->logo = $request->input('logo');
+                $aliado->ruta_multi = $request->input('ruta_multi');
+                $aliado->save();
+
+                if ($aliado->auth) {
+                    $user = $aliado->auth;
+                    $user->email = $request->input('email');
+                    $user->password = Hash::make($request->input('password'));
+                    $user->estado = $request->input('estado');
+                    $user->save();
+                }
+                return response()->json(['message' => 'Aliado actualizado correctamente']);
+            } else {
+                return response()->json(['message' => 'Aliado no encontrado'], 404);
+            }
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     /**
@@ -194,44 +192,45 @@ class AliadoApiController extends Controller
     }
 
     public function mostrarAsesorAliado($id)
-{
-    if (Auth::user()->is_rol == 3) {
-        return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+    {
+        if (Auth::user()->is_rol == 3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $aliado = Aliado::find($id);
+
+        if (!$aliado) {
+            return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
+        }
+
+        $asesores = Aliado::findOrFail($id)->asesor()->select('nombre', 'apellido', 'celular', 'id_autentication')->get();
+
+        $asesoresConEstado = $asesores->map(function ($asesor) {
+            $user = User::find($asesor->id_autentication);
+
+            return [
+                'nombre' => $asesor->nombre,
+                'apellido' => $asesor->apellido,
+                'celular' => $asesor->celular,
+                'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+            ];
+        });
+
+        return response()->json($asesoresConEstado);
     }
 
-    $aliado = Aliado::find($id);
 
-    if (!$aliado) {
-        return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
-    }
-
-    $asesores = Aliado::findOrFail($id)->asesor()->select('nombre', 'apellido', 'celular', 'id_autentication')->get();
-
-    $asesoresConEstado = $asesores->map(function ($asesor) {
-        $user = User::find($asesor->id_autentication);
-        
-        return [
-            'nombre' => $asesor->nombre,
-            'apellido' => $asesor->apellido,
-            'celular' => $asesor->celular,
-            'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-        ];
-    });
-
-    return response()->json($asesoresConEstado);
-}
-
-
-    public function dashboardAliado($idAliado){
+    public function dashboardAliado($idAliado)
+    {
         //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
-        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function ($query) {
             $query->where('estado', 'Finalizada');
         })->count();
 
-        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function ($query) {
             $query->where('estado', 'Activa');
         })->count();
-        
+
         //CONTAR # DE ASESORES DE ESE ALIADO
         $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
 
@@ -240,52 +239,100 @@ class AliadoApiController extends Controller
             'Asesorias Activas' => $activas,
             'Mis Asesores' => $numAsesores,
         ]);
-
     }
 
     public function gestionarAsesoria(Request $request)
-{
-    try {
-        if (Auth::user()->id_rol != 3) {
-        return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-    }
+    {
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+            }
 
-    $asesoriaId = $request->input('id_asesoria');
-    $accion = $request->input('accion'); // aceptar o rechazar
+            $asesoriaId = $request->input('id_asesoria');
+            $accion = $request->input('accion'); // aceptar o rechazar
 
-    $asesoria = Asesoria::find($asesoriaId);
+            $asesoria = Asesoria::find($asesoriaId);
 
-    if (!$asesoria || $asesoria->id_aliado != Auth::user()->aliado->id) {
-        return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
-    }
+            if (!$asesoria || $asesoria->id_aliado != Auth::user()->aliado->id) {
+                return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
+            }
 
-    /*$horario = HorarioAsesoria::where('id_asesoria', $asesoriaId)->first();
+            /*$horario = HorarioAsesoria::where('id_asesoria', $asesoriaId)->first();
     if (!$horario) {
         return response()->json(['message' => 'No se encontró un horario para esta asesoría'], 404);
     }*/
 
-    /*if ($accion === 'aceptar') {
+            /*if ($accion === 'aceptar') {
         $horario->estado = 'aceptada';
         $mensaje = 'Asesoría aceptada correctamente';
     } 
-    */
-    elseif ($accion === 'rechazar') {
-        //$horario->estado = 'rechazada';
-        $asesoria->id_aliado = null;  // Establecer id_aliado a null
-        $asesoria->isorientador = true;
-        $asesoria->save(); // Guardar cambios en la asesoria
-        $mensaje = 'Asesoría rechazada correctamente';
-    } else {
-        return response()->json(['message' => 'Acción no válida'], 400);
+    */ elseif ($accion === 'rechazar') {
+                //$horario->estado = 'rechazada';
+                $asesoria->id_aliado = null;  // Establecer id_aliado a null
+                $asesoria->isorientador = true;
+                $asesoria->save(); // Guardar cambios en la asesoria
+                $mensaje = 'Asesoría rechazada correctamente';
+            } else {
+                return response()->json(['message' => 'Acción no válida'], 400);
+            }
+
+            //$horario->save();
+
+            return response()->json(['message' => $mensaje], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
-    //$horario->save();
 
-    return response()->json(['message' => $mensaje], 200);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+
+
+
+
+
+
+
+
+
+
+    public function editarAsesorAliado(Request $request, $id)
+    {
+        try {
+            // Verificar si el usuario autenticado es un aliado
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+            }
+
+
+            // Encontrar al asesor por ID
+            $asesor = Asesor::find($id);
+            if (!$asesor) {
+                return response()->json(['message' => 'Asesor no encontrado'], 404);
+            }
+
+            // Actualizar datos del asesor
+            $asesor->nombre = $request->input('nombre');
+            $asesor->apellido = $request->input('apellido');
+            $asesor->celular = $request->input('celular');
+            $asesor->save();
+
+            // Actualizar datos del usuario asociado al asesor
+            if ($asesor->auth) {
+                $user = $asesor->auth;
+                $user->email = $request->input('email');
+                if ($request->filled('password')) {
+                    if (strlen($request->password) < 8) {
+                        return response()->json(["error" => "La contraseña debe tener al menos 8 caracteres"], 400);
+                    }
+                }
+                $user->password = Hash::make($request->input('password'));
+                $user->estado = $request->input('estado');
+                $user->save();
+            }
+
+            return response()->json(['message' => 'Asesor actualizado correctamente']);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
-    
-}
-
 }

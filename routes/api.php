@@ -82,6 +82,7 @@ Route::group([
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::post('/asesoria/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
+    Route::post('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorAliado'])->name('EditarAsesorAliado');
 });
 
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
