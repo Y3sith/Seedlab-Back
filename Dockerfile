@@ -23,9 +23,12 @@ WORKDIR /var/www
 # Copia los archivos del proyecto
 COPY . .
 
-
 # Instala las dependencias de Laravel
 RUN composer install
+
+# Ejecuta los comandos de Passport
+RUN php artisan passport:key --force \
+    && php artisan passport:client --personal
 
 # Expone el puerto en el que se ejecutará la aplicación
 EXPOSE 8000
