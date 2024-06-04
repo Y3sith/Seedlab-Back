@@ -31,6 +31,7 @@ Route::group([
     Route::post('/login', [AuthController::class, 'login'])->name('login');
     Route::post('/register_em', [AuthController::class, 'register'])->name('register');
     Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
+    Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
 });
 
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
@@ -123,16 +124,6 @@ Route::group([
 Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
 Route::apiResource('/respuestas',RespuestasApiController::class);
 
-Route::group(['prefix' => 'auth'], function (){
-
-    /** Maneja la verificacion de correo electronico */
-    Route::post('/verify-email', [AuthController::class, "sendVerificationEmail"]);
-    /** Maneja el envio del correo para restablecer la contraseña */
-    Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
-    /** Restablece la contraseña */
-    //Route::post('/reset-password', [AuthController::class, "resetPassword"]);
-
-});
 
 
 

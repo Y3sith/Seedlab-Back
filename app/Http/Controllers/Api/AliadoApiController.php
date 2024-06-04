@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Asesor;
 use App\Models\HorarioAsesoria;
+use App\Models\User;
 use Exception;
 
 class AliadoApiController extends Controller
@@ -193,19 +194,32 @@ class AliadoApiController extends Controller
     }
 
     public function mostrarAsesorAliado($id)
-    {
-        if(Auth::user()->is_rol != 3){
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-        $aliado = Aliado::find($id);
-
-        if (!$aliado) {
-            return response()->json(['message' => 'No se encontró ningún aliado este ID'], 404);
-        }
-
-        $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
-        return response()->json($asesores);
+{
+    if (Auth::user()->is_rol == 3) {
+        return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
     }
+
+    $aliado = Aliado::find($id);
+
+    if (!$aliado) {
+        return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
+    }
+
+    $asesores = Aliado::findOrFail($id)->asesor()->select('nombre', 'apellido', 'celular', 'id_autentication')->get();
+
+    $asesoresConEstado = $asesores->map(function ($asesor) {
+        $user = User::find($asesor->id_autentication);
+        return [
+            'nombre' => $asesor->nombre,
+            'apellido' => $asesor->apellido,
+            'celular' => $asesor->celular,
+            'estado' => $user->estado
+        ];
+    });
+
+    return response()->json($asesoresConEstado);
+}
+
 
     public function dashboardAliado($idAliado){
         //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)

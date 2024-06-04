@@ -50,12 +50,4 @@
         </div>
     </div>
 </body>
-
-
-
-
-"Gill Sans", sans-serif
-
-
-
 </html>

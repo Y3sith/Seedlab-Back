@@ -217,16 +217,18 @@ class AuthController extends Controller
     */
     public function enviarRecuperarContrasena(Request $request)
     {
+
+        
         $request->validate([
             'email' => 'required|email',
         ]);
-
         $email = $request->email;
         if (!$email) {
             return response()->json(['error' => 'Proporciona un email válido'], 400);
         }
-        $user = User::where('email', $email)->first();
-
+        
+        $user = User::where('email', 'LIKE', '%' . $email . '%')->first();
+     
         if (!$user) {
             return response()->json(['error' => 'Cuenta no existe'], 400);
         }
@@ -245,7 +247,7 @@ class AuthController extends Controller
         return response()->json(['message' => 'Te hemos enviado un email con tu nueva contraseña temporal'], 200);
     }
 
-    public function sendVerificationEmail(Request $request)
+    /*public function sendVerificationEmail(Request $request)
     {
         $request->validate([
             'email' => 'required',
