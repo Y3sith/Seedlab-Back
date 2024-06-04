@@ -284,39 +284,22 @@ class AliadoApiController extends Controller
         }
     }
 
-
-
-
-
-
-
-
-
-
-
-
     public function editarAsesorAliado(Request $request, $id)
     {
         try {
-            // Verificar si el usuario autenticado es un aliado
             if (Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
-
-
-            // Encontrar al asesor por ID
             $asesor = Asesor::find($id);
             if (!$asesor) {
                 return response()->json(['message' => 'Asesor no encontrado'], 404);
             }
 
-            // Actualizar datos del asesor
             $asesor->nombre = $request->input('nombre');
             $asesor->apellido = $request->input('apellido');
             $asesor->celular = $request->input('celular');
             $asesor->save();
 
-            // Actualizar datos del usuario asociado al asesor
             if ($asesor->auth) {
                 $user = $asesor->auth;
                 $user->email = $request->input('email');
