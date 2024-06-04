@@ -19,3 +19,4 @@ services:
       - DB_DATABASE=seedlab
       - DB_USERNAME=root
       - DB_PASSWORD=eqiWKmwMxjBsIahcQdXdSDRxYatuqovO
+      
