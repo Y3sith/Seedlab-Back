@@ -240,6 +240,7 @@ class AuthController extends Controller
 
         // Enviar la contraseña temporal por correo electrónico
         Mail::to($email)->send(new PasswordReset($temporaryPassword));
+        
 
         return response()->json(['message' => 'Te hemos enviado un email con tu nueva contraseña temporal'], 200);
     }
