@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Aliado;
 use App\Models\User;
-use Exception;
+use App\Models\Orientador;
+
+
+
 
 class OrientadorApiController extends Controller
 {
@@ -145,4 +148,20 @@ class OrientadorApiController extends Controller
         return response()->json(['Emprendedores activos' => $enumerar]);
     }
 
+    public function mostrarOrientadores()
+    {
+        $activos = Orientador::whereHas('auth', function($query) {
+            $query->where('estado', true);
+        })->get(['nombre', 'apellido', 'celular']);
+
+        // Obtener orientadores inactivos
+        $inactivos = Orientador::whereHas('auth', function($query) {
+            $query->where('estado', false);
+        })->get(['nombre', 'apellido', 'celular']);
+
+        return response()->json([
+            'activos' => $activos,
+            'inactivos' => $inactivos
+        ]);
+    }
 }

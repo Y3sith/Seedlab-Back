@@ -220,23 +220,31 @@ class AliadoApiController extends Controller
     }
 
 
-    public function dashboardAliado($idAliado)
-    {
-        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
-        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function ($query) {
+    public function dashboardAliado($idAliado){
+        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (PENDIENTES O FINALIZADAS)
+        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
             $query->where('estado', 'Finalizada');
         })->count();
 
-        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function ($query) {
-            $query->where('estado', 'Activa');
+        $pendientes = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Pendiente');
         })->count();
 
         //CONTAR # DE ASESORES DE ESE ALIADO
         $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
 
+        $totalAsesorias = $finalizadas + $pendientes;
+
+        // Calcular los porcentajes
+         // Calcular los porcentajes
+    $porcentajeFinalizadas = $totalAsesorias > 0 ? round(($finalizadas / $totalAsesorias) * 100, 2) . '%' : 0;
+    $porcentajePendientes = $totalAsesorias > 0 ? round(($pendientes / $totalAsesorias) * 100, 2) .'%' : 0;
+    
         return response()->json([
+            'Asesorias Pendientes' => $pendientes,
+            'Porcentaje Pendientes' => $porcentajePendientes,
             'Asesorias Finalizadas' => $finalizadas,
-            'Asesorias Activas' => $activas,
+            'Porcentaje Finalizadas' => $porcentajeFinalizadas,
             'Mis Asesores' => $numAsesores,
         ]);
     }
@@ -278,44 +286,11 @@ class AliadoApiController extends Controller
 
             //$horario->save();
 
-            return response()->json(['message' => $mensaje], 200);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
+    return response()->json(['message' => $mensaje], 200);
+}
+
+    public function eliminarAsesoria(){
+
     }
 
-    public function editarAsesorAliado(Request $request, $id)
-    {
-        try {
-            if (Auth::user()->id_rol != 3) {
-                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            }
-            $asesor = Asesor::find($id);
-            if (!$asesor) {
-                return response()->json(['message' => 'Asesor no encontrado'], 404);
-            }
-
-            $asesor->nombre = $request->input('nombre');
-            $asesor->apellido = $request->input('apellido');
-            $asesor->celular = $request->input('celular');
-            $asesor->save();
-
-            if ($asesor->auth) {
-                $user = $asesor->auth;
-                $user->email = $request->input('email');
-                if ($request->filled('password')) {
-                    if (strlen($request->password) < 8) {
-                        return response()->json(["error" => "La contraseña debe tener al menos 8 caracteres"], 400);
-                    }
-                }
-                $user->password = Hash::make($request->input('password'));
-                $user->estado = $request->input('estado');
-                $user->save();
-            }
-
-            return response()->json(['message' => 'Asesor actualizado correctamente']);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
-    }
 }
