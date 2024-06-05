@@ -105,6 +105,7 @@ Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::cla
 Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
 Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
 Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
+Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
 
 //asesorias
 Route::group([
