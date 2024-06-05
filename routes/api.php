@@ -52,8 +52,8 @@ Route::group([
     Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
     Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAsesoriaAliado']);
     Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
+    Route::get('/listaOrientador', [OrientadorApiController::class,'mostrarOrientadores']);
 });
-Route::get('/listaOrientador', [OrientadorApiController::class,'mostrarOrientadores']);
 
 
 //Super Admin
