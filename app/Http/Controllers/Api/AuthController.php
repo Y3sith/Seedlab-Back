@@ -19,27 +19,21 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
-        $credentials = $request->validate([
-            'email' => ['required', 'email'],
-            'password' => ['required', 'string'],
-        ]);
+        $user = User::where('email', $request->email)->first();
 
-
-        $user = User::where('email', $request->email)->with('emprendedor')->first();
-        $verificationCode = mt_rand(10000, 99999);
-
-        //Si el usuario no existe, validacion de credenciales 
-        if (!Auth::attempt($credentials)) {
-            return response()->json(['message' => 'No se encuentra registrado'], 401);
+        if (!$user) {
+            return response()->json(['message' => 'El usuario no está registrado en el sistema'], 404);
         }
-
-
+        if(!Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Contraseña incorrecta'], 401);
+        }
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
         if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
+            $verificationCode = mt_rand(10000, 99999);
             $user->emprendedor->cod_ver = $verificationCode; 
             $user->emprendedor->save();
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
-            return response()->json(['message' => 'Por favor verifique su correo electronico'], 403);
+            return response()->json(['message' => 'Por favor verifique su correo electronico'], 307);
         }
         
         $tokenResult = $user->createToken('Personal Access Token');
@@ -51,7 +45,6 @@ class AuthController extends Controller
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            //'user' => $user,
             'user' => $additionalInfo
         ]);
     }
@@ -59,49 +52,51 @@ class AuthController extends Controller
     protected function getAdditionalInfo($user)
     {
         $info = [];
-
-        if ($user->id_rol == 3) {
-            $info = [
-
-                'id'=>$user->aliado->id,
-                'nombre' => $user->aliado->nombre,
-                'id_autentication' => $user->aliado->id_autentication,
-                'id_rol' => $user->id_rol   
-            ];
-        } elseif ($user->id_rol == 4) {
-            $info = [
-                
-                'id'=>$user->asesor->id,
-                'id_autentication' => $user->asesor->id_autentication,
-                'id_aliado' => $user->asesor->id_aliado,
-                'id_rol' => $user->id_rol
-            ];
-        } elseif ($user->id_rol == 5){
-            $info = $user;
-            
-        } elseif ($user->id_rol == 1){
-            $info = [
-                'id'=>$user->superadmin->id,
-                'nombre'=>$user->superadmin->nombre,
-                'apellido' => $user->superadmin->apellido,
-                'id_autentication' => $user->superadmin->id_autentication,
-                'id_rol' => $user->id_rol                
-            ];
-        } elseif ($user->id_rol == 2){
-            $info = [
-                //$user,
-                'id'=>$user->orientador->id,
-                'nombre'=>$user->orientador->nombre,
-                'apellido' => $user->orientador->apellido,
-                'id_autentication' => $user->orientador->id_autentication,
-                'id_rol' => $user->id_rol
-            ];
-        }
     
-
+        switch ($user->id_rol) {
+            case 1:
+                $info = [
+                    'id' => $user->superadmin->id,
+                    'nombre' => $user->superadmin->nombre,
+                    'apellido' => $user->superadmin->apellido,
+                    'id_autentication' => $user->superadmin->id_autentication,
+                    'id_rol' => $user->id_rol
+                ];
+                break;
+            case 2:
+                $info = [
+                    'id' => $user->orientador->id,
+                    'nombre' => $user->orientador->nombre,
+                    'apellido' => $user->orientador->apellido,
+                    'id_autentication' => $user->orientador->id_autentication,
+                    'id_rol' => $user->id_rol
+                ];
+                break;
+            case 3:
+                $info = [
+                    'id' => $user->aliado->id,
+                    'nombre' => $user->aliado->nombre,
+                    'id_autentication' => $user->aliado->id_autentication,
+                    'id_rol' => $user->id_rol
+                ];
+                break;
+            case 4:
+                $info = [
+                    'id' => $user->asesor->id,
+                    'id_autentication' => $user->asesor->id_autentication,
+                    'id_aliado' => $user->asesor->id_aliado,
+                    'id_rol' => $user->id_rol
+                ];
+                break;
+            case 5:
+                $info = $user;
+                break;
+            default:
+                $info = [];
+                break;
+        }
         return $info;
     }
-
 
     public function userProfile($documento)
     {
