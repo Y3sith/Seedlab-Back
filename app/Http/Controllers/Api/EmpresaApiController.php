@@ -114,7 +114,7 @@ class EmpresaApiController extends Controller
         }
 
         return response()->json([
-            'message' => 'Empresa y apoyoEmpresa creados exitosamente',
+            'message' => 'Registro exitoso ',
             'empresa' => $empresa,
             'apoyos' => $apoyos
         ], 200);

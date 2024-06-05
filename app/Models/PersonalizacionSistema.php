@@ -16,6 +16,7 @@ class PersonalizacionSistema extends Model
         'nombre_sistema',
         'color_principal',
         'color_secundario',
+        'color_terciario',
         'id_superadmin'
     ];
 

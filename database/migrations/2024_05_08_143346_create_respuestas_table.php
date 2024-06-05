@@ -23,8 +23,8 @@ return new class extends Migration
             $table->foreign('id_pregunta')->references('id')->on('pregunta');
             $table->string('id_empresa');
             $table->foreign('id_empresa')->references('documento')->on('empresa');
-            $table->unsignedBigInteger('id_subpregunta');
-            $table->foreign('id_subpregunta')->references('id')->on('subpregunta')->nullable();
+            $table->unsignedBigInteger('id_subpregunta')->nullable();
+            $table->foreign('id_subpregunta')->references('id')->on('subpregunta');
             //$table->timestamps();
         });
     }
