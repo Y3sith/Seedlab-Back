@@ -138,20 +138,24 @@ class OrientadorApiController extends Controller
         return response()->json(['Emprendedores activos' => $enumerar]);
     }
 
-    public function mostrarOrientadores()
-    {
-        $activos = Orientador::whereHas('auth', function($query) {
-            $query->where('estado', true);
-        })->get(['nombre', 'apellido', 'celular']);
+    public function mostrarOrientadores(){
+        if (Auth::user()->id_rol !== 1) {
+           return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+       }
 
-        // Obtener orientadores inactivos
-        $inactivos = Orientador::whereHas('auth', function($query) {
-            $query->where('estado', false);
-        })->get(['nombre', 'apellido', 'celular']);
+       $orientadores = Orientador::select('nombre', 'apellido', 'celular', 'id_autentication')->get();
 
-        return response()->json([
-            'activos' => $activos,
-            'inactivos' => $inactivos
-        ]);
-    }
+       $orientadoresConEstado = $orientadores->map(function ($orientador) {
+           $user = User::find($orientador->id_autentication);
+
+           return [
+               'nombre' => $orientador->nombre,
+               'apellido' => $orientador->apellido,
+               'celular' => $orientador->celular,
+               'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+           ];
+       });
+
+       return response()->json($orientadoresConEstado);
+   }
 }
