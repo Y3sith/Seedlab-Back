@@ -193,7 +193,7 @@ class AliadoApiController extends Controller
 
     public function mostrarAsesorAliado($id)
     {
-        if (Auth::user()->id_rol == 3) {
+        if (Auth::user()->id_rol != 3) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
