@@ -47,7 +47,7 @@ Route::get('userProfile/{documento}', [AuthController::class, 'userProfile'])->m
 //Orientador
 Route::group([
     'prefix' => 'orientador',
-    'middelware' => 'auth:api'
+    'middleware' => 'auth:api'
 ], function(){
     Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
     Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAsesoriaAliado']);
