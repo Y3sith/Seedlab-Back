@@ -11,9 +11,7 @@ use App\Models\Asesoria;
 use App\Models\Aliado;
 use App\Models\User;
 use App\Models\Orientador;
-
-
-
+use Exception;
 
 class OrientadorApiController extends Controller
 {
@@ -129,9 +127,10 @@ class OrientadorApiController extends Controller
 
     public function listarAliados()
 {   
-    if(Auth::user()->id_rol!=2){
+    if (Auth::user()->id_rol != 2 && Auth::user()->id_rol != 5){
         return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
     }
+
     $usuarios = User::where('estado', true)
                     ->where('id_rol', 3)
                     ->pluck('id');
