@@ -44,7 +44,7 @@ Route::group([
 
 //Emprendedor
 Route::group([
-    'middelware' => 'auth:api'
+    'middleware' => 'auth:api'
 ], function (){
     Route::apiResource('/emprendedor',EmprendedorApiController::class);
     Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
