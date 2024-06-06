@@ -80,7 +80,7 @@ class AsesorApiController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4) {
+            if (Auth::user()->id_rol == 4) {
                 $asesor = Asesor::find($id);
                 $asesor->update([
                     'nombre' => $request->nombre,
@@ -195,17 +195,13 @@ class AsesorApiController extends Controller
     public function userProfileAsesor($id)
     {
         try {
-            //     if (Auth::user()->id_rol != 4) {
-            //     return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            // }
+            if (Auth::user()->id_rol != 4) {
+                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+            }
             $asesor = Asesor::where('id', $id)
                 ->with('auth:id,email')
-                ->select('nombre', 'apellido', 'celular',"id_autentication")
+                ->select('nombre', 'apellido', 'celular', "id_autentication")
                 ->first();
-
-                
-
-
             return response()->json($asesor);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

@@ -293,4 +293,7 @@ class AliadoApiController extends Controller
     }
     
 }
+public function editarAsesorXaliado(){
+    
+}
 }
