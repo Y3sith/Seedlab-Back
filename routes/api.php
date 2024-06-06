@@ -35,11 +35,11 @@ Route::group([
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 //Empresa
-Route:group([
+Route::group([
    'middleware' => 'auth:api'
 ], function(){
-    Route::apiResource('/empresa',EmpresaApiController::class);
     Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
+    Route::apiResource('/empresa',EmpresaApiController::class);
 });
 
 //Emprendedor
