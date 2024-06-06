@@ -195,7 +195,7 @@ class AsesorApiController extends Controller
     public function userProfileAsesor($id)
     {
         try {
-            if (Auth::user()->id_rol != 4) {
+            if (Auth::user()->id_rol != 4 | Auth::user()->id_rol!= 3) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
             $asesor = Asesor::where('id', $id)
