@@ -36,6 +36,9 @@ class AsesoriasController extends Controller
                     return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
                 }
             }
+            if (is_null($aliado)&& $request->input('isorientador')==0) {
+                return response()->json(['message' => 'Nesecitas asignar ya sea un aliado u orientador'], 400);
+            }
             $asesoria = Asesoria::create([
                 'Nombre_sol' => $request->input('nombre'),
                 'notas' => $request->input('notas'),
@@ -45,6 +48,7 @@ class AsesoriasController extends Controller
                 'id_aliado' => $aliado ? $aliado->id : null,
                 'doc_emprendedor' => $request->input('doc_emprendedor'),
             ]);
+            
             return response()->json(['message' => 'La asesoría se ha solicitado con éxito'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

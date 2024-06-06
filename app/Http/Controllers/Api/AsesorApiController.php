@@ -28,43 +28,42 @@ class AsesorApiController extends Controller
     {
         try {
             $response = null;
-        $statusCode = 200;
-        if(Auth::user()->id_rol !=3){
-            $statusCode = 400;
-            $response = 'Solo los aliados pueden crear asesores';
-            return response()->json(['message' => $response], $statusCode);
-        }
-        if(strlen($data['password']) <8) {
-            $statusCode = 400;
-            $response = 'La contraseña debe tener al menos 8 caracteres';
-            return response()->json(['message' => $response], $statusCode);
-        }
-        
-        DB::transaction(function () use ($data, &$response, &$statusCode) {
-        $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?,?)', [
-                $data['nombre'],
-                $data['apellido'],
-                $data['celular'],
-                $data['aliado'],
-                $data['email'],
-                Hash::make($data['password']),
-                $data['estado'],
-            ]);
+            $statusCode = 200;
+            if (Auth::user()->id_rol != 3) {
+                $statusCode = 400;
+                $response = 'Solo los aliados pueden crear asesores';
+                return response()->json(['message' => $response], $statusCode);
+            }
+            if (strlen($data['password']) < 8) {
+                $statusCode = 400;
+                $response = 'La contraseña debe tener al menos 8 caracteres';
+                return response()->json(['message' => $response], $statusCode);
+            }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?,?)', [
+                    $data['nombre'],
+                    $data['apellido'],
+                    $data['celular'],
+                    $data['aliado'],
+                    $data['email'],
+                    Hash::make($data['password']),
+                    $data['estado'],
+                ]);
 
 
-            if (!empty($results)) {
-                $response = $results[0]->mensaje;
-                if ($response === 'El numero de celular ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    $statusCode = 400;
+                if (!empty($results)) {
+                    $response = $results[0]->mensaje;
+                    if ($response === 'El numero de celular ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                        $statusCode = 400;
+                    }
                 }
-            } 
-        });
+            });
 
             return response()->json(['message' => $response], $statusCode);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     /**
@@ -81,22 +80,22 @@ class AsesorApiController extends Controller
     public function update(Request $request, $id)
     {
         try {
-            if(Auth::user()-> id_rol == 3 || Auth::user()-> id_rol ==4){
-            $asesor = Asesor::find($id);
-            $asesor->update([
-                'nombre' => $request->nombre,
-                'apellido' => $request->apellido,
-                'celular' => $request->celular,
-                //'email' => $request->email, no se sabe si pueda editar 
-            ]);
-            return response()->json(['message' => 'Asesor actualizado', 200]);
-        }
-        return response()->json([
-            'message' => 'No tienes permisos para realizar esta acción'], 403);   
+            if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4) {
+                $asesor = Asesor::find($id);
+                $asesor->update([
+                    'nombre' => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'celular' => $request->celular,
+                    //'email' => $request->email, no se sabe si pueda editar 
+                ]);
+                return response()->json(['message' => 'Asesor actualizado', 200]);
+            }
+            return response()->json([
+                'message' => 'No tienes permisos para realizar esta acción'
+            ], 403);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     /**
@@ -104,35 +103,37 @@ class AsesorApiController extends Controller
      */
     public function destroy($id)
     {
-        if(Auth::user()->id_rol != 3){
+        if (Auth::user()->id_rol != 3) {
             return response()->json([
-               'message' => 'No tienes permisos para realizar esta acción'
+                'message' => 'No tienes permisos para realizar esta acción'
             ], 403);
         }
         $asesor = Asesor::find($id);
         if (!$asesor) {
             return response()->json([
-               'message' => 'Asesor no encontrado',
+                'message' => 'Asesor no encontrado',
             ], 404);
         }
         $user = $asesor->auth;
         $user->estado = 0;
         $user->save();
         return response()->json([
-           'message' => 'Asesor desactivado',
+            'message' => 'Asesor desactivado',
         ], 200);
     }
 
-    public function mostrarAsesoriasAsesor($id, $conHorario) {
+    public function mostrarAsesoriasAsesor($id, $conHorario)
+    {
         $asesor = Asesor::find($id);
-    
+
         if (!$asesor) {
             return response()->json([
-                'message' => 'El asesor no existe en el sistema'], 404);
+                'message' => 'El asesor no existe en el sistema'
+            ], 404);
         }
-    
+
         $asesoriasAsesor = $asesor->asesorias()->with('emprendedor', 'horarios')->get();
-    
+
         if ($conHorario === 'true') {
             $asesoriasFiltradas = $asesoriasAsesor->filter(function ($asesoria) {
                 return $asesoria->horarios->isNotEmpty();
@@ -142,9 +143,9 @@ class AsesorApiController extends Controller
                 return $asesoria->horarios->isEmpty();
             });
         }
-    
+
         $resultado = $asesoriasFiltradas->map(function ($asesoria) {
-            $data =[
+            $data = [
                 'id' => $asesoria->id,
                 'Nombre_sol' => $asesoria->Nombre_sol,
                 'notas' => $asesoria->notas,
@@ -154,23 +155,22 @@ class AsesorApiController extends Controller
                 'celular' => $asesoria->emprendedor->celular,
                 'correo' => $asesoria->emprendedor->auth->email,
             ];
-            if($asesoria->horarios->isNotEmpty()){
+            if ($asesoria->horarios->isNotEmpty()) {
                 $data['observaciones'] = $asesoria->horarios->first()->observaciones;
                 $data['fecha_asignacion'] = $asesoria->horarios->first()->fecha;
                 $data['estado'] = $asesoria->horarios->first()->estado;
-            }
-            else{
+            } else {
                 $data['mensaje'] = 'No tiene horario asignado';
-
             }
-            return $data;   
+            return $data;
         })->values();
-    
+
         return response()->json($resultado, 200);
     }
 
-    public function contarAsesorias($idAsesor) {
-        
+    public function contarAsesorias($idAsesor)
+    {
+
         $asesor = Asesor::find($idAsesor);
 
         if (!$asesor) {
@@ -179,11 +179,11 @@ class AsesorApiController extends Controller
             ], 404);
         }
 
-        $finalizadas = $asesor->asesorias()->whereHas('horarios', function($query) {
-                $query->where('estado', 'Finalizada');
+        $finalizadas = $asesor->asesorias()->whereHas('horarios', function ($query) {
+            $query->where('estado', 'Finalizada');
         })->count();
 
-        $pendientes = $asesor->asesorias()->whereHas('horarios', function($query) {
+        $pendientes = $asesor->asesorias()->whereHas('horarios', function ($query) {
             $query->where('estado', 'Pendiente');
         })->count();
 
@@ -192,5 +192,23 @@ class AsesorApiController extends Controller
             'Asesorias Pendientes' => $pendientes,
         ]);
     }
-    
+    public function userProfileAsesor($id)
+    {
+        try {
+            //     if (Auth::user()->id_rol != 4) {
+            //     return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+            // }
+            $asesor = Asesor::where('id', $id)
+                ->with('auth:id,email')
+                ->select('nombre', 'apellido', 'celular',"id_autentication")
+                ->first();
+
+                
+
+
+            return response()->json($asesor);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
 }
