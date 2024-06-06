@@ -181,6 +181,12 @@ class OrientadorApiController extends Controller
             $orientador->celular = $request->input('celular');
             $orientador->save();
 
+            // if (strlen($user['password'])<8) {
+            //     $statusCode=400;
+            //     $response = 'La contraseña debe tener al menos 8 caracteres';
+            //     return response()->json([])
+            // }
+
             if ($orientador->auth) {
                 $user= $orientador->auth;
                 $password = $request->input('password');
@@ -189,7 +195,7 @@ class OrientadorApiController extends Controller
                     return response()->json(['message' => $response]);
                 }
                 $user->email = $request->input('email');
-                $user->password =Hash::make('password');
+                $user->password =  Hash::make($request->input('password'));
                 $user->save();
             }
             return response()->json(['message' => 'Orientador actualizado correctamente'], 200);
