@@ -203,12 +203,13 @@ class AliadoApiController extends Controller
             return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
         }
 
-        $asesores = Aliado::findOrFail($id)->asesor()->select('nombre', 'apellido', 'celular', 'id_autentication')->get();
+        $asesores = Aliado::findOrFail($id)->asesor()->select('id','nombre', 'apellido', 'celular', 'id_autentication')->get();
 
         $asesoresConEstado = $asesores->map(function ($asesor) {
             $user = User::find($asesor->id_autentication);
 
             return [
+                'id'=>$asesor->id,
                 'nombre' => $asesor->nombre,
                 'apellido' => $asesor->apellido,
                 'celular' => $asesor->celular,
@@ -308,6 +309,11 @@ public function editarAsesorXaliado(Request $request, $id){
 
             if ($asesor->auth) {
                 $user = $asesor-> auth;
+                $password = $request->input('password');
+                if (strlen($password)< 8) {
+                    $response = 'la contraseña debe tener al menos 8 caracteres';
+                    return response()->json(['message' => $response]);
+                }
                 $user->email = $request->input('email');
                 $user->password =  Hash::make($request->input('password'));
                 $user->save();
