@@ -20,10 +20,7 @@ use App\Http\Controllers\Api\OrientadorApiController;
 use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
-Route::get('/user', function (Request $request) {
-    return $request->user();
-})->middleware('auth:api');
-Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
+
 //Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
@@ -37,12 +34,20 @@ Route::group([
 Route::post('logout', [AuthController::class, 'logout'])->middleware('auth:api');
 
 //Empresa
-Route::apiResource('/empresa',EmpresaApiController::class)->middleware('auth:api');
-Route::post('/createEmpresa', [EmpresaApiController::class, 'store'])->middleware('auth:api');
+Route:group([
+   'middleware' => 'auth:api'
+], function(){
+    Route::apiResource('/empresa',EmpresaApiController::class);
+    Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
+});
 
 //Emprendedor
-Route::apiResource('/emprendedor',EmprendedorApiController::class)->middleware('auth:api');
-Route::get('userProfile/{documento}', [AuthController::class, 'userProfile'])->middleware('auth:api');
+Route::group([
+    'middelware' => 'auth:api'
+], function (){
+    Route::apiResource('/emprendedor',EmprendedorApiController::class);
+    Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
+});
 
 //Orientador
 Route::group([
@@ -65,8 +70,9 @@ Route::group([
     Route::post('/personalizacion',[SuperAdminController::class,'personalizacionSis']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
+    Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
+    Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
 });
-Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
 
    
 //UbicacionController
@@ -85,10 +91,10 @@ Route::group([
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::post('/asesoria/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
     Route::post('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorAliado'])->name('EditarAsesorAliado');
+    Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
+    Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
 });
 
-Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
-Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
@@ -102,12 +108,17 @@ Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
 Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
 //Asesor
-Route::apiResource('/asesor', AsesorApiController::class)->middleware('auth:api');
-Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
-Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
-Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
+Route::group([
+    'prefix' => 'asesor',
+    'middleware' => 'auth:api'
+], function(){
+    Route::apiResource('/asesor', AsesorApiController::class);
+    Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
+    Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
+    Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
+});
 
-//asesorias
+//Asesorias
 Route::group([
     'prefix' => 'asesorias',
     'middleware' =>'auth:api'
@@ -123,9 +134,15 @@ Route::group([
     Route::get('/asesores_disponibles/{idaliado}', [AsesoriasController::class, 'listarasesoresdisponibles'])->name('listarasesoresdisponibles'); //ver asesores disponibles por aliado
 });
 
+//Respuestas formulario
+Route::group([
+    'prefix' => 'respuestas',
+    'middleware' => 'auth:api'
+], function (){
+    Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
+    Route::apiResource('/respuestas',RespuestasApiController::class);
+});
 
-Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
-Route::apiResource('/respuestas',RespuestasApiController::class);
 
 
 
