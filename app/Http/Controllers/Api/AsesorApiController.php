@@ -145,6 +145,7 @@ class AsesorApiController extends Controller
     
         $resultado = $asesoriasFiltradas->map(function ($asesoria) {
             $data =[
+                'id' => $asesoria->id,
                 'Nombre_sol' => $asesoria->Nombre_sol,
                 'notas' => $asesoria->notas,
                 'fecha' => $asesoria->fecha,
@@ -182,13 +183,13 @@ class AsesorApiController extends Controller
                 $query->where('estado', 'Finalizada');
         })->count();
 
-        $activas = $asesor->asesorias()->whereHas('horarios', function($query) {
-            $query->where('estado', 'Activa');
+        $pendientes = $asesor->asesorias()->whereHas('horarios', function($query) {
+            $query->where('estado', 'Pendiente');
         })->count();
 
         return response()->json([
             'Asesorias finalizadas' => $finalizadas,
-            'Asesorias activas' => $activas,
+            'Asesorias Pendientes' => $pendientes,
         ]);
     }
     

@@ -10,7 +10,10 @@ use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Aliado;
 use App\Models\User;
-use Exception;
+use App\Models\Orientador;
+
+
+
 
 class OrientadorApiController extends Controller
 {
@@ -145,4 +148,24 @@ class OrientadorApiController extends Controller
         return response()->json(['Emprendedores activos' => $enumerar]);
     }
 
+    public function mostrarOrientadores(){
+        if (Auth::user()->id_rol !== 1) {
+           return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+       }
+
+       $orientadores = Orientador::select('nombre', 'apellido', 'celular', 'id_autentication')->get();
+
+       $orientadoresConEstado = $orientadores->map(function ($orientador) {
+           $user = User::find($orientador->id_autentication);
+
+           return [
+               'nombre' => $orientador->nombre,
+               'apellido' => $orientador->apellido,
+               'celular' => $orientador->celular,
+               'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+           ];
+       });
+
+       return response()->json($orientadoresConEstado);
+   }
 }

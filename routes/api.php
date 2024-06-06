@@ -46,12 +46,14 @@ Route::get('userProfile/{documento}', [AuthController::class, 'userProfile'])->m
 //Orientador
 Route::group([
     'prefix' => 'orientador',
-    'middelware' => 'auth:api'
+    'middleware' => 'auth:api'
 ], function(){
     Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
     Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAsesoriaAliado']);
     Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
+    Route::get('/listaOrientador', [OrientadorApiController::class,'mostrarOrientadores']);
 });
+
 
 //Super Admin
 Route::group([
@@ -108,7 +110,6 @@ Route::group([
     'middleware' =>'auth:api'
 ], function(){
     Route::post('/solicitud_asesoria',[AsesoriasController::class,'guardarAsesoria']);//guardar asesoria - emprendedor
-    
     Route::post('/asignar_asesoria', [AsesoriasController::class, 'asignarAsesoria'])->name('asignarasesoria'); //asignar asesoria - aliado
     Route::post('/horario_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('definirhorarioasesoria'); //asignar horario - asesor
     Route::put('/editar_asignar_asesoria',[AsesoriasController::class, 'definirHorarioAsesoria'])->name('editarasignacionasesoria'); //editar asesor - aliado
