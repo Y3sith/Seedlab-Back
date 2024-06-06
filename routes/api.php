@@ -2,6 +2,7 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+
 use App\Http\Controllers\Api\Contenido_por_LeccionController;
 use App\Http\Controllers\Api\UbicacionController;
 use App\Http\Controllers\Api\EmprendedorApiController;
