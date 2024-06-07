@@ -113,7 +113,7 @@ class SuperAdminController extends Controller
             }
             $admin = SuperAdmin::where('id',$id)
             ->with('auth:id,email')
-            ->select('nombre','apellido',"id_autentication")
+            ->select('id','nombre','apellido',"id_autentication")
             ->first();
             return response()->json($admin);
         } catch (Exception $e) {
