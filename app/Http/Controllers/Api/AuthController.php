@@ -22,14 +22,12 @@ class AuthController extends Controller
     public function login(Request $request)
     {
 
-        $user = User::where('email', $request->email)->first();
+        $user = User::where('email', $request->email)->with('emprendedor')->first();
 
-        if (!$user) {
-            return response()->json(['message' => 'El usuario no está registrado en el sistema'], 404);
+        if (!$user || !Hash::check($request->password, $user->password)) {
+            return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
         }
-        if(!Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Contraseña incorrecta'], 401);
-        }
+ 
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
         if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
             $verificationCode = mt_rand(10000, 99999);

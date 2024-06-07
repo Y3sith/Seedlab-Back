@@ -58,7 +58,7 @@ Route::group([
     Route::post('/crearOrientador',[OrientadorApiController::class,'createOrientador']);
     Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAsesoriaAliado']);
     Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
-    Route::get('/listaOrientador', [OrientadorApiController::class,'mostrarOrientadores']);
+    Route::get('/listaOrientador/{status}', [OrientadorApiController::class,'mostrarOrientadores']);
     Route::put('/editarOrientador/{id}', [OrientadorApiController::class,'editarOrientador']);
 });
 
@@ -97,8 +97,8 @@ Route::group([
     Route::put('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorXaliado'])->name('EditarAsesorAliado');
     Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
 });
-Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
 
+Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
 
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');

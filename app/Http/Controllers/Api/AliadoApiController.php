@@ -21,9 +21,7 @@ class AliadoApiController extends Controller
      */
     public function traerAliadosActivos($status)
     {
-        // if(Auth::user()->id_rol !=1){
-        //     return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        // }
+       
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
