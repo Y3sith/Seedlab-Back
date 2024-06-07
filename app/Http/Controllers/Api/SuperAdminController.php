@@ -106,6 +106,30 @@ class SuperAdminController extends Controller
         //
     }
 
+    public function userProfileAdmin($id){
+        try {
+            if (Auth::user()->id_rol!=1) {
+                return response()->json(['message'=>'no tienes permiso para esta funcion']);
+            }
+            $admin = SuperAdmin::where('id',$id)
+            ->with('auth:id,email')
+            ->select('nombre','apellido',"id_autentication")
+            ->first();
+            return response()->json($admin);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+         }
+    }
+
+
+
+
+
+
+
+
+
+
     /**
      * Update the specified resource in storage.
      */
