@@ -22,18 +22,7 @@ class SuperAdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function verEmprendedoresxEmpresa()
-    {
-        if(Auth::user()->id_rol != 1){
-            return response()->json([
-               'message' => 'No tienes permiso para acceder a esta ruta'
-            ], 401);
-        }
-
-        $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
-        
-        return response()->json($emprendedoresConEmpresas);
-    }
+   
 
 
     public function personalizacionSis(Request $request)

@@ -190,6 +190,7 @@ class OrientadorApiController extends Controller
                 }
                 $user->email = $request->input('email');
                 $user->password =  Hash::make($request->input('password'));
+                $user->estado = $request->input('estado');
                 $user->save();
             }
             return response()->json(['message' => 'Orientador actualizado correctamente'], 200);
@@ -201,4 +202,21 @@ class OrientadorApiController extends Controller
     }
 
    }
+
+   public function userProfileOrientador($id){
+    try {
+        if (Auth::user()->id_rol!=2) {
+            return response()->json(['message'=>'no tienes permiso para esta funcion']);
+        }
+        $orientador = Orientador::where('id',$id)
+        ->with('auth:id,email')
+        ->select('id','nombre','apellido', 'celular',"id_autentication")
+        ->first();
+        return response()->json($orientador);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+     }
+}
+
+
 }

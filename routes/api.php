@@ -60,6 +60,7 @@ Route::group([
     Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
     Route::get('/listaOrientador', [OrientadorApiController::class,'mostrarOrientadores']);
     Route::put('/editarOrientador/{id}', [OrientadorApiController::class,'editarOrientador']);
+    Route::get('/userProfileOrientador/{id}', [OrientadorApiController::class,'userProfileOrientador']);
 });
 
 
@@ -68,7 +69,6 @@ Route::group([
     'prefix' =>'superadmin',
     'middleware' => 'auth:api',
 ],function(){
-    Route::get('/emprendedores&empresa',[SuperAdminController::class,'verEmprendedoresxEmpresa']);
     Route::post('/personalizacion',[SuperAdminController::class,'personalizacionSis']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
@@ -96,6 +96,7 @@ Route::group([
     Route::post('/asesoria/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
     Route::put('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorXaliado'])->name('EditarAsesorAliado');
     Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
+    Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
 });
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
 
