@@ -317,9 +317,9 @@ class AliadoApiController extends Controller
                 }
                 $user->email = $request->input('email');
                 $user->password =  Hash::make($request->input('password'));
+                $user->estado = $request->input('estado');
                 $user->save();
             }
-
             return response()->json(['message' => 'Asesor actualizado correctamente']);
         } else {
             return response()->json(['message' => 'Asesor no encontrado'], 404);
