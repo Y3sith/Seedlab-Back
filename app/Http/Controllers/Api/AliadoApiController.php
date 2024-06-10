@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Asesor;
+use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
 use App\Models\User;
 use Exception;
@@ -292,39 +293,51 @@ class AliadoApiController extends Controller
         }
     }
     public function editarAsesorXaliado(Request $request, $id)
-{
-    try {
-        if (Auth::user()->id_rol != 3) {
-            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-        }
-
-        $asesor = Asesor::find($id);
-
-        if ($asesor) {
-            $asesor->nombre = $request->input('nombre');
-            $asesor->apellido = $request->input('apellido');
-            $asesor->celular = $request->input('celular');
-            $asesor->save();
-
-            if ($asesor->auth) {
-                $user = $asesor-> auth;
-                $password = $request->input('password');
-                if (strlen($password)< 8) {
-                    $response = 'la contraseña debe tener al menos 8 caracteres';
-                    return response()->json(['message' => $response]);
-                }
-                $user->email = $request->input('email');
-                $user->password =  Hash::make($request->input('password'));
-                $user->save();
+    {
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
             }
 
-            return response()->json(['message' => 'Asesor actualizado correctamente']);
-        } else {
-            return response()->json(['message' => 'Asesor no encontrado'], 404);
-        }
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    }
-}
+            $asesor = Asesor::find($id);
 
+            if ($asesor) {
+                $asesor->nombre = $request->input('nombre');
+                $asesor->apellido = $request->input('apellido');
+                $asesor->celular = $request->input('celular');
+                $asesor->save();
+
+                if ($asesor->auth) {
+                    $user = $asesor->auth;
+                    $password = $request->input('password');
+                    if (strlen($password) < 8) {
+                        $response = 'la contraseña debe tener al menos 8 caracteres';
+                        return response()->json(['message' => $response]);
+                    }
+                    $user->email = $request->input('email');
+                    $user->password =  Hash::make($request->input('password'));
+                    $user->estado = $request->input('estado');
+                    $user->save();
+                }
+                return response()->json(['message' => 'Asesor actualizado correctamente']);
+            } else {
+                return response()->json(['message' => 'Asesor no encontrado'], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function verEmprendedoresxEmpresa()
+    {
+        if (Auth::user()->id_rol != 3) {
+            return response()->json([
+                'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+
+        $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
+
+        return response()->json($emprendedoresConEmpresas);
+    }
 }

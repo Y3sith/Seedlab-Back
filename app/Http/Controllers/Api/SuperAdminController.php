@@ -22,18 +22,7 @@ class SuperAdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function verEmprendedoresxEmpresa()
-    {
-        if(Auth::user()->id_rol != 1){
-            return response()->json([
-               'message' => 'No tienes permiso para acceder a esta ruta'
-            ], 401);
-        }
-
-        $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
-        
-        return response()->json($emprendedoresConEmpresas);
-    }
+   
 
 
     public function personalizacionSis(Request $request)
@@ -154,6 +143,7 @@ class SuperAdminController extends Controller
                     }
                     $user->email = $request->input('email');
                     $user->password =  Hash::make($request->input('password'));
+                    $user->estado=$request->input('estado');
                     $user->save();
                 }
                 return response()->json(['messaje'=>'Superadministrador actualizado correctamente'],200);
@@ -168,28 +158,28 @@ class SuperAdminController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy($id)
-    {
-        if(Auth::user()->id_rol !=1){
-            return response()->json([
-               'message' => 'No tienes permiso para acceder a esta ruta'
-            ], 401);
-        }
+    // public function destroy($id)
+    // {
+    //     if(Auth::user()->id_rol !=1){
+    //         return response()->json([
+    //            'message' => 'No tienes permiso para acceder a esta ruta'
+    //         ], 401);
+    //     }
 
-        $superAdmin = SuperAdmin::find($id);
-        if(!$superAdmin){
-            return response()->json([
-               'message' => 'SuperAdmin no encontrado'
-            ], 404);
-        }
+    //     $superAdmin = SuperAdmin::find($id);
+    //     if(!$superAdmin){
+    //         return response()->json([
+    //            'message' => 'SuperAdmin no encontrado'
+    //         ], 404);
+    //     }
 
-        $user = $superAdmin->auth;
-        $user->estado = 0;
-        $user->save();
+    //     $user = $superAdmin->auth;
+    //     $user->estado = 0;
+    //     $user->save();
 
-        return response()->json(['message' =>'SuperAdmin desactivado'], 200);
+    //     return response()->json(['message' =>'SuperAdmin desactivado'], 200);
        
-    }
+    // }
 
     public function enumerarUsuarios() {
         $roles = Rol::all();
