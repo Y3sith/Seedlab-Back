@@ -44,6 +44,7 @@ Route::group([
 
 //Emprendedor
 Route::group([
+    'prefix' => 'emprendedor',
     'middleware' => 'auth:api'
 ], function (){
     Route::apiResource('/emprendedor',EmprendedorApiController::class);
