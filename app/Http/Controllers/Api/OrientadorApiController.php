@@ -178,7 +178,7 @@ class OrientadorApiController extends Controller
 
    public function editarOrientador (Request $request, $id){
     try {
-        if (Auth::user()->id_rol != 2) {
+        if (Auth::user()->id_rol != 2 && Auth::user()->id_rol != 1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         $orientador = Orientador::find($id);
@@ -212,7 +212,7 @@ class OrientadorApiController extends Controller
 
    public function userProfileOrientador($id){
     try {
-        if (Auth::user()->id_rol!=2) {
+        if (Auth::user()->id_rol!=2 && Auth::user()->id_rol!=1) {
             return response()->json(['message'=>'no tienes permiso para esta funcion']);
         }
         $orientador = Orientador::where('id',$id)
