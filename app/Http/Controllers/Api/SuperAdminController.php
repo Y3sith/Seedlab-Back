@@ -117,8 +117,8 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
         }
 
-        $adminVer = User::where('estado', true)
-            ->where('id_rol', 1)
+        $adminVer = User::where('id_rol', 1)
+            
             ->pluck('id');
 
         $admins = SuperAdmin::whereIn('id_autentication', $adminVer)
