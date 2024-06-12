@@ -220,10 +220,19 @@ class OrientadorApiController extends Controller
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
             $orientador = Orientador::where('id', $id)
-                ->with('auth:id,email')
-                ->select('id', 'nombre', 'apellido', 'celular', "id_autentication")
+                ->with('auth:id,email,estado')
+                //->select('id', 'nombre', 'apellido', 'celular', "id_autentication")
                 ->first();
-            return response()->json($orientador);
+            $response = [
+                'id' => $orientador->id,
+                'nombre' => $orientador->nombre,
+                'apellido' => $orientador->apellido,
+                'id_auth' => $orientador->auth->id,
+                'email' => $orientador->auth->email,
+                'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo'
+
+            ];
+            return response()->json($response);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
