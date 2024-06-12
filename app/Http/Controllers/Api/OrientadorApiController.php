@@ -61,7 +61,6 @@ class OrientadorApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-
     }
 
     /**
@@ -115,7 +114,6 @@ class OrientadorApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-
     }
     /*
     EJ de Json para "asignarAliado"
@@ -163,7 +161,7 @@ class OrientadorApiController extends Controller
             $user = User::find($orientador->id_autentication);
 
             return [
-                'id' => $orientador->id, 
+                'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
                 'celular' => $orientador->celular,
@@ -176,54 +174,58 @@ class OrientadorApiController extends Controller
         return response()->json($orientadoresConEstado);
     }
 
-   public function editarOrientador (Request $request, $id){
-    try {
-        if (Auth::user()->id_rol != 2 && Auth::user()->id_rol != 1) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-        $orientador = Orientador::find($id);
-        if ($orientador) {
-            $orientador->nombre = $request->input ('nombre');
-            $orientador->apellido = $request->input('apellido');
-            $orientador->celular = $request->input('celular');
-            $orientador->save();
-            
-            if ($orientador->auth) {
-                $user= $orientador->auth;
-                $password = $request->input('password');
-                if (strlen($password)< 8) {
-                    $response = 'la contraseña debe tener al menos 8 caracteres';
-                    return response()->json(['message' => $response]);
-                }
-                $user->email = $request->input('email');
-                $user->password =  Hash::make($request->input('password'));
-                $user->estado = $request->input('estado');
-                $user->save();
+    public function editarOrientador(Request $request, $id)
+    {
+        try {
+            if (Auth::user()->id_rol != 2 && Auth::user()->id_rol != 1) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-            return response()->json(['message' => 'Orientador actualizado correctamente'], 200);
-        }else {
-            return response()->json(['message' => 'Orientador no encontrado'], 404);
+            $orientador = Orientador::find($id);
+            if ($orientador) {
+                $orientador->nombre = $request->input('nombre');
+                $orientador->apellido = $request->input('apellido');
+                $orientador->celular = $request->input('celular');
+                $orientador->save();
+
+                if ($orientador->auth) {
+                    $user = $orientador->auth;
+                    $password = $request->input('password');
+                    if ($request->has('password')) {
+                        if (strlen($password) < 8) {
+                            $response = 'la contraseña debe tener al menos 8 caracteres';
+                            return response()->json(['message' => $response]);
+                        }
+                        if (Hash::check($request->password, $user->password)) {
+                            return response()->json(["error" => "La nueva contraseña no puede ser igual a la contraseña actual"], 400);
+                        }
+                    }
+                    $user->email = $request->input('email');
+                    $user->password =  Hash::make($request->input('password'));
+                    $user->estado = $request->input('estado');
+                    $user->save();
+                }
+                return response()->json(['message' => 'Orientador actualizado correctamente'], 200);
+            } else {
+                return response()->json(['message' => 'Orientador no encontrado'], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
 
-   }
-
-   public function userProfileOrientador($id){
-    try {
-        if (Auth::user()->id_rol!=2 && Auth::user()->id_rol!=1) {
-            return response()->json(['message'=>'no tienes permiso para esta funcion']);
+    public function userProfileOrientador($id)
+    {
+        try {
+            if (Auth::user()->id_rol != 2 && Auth::user()->id_rol != 1) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
+            }
+            $orientador = Orientador::where('id', $id)
+                ->with('auth:id,email')
+                ->select('id', 'nombre', 'apellido', 'celular', "id_autentication")
+                ->first();
+            return response()->json($orientador);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        $orientador = Orientador::where('id',$id)
-        ->with('auth:id,email')
-        ->select('id','nombre','apellido', 'celular',"id_autentication")
-        ->first();
-        return response()->json($orientador);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-     }
-}
-
-
+    }
 }
