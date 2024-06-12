@@ -136,7 +136,7 @@ class SuperAdminController extends Controller
                     'id' => $admin->id,
                     'nombre' => $admin->nombre,
                     'apellido' => $admin->apellido,
-                    'id' => $user->id,
+                    'id_auth' => $user->id,
                     'email' => $user->email,
                     'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
                     
