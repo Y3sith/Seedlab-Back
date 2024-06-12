@@ -190,17 +190,10 @@ class OrientadorApiController extends Controller
                 if ($orientador->auth) {
                     $user = $orientador->auth;
                     $password = $request->input('password');
-                    if ($request->has('password')) {
-                        if (strlen($password) < 8) {
-                            $response = 'la contraseña debe tener al menos 8 caracteres';
-                            return response()->json(['message' => $response]);
-                        }
-                        if (Hash::check($request->password, $user->password)) {
-                            return response()->json(["error" => "La nueva contraseña no puede ser igual a la contraseña actual"], 400);
-                        }
+                    if ($password) {
+                        $user->password =  Hash::make($request->input('password'));
                     }
                     $user->email = $request->input('email');
-                    $user->password =  Hash::make($request->input('password'));
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
@@ -227,6 +220,7 @@ class OrientadorApiController extends Controller
                 'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
+                'celular' => $orientador->celular,
                 'id_auth' => $orientador->auth->id,
                 'email' => $orientador->auth->email,
                 'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo'

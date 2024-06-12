@@ -310,12 +310,10 @@ class AliadoApiController extends Controller
                 if ($asesor->auth) {
                     $user = $asesor->auth;
                     $password = $request->input('password');
-                    if (strlen($password) < 8) {
-                        $response = 'la contraseña debe tener al menos 8 caracteres';
-                        return response()->json(['message' => $response]);
+                    if ($password) {
+                        $user->password =  Hash::make($request->input('password'));
                     }
                     $user->email = $request->input('email');
-                    $user->password =  Hash::make($request->input('password'));
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
