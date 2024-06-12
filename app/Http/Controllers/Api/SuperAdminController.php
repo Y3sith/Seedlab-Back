@@ -112,13 +112,6 @@ class SuperAdminController extends Controller
 
 
 
-
-
-
-
-
-
-
     /**
      * Update the specified resource in storage.
      */
@@ -236,20 +229,20 @@ class SuperAdminController extends Controller
        
         $totalAsesorias = Asesoria::count();
 
-$topAliados = Aliado::withCount('asesoria')
-    ->orderByDesc('asesoria_count')
-    ->take(5)
-    ->get(['nombre', 'asesoria_count']);
+            $topAliados = Aliado::withCount('asesoria')
+                ->orderByDesc('asesoria_count')
+                ->take(5)
+                ->get(['nombre', 'asesoria_count']);
 
-$topAliados->transform(function ($aliado) use ($totalAsesorias) {
-    $porcentaje = ($aliado->asesoria_count / $totalAsesorias) * 100;
-    $aliado->porcentaje = round($porcentaje, 2) . '%';
-    return [
-        'nombre' => $aliado->nombre,
-        'asesorias' => $aliado->asesoria_count,
-        'porcentaje' => $aliado->porcentaje,
-    ];
-});    
+            $topAliados->transform(function ($aliado) use ($totalAsesorias) {
+                $porcentaje = ($aliado->asesoria_count / $totalAsesorias) * 100;
+                $aliado->porcentaje = round($porcentaje, 2) . '%';
+                return [
+                    'nombre' => $aliado->nombre,
+                    'asesorias' => $aliado->asesoria_count,
+                    'porcentaje' => $aliado->porcentaje,
+                ];
+            });    
     return $topAliados;
     }
 
