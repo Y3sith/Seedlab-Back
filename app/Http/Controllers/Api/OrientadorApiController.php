@@ -166,7 +166,7 @@ class OrientadorApiController extends Controller
                 'apellido' => $orientador->apellido,
                 'celular' => $orientador->celular,
                 'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo',
-                'correo' => $user->email,
+                'email' => $user->email,
                 'id_auth' => $orientador->id_autentication,
             ];
         });
