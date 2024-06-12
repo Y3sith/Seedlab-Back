@@ -132,11 +132,10 @@ class SuperAdminController extends Controller
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
-                'auth' => [
-                    'id' => $user->id,
-                    'email' => $user->email,
-                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-                ]
+                'id' => $user->id,
+                'email' => $user->email,
+                'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+                
             ];
         });
 
@@ -145,6 +144,7 @@ class SuperAdminController extends Controller
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
 }
+
 
 
     /**
