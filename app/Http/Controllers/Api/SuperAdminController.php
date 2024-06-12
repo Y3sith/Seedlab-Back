@@ -110,6 +110,41 @@ class SuperAdminController extends Controller
          }
     }
 
+    public function mostrarSuperAdmins()
+{
+    try {
+        if (Auth::user()->id_rol != 1) {
+            return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
+        }
+
+        $adminVer = User::where('id_rol', 1)
+            
+            ->pluck('id');
+
+        $admins = SuperAdmin::whereIn('id_autentication', $adminVer)
+            ->with('auth:id,email,estado')
+            ->get(['id', 'nombre', 'apellido', 'id_autentication']);
+
+        $adminsConEstado = $admins->map(function ($admin) {
+            $user = User::find($admin->id_autentication);
+
+            return [
+                'id' => $admin->id,
+                'nombre' => $admin->nombre,
+                'apellido' => $admin->apellido,
+                'auth' => [
+                    'id' => $user->id,
+                    'email' => $user->email,
+                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+                ]
+            ];
+        });
+
+        return response()->json($adminsConEstado);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+}
 
 
     /**

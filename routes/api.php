@@ -77,6 +77,7 @@ Route::group([
     Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
     Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
     Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
+    Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
 });
 
    
