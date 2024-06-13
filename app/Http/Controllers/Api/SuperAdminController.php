@@ -176,12 +176,10 @@ class SuperAdminController extends Controller
                 if ($admin->auth) {
                     $user=$admin->auth;
                     $password = $request->input('password');
-                    if (strlen($password)<8) {
-                        $response = 'la contraseña debe ser al menos de 8 caracteres';
-                        return response()->json(['message'=>$response]);
+                    if ($password) {
+                        $user->password =  Hash::make($request->input('password'));
                     }
                     $user->email = $request->input('email');
-                    $user->password =  Hash::make($request->input('password'));
                     $user->estado=$request->input('estado');
                     $user->save();
                 }
