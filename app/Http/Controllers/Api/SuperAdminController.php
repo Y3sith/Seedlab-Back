@@ -101,10 +101,18 @@ class SuperAdminController extends Controller
                 return response()->json(['message'=>'no tienes permiso para esta funcion']);
             }
             $admin = SuperAdmin::where('id',$id)
-            ->with('auth:id,email')
+            ->with('auth:id,email,estado')
             ->select('id','nombre','apellido',"id_autentication")
             ->first();
-            return response()->json($admin);
+            return[
+                'id' => $admin->id,
+                'nombre' => $admin->nombre,
+                'apellido' => $admin->apellido,
+                'email' => $admin->auth->email,
+                'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
+                'id_auth' => $admin->id_autentication
+            ];
+            //return response()->json($admin);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
          }
