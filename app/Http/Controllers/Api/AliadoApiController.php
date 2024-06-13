@@ -190,20 +190,36 @@ class AliadoApiController extends Controller
         ], 403);
     }
 
-    public function mostrarAsesorAliado($id)
-    {
+    public function mostrarAsesorAliado(Request $request, $id)
+{
+    try {
+        // Verificar si el usuario autenticado tiene el rol correcto (id_rol = 3)
         if (Auth::user()->id_rol != 3) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
+        // Obtener el estado desde el request, por defecto 'Activo'
+        $estado = $request->input('estado', 'Activo');
+
+        // Convertir el estado en un valor booleano
+        $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+        // Obtener el Aliado con el ID proporcionado
         $aliado = Aliado::find($id);
 
         if (!$aliado) {
             return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
         }
 
-        $asesores = Aliado::findOrFail($id)->asesor()->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')->get();
+        // Obtener los asesores del Aliado con el estado especificado
+        $asesores = Aliado::findOrFail($id)->asesor()
+            ->whereHas('auth', function ($query) use ($estadoBool) {
+                $query->where('estado', $estadoBool);
+            })
+            ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')
+            ->get();
 
+        // Transformar la información obtenida
         $asesoresConEstado = $asesores->map(function ($asesor) {
             $user = User::find($asesor->id_autentication);
 
@@ -216,8 +232,12 @@ class AliadoApiController extends Controller
             ];
         });
 
+        // Retornar la respuesta en formato JSON
         return response()->json($asesoresConEstado);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
 
 
     public function dashboardAliado($idAliado)
