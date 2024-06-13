@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('respuesta', function (Blueprint $table) {
             $table->id();
-            $table->string('opcion', 10);
+            $table->string('opcion', 10)->nullable();
             $table->text('texto_res')->nullable();
             $table->double('valor');
             $table->boolean('verform_pr')->nullable();
