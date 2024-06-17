@@ -22,11 +22,16 @@ use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
 
+
+
+
+// Route::post('/login3', [AuthController::class, 'login3'])->name('login3');
+
 //Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
 ], function(){
-    Route::post('/login', [AuthController::class, 'login'])->name('login');
+    Route::post('/login', [AuthController::class, 'login2'])->name('login2');
     Route::post('/register_em', [AuthController::class, 'register'])->name('register');
     Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
     Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
