@@ -216,7 +216,7 @@ class AliadoApiController extends Controller
             ->whereHas('auth', function ($query) use ($estadoBool) {
                 $query->where('estado', $estadoBool);
             })
-            ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')
+            ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')    
             ->get();
 
         // Transformar la información obtenida
