@@ -39,22 +39,6 @@ class RespuestasApiController extends Controller
             return response()->json(['message' => 'Seccion no encontrada'], 404);
         }
 
-        /*$respuestas = [];
-
-        foreach ($seccion->preguntas as $pregunta) {
-            foreach ($pregunta->respuestas as $respuesta){
-                $respuestas[] = $respuesta;
-            }
-            foreach ($pregunta->subpreguntas as $subpregunta) {
-                foreach ($subpregunta->respuestas as $respuesta){
-                    $respuestas[] = $respuesta;
-                }
-            }
-        }
-
-        foreach($respuestas as $respuesta){
-            Respuesta::create($respuesta->toArray());
-        }*/
 
         return response()->json($seccion, 200);
     }
@@ -63,7 +47,13 @@ class RespuestasApiController extends Controller
     {
         $respuestas = $request->input('respuestas');
 
-        foreach ($respuestas as $respuestaData) {
+        $jsonRespuestas = json_encode($respuestas);
+        $respuestas = new Respuesta();
+        $respuestas->respuestas_json = $jsonRespuestas;
+        $respuestas->id_empresa = $request->input('id_empresa');
+        $respuestas->save();
+
+        /*foreach ($respuestas as $respuestaData) {
             Respuesta::create([
                 'opcion' => $respuestaData['opcion'] ?? null,
                 'texto_res' => $respuestaData['texto_res'] ?? null,
@@ -72,9 +62,25 @@ class RespuestasApiController extends Controller
                 'id_empresa' => $respuestaData['id_empresa'] ?? null,
                 'id_subpregunta' => $respuestaData['id_subpregunta'] ?? null,
             ]);
-        }
+        }*/
 
         return response()->json(['message' => 'Respuestas guardadas correctamente'], 200);
+    }
+
+
+        public function getAnswers($id_empresa)
+    {
+        $respuestas = Respuesta::where('id_empresa', $id_empresa)->first();
+
+        if (!$respuestas) {
+            return response()->json([
+                'message' => 'No se encontraron respuestas para esta empresa'
+            ], 404);
+        }
+
+        return response()->json([
+            'respuestas' => json_decode($respuestas->respuestas_json)
+        ], 200);
     }
 
     /**

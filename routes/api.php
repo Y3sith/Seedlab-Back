@@ -152,6 +152,7 @@ Route::group([
     Route::apiResource('/respuestas',RespuestasApiController::class);
 });
 
+Route::get('/respuestas_empresa/{id_empresa}', [RespuestasApiController::class, 'getAnswers']);
 
 
 

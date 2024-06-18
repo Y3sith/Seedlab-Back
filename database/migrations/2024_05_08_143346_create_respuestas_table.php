@@ -13,18 +13,19 @@ return new class extends Migration
     {
         Schema::create('respuesta', function (Blueprint $table) {
             $table->id();
-            $table->string('opcion', 10)->nullable();
-            $table->text('texto_res')->nullable();
-            $table->double('valor');
-            $table->boolean('verform_pr')->nullable();
-            $table->boolean('verform_se')->nullable();
-            $table->timestamp('fecha_reg');
-            $table->unsignedBigInteger('id_pregunta');
-            $table->foreign('id_pregunta')->references('id')->on('pregunta');
+            //$table->string('opcion', 10)->nullable();
+            $table->json('respuestas_json');
+            //$table->text('texto_res')->nullable();
+            //$table->double('valor');
+            //$table->boolean('verform_pr')->nullable();
+            //$table->boolean('verform_se')->nullable();
+            //$table->timestamp('fecha_reg');
+            //$table->unsignedBigInteger('id_pregunta');
+           // $table->foreign('id_pregunta')->references('id')->on('pregunta');
             $table->string('id_empresa');
             $table->foreign('id_empresa')->references('documento')->on('empresa');
-            $table->unsignedBigInteger('id_subpregunta')->nullable();
-            $table->foreign('id_subpregunta')->references('id')->on('subpregunta');
+            //$table->unsignedBigInteger('id_subpregunta')->nullable();
+            //$table->foreign('id_subpregunta')->references('id')->on('subpregunta');
             //$table->timestamps();
         });
     }
