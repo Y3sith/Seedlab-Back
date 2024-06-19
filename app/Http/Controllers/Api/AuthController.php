@@ -29,7 +29,7 @@ class AuthController extends Controller
             return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
         }
 
-        if($user->emprendedor->email_verified_at){
+        if($user->id_rol == 5 && $user->emprendedor->email_verified_at){
             $user->estado = 1;
             $user->save();
         }
