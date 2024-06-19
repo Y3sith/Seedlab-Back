@@ -34,7 +34,7 @@ class AuthController extends Controller
             $user->emprendedor->cod_ver = $verificationCode; 
             $user->emprendedor->save();
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
-            return response()->json(['message' => 'Por favor verifique su correo electronico'], 307);
+            return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
         }
 
         $tokenResult = $user->createToken('Personal Access Token');
@@ -105,10 +105,26 @@ class AuthController extends Controller
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $emprendedor = Emprendedor::where('documento', $documento)
-            ->with('auth:id,email')
+            //->with('auth:id,email,estado')
             ->select('nombre', 'apellido', 'documento', 'celular', 'genero', 'fecha_nac', 'direccion', 'id_municipio', 'id_autentication', 'id_tipo_documento')
             ->first();
-        return response()->json($emprendedor);
+            return[
+                'id'=>$emprendedor->auth->id,
+                'nombre'=>$emprendedor->nombre,
+                'apellido'=>$emprendedor->apellido,
+                'documento'=>$emprendedor->documento,
+                'celular'=>$emprendedor->celular,
+                'genero'=>$emprendedor->genero,
+                'fecha_nac'=>$emprendedor->fecha_nac,
+                'direccion'=>$emprendedor->direccion,
+                'id_municipio'=>$emprendedor->id_municipio,
+                'id_autentication'=>$emprendedor->id_autentication,
+                'id_tipo_documento'=>$emprendedor->id_tipo_documento,
+                'email'=>$emprendedor->auth->email,
+                'estado'=>$emprendedor->auth->estado == 1 ? 'Activo': 'Inactivo',
+            ];
+
+        //return response()->json($emprendedor);
     }
 
     public function logout(Request $request)
