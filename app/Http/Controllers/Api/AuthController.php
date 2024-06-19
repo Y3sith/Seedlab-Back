@@ -23,10 +23,17 @@ class AuthController extends Controller
     {
 
         $user = User::where('email', $request->email)->with('emprendedor')->first();
+        //dd($user->estado);
 
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
         }
+
+        if($user->emprendedor->email_verified_at){
+            $user->estado = 1;
+            $user->save();
+        }
+        
  
         //Que el campo de verificacion de email del rol emprendedor no sea nullo
         if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
@@ -36,6 +43,8 @@ class AuthController extends Controller
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
         }
+
+        
 
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
