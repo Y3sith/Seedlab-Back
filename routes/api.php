@@ -48,7 +48,7 @@ Route::group([
     'middleware' => 'auth:api'
 ], function (){
     Route::apiResource('/emprendedor',EmprendedorApiController::class);
-    Route::get('userProfile/{documento}', [AuthController::class, 'userProfile']);
+    Route::get('/userProfile/{documento}', [AuthController::class, 'userProfile']);
 });
 
 //Orientador

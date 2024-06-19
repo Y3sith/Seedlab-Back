@@ -199,10 +199,19 @@ class AsesorApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
             $asesor = Asesor::where('id', $id)
-                ->with('auth:id,email')
-                ->select('nombre', 'apellido', 'celular', "id_autentication")
+                //->with('auth:id,email,estado')
+                ->select('id','nombre', 'apellido', 'celular', "id_autentication")
                 ->first();
-            return response()->json($asesor);
+                return [
+                    'id'=>$asesor->id,
+                    'nombre'=>$asesor->nombre,
+                    'apellido'=>$asesor->apellido,
+                    'celular'=>$asesor->celular,
+                    'email'=>$asesor->auth->email,
+                    'estado'=>$asesor->auth->estado == 1 ? 'Activo': 'Inactivo',
+                    //'id_autentication' =>$asesor->auth->id_autentication    
+                ];
+            //return response()->json($asesor);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

@@ -190,11 +190,16 @@ class AliadoApiController extends Controller
         ], 403);
     }
 
-    public function mostrarAsesorAliado($id)
-    {
+    public function mostrarAsesorAliado(Request $request, $id)
+{
+    try {
         if (Auth::user()->id_rol != 3) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
+
+        $estado = $request->input('estado', 'Activo');
+
+        $estadoBool = $estado === 'Activo' ? 1 : 0;
 
         $aliado = Aliado::find($id);
 
@@ -202,7 +207,12 @@ class AliadoApiController extends Controller
             return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
         }
 
-        $asesores = Aliado::findOrFail($id)->asesor()->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')->get();
+        $asesores = Aliado::findOrFail($id)->asesor()
+            ->whereHas('auth', function ($query) use ($estadoBool) {
+                $query->where('estado', $estadoBool);
+            })
+            ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')    
+            ->get();
 
         $asesoresConEstado = $asesores->map(function ($asesor) {
             $user = User::find($asesor->id_autentication);
@@ -217,7 +227,10 @@ class AliadoApiController extends Controller
         });
 
         return response()->json($asesoresConEstado);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
 
 
     public function dashboardAliado($idAliado)

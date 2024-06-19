@@ -72,6 +72,7 @@ class EmprendedorApiController extends Controller
             'id_municipio' => 'required|string|max:255', // Validar el nombre del municipio
             'id_tipo_documento' => 'required|integer',
             'password' => 'nullable|string|min:8',
+            
         ]);
 
         if ($validator->fails()) {
@@ -145,6 +146,9 @@ if ($request->has('password')) {
         //dd($user);
         $user->estado = 0;
         $user->save();
+        if ($user->estado == 0) {
+            return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
+        }
 
         $emprendedor->email_verified_at = null;
         $emprendedor->save();
