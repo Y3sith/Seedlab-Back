@@ -154,7 +154,7 @@ if ($request->has('password')) {
         $emprendedor->save();
 
         return response()->json([
-            'message' => 'Emprendedor desactivado exitosamente',
+            'message' => 'Emprendedor desactivado exitosamente', $user->email
         ], 200);
     }
 }
