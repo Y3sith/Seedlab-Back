@@ -39,34 +39,7 @@ class EmpresaApiController extends Controller
          if (Auth::user()->id_rol != 5) {
              return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
         }
-
-        // Validar datos de entrada
-       /* $validatedData = $request->validate([
-            'empresa.nombre' => 'required|string',
-            'empresa.documento' => 'required|string',
-            'empresa.cargo' => 'required|string',
-            'empresa.razonSocial' => 'required|string',
-            'empresa.url_pagina' => 'nullable|string',
-            'empresa.telefono' => 'required|string|max:10',
-            'empresa.celular' => 'required|string|max:13',
-            'empresa.direccion' => 'required|string|',
-            'empresa.correo' => 'required|string|email',
-            'empresa.profesion' => 'required|string',
-            'empresa.experiencia' => 'nullable|string',
-            'empresa.funciones' => 'nullable|string',
-            'empresa.id_tipo_documento' => 'required|integer',
-            'empresa.id_municipio' => 'required|string',
-            'empresa.id_emprendedor' => 'required|string',
-            'apoyos.*.documento' => 'nullable|string',
-            'apoyos.*.nombre' => 'nullable|string',
-            'apoyos.*.apellido' => 'nullable|string',
-            'apoyos.*.cargo' => 'nullable|string',
-            'apoyos.*.telefono' => 'nullable|string|max:10',
-            'apoyos.*.celular' => 'nullable|string|max:13',
-            'apoyos.*.email' => 'nullable|string|email',
-            'apoyos.*.id_tipo_documento' => 'nullable|integer',
-        ]);*/
-
+        
         // Buscar el municipio por nombre
         $nombreMunicipio = $request['empresa']['id_municipio'];
         $municipio = Municipio::where('nombre', $nombreMunicipio)->first();

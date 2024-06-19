@@ -21,13 +21,11 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-        $user = User::where('email', $request->email)->with('emprendedor')->first();
-
+        $user = User::where('email', $request->email)->first();
+        
         if (!$user || !Hash::check($request->password, $user->password)) {
             return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
-        }
-
-        //Que el campo de verificacion de email del rol emprendedor no sea nullo
+        } 
         if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
             $verificationCode = mt_rand(10000, 99999);
             $user->emprendedor->cod_ver = $verificationCode;
@@ -35,7 +33,6 @@ class AuthController extends Controller
             Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
             return response()->json(['message' => 'Por favor verifique su correo electronico'], 307);
         }
-
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         $token->save();
@@ -45,46 +42,13 @@ class AuthController extends Controller
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',
             'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            'user' => $additionalInfo
+            'user' => $additionalInfo,
         ]);
     }
-
-
-    // public function login3(Request $request)
-    // {
-    //     // $user = User::where('email', $request->email)->select('id', 'email', 'estado','id_rol')->first();
-    //     $user = User::where('email', $request->email)->first();
-
-    //     if (!$user || !Hash::check($request->password, $user->password)) {
-    //         return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
-    //     }
-
-    //     //Que el campo de verificacion de email del rol emprendedor no sea nullo
-    //     if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
-    //         $verificationCode = mt_rand(10000, 99999);
-    //         $user->emprendedor->cod_ver = $verificationCode;
-    //         $user->emprendedor->save();
-    //         Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
-    //         return response()->json(['message' => 'Por favor verifique su correo electronico'], 307);
-    //     }
-
-    //     $tokenResult = $user->createToken('Personal Access Token');
-    //     $token = $tokenResult->token;
-    //     $token->save();
-    //     $additionalInfo = $this->getAdditionalInfo($user);
-    //     $info = [];
-    //     return response()->json([
-    //         'access_token' => $tokenResult->accessToken,
-    //         'token_type' => 'Bearer',
-    //         'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-    //         'user' => $additionalInfo,
-    //     ]);
-    // }
 
     protected function getAdditionalInfo($user)
     {
         $info = [];
-
         switch ($user->id_rol) {
             case 1:
                 $info = [
@@ -170,9 +134,7 @@ class AuthController extends Controller
         $verificationCode = mt_rand(10000, 99999);
 
         if (strlen($data['password']) < 8) {
-            $statusCode = 400;
-            $response = 'La contraseña debe tener al menos 8 caracteres';
-            return response()->json(['message' => $response], $statusCode);
+            return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
         }
 
         DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
@@ -230,42 +192,28 @@ class AuthController extends Controller
         return response()->json(['message' => $response], $statusCode);
     }
 
-    public function allUsers()
-    {
-        $users = User::with('emprendedor')->get();
-        return response()->json($users);
-    }
-
     /*Metodo que maneja el envio del correo para restablecer la contraseña
      */
     public function enviarRecuperarContrasena(Request $request)
     {
-
-        $request->validate([
-            'email' => 'required|email',
-        ]);
         $email = $request->email;
         if (!$email) {
             return response()->json(['error' => 'Proporciona un email válido'], 400);
         }
 
-        $user = User::where('email', 'LIKE', '%' . $email . '%')->first();
+        $user = User::where('email',$email)->first();
 
         if (!$user) {
-            return response()->json(['error' => 'Cuenta no existe'], 400);
+            return response()->json(['error' => 'Esta cuenta no existe'], 400);
         }
+        $temporaryPassword = Str::random(10);
 
-        // Generar una contraseña temporal aleatoria
-        $temporaryPassword = Str::random(10); // Usar 10 caracteres para la contraseña temporal
-
-        // Actualizar la contraseña del usuario en la base de datos
         $user->password = Hash::make($temporaryPassword);
         $user->save();
 
-        // Enviar la contraseña temporal por correo electrónico
         Mail::to($email)->send(new PasswordReset($temporaryPassword));
 
-        return response()->json(['message' => 'Te hemos enviado un email con tu nueva contraseña temporal'], 200);
+        return response()->json(['message' => 'Te hemos enviado un email con tu nueva contraseña temporal,Cambiala cuando recien inicies sesion'], 200);
     }
 
     /*public function sendVerificationEmail(Request $request)
@@ -332,6 +280,14 @@ return response()->json(['error' => 'Error al restablecer la contraseña: ' . $e
 
 // JSON DE EJEMPLO PARA LOS ENDPOINT
 
+
+
+// login:
+// {
+//     "email": "brayanfigueroajerez@gmail.com",
+//     "password":"123456789"
+// }
+
 // register:
 //  {
 //     "documento": "1000",
@@ -352,4 +308,9 @@ return response()->json(['error' => 'Error al restablecer la contraseña: ' . $e
 // {
 //     "email": "brayanfigueroajerez@gmail.com",
 //     "codigo": "69838"
+// }
+
+// send-reset-password:
+// {
+//     "email": "brayanfigueroajerez@gmail.com",
 // }
