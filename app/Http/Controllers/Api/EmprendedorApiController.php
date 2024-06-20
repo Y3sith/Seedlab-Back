@@ -141,13 +141,14 @@ if ($request->has('password')) {
             ], 404);
         }
 
+
+        // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
+        $user = $emprendedor->auth;
+        
         $tokens = Token::where('user_id', $user->id)->get();
             foreach ($tokens as $token) {
             $token->revoke();
         }
-
-        // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
-        $user = $emprendedor->auth;
         //dd($user);
         $user->estado = 0;
         $user->save();
