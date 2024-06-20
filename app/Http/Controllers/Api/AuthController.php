@@ -15,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Passport\Token;
 
 class AuthController extends Controller
 {
@@ -137,13 +138,27 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-    {
-        $request->user()->token()->revoke();
+{
+    // Obtener el usuario autenticado
+    $user = $request->user();
+
+    if ($user) {
+        // Obtener y eliminar todos los tokens del usuario
+        $tokens = Token::where('user_id', $user->id)->get();
+        foreach ($tokens as $token) {
+            $token->delete();
+        }
 
         return response()->json([
             'message' => 'Successfully logged out',
         ]);
     }
+
+    return response()->json([
+        'message' => 'User not found',
+    ], 404);
+}
+
 
     protected function existeusuario($documento)
     {
