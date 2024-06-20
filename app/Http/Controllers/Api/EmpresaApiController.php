@@ -3,16 +3,11 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
-
 use App\Models\ApoyoEmpresa;
-use App\Models\Departamento;
 use App\Models\Empresa;
-use App\Models\Municipio;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
 
 class EmpresaApiController extends Controller
 {
@@ -36,18 +31,16 @@ class EmpresaApiController extends Controller
     public function store(Request $request)
     {
         // Verificar permisos de usuario
-         if (Auth::user()->id_rol != 5) {
-             return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+        if (Auth::user()->id_rol != 5) {
+            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
         }
-        
-        // Buscar el municipio por nombre
-        $nombreMunicipio = $request['empresa']['id_municipio'];
-        $municipio = Municipio::where('nombre', $nombreMunicipio)->first();
+        $empresaexiste = Empresa::where('documento', $request['empresa']['documento'])->first();
 
-        if (!$municipio) {
-            return response()->json(["error" => "Municipio no encontrado"], 404);
+        if ($empresaexiste) {
+            return response()->json([
+                'error' => 'La empresa ya existe',
+            ], 409);
         }
-
         // Crear la empresa
         $empresa = Empresa::create([
             "nombre" => $request['empresa']['nombre'],
@@ -63,7 +56,7 @@ class EmpresaApiController extends Controller
             "experiencia" => $request['empresa']['experiencia'],
             "funciones" => $request['empresa']['funciones'],
             "id_tipo_documento" => $request['empresa']['id_tipo_documento'],
-            "id_municipio" => $municipio->id,
+            "id_municipio" => $request['empresa']['id_municipio'],
             "id_emprendedor" => $request['empresa']['id_emprendedor'],
         ]);
 
@@ -71,6 +64,7 @@ class EmpresaApiController extends Controller
         $apoyos = [];
         if ($request->has('apoyos')) {
             foreach ($request['apoyos'] as $apoyo) {
+                $Apoyoenempresaexiste = ApoyoEmpresa::where('id_empresa', $request['empresa']['documento'])->first();
                 $nuevoApoyo = ApoyoEmpresa::create([
                     "documento" => $apoyo['documento'],
                     "nombre" => $apoyo['nombre'],
@@ -87,28 +81,16 @@ class EmpresaApiController extends Controller
         }
 
         return response()->json([
-            'message' => 'Registro exitoso ',
-            'empresa' => $empresa,
-            'apoyos' => $apoyos
+            'message' =>  'Empresa creada exitosamente',
         ], 200);
     }
-
-
-
-    /**
-     * Display the specified resource.
-     */
-    public function show($id_emprendedor)
-    {
-    }
-
 
     /**
      * Update the specified resource in storage.
      */
     public function update(Request $request, $documento)
     {
-        // edita la empresa/edita y agrega apoyos 
+        // edita la empresa/edita y agrega apoyos
         if (Auth::user()->id_rol != 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
@@ -117,12 +99,11 @@ class EmpresaApiController extends Controller
 
         if (!$empresa) {
             return response()->json([
-                'message' => 'Empresa no encontrada'
+                'message' => 'Empresa no encontrada',
             ], 404);
         }
 
         $empresa->update($request->all());
-
 
         if ($request->filled('apoyoxempresa')) {
             foreach ($request->apoyoxempresa as $apoyoData) {
@@ -141,11 +122,8 @@ class EmpresaApiController extends Controller
                 }
             }
         }
-
         return response()->json(["message" => "Empresa actualizada"], 200);
     }
-
-
 
     /**
      * Remove the specified resource from storage.
@@ -156,39 +134,45 @@ class EmpresaApiController extends Controller
     }
 }
 
-/**
- * creacion empresa
- *{"nombre":"Gamer Oscar",
- * "documento":"123456789",
- * "cargo":"Gerente",
- * "razonSocial":"Gamer Oscar",
- * "url_pagina":"www.gameroscar.com",
- * "telefono":"123456789",
- * "celular":"3215897631",
- * "direccion":"123456789",
- * "correo":"oscar@gmail.com",
- * "profesion":"Gamer",
- * "experiencia":"Jugar juegos",
- * "funciones":"Jugar fifa",
- * "id_tipo_documento":"1",
- * "id_municipio":"866",
- * "id_emprendedor":"1000",
- * 
- * "apoyos":[
- * {
- * "documento":"1",
- * "nombre":"Marly",
- * "apellido":"Rangel",
- * "cargo":"Diseñadora de juegos",
- * "telefono:" null,
- * "celular":"3214269607",
- * "email":"rangel@gmail.com",
- * "id_tipo_documento":"1",
- * "id_empresa":"1000",
- * }
- * ]
- * 
- * }
- * 
- * 
- */
+//creacion de empresa
+// {
+//     "empresa": {
+//         "nombre": "Empresa XYZ",
+//         "documento": "1234567890",
+//         "cargo": "Director",
+//         "razonSocial": "XYZ S.A.",
+//         "url_pagina": "http://www.xyz.com",
+//         "telefono": "123456789",
+//         "celular": "987654321",
+//         "direccion": "Calle 123 # 45-67",
+//         "correo": "contacto@xyz.com",
+//         "profesion": "Ingeniero",
+//         "experiencia": "10 años",
+//         "funciones": "Gerencia y administración",
+//         "id_tipo_documento": 1,
+//         "id_municipio": "Abejorral",
+//         "id_emprendedor": "1000"
+//     },
+//     "apoyos": [
+//         {
+//             "documento": "0987654321",
+//             "nombre": "John",
+//             "apellido": "Doe",
+//             "cargo": "Asistente",
+//             "telefono": "123456789",
+//             "celular": "987654321",
+//             "email": "johndoe@example.com",
+//             "id_tipo_documento": 1
+//         },
+//         {
+//             "documento": "1122334455",
+//             "nombre": "Jane",
+//             "apellido": "Smith",
+//             "cargo": "Contadora",
+//             "telefono": "123456789",
+//             "celular": "987654321",
+//             "email": "janesmith@example.com",
+//             "id_tipo_documento": 2
+//         }
+//     ]
+// }
