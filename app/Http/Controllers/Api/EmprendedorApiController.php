@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
+use Laravel\Passport\Token;
 
 class EmprendedorApiController extends Controller
 {
@@ -141,24 +142,21 @@ if ($request->has('password')) {
             ], 404);
         }
 
+        
 
         // Con la relacion de emprendedor User, en la funcion llamada auth, se trae los datos de la tabla users
         $user = $emprendedor->auth;
-        
-        $tokens = Token::where('user_id', $user->id)->get();
-            foreach ($tokens as $token) {
-            $token->revoke();
-        }
         //dd($user);
         $user->estado = 0;
         $user->save();
         
-
+        
         $emprendedor->email_verified_at = null;
         $emprendedor->save();
+        
 
-        return response()->json([
-            'message' => 'Emprendedor desactivado exitosamente'
-        ], 200);
+        
+
+        return response()->json(['message' => 'Emprendedor desactivado exitosamente. Por favor, inicie sesión de nuevo.'], 200);
     }
 }
