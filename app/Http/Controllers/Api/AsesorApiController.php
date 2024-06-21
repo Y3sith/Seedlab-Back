@@ -80,13 +80,25 @@ class AsesorApiController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $asesor = Asesor::find($id);
             if (Auth::user()->id_rol == 4) {
-                $asesor = Asesor::find($id);
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
                     //'email' => $request->email, no se sabe si pueda editar 
+                ]);
+                return response()->json(['message' => 'Asesor actualizado', 200]);
+            }
+            if(Auth::user()->id_rol == 3){
+                $user = $asesor->auth;
+                $asesor->update([
+                    'nombre' => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'celular' => $request->celular
+                ]);
+                $user->update([
+                    'email' => $request->email
                 ]);
                 return response()->json(['message' => 'Asesor actualizado', 200]);
             }
