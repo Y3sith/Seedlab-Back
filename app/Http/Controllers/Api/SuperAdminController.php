@@ -61,7 +61,7 @@ class SuperAdminController extends Controller
         }
 
         if(strlen($data['password']) <8) {
-            $statusCode = 400;
+            $statusCode = 401;
             $response = 'La contraseña debe tener al menos 8 caracteres';
             return response()->json(['message' => $response], $statusCode);
         }
@@ -77,13 +77,15 @@ class SuperAdminController extends Controller
 
             if (!empty($results)) {
                 $response = $results[0]->mensaje;
+                //dd($response);
                 if ($response === 'El correo electrónico ya ha sido registrado anteriormente') {
                     $statusCode = 400;
                 }
             }
         });
+        return response()->json(['message' => 'SuperAdministrador creado exitosamente'], 200);
 
-        return response()->json(['message' => $response], $statusCode);
+        //return response()->json(['message' => $response], $statusCode);
         
     }
 
@@ -175,15 +177,19 @@ class SuperAdminController extends Controller
 
                 if ($admin->auth) {
                     $user=$admin->auth;
+                    
                     $password = $request->input('password');
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
                     $user->email = $request->input('email');
+                    // if ($user->email==$request->input('email')) {
+                    //     return response()->json(['message'=>'El correo electrónico ya ha sido registrado anteriormente'],501);
+                    // }
                     $user->estado=$request->input('estado');
                     $user->save();
                 }
-                return response()->json(['messaje'=>'Superadministrador actualizado correctamente'],200);
+                return response()->json(['message'=>'Superadministrador actualizado correctamente'],200);
             }else{
                 return response()->json(['message'=>'Superadministrador no encontrado'], 404);
             }
