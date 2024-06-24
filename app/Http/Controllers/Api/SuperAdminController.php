@@ -22,18 +22,18 @@ class SuperAdminController extends Controller
     /**
      * Display a listing of the resource.
      */
-   
+
 
 
     public function personalizacionSis(Request $request)
     {
-        
-        if(Auth::user()->id_rol != 1){
+
+        if (Auth::user()->id_rol != 1) {
             return response()->json([
-               'message' => 'No tienes permiso para acceder a esta ruta'
+                'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
-        
+
         $personalizacion = PersonalizacionSistema::create([
             'imagen_Logo' => $request->input('imagen_Logo'),
             'nombre_sistema' => $request->input('nombre_sistema'),
@@ -41,7 +41,7 @@ class SuperAdminController extends Controller
             'color_secundario' => $request->input('color_secundario'),
             'id_superadmin' => $request->input('id_superadmin'),
         ]);
-    
+
         return response()->json(['message' => 'Personalización del sistema creada correctamente'], 201);
     }
 
@@ -56,17 +56,17 @@ class SuperAdminController extends Controller
         $response = null;
         $statusCode = 200;
 
-        if(Auth::user()->id_rol != 1){
+        if (Auth::user()->id_rol != 1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if(strlen($data['password']) <8) {
+        if (strlen($data['password']) < 8) {
             $statusCode = 401;
             $response = 'La contraseña debe tener al menos 8 caracteres';
             return response()->json(['message' => $response], $statusCode);
         }
 
-        DB::transaction(function()use ($data, &$response, &$statusCode) {
+        DB::transaction(function () use ($data, &$response, &$statusCode) {
             $results = DB::select('CALL sp_registrar_superadmin(?,?,?,?,?)', [
                 $data['nombre'],
                 $data['apellido'],
@@ -81,12 +81,14 @@ class SuperAdminController extends Controller
                 if ($response === 'El correo electrónico ya ha sido registrado anteriormente') {
                     $statusCode = 400;
                 }
+                if ($response === 'Superadmin creado exitosamente') {
+                    $statusCode = 200;
+                }
             }
         });
-        return response()->json(['message' => 'SuperAdministrador creado exitosamente'], 200);
+        //return response()->json(['message' => 'SuperAdministrador creado exitosamente'], 200);
 
-        //return response()->json(['message' => $response], $statusCode);
-        
+        return response()->json(['message' => $response], $statusCode);
     }
 
     /**
@@ -97,16 +99,17 @@ class SuperAdminController extends Controller
         //
     }
 
-    public function userProfileAdmin($id){
+    public function userProfileAdmin($id)
+    {
         try {
-            if (Auth::user()->id_rol!=1) {
-                return response()->json(['message'=>'no tienes permiso para esta funcion']);
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
-            $admin = SuperAdmin::where('id',$id)
-            ->with('auth:id,email,estado')
-            ->select('id','nombre','apellido',"id_autentication")
-            ->first();
-            return[
+            $admin = SuperAdmin::where('id', $id)
+                ->with('auth:id,email,estado')
+                ->select('id', 'nombre', 'apellido', "id_autentication")
+                ->first();
+            return [
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
@@ -117,7 +120,7 @@ class SuperAdminController extends Controller
             //return response()->json($admin);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-         }
+        }
     }
 
     public function mostrarSuperAdmins(Request $request)
@@ -126,22 +129,22 @@ class SuperAdminController extends Controller
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
             }
-    
+
             $estado = $request->input('estado', 'Activo'); // Obtener el estado desde el request, por defecto 'Activo'
-    
+
             $estadoBool = $estado === 'Activo' ? 1 : 0;
-    
+
             $adminVer = User::where('estado', $estadoBool)
                 ->where('id_rol', 1)
                 ->pluck('id');
-    
+
             $admins = SuperAdmin::whereIn('id_autentication', $adminVer)
                 ->with('auth:id,email,estado')
                 ->get(['id', 'nombre', 'apellido', 'id_autentication']);
-    
+
             $adminsConEstado = $admins->map(function ($admin) {
                 $user = User::find($admin->id_autentication);
-    
+
                 return [
                     'id' => $admin->id,
                     'nombre' => $admin->nombre,
@@ -149,10 +152,10 @@ class SuperAdminController extends Controller
                     'id_auth' => $user->id,
                     'email' => $user->email,
                     'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-                    
+
                 ];
             });
-    
+
             return response()->json($adminsConEstado);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -166,36 +169,47 @@ class SuperAdminController extends Controller
     public function editarSuperAdmin(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol !=1) {
-                return response()->json(['message'=>'no tienes permiso para esta funcion']);
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
             $admin = SuperAdmin::find($id);
             if ($admin) {
-                $admin->nombre=$request->input('nombre');
-                $admin->apellido=$request->input('apellido');
+                $admin->nombre = $request->input('nombre');
+                $admin->apellido = $request->input('apellido');
                 $admin->save();
 
                 if ($admin->auth) {
-                    $user=$admin->auth;
-                    
+                    $user = $admin->auth;
+
                     $password = $request->input('password');
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
-                    $user->email = $request->input('email');
-                    // if ($user->email==$request->input('email')) {
-                    //     return response()->json(['message'=>'El correo electrónico ya ha sido registrado anteriormente'],501);
-                    // }
-                    $user->estado=$request->input('estado');
+                    
+                    $newEmail = $request->input('email');
+                    if ($newEmail && $newEmail !== $user->email) {
+                        // Verificar si el nuevo email ya está en uso
+                        $existingUser = User::where('email', $newEmail)->first();
+                        if ($existingUser) {
+                            return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                        }
+                        $user->email = $newEmail;
+                    }
+                    // $user->email = $request->input('email');
+                    // //  if ($user->email) {
+                    // //      return response()->json(['message'=>'El correo electrónico ya ha sido registrado anteriormente'],501);
+                    // //  }
+                    // //dd($user->email);
+                    $user->estado = $request->input('estado');
                     $user->save();
                 }
-                return response()->json(['message'=>'Superadministrador actualizado correctamente'],200);
-            }else{
-                return response()->json(['message'=>'Superadministrador no encontrado'], 404);
+                return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
+            } else {
+                return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-         }
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '], 500);
+        }
     }
 
     /**
@@ -221,36 +235,37 @@ class SuperAdminController extends Controller
     //     $user->save();
 
     //     return response()->json(['message' =>'SuperAdmin desactivado'], 200);
-       
+
     // }
 
-    public function enumerarUsuarios() {
+    public function enumerarUsuarios()
+    {
         $roles = Rol::all();
         $result = [];
-    
+
         $totalUsers = User::count();
-    
+
         foreach ($roles as $rol) {
             $countActive = User::where('id_rol', $rol->id)->where('estado', true)->count();
             $percentageActive = $totalUsers > 0 ? ($countActive / $totalUsers) * 100 : 0;
-    
+
             $result[$rol->nombre] = [
                 '# de usuarios activos' => $countActive,
                 'Porcentaje del total' => round($percentageActive, 2) . '%'
             ];
         }
-    
+
         $activeUsersCount = User::where('estado', true)->count();
         $inactiveUsersCount = User::where('estado', false)->count();
-    
+
         $activePercentage = $totalUsers > 0 ? ($activeUsersCount / $totalUsers) * 100 : 0;
         $inactivePercentage = $totalUsers > 0 ? ($inactiveUsersCount / $totalUsers) * 100 : 0;
-    
+
         $result['activos'] = round($activePercentage, 2) . '%';
         $result['inactivos'] = round($inactivePercentage, 2) . '%';
-    
+
         $averageAsesorias = $this->averageAsesorias2024();
-    
+
 
         $result['Promedio Anual de AsesoriasxEmprendedor'] = round($averageAsesorias, 2);
 
@@ -258,10 +273,10 @@ class SuperAdminController extends Controller
 
         $result['Top Aliados'] = $top;
 
-    
+
         return response()->json($result);
     }
-    
+
     public function averageAsesorias2024()
     {
         $averageAsesorias = Asesoria::whereRaw('YEAR(fecha) = 2024') // Cambiar aquí el año desde el front
@@ -271,32 +286,29 @@ class SuperAdminController extends Controller
                 '=',
                 'asesoria.doc_emprendedor'
             )->selectRaw('AVG(asesoria_counts.asesoria_count) as average_asesorias')->value('average_asesorias');
-    
+
         return $averageAsesorias;
     }
 
-    public function topAliados(){
-       
+    public function topAliados()
+    {
+
         $totalAsesorias = Asesoria::count();
 
-            $topAliados = Aliado::withCount('asesoria')
-                ->orderByDesc('asesoria_count')
-                ->take(5)
-                ->get(['nombre', 'asesoria_count']);
+        $topAliados = Aliado::withCount('asesoria')
+            ->orderByDesc('asesoria_count')
+            ->take(5)
+            ->get(['nombre', 'asesoria_count']);
 
-            $topAliados->transform(function ($aliado) use ($totalAsesorias) {
-                $porcentaje = ($aliado->asesoria_count / $totalAsesorias) * 100;
-                $aliado->porcentaje = round($porcentaje, 2) . '%';
-                return [
-                    'nombre' => $aliado->nombre,
-                    'asesorias' => $aliado->asesoria_count,
-                    'porcentaje' => $aliado->porcentaje,
-                ];
-            });    
-    return $topAliados;
+        $topAliados->transform(function ($aliado) use ($totalAsesorias) {
+            $porcentaje = ($aliado->asesoria_count / $totalAsesorias) * 100;
+            $aliado->porcentaje = round($porcentaje, 2) . '%';
+            return [
+                'nombre' => $aliado->nombre,
+                'asesorias' => $aliado->asesoria_count,
+                'porcentaje' => $aliado->porcentaje,
+            ];
+        });
+        return $topAliados;
     }
-
-
-
-    
 }
