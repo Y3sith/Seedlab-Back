@@ -6,6 +6,8 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\MySqlGrammar;
 use Illuminate\Support\Fluent;
+use Laravel\Passport\Passport;
+use Carbon\Carbon;
 
 
 
@@ -31,5 +33,6 @@ class AppServiceProvider extends ServiceProvider
         MySqlGrammar::macro('typeLongBinary', function (Fluent $column) {
             return 'longblob'; // Tipo equivalente en MySQL
         });
+
     }
 }
