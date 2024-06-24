@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Asesor;
+use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
@@ -103,7 +104,16 @@ class AsesorApiController extends Controller
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
-                    $user->email = $request->input('email');
+                    $newEmail = $request->input('email');
+                    if ($newEmail && $newEmail !== $user->email) {
+                        // Verificar si el nuevo email ya está en uso
+                        $existingUser = User::where('email', $newEmail)->first();
+                        if ($existingUser) {
+                            return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                        }
+                        $user->email = $newEmail;
+                    }
+
                     $user->estado = $request->input('estado');
                     $user->save();
                 return response()->json(['message' => 'Asesor actualizado', 200]);
