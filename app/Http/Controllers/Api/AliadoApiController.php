@@ -192,46 +192,46 @@ class AliadoApiController extends Controller
     }
 
     public function mostrarAsesorAliado(Request $request, $id)
-{
-    try {
-        if (Auth::user()->id_rol != 3) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+    {
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+
+            $estado = $request->input('estado', 'Activo');
+
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+            $aliado = Aliado::find($id);
+
+            if (!$aliado) {
+                return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
+            }
+
+            $asesores = Aliado::findOrFail($id)->asesor()
+                ->whereHas('auth', function ($query) use ($estadoBool) {
+                    $query->where('estado', $estadoBool);
+                })
+                ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')    
+                ->get();
+
+            $asesoresConEstado = $asesores->map(function ($asesor) {
+                $user = User::find($asesor->id_autentication);
+
+                return [
+                    'id' => $asesor->id,
+                    'nombre' => $asesor->nombre,
+                    'apellido' => $asesor->apellido,
+                    'celular' => $asesor->celular,
+                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+                ];
+            });
+
+            return response()->json($asesoresConEstado);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-
-        $estado = $request->input('estado', 'Activo');
-
-        $estadoBool = $estado === 'Activo' ? 1 : 0;
-
-        $aliado = Aliado::find($id);
-
-        if (!$aliado) {
-            return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
-        }
-
-        $asesores = Aliado::findOrFail($id)->asesor()
-            ->whereHas('auth', function ($query) use ($estadoBool) {
-                $query->where('estado', $estadoBool);
-            })
-            ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')    
-            ->get();
-
-        $asesoresConEstado = $asesores->map(function ($asesor) {
-            $user = User::find($asesor->id_autentication);
-
-            return [
-                'id' => $asesor->id,
-                'nombre' => $asesor->nombre,
-                'apellido' => $asesor->apellido,
-                'celular' => $asesor->celular,
-                'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-            ];
-        });
-
-        return response()->json($asesoresConEstado);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
-}
 
 
     public function dashboardAliado($idAliado)
@@ -306,39 +306,40 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    public function editarAsesorXaliado(Request $request, $id)
-    {
-        try {
-            if (Auth::user()->id_rol != 3) {
-                return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-            }
+    //Se hizo un solo update en  Asesor
+    // public function editarAsesorXaliado(Request $request, $id)
+    // {
+    //     try {
+    //         if (Auth::user()->id_rol != 3) {
+    //             return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+    //         }
 
-            $asesor = Asesor::find($id);
+    //         $asesor = Asesor::find($id);
 
-            if ($asesor) {
-                $asesor->nombre = $request->input('nombre');
-                $asesor->apellido = $request->input('apellido');
-                $asesor->celular = $request->input('celular');
-                $asesor->save();
+    //         if ($asesor) {
+    //             $asesor->nombre = $request->input('nombre');
+    //             $asesor->apellido = $request->input('apellido');
+    //             $asesor->celular = $request->input('celular');
+    //             $asesor->save();
 
-                if ($asesor->auth) {
-                    $user = $asesor->auth;
-                    $password = $request->input('password');
-                    if ($password) {
-                        $user->password =  Hash::make($request->input('password'));
-                    }
-                    $user->email = $request->input('email');
-                    $user->estado = $request->input('estado');
-                    $user->save();
-                }
-                return response()->json(['message' => 'Asesor actualizado correctamente']);
-            } else {
-                return response()->json(['message' => 'Asesor no encontrado'], 404);
-            }
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
-    }
+    //             if ($asesor->auth) {
+    //                 $user = $asesor->auth;
+    //                 $password = $request->input('password');
+    //                 if ($password) {
+    //                     $user->password =  Hash::make($request->input('password'));
+    //                 }
+    //                 $user->email = $request->input('email');
+    //                 $user->estado = $request->input('estado');
+    //                 $user->save();
+    //             }
+    //             return response()->json(['message' => 'Asesor actualizado correctamente']);
+    //         } else {
+    //             return response()->json(['message' => 'Asesor no encontrado'], 404);
+    //         }
+    //     } catch (Exception $e) {
+    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    //     }
+    // }
 
     public function verEmprendedoresxEmpresa()
     {
