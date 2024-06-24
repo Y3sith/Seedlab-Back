@@ -101,7 +101,8 @@ class AliadoApiController extends Controller
                 'ruta_multi' => $aliado->ruta_multi,
                 'id_autentication' => $aliado->id_autentication,
                 'id_tipo_dato' => $tipoDato,
-                'estado' => $estado == 1 ? "Activo" : "Inactivo",
+                'estado' => $estado == 1 ? "Activo" : "Inactivo", 
+                'message' => 'Aliado creado exitosamente', 200
             ]);
         } else {
             return response()->json(['message' => 'Aliado no encontrado'], 404);

@@ -46,12 +46,14 @@ class AuthController extends Controller
         }
 
         
-
+        // Creación el token de acceso con tiempo de expiración 
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         $token->save();
+        $token->expires_at = Carbon::now()->addMinutes(3);
+
         $additionalInfo = $this->getAdditionalInfo($user);
-        $info = [];
+        //$info = [];
         return response()->json([
             'access_token' => $tokenResult->accessToken,
             'token_type' => 'Bearer',

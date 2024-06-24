@@ -80,8 +80,9 @@ class AsesorApiController extends Controller
     public function update(Request $request, $id)
     {
         try {
+            $asesor = Asesor::find($id);
+            //dd($request->estado);
             if (Auth::user()->id_rol == 4) {
-                $asesor = Asesor::find($id);
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
@@ -90,6 +91,23 @@ class AsesorApiController extends Controller
                 ]);
                 return response()->json(['message' => 'Asesor actualizado', 200]);
             }
+            if(Auth::user()->id_rol == 3){
+                $user = $asesor->auth;
+                $asesor->update([
+                    'nombre' => $request->nombre,
+                    'apellido' => $request->apellido,
+                    'celular' => $request->celular
+                ]);
+                
+                $password = $request->input('password');
+                    if ($password) {
+                        $user->password =  Hash::make($request->input('password'));
+                    }
+                    $user->email = $request->input('email');
+                    $user->estado = $request->input('estado');
+                    $user->save();
+                return response()->json(['message' => 'Asesor actualizado', 200]);
+                }
             return response()->json([
                 'message' => 'No tienes permisos para realizar esta acción'
             ], 403);
