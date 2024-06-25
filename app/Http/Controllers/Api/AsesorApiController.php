@@ -84,26 +84,50 @@ class AsesorApiController extends Controller
             $asesor = Asesor::find($id);
             //dd($request->estado);
             if (Auth::user()->id_rol == 4) {
+
+                $newCelular = $request->input('celular');
+                    if ($newCelular && $newCelular !== $asesor->celular) {
+                        // Verificar si el nuevo email ya está en uso
+                        $existing = Asesor::where('celular', $newCelular)->first();
+                        if ($existing) {
+                            return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+                        }
+                        $asesor->celular = $newCelular;
+                    }
+
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
+                
                 return response()->json(['message' => 'Asesor actualizado', 200]);
             }
             if(Auth::user()->id_rol == 3){
                 $user = $asesor->auth;
+
+                $newCelular = $request->input('celular');
+                if ($newCelular && $newCelular !== $asesor->celular) {
+                    // Verificar si el nuevo email ya está en uso
+                    $existing = Asesor::where('celular', $newCelular)->first();
+                    if ($existing) {
+                        return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+                    }
+                    $asesor->celular = $newCelular;
+                }
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
                     'celular' => $request->celular
                 ]);
+
                 
                 $password = $request->input('password');
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
+
                     $newEmail = $request->input('email');
                     if ($newEmail && $newEmail !== $user->email) {
                         // Verificar si el nuevo email ya está en uso
