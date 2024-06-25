@@ -193,7 +193,16 @@ class OrientadorApiController extends Controller
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
-                    $user->email = $request->input('email');
+
+                    $newEmail = $request->input('email');
+                    if ($newEmail && $newEmail !== $user->email) {
+                        // Verificar si el nuevo correo electrónico ya existe
+                        $existingUser = User::where('email', $newEmail)->first();
+                        if ($existingUser) {
+                            return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                        }
+                        $user->email = $newEmail;
+                    }
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
