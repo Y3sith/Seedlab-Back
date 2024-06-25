@@ -83,7 +83,7 @@ class AsesorApiController extends Controller
         try {
             $asesor = Asesor::find($id);
             //dd($request->estado);
-            if (Auth::user()->id_rol == 4) {
+            if (Auth::user()->id_rol == 4 ) {
 
                 $newCelular = $request->input('celular');
                     if ($newCelular && $newCelular !== $asesor->celular) {
