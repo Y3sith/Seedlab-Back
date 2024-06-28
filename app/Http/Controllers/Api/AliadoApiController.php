@@ -35,7 +35,7 @@ class AliadoApiController extends Controller
             'ruta_multi' => $aliado->ruta_multi,
             'tipo_dato' => $aliado->tipoDato->nombre,
             'email' => $aliado->auth->email,
-            'estado_usuario' => $aliado->auth->estado
+            'estado' => $aliado->auth->estado
         ]);
         return response()->json($aliadosTransformados);
     }
