@@ -17,7 +17,7 @@ class RutaApiController extends Controller
      */
     public function index()
     {
-        if(Auth::user()->id_rol !=1){
+        if(Auth::user()->id_rol !=1 && Auth::user()->id_rol !=3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         $ruta = Ruta::all();
