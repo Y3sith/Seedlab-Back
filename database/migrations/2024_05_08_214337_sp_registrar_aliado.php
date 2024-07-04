@@ -16,6 +16,7 @@ return new class extends Migration
         DB::unprepared("CREATE PROCEDURE sp_registrar_aliado(
             IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_logo BLOB ,
+            IN p_banner BLOB ,
             IN p_descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_tipodato VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_ruta TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -39,8 +40,8 @@ return new class extends Migration
         
                             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
-                            INSERT INTO aliado (nombre, logo, descripcion, id_tipo_dato, ruta_multi, id_autentication)
-                            VALUES (p_nombre, p_logo, p_descripcion, v_idtipodato, p_ruta, @last_inserted_id);
+                            INSERT INTO aliado (nombre, logo, banner, descripcion, id_tipo_dato, ruta_multi, id_autentication)
+                            VALUES (p_nombre, p_logo, p_banner, p_descripcion, v_idtipodato, p_ruta, @last_inserted_id);
                             
                             SELECT 'Se ha registrado exitosamente el aliado' AS mensaje;
                         END IF;

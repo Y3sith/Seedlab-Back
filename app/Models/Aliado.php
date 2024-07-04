@@ -15,6 +15,7 @@ class Aliado extends Model
         'nombre',
         'descripcion',
         'logo',
+        'banner',
         'ruta_multi',
         'id_autentication',
         'id_tipo_dato'

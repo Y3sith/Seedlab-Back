@@ -22,6 +22,10 @@ use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
 
+
+
+
+
 //Rutas de login y registro
 Route::group([
     'prefix' => 'auth'

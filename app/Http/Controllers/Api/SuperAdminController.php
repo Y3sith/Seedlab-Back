@@ -39,6 +39,7 @@ class SuperAdminController extends Controller
             'nombre_sistema' => $request->input('nombre_sistema'),
             'color_principal' => $request->input('color_principal'),
             'color_secundario' => $request->input('color_secundario'),
+            'color_terciario' => $request->input('color_terciario'),
             'id_superadmin' => $request->input('id_superadmin'),
         ]);
 
@@ -61,7 +62,7 @@ class SuperAdminController extends Controller
         }
 
         if (strlen($data['password']) < 8) {
-            $statusCode = 401;
+            $statusCode = 400;
             $response = 'La contraseña debe tener al menos 8 caracteres';
             return response()->json(['message' => $response], $statusCode);
         }

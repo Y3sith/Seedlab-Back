@@ -3,9 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\Request;
 use App\Models\Departamento;
 use App\Models\Municipio;
+use Illuminate\Http\Request;
 
 class UbicacionController extends Controller
 {
@@ -14,12 +14,20 @@ class UbicacionController extends Controller
         $nombresDepartamentos = Departamento::pluck('name');
         return response()->json($nombresDepartamentos, 200, [], JSON_UNESCAPED_UNICODE);
     }
-    
+
     public function listar_munxdep(Request $request)
     {
         $nombreDepartamento = $request->input('dep_name');
         $departamento = Departamento::where('name', $nombreDepartamento)->first();
-        $municipios = Municipio::where('id_departamento', $departamento->id)->pluck('nombre');
+
+        if (!$departamento) {
+            return response()->json(['error' => 'Departamento no encontrado'], 404);
+        }
+
+        $municipios = Municipio::where('id_departamento', $departamento->id)
+            ->select('id', 'nombre')
+            ->get();
+
         return response()->json($municipios);
     }
 

@@ -62,6 +62,7 @@ class AliadoApiController extends Controller
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['logo'],
+                    $data['banner'],
                     $data['descripcion'],
                     $data['tipodato'],
                     $data['ruta'],
