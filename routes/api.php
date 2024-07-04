@@ -98,6 +98,7 @@ Route::group([
     Route::put('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorXaliado'])->name('EditarAsesorAliado');
     Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
+    
 });
 
 //FanPage
@@ -106,7 +107,16 @@ Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'
 //Rutas
 Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
 //Actividad
-Route::apiResource('/actividad',ActividadController::class)->middleware('auth:api');
+Route::group([
+    'prefix' => 'actividad',
+    'middleware' => 'auth:api'
+],function(){
+    Route::apiResource('/actividad',ActividadController::class);
+    Route::get('/tipo_dato',[ActividadController::class,'tipoDato']);
+    Route::get('/verActividadAliado/{id}',[ActividadController::class,'VerActividadAliado']);
+});
+
+
 //Leccion
 Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
 //Nivel

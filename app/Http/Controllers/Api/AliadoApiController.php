@@ -12,6 +12,7 @@ use App\Models\Asesoria;
 use App\Models\Asesor;
 use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
+use App\Models\TipoDato;
 use App\Models\User;
 use Exception;
 
@@ -352,4 +353,6 @@ class AliadoApiController extends Controller
 
         return response()->json($emprendedoresConEmpresas);
     }
+
+    
 }
