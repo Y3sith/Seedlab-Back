@@ -41,4 +41,8 @@ class Aliado extends Model
         return $this->hasMany(Asesoria::class, 'id_aliado');
     }
 
+    public function actividad(){
+        return $this->hasMany(Actividad::class, 'id_aliado');
+    }
+
 }
