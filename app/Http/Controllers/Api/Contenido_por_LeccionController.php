@@ -33,7 +33,7 @@ class Contenido_por_LeccionController extends Controller
     {
         //crea contenido a la leccion solo el asesor
         try {
-            if (Auth::user()->id_rol==4) {
+            if (Auth:: user()->id_rol==3 && Auth::user()->id_rol==4) {
                 $contenidoxleccion = ContenidoLeccion::create([
                     'titulo'=>$request->titulo,
                     'descripcion'=>$request->descripcion,

@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
+use App\Models\Aliado;
+use App\Models\TipoDato;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -94,6 +96,8 @@ class ActividadController extends Controller
         }
     }
 
+
+
     /**
      * Show the form for editing the specified resource.
      */
@@ -168,5 +172,27 @@ class ActividadController extends Controller
     public function destroy(string $id)
     {
         //
+    }
+
+    public function tipoDato(){
+        if (Auth::user()->id_rol !=3 && Auth::user()->id_rol !=4) {
+            return response()->json([
+                'messaje'=>'No tienes permisos para acceder a esta ruta'
+            ],401);
+        }
+        $dato= TipoDato::get(['id','nombre']);
+        return response()->json($dato);
+    }
+
+    public function VerActividadAliado($id){
+        if (Auth::user()->id_rol!=3 && Auth::user()->id_rol !=4) {
+            return response()->json([
+                'messaje'=>'No tienes permisos para acceder a esta ruta'
+            ],401);
+        }
+        $aliado = Aliado::find($id);
+        
+        $actividad = Aliado::findOrFail($id)->actividad()->whereHas('auth',)
+
     }
 }

@@ -13,6 +13,7 @@ class ApoyoEmpresa extends Model
     protected $primaryKey = 'documento';
     public $incrementing = false;
     protected $fillable = [
+        'id',
         'nombre',
         'apellido',
         'documento',
@@ -29,7 +30,7 @@ class ApoyoEmpresa extends Model
     }
    
     public function empresa(){
-        return $this->belongsTo(Empresa::class, 'id_empresa');
+        return $this->belongsTo(Empresa::class, 'id_empresa', 'documento'); // Añadir la referencia a la columna 'documento'
     }
 
     public $timestamps = false;

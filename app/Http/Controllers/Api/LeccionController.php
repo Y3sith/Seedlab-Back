@@ -33,7 +33,7 @@ class LeccionController extends Controller
     {
         //crear leccion (solo el asesor)
         try {
-            if (Auth::user()->id_rol==4) {
+            if (Auth:: user()->id_rol==3 && Auth::user()->id_rol==4) {
             $leccion = Leccion::create([
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,

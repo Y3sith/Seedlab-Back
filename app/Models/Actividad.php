@@ -23,7 +23,9 @@ class Actividad extends Model
     public function tiposDatos(){
         return $this->belongsTo(TipoDato::class, 'id_tipo_dato');
     }
-
+    public function aliado(){
+        return $this->belongsTo(Aliado::class, 'id_aliado');
+    }
     public function asesor(){
         return $this->belongsTo(Asesor::class, 'id_asesor');
     }

@@ -22,6 +22,8 @@ return new class extends Migration
             $table->foreign('id_asesor')->references('id')->on('asesor');
             $table->unsignedBigInteger('id_ruta');
             $table->foreign('id_ruta')->references('id')->on('ruta');
+            $table->unsignedBigInteger('id_aliado');
+            $table->foreign('id_aliado')->references('id')->on('aliado');
             //$table->timestamps();
         });
     }

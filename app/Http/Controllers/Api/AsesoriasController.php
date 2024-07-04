@@ -37,7 +37,7 @@ class AsesoriasController extends Controller
                 }
             }
             if (is_null($aliado)&& $request->input('isorientador')==0) {
-                return response()->json(['message' => 'Nesecitas asignar ya sea un aliado u orientador'], 400);
+                return response()->json(['message' => 'Necesitas asignar ya sea un aliado u orientador'], 400);
             }
             $asesoria = Asesoria::create([
                 'Nombre_sol' => $request->input('nombre'),
@@ -80,7 +80,7 @@ class AsesoriasController extends Controller
             'id_asesor' => $request->input('id_asesor'),
         ]);
 
-            return response()->json(['message' => 'se ha asignado el asesor para esta asesoria'], 201);
+            return response()->json(['message' => 'Se ha asignado correctamente el asesor para esta asesoria'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -124,7 +124,7 @@ class AsesoriasController extends Controller
                 'id_asesoria' => $request->input('id_asesoria'),
             ]);
 
-            return response()->json(['mesage' => 'Se le a asignado un horario a su Asesoria'], 201);
+            return response()->json(['message' => 'Se le a asignado un horario a su Asesoria'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

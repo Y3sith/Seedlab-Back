@@ -12,6 +12,7 @@ use App\Models\Asesoria;
 use App\Models\Asesor;
 use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
+use App\Models\TipoDato;
 use App\Models\User;
 use Exception;
 
@@ -35,7 +36,7 @@ class AliadoApiController extends Controller
             'ruta_multi' => $aliado->ruta_multi,
             'tipo_dato' => $aliado->tipoDato->nombre,
             'email' => $aliado->auth->email,
-            'estado_usuario' => $aliado->auth->estado
+            'estado' => $aliado->auth->estado
         ]);
         return response()->json($aliadosTransformados);
     }
@@ -61,6 +62,7 @@ class AliadoApiController extends Controller
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['logo'],
+                    $data['banner'],
                     $data['descripcion'],
                     $data['tipodato'],
                     $data['ruta'],
@@ -353,4 +355,6 @@ class AliadoApiController extends Controller
 
         return response()->json($emprendedoresConEmpresas);
     }
+
+    
 }

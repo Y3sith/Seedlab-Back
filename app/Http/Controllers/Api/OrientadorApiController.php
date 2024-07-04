@@ -184,7 +184,17 @@ class OrientadorApiController extends Controller
             if ($orientador) {
                 $orientador->nombre = $request->input('nombre');
                 $orientador->apellido = $request->input('apellido');
-                $orientador->celular = $request->input('celular');
+               // $orientador->celular = $request->input('celular');
+               $newCelular = $request->input('celular');
+                    if ($newCelular && $newCelular !== $orientador->celular) {
+                        // Verificar si el nuevo email ya está en uso
+                        $existing = Orientador::where('celular', $newCelular)->first();
+                        if ($existing) {
+                            return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 402);
+                        }
+                        $orientador->celular = $newCelular;
+                    }
+
                 $orientador->save();
 
                 if ($orientador->auth) {
@@ -193,7 +203,16 @@ class OrientadorApiController extends Controller
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
-                    $user->email = $request->input('email');
+
+                    $newEmail = $request->input('email');
+                    if ($newEmail && $newEmail !== $user->email) {
+                        // Verificar si el nuevo correo electrónico ya existe
+                        $existingUser = User::where('email', $newEmail)->first();
+                        if ($existingUser) {
+                            return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                        }
+                        $user->email = $newEmail;
+                    }
                     $user->estado = $request->input('estado');
                     $user->save();
                 }

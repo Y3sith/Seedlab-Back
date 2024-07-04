@@ -33,7 +33,7 @@ class NivelesController extends Controller
     {
         //crear nivel solo asesor
         try {
-             if (Auth::user()->id_rol==4) {
+             if ( Auth:: user()->id_rol==3 && Auth::user()->id_rol==4  ) {
             $niveles = Nivel::create([
                 'nombre'=>$request->nombre,
                 'descripcion'=>$request->descripcion,
