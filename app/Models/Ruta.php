@@ -14,7 +14,8 @@ class Ruta extends Model
     protected $fillable = [
         'nombre',
         'fecha_creacion',
-        'estado'
+        'estado',
+        'imagen_ruta'
     ];
 
     public $timestamps = false;

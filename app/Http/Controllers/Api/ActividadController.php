@@ -197,6 +197,5 @@ class ActividadController extends Controller
                     ->select('id', 'nombre', 'descripcion','ruta_multi','id_tipo_dato','id_asesor','id_ruta',)
                     ->get();
             return response()->json($actividades);
-
     }
 }

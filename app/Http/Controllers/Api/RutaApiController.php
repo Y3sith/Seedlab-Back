@@ -20,9 +20,12 @@ class RutaApiController extends Controller
         if(Auth::user()->id_rol !=1 && Auth::user()->id_rol !=3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
+        //$ruta = Ruta::with('actividades')->get();
+        //$ruta = Actividad::where('id_ruta')->with('id_actividad')->get();
         $ruta = Ruta::all();
         return response()->json($ruta);
     }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -36,13 +39,21 @@ class RutaApiController extends Controller
             $ruta = Ruta::create([
             "nombre" => $request->nombre,
             "fecha_creacion"  => Carbon::now(),
-            "estado" => 1
+            "estado" => 1,
+            "imagen_ruta"=>$request->imagen_ruta
         ]);
         return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
+    }
+
+    public function rutasActivas(){
+        if (Auth::user()->id_rol != 3) {
+            return response()->json(['Error'=>'No tienes permiso para realizar esta accion'],401);
+        }
+        $rutasActivas = Ruta::where('estado', 1)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
+        return response()->json($rutasActivas);
     }
 
     /**
@@ -56,8 +67,8 @@ class RutaApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
+        // $ruta = Ruta::where('id',$id)-> with('actividades.nivel.lecciones.contenidoLecciones')->get();
         $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->get();
-
         // Retornar la ruta con todas las relaciones cargadas
         return response()->json($ruta);
     }
