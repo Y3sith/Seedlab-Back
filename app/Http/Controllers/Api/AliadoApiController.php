@@ -14,6 +14,7 @@ use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
 use App\Models\TipoDato;
 use App\Models\User;
+use Illuminate\Support\Facades\Storage;
 use Exception;
 
 class AliadoApiController extends Controller
@@ -23,24 +24,35 @@ class AliadoApiController extends Controller
      */
     public function traerAliadosActivos($status)
     {
-       
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
+            ->select('nombre', 'descripcion', 'logo', 'banner', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
-
-        $aliadosTransformados = $aliados->map(fn ($aliado) => [
-            'nombre' => $aliado->nombre,
-            'descripcion' => $aliado->descripcion,
-            'logo' => $aliado->logo,
-            'ruta_multi' => $aliado->ruta_multi,
-            'tipo_dato' => $aliado->tipoDato->nombre,
-            'email' => $aliado->auth->email,
-            'estado' => $aliado->auth->estado
-        ]);
+    
+        $aliadosTransformados = $aliados->map(function ($aliado) {
+            return [
+                'nombre' => $aliado->nombre,
+                'descripcion' => $aliado->descripcion,
+                'logo' => $aliado->logo,
+                'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
+                'ruta_multi' => $aliado->ruta_multi,
+                'tipo_dato' => $aliado->tipoDato,
+                'email' => $aliado->auth->email,
+                'estado' => $aliado->auth->estado
+            ];
+        });
+    
         return response()->json($aliadosTransformados);
     }
-
+    
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
+        
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
 
     public function crearAliado(Request $data)
     {
@@ -58,11 +70,18 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
+            $bannerUrl = null;
+
+            if ($data->hasFile('banner') && $data->file('banner')->isValid()) {
+                $bannerPath = $data->file('banner')->store('public/banners');
+                $bannerUrl = Storage::url($bannerPath);
+            }
+
+            DB::transaction(function () use ($data, $bannerUrl, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['logo'],
-                    $data['banner'],
+                    $bannerUrl,
                     $data['descripcion'],
                     $data['tipodato'],
                     $data['ruta'],
@@ -84,6 +103,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function mostrarAliado(Request $request)
     {
