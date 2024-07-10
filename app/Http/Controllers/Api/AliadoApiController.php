@@ -247,6 +247,15 @@ class AliadoApiController extends Controller
             $query->where('estado', 'Pendiente');
         })->count();
 
+        $asignadas = Asesoria::where('id_aliado', $idAliado)
+                    ->where('asignacion', 1)
+                    ->count();
+
+        $sinAsignar = Asesoria::where('id_aliado', $idAliado)
+                       ->where('asignacion', 0)
+                       ->count();
+
+
         //CONTAR # DE ASESORES DE ESE ALIADO
         $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
 
@@ -262,6 +271,8 @@ class AliadoApiController extends Controller
             'Porcentaje Pendientes' => $porcentajePendientes,
             'Asesorias Finalizadas' => $finalizadas,
             'Porcentaje Finalizadas' => $porcentajeFinalizadas,
+            'Asesorias Asignadas' => $asignadas,
+            'Asesorias Sin Asignar' => $sinAsignar,
             'Mis Asesores' => $numAsesores,
         ]);
     }
