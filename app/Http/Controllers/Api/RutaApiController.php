@@ -15,14 +15,48 @@ class RutaApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
+        try {
         if(Auth::user()->id_rol !=1 && Auth::user()->id_rol !=3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
+
+        $estado = $request->input('estado', 'Activo'); // Obtener el estado desde el request, por defecto 'Activo'
+
+        $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+        $rutaVer = Ruta::where('estado', $estadoBool)
+                ->get(['id', 'nombre', 'fecha_creacion', 'estado', 'imagen_ruta']);
+
+        $rutasi = $rutaVer->map(function ($rutaVers){
+            return [
+                'id' => $rutaVers->id,
+                'nombre' => $rutaVers->nombre,
+                'fecha_creacion' => $rutaVers->fecha_creacion,
+                'estado' => $rutaVers->estado == 1 ? 'Activo' : 'Inactivo',
+                'imagen_ruta' => $rutaVers->imagen_ruta,
+            ];
+        });
+        return response()->json($rutasi);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+
         //$ruta = Ruta::with('actividades')->get();
         //$ruta = Actividad::where('id_ruta')->with('id_actividad')->get();
-        $ruta = Ruta::all();
+        //$rutas = Ruta::all(); ------
+        // foreach ($rutas as $ruta) {
+        //     $ruta->imagen_ruta = base64_decode($ruta->imagen_ruta);
+        // }
+        //return response()->json($rutas); ------
+    }
+
+    public function rutaxId($id){
+        if(Auth::user()->id_rol !=1 && Auth::user()->id_rol !=3){
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        $ruta = Ruta::find($id);
         return response()->json($ruta);
     }
     
@@ -36,11 +70,19 @@ class RutaApiController extends Controller
             if(Auth::user()->id_rol != 1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
+        // if ($request->hasFile('imagen_ruta')) {
+        //     $image = $request->file('imagen_ruta');
+        //     $encodedImage = base64_encode(file_get_contents($image->path()));
+        // } else {
+        //     $encodedImage = null;
+        // }
+
             $ruta = Ruta::create([
             "nombre" => $request->nombre,
             "fecha_creacion"  => Carbon::now(),
             "estado" => 1,
             "imagen_ruta"=>$request->imagen_ruta
+            //$encodedImage
         ]);
         return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
         } catch (Exception $e) {
@@ -68,7 +110,14 @@ class RutaApiController extends Controller
         }
         // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
         // $ruta = Ruta::where('id',$id)-> with('actividades.nivel.lecciones.contenidoLecciones')->get();
+        
         $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->get();
+
+        // if ($ruta) {
+        //     $ruta->imagen_ruta = base64_decode($ruta->imagen_ruta);
+        // } // Decodificar la imagen
+
+
         // Retornar la ruta con todas las relaciones cargadas
         return response()->json($ruta);
     }
@@ -92,10 +141,12 @@ class RutaApiController extends Controller
         }
             $ruta->update([
                 'nombre' => $request->nombre,
+                'imagen_ruta'=>$request->imagen_ruta,
                 'estado' => $request->estado,
             ]);
 
-            return response()->json($ruta, 200);
+             return response()->json(['message'=>'ruta actualizada correctamente',$ruta], 200); //mostrar ruta al actualizar
+            //return response()->json(['message'=>'ruta actualizada correctamente'], 200); //mostrar solo el mensaje
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

@@ -119,6 +119,7 @@ Route::group([
     Route::apiResource('/ruta',RutaApiController::class);
     Route::get('/mostrarRutaContenido/{id}',[RutaApiController::class,'mostrarRutaConContenido'])->name('mostrarRutaContenido');
     Route::get('/rutasActivas',[RutaApiController::class,'rutasActivas']);
+    Route::get('/rutaXid/{id}',[RutaApiController::class,'rutaxId']);
 });
 
 
