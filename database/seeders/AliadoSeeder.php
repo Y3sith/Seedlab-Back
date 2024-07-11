@@ -40,14 +40,15 @@ if (File::exists($sourceImagePath)) {
 }
 
 // URL de la imagen para guardar en la base de datos
-$bannerUrl = '/storage/banners/' . $destinationImageName;
+$bannerUrl = 'storage/banners/' . $destinationImageName;
+
         $aliados = [
             [
                 "nombre" => "Ecopetrol",
                 "descripcion" => "Ecopetrol S.A. es una Compañía organizada bajo la forma de sociedad anónima, del orden nacional, vinculada al Ministerio de Minas y Energía. Tiene operaciones ubicadas en el centro, sur, oriente y norte de Colombia, al igual que en el exterior.",
                 "logo" => "",
-                "ruta_multi" => $bannerUrl,
-                "banner" => "public/storage/banners/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg",
+                "ruta_multi" => "",
+                "banner" => $bannerUrl,
                 "id_autentication" => 6,
                 "id_tipo_dato" => 1
             ],
