@@ -108,8 +108,27 @@ Route::group([
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
 
+
+
+
 //Rutas
-Route::apiResource('/ruta',RutaApiController::class)->middleware('auth:api');
+Route::group([
+    'prefix' => 'ruta',
+    'middleware' => 'auth:api'
+],function(){
+    Route::apiResource('/ruta',RutaApiController::class);
+    Route::get('/mostrarRutaContenido/{id}',[RutaApiController::class,'mostrarRutaConContenido'])->name('mostrarRutaContenido');
+    Route::get('/rutasActivas',[RutaApiController::class,'rutasActivas']);
+    Route::get('/rutaXid/{id}',[RutaApiController::class,'rutaxId']);
+});
+
+
+
+
+
+
+
+
 //Actividad
 Route::group([
     'prefix' => 'actividad',

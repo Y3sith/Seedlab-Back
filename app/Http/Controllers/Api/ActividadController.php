@@ -50,6 +50,7 @@ class ActividadController extends Controller
             'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
             'id_asesor' => 'required|integer|exists:asesor,id',
             'id_ruta' => 'required|integer|exists:ruta,id',
+            'id_aliado'=> 'required|integer|exists:aliado,id'
         ]);
 
         // Verificar si la actividad ya existe
@@ -59,7 +60,8 @@ class ActividadController extends Controller
             ['ruta_multi', $validatedData['ruta_multi']],
             ['id_tipo_dato', $validatedData['id_tipo_dato']],
             ['id_asesor', $validatedData['id_asesor']],
-            ['id_ruta', $validatedData['id_ruta']]
+            ['id_ruta', $validatedData['id_ruta']],
+            ['id_aliado', $validatedData['id_aliado']]
         ])->first();
 
         if ($existingActividad) {
@@ -73,6 +75,7 @@ class ActividadController extends Controller
             'id_tipo_dato' => $validatedData['id_tipo_dato'],
             'id_asesor' => $validatedData['id_asesor'],
             'id_ruta' => $validatedData['id_ruta'],
+            'id_aliado'=> $validatedData['id_aliado']
         ]);
 
         return response()->json(['message' => 'Actividad creada con éxito'], 201);
@@ -190,9 +193,9 @@ class ActividadController extends Controller
                 'messaje'=>'No tienes permisos para acceder a esta ruta'
             ],401);
         }
-        $aliado = Aliado::find($id);
-        
-        $actividad = Aliado::findOrFail($id)->actividad()->whereHas('auth',)
-
+        $actividades = Actividad::where('id_aliado', $id)
+                    ->select('id', 'nombre', 'descripcion','ruta_multi','id_tipo_dato','id_asesor','id_ruta',)
+                    ->get();
+            return response()->json($actividades);
     }
 }
