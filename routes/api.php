@@ -102,6 +102,7 @@ Route::group([
     Route::put('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorXaliado'])->name('EditarAsesorAliado');
     Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
+    Route::get('/generoAliado',[AliadoApiController::class,'generos']);
     
 });
 

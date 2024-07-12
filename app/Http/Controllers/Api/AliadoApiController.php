@@ -277,6 +277,18 @@ class AliadoApiController extends Controller
         ]);
     }
 
+    public function generos(Request $request, $id){
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(['message', 'No tienes permiso para acceder a esta funcion'],400);
+            }
+            
+
+        }catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+         }
+    }
+
     public function gestionarAsesoria(Request $request)
     {
         try {
