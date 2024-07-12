@@ -45,4 +45,8 @@ class Aliado extends Model
         return $this->hasMany(Actividad::class, 'id_aliado');
     }
 
+    public function banner(){
+        return $this->belongsTo(Banner::class, 'id_banner');
+    }
+
 }
