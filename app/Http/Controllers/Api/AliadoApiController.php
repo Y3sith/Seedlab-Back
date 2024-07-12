@@ -28,7 +28,7 @@ class AliadoApiController extends Controller
             ->with(['tipoDato:id,nombre', 'auth'])
             ->select('nombre', 'descripcion', 'logo', 'banner', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
-    
+
         $aliadosTransformados = $aliados->map(function ($aliado) {
             return [
                 'nombre' => $aliado->nombre,
@@ -41,15 +41,15 @@ class AliadoApiController extends Controller
                 'estado' => $aliado->auth->estado
             ];
         });
-    
+
         return response()->json($aliadosTransformados);
     }
-    
+
     private function correctImageUrl($path)
     {
         // Elimina cualquier '/storage' inicial
         $path = ltrim($path, '/storage');
-        
+
         // Asegúrate de que solo haya un '/storage' al principio
         return url('storage/' . $path);
     }
@@ -123,7 +123,7 @@ class AliadoApiController extends Controller
                 'ruta_multi' => $aliado->ruta_multi,
                 'id_autentication' => $aliado->id_autentication,
                 'id_tipo_dato' => $tipoDato,
-                'estado' => $estado == 1 ? "Activo" : "Inactivo", 
+                'estado' => $estado == 1 ? "Activo" : "Inactivo",
                 'message' => 'Aliado creado exitosamente', 200
             ]);
         } else {
@@ -234,7 +234,7 @@ class AliadoApiController extends Controller
                 ->whereHas('auth', function ($query) use ($estadoBool) {
                     $query->where('estado', $estadoBool);
                 })
-                ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')    
+                ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')
                 ->get();
 
             $asesoresConEstado = $asesores->map(function ($asesor) {
@@ -268,12 +268,12 @@ class AliadoApiController extends Controller
         })->count();
 
         $asignadas = Asesoria::where('id_aliado', $idAliado)
-                    ->where('asignacion', 1)
-                    ->count();
+            ->where('asignacion', 1)
+            ->count();
 
         $sinAsignar = Asesoria::where('id_aliado', $idAliado)
-                       ->where('asignacion', 0)
-                       ->count();
+            ->where('asignacion', 0)
+            ->count();
 
 
         //CONTAR # DE ASESORES DE ESE ALIADO
@@ -297,16 +297,38 @@ class AliadoApiController extends Controller
         ]);
     }
 
-    public function generos(Request $request, $id){
+    public function generos() //contador de cuantos usuarios son mujer/hombres u otros
+    {
         try {
             if (Auth::user()->id_rol != 3) {
-                return response()->json(['message', 'No tienes permiso para acceder a esta funcion'],400);
+                return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
             }
-            
+            $generos = DB::table('emprendedor')
+                ->select('genero', DB::raw('count(*) as total'))
+                ->whereIn('genero', ['Masculino', 'Femenino','Otro'])
+                ->groupBy('genero')
+                ->get();
 
-        }catch (Exception $e) {
+            $masculino = 0;
+            $femenino = 0;
+            $otro = 0;
+
+            foreach ($generos as $genero) {
+                if ($genero->genero == 'Femenino') {
+                    $femenino = $genero->total;
+                } else {
+                    $masculino = $genero->total;
+                    $otro = $genero->total;
+                }
+            }
+
+
+
+
+            return response()->json($generos, 200);
+        } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-         }
+        }
     }
 
     public function gestionarAsesoria(Request $request)
@@ -398,6 +420,4 @@ class AliadoApiController extends Controller
 
         return response()->json($emprendedoresConEmpresas);
     }
-
-    
 }
