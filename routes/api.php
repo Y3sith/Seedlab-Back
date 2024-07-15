@@ -69,6 +69,7 @@ Route::group([
 });
 
 
+Route::get('/traerPersonalizacion',[SuperAdminController::class,'obtenerPersonalizacion']);
 //Super Admin
 Route::group([
     'prefix' =>'superadmin',
@@ -122,12 +123,6 @@ Route::group([
     Route::get('/rutasActivas',[RutaApiController::class,'rutasActivas']);
     Route::get('/rutaXid/{id}',[RutaApiController::class,'rutaxId']);
 });
-
-
-
-
-
-
 
 
 //Actividad

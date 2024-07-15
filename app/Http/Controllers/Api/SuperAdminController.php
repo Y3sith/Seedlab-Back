@@ -35,7 +35,7 @@ class SuperAdminController extends Controller
         }
 
         $personalizacion = PersonalizacionSistema::create([
-            'imagen_Logo' => $request->input('imagen_Logo'),
+            'imagen_Logo' => $request->input('imagen_logo'),
             'nombre_sistema' => $request->input('nombre_sistema'),
             'color_principal' => $request->input('color_principal'),
             'color_secundario' => $request->input('color_secundario'),
@@ -44,6 +44,26 @@ class SuperAdminController extends Controller
         ]);
 
         return response()->json(['message' => 'Personalización del sistema creada correctamente'], 201);
+    }
+    
+
+    public function obtenerPersonalizacion(){
+        $personalizaciones = PersonalizacionSistema::first();
+        //dd($personalizaciones);
+
+        if (!$personalizaciones) {
+            return response()->json([
+               'message' => 'No se encontraron personalizaciones del sistema'
+            ], 404);
+        }
+
+        return response()->json([
+            'imagen_Logo' => url('storage/' . $personalizaciones->imagen_logo),
+            'nombre_sistema'=>$personalizaciones->nombre_sistema,
+            'color principal'=> $personalizaciones->color_principal,
+            'color secundario' => $personalizaciones->color_secundario,
+            'color terciario' => $personalizaciones->color_terciario,
+        ], 200);
     }
 
 
