@@ -60,9 +60,9 @@ class SuperAdminController extends Controller
         return response()->json([
             'imagen_Logo' => url('storage/' . $personalizaciones->imagen_logo),
             'nombre_sistema'=>$personalizaciones->nombre_sistema,
-            'color principal'=> $personalizaciones->color_principal,
-            'color secundario' => $personalizaciones->color_secundario,
-            'color terciario' => $personalizaciones->color_terciario,
+            'color_principal'=> $personalizaciones->color_principal,
+            'color_secundario' => $personalizaciones->color_secundario,
+            'color_terciario' => $personalizaciones->color_terciario,
         ], 200);
     }
 
