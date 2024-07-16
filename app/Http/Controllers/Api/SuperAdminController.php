@@ -15,6 +15,7 @@ use App\Models\User;
 use App\Models\Rol;
 use App\Models\Asesoria;
 use App\Models\Aliado;
+use App\Models\Asesor;
 use Exception;
 
 class SuperAdminController extends Controller
@@ -186,7 +187,7 @@ class SuperAdminController extends Controller
                     if ($password) {
                         $user->password =  Hash::make($request->input('password'));
                     }
-                    
+
                     $newEmail = $request->input('email');
                     if ($newEmail && $newEmail !== $user->email) {
                         // Verificar si el nuevo email ya está en uso
@@ -311,5 +312,36 @@ class SuperAdminController extends Controller
             ];
         });
         return $topAliados;
+    }
+
+    public function asesorConAliado(Request $request)
+    {
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(['error' => 'no tienes permiso para cceder a esta funcion'], 400);
+            }
+
+            $estado = $request->input('estado', 'Activo');
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+            $asesoresConAliado = Asesor::with(['aliado:id,nombre', 'auth:id,estado'])
+                ->whereHas('auth', function ($query) use ($estadoBool) {
+                    $query->where('estado', $estadoBool);
+                })
+                ->get()
+                ->map(function ($asesor) {
+                    return [
+                        'id' => $asesor->id,
+                        'nombre' => $asesor->nombre,
+                        'apellido' => $asesor->apellido,
+                        'estado' => $asesor->auth->estado == 1 ? "Activo" : "Inactivo",
+                        'nombre_aliado' => $asesor->aliado ? $asesor->aliado->nombre : null
+                    ];
+                });
+
+            return response()->json($asesoresConAliado, 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 }

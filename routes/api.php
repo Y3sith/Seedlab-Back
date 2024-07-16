@@ -82,6 +82,7 @@ Route::group([
     Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
     Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
+    Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
 });
 
    
