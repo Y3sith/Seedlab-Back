@@ -71,10 +71,10 @@ class SuperAdminController extends Controller
             ], 404);
         }
         $imageBase64 = $personalizaciones->imagen_logo;
-        if (strpos($imageBase64, 'data:image/png;base64,') === false) {
-            // Si no contiene el prefijo, agregarlo
-            $imageBase64 = 'data:image/png;base64,' . $imageBase64;
-        }
+        // if (strpos($imageBase64, 'data:image/png;base64,') === false) {
+        //     // Si no contiene el prefijo, agregarlo
+        //     $imageBase64 = 'data:image/png;base64,' . $imageBase64;
+        // }
         return response()->json([
             'imagen_Logo' => $imageBase64,
             'nombre_sistema' => $personalizaciones->nombre_sistema,
