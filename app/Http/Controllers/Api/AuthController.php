@@ -22,41 +22,42 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-
         $user = User::where('email', $request->email)->with('emprendedor')->first();
-        //dd($user->estado);
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
+        if (!$user) {
+            return response()->json(['message' => 'Tu usuario no existe en el sistema'], 404);
         }
-
-        if($user->id_rol == 5 && $user->emprendedor->email_verified_at){
-            $user->estado = 1;
-            $user->save();
+        else{
+            if ($user->id_rol != 5 && $user->estado != 1){  
+                return response()->json(['message' => 'Tu usuario no esta activo en el sistema actualmente'], 401);
+            }
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json(['message' => 'Tu contraseña es incorrecta'], 401);
+            }
+            if ($user->id_rol == 5) {
+                if ($user->emprendedor->email_verified_at) {
+                    $user->estado = 1;
+                    $user->save();
+                } else {
+                    $verificationCode = mt_rand(10000, 99999);
+                    $user->emprendedor->cod_ver = $verificationCode;
+                    $user->emprendedor->save();
+                    Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
+                    return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
+                }
+            }
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->token;
+            $token->save();
+    
+            $additionalInfo = $this->getAdditionalInfo($user);
+    
+            return response()->json([
+                'access_token' => $tokenResult->accessToken,
+                'token_type' => 'Bearer',
+                'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
+                'user' => $additionalInfo,
+            ],200);
         }
-        
- 
-        //Que el campo de verificacion de email del rol emprendedor no sea nullo
-        if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
-            $verificationCode = mt_rand(10000, 99999);
-            $user->emprendedor->cod_ver = $verificationCode;
-            $user->emprendedor->save();
-            Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
-            return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
-        }
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        $token->save();
-        //$token->expires_at = Carbon::now()->addMinutes(60);
-
-        $additionalInfo = $this->getAdditionalInfo($user);
-        //$info = [];
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            'user' => $additionalInfo,
-        ]);
     }
 
     protected function getAdditionalInfo($user)

@@ -85,9 +85,7 @@ class EmpresaApiController extends Controller
         ], 200);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
+    /* Update the specified resource in storage.*/
     public function update(Request $request, $documento)
     {
         // edita la empresa/edita y agrega apoyos
@@ -125,8 +123,8 @@ class EmpresaApiController extends Controller
         return response()->json(["message" => "Empresa actualizada"], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
+    /*
+    Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
