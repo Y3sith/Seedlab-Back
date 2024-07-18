@@ -286,10 +286,12 @@ class SuperAdminController extends Controller
 
         foreach ($roles as $rol) {
             $countActive = User::where('id_rol', $rol->id)->where('estado', true)->count();
+            $countInactive = User::where('id_rol', $rol->id)->where('estado', false)->count();
             $percentageActive = $totalUsers > 0 ? ($countActive / $totalUsers) * 100 : 0;
 
             $result[$rol->nombre] = [
-                '# de usuarios activos' => $countActive,
+                'activos' => $countActive,
+                'inactivos' => $countInactive,
                 'Porcentaje del total' => round($percentageActive, 2) . '%'
             ];
         }
@@ -310,7 +312,7 @@ class SuperAdminController extends Controller
 
         $top = $this->topAliados();
 
-        $result['Top Aliados'] = $top;
+        $result['topAliados'] = $top;
 
 
         return response()->json($result);
