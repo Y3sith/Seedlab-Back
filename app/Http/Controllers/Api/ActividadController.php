@@ -39,7 +39,7 @@ class ActividadController extends Controller
     {
         // Crear actividad (solo el aliado)
         try {
-            if (Auth::user()->id_rol !== 3) {
+            if (Auth::user()->id_rol !== 1 && Auth::user()->id_rol !== 3) {
             return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
         }
 
