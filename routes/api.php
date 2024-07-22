@@ -42,7 +42,7 @@ Route::group([
 Route::group([
    'middleware' => 'auth:api'
 ], function(){
-    Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
+    //Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
     Route::apiResource('/empresa',EmpresaApiController::class);
 });
 
