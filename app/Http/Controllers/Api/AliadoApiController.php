@@ -82,7 +82,7 @@ class AliadoApiController extends Controller
             // }
 
             DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, )', [
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['logo'],
                     //$bannerUrl,
