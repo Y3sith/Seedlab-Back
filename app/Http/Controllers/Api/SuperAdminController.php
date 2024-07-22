@@ -307,12 +307,15 @@ class SuperAdminController extends Controller
 
         $averageAsesorias = $this->averageAsesorias2024();
 
-
         $result['Promedio Anual de AsesoriasxEmprendedor'] = round($averageAsesorias, 2);
 
         $top = $this->topAliados();
 
         $result['topAliados'] = $top;
+
+       
+        $result['conteoAsesorias'] = $this->asesoriasAsignadasSinAsignar();
+
 
 
         return response()->json($result);
@@ -352,6 +355,15 @@ class SuperAdminController extends Controller
             ];
         });
         return $topAliados;
+    }
+
+    public function asesoriasAsignadasSinAsignar(){
+        $asesoriasAsignadas = Asesoria::where('asignacion', 1)->count();
+        $asesoriasSinAsignar = Asesoria::where('asignacion', 0)->count();
+        return [
+            'asesoriasAsignadas' => $asesoriasAsignadas,
+            'asesoriasSinAsignar' => $asesoriasSinAsignar
+        ];
     }
 
 

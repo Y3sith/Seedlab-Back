@@ -69,7 +69,6 @@ Route::group([
 });
 
 
-Route::get('/traerPersonalizacion',[SuperAdminController::class,'obtenerPersonalizacion']);
 //Super Admin
 Route::group([
     'prefix' =>'superadmin',
@@ -82,11 +81,12 @@ Route::group([
     Route::put('/editarAdmin/{id}',[SuperAdminController::class,'editarSuperAdmin']);
     Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
     Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
+    Route::get('/conteoAsesorias', [SuperAdminController::class, 'asesoriasAsignadasSinAsignar']);
     Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
 });
 
-   
+
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
@@ -110,6 +110,7 @@ Route::group([
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
+Route::get('/traerPersonalizacion',[SuperAdminController::class,'obtenerPersonalizacion']);
 
 
 
