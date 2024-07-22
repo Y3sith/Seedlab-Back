@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Asesor;
+use App\Models\Banner;
 use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
 use App\Models\TipoDato;
@@ -24,17 +25,20 @@ class AliadoApiController extends Controller
      */
     public function traerAliadosActivos($status)
     {
+       // 
+
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('nombre', 'descripcion', 'logo', 'banner', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
+            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
+            //$banner = Banner::find($aliado->$id_aliado);
             return [
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
                 'logo' => $aliado->logo,
-                'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
+                //'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
                 'ruta_multi' => $aliado->ruta_multi,
                 'tipo_dato' => $aliado->tipoDato,
                 'email' => $aliado->auth->email,
@@ -70,18 +74,18 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            $bannerUrl = null;
+            // $bannerUrl = null;
 
-            if ($data->hasFile('banner') && $data->file('banner')->isValid()) {
-                $bannerPath = $data->file('banner')->store('public/banners');
-                $bannerUrl = Storage::url($bannerPath);
-            }
+            // if ($data->hasFile('banner') && $data->file('banner')->isValid()) {
+            //     $bannerPath = $data->file('banner')->store('public/banners');
+            //     $bannerUrl = Storage::url($bannerPath);
+            // }
 
-            DB::transaction(function () use ($data, $bannerUrl, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, )', [
                     $data['nombre'],
                     $data['logo'],
-                    $bannerUrl,
+                    //$bannerUrl,
                     $data['descripcion'],
                     $data['tipodato'],
                     $data['ruta'],
