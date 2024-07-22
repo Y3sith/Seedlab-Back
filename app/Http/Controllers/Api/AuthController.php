@@ -171,47 +171,49 @@ class AuthController extends Controller
     }
 
     protected function register(Request $data)
-    {
-        $response = null;
-        $statusCode = 200;
+{
+    $response = null;
+    $statusCode = 200;
 
-        $verificationCode = mt_rand(10000, 99999);
+    $verificationCode = mt_rand(10000, 99999);
 
-        if (strlen($data['password']) < 8) {
-            return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
-        }
-
-        DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
-            $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
-                $data['documento'],
-                $data['nombretipodoc'],
-                $data['nombre'],
-                $data['apellido'],
-                $data['celular'],
-                $data['genero'],
-                $data['fecha_nacimiento'],
-                $data['municipio'],
-                $data['direccion'],
-                $data['email'],
-                Hash::make($data['password']),
-                $data['estado'],
-                $verificationCode,
-            ]);
-
-            if (!empty($results)) {
-                $response = $results[0]->mensaje;
-                if ($response === 'El numero de documento ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    $statusCode = 400;
-                } else {
-                    Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
-                    //el codigo de abajo ejecuta el job (aun no se ha definido si se usara ya que se necesita el comando "php artisan queue:work")
-                    //dispatch(new SendVerificationEmail($data['email'], $verificationCode));
-                }
-            }
-        });
-
-        return response()->json(['message' => $response, 'email' => $data->email], $statusCode);
+    if (strlen($data['password']) < 8) {
+        return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
     }
+
+    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
+        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            $data['documento'],
+            $data['nombretipodoc'],
+            $data['nombre'],
+            $data['apellido'],
+            $data['celular'],
+            $data['genero'],
+            $data['fecha_nacimiento'],
+            $data['municipio'],
+            $data['direccion'],
+            $data['email'],
+            Hash::make($data['password']),
+            $data['estado'],
+            $verificationCode,
+        ]);
+
+        if (!empty($results)) {
+            $response = $results[0]->mensaje;
+            if ($response === 'El numero de documento ya ha sido registrado en el sistema' ||
+                $response === 'El correo electrónico ya ha sido registrado anteriormente' ||
+                $response === 'Este numero de celular ya ha sido registrado anteriormente') {
+                $statusCode = 400;
+            } else {
+                Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
+                //el codigo de abajo ejecuta el job (aun no se ha definido si se usara ya que se necesita el comando "php artisan queue:work")
+                //dispatch(new SendVerificationEmail($data['email'], $verificationCode));
+            }
+        }
+    });
+
+    return response()->json(['message' => $response, 'email' => $data['email']], $statusCode);
+}
 
     protected function validate_email(Request $request)
     {
