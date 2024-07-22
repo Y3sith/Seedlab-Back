@@ -83,6 +83,7 @@ Route::group([
     Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
+    Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);
 });
 
    
@@ -97,7 +98,7 @@ Route::group([
 ], function(){
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
-    Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado');
+    Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado'); //////////
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::put('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorXaliado'])->name('EditarAsesorAliado');
@@ -137,6 +138,7 @@ Route::group([
     'middleware' => 'auth:api'
 ],function(){
     Route::apiResource('/actividad',ActividadController::class);
+    Route::post('/crearActividad',[ActividadController::class,'store']);
     Route::get('/tipo_dato',[ActividadController::class,'tipoDato']);
     Route::get('/verActividadAliado/{id}',[ActividadController::class,'VerActividadAliado']);
 });

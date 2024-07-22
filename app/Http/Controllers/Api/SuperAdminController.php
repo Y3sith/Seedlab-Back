@@ -344,4 +344,21 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    public function listarAliados (){
+
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message'=>'No tienes permiso para esta funcion'],400);
+            }
+            $aliados = Aliado::whereHas('auth', function($query) {
+                $query->where('estado', '1');
+            })->get(['id', 'nombre']);
+            return response()->json($aliados, 200);
+            
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 401);
+        }
+       
+    }
 }
