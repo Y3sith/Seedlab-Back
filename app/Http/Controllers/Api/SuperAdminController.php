@@ -48,7 +48,6 @@ class SuperAdminController extends Controller
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
-        $personalizacion->color_terciario = $request->input('color_terciario');
         $personalizacion->id_superadmin = $request->input('id_superadmin');
         $personalizacion->imagen_logo = $request->input('imagen_logo');
      
@@ -80,7 +79,6 @@ class SuperAdminController extends Controller
             'nombre_sistema' => $personalizaciones->nombre_sistema,
             'color_principal' => $personalizaciones->color_principal,
             'color_secundario' => $personalizaciones->color_secundario,
-            'color_terciario' => $personalizaciones->color_terciario,
         ], 200);
     }
 

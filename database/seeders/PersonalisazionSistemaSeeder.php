@@ -21,7 +21,6 @@ class PersonalisazionSistemaSeeder extends Seeder
             'nombre_sistema' => 'SeedLab',
             'color_principal' => '#00B3ED',
             'color_secundario' => '#FA7D00',
-            'color_terciario' => '#fff',
             'id_superadmin' => 1,
         ]);
     }
