@@ -33,15 +33,17 @@ class LeccionController extends Controller
     {
         //crear leccion (solo el asesor)
         try {
-            if (Auth:: user()->id_rol==3 && Auth::user()->id_rol==4) {
+            if (Auth:: user()->id_rol!=1  && Auth:: user()->id_rol !=3 && Auth::user()->id_rol !=4) { 
+                 return response()->json(['error' => 'No tienes permisos para crear lecciones'], 401);
+            }
             $leccion = Leccion::create([
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,
             ]);
             return response()->json($leccion,201);
-        }else {
-            return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
-        }
+       
+           
+        
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

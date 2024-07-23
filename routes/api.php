@@ -145,9 +145,23 @@ Route::group([
 
 
 //Leccion
-Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
+Route::group([
+    'prefix' => 'leccion',
+    'middleware' => 'auth:api'
+],function(){
+    Route::apiResource('/leccion',LeccionController::class);
+    Route::post('/crearLeccion',[LeccionController::class,'store']);
+    //Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
+});
 //Nivel
-Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
+Route::group([
+    'prefix' => 'nivel',
+    'middleware' => 'auth:api'
+],function(){
+    Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
+    Route::post('/crearNivel',[NivelesController::class,'store']);
+});
+
 //Contenido_por_Leccion
 Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
