@@ -43,9 +43,12 @@ return new class extends Migration
 			IF EXISTS (SELECT 1 FROM emprendedor WHERE documento  = p_num_documento limit 1) THEN
 				SELECT 'El numero de documento ya ha sido registrado en el sistema' AS mensaje;
 			ELSE
-				IF EXISTS ( SELECT 1 FROM users WHERE email = p_correo limit 1) THEN
-					SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+				IF EXISTS ( SELECT 1 FROM emprendedor WHERE celular = p_celular limit 1) THEN
+					SELECT 'Este numero de celular ya ha sido registrado anteriormente' AS mensaje;
 				ELSE
+                    IF EXISTS ( SELECT 1 FROM users WHERE email = p_correo limit 1) THEN
+					    SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+				    ELSE
 						SELECT id INTO v_idtipodoc FROM tipo_documento WHERE nombre = p_nombretipodoc LIMIT 1;
 						SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
 						SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
@@ -60,6 +63,7 @@ return new class extends Migration
 
                         SELECT 'Tu usuario ha sido creado con exito' AS mensaje;
 				END IF;
+                end if;
 			END IF;
 	END");
     }

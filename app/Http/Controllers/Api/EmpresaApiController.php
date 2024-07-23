@@ -85,16 +85,14 @@ class EmpresaApiController extends Controller
                     $apoyos[] = $nuevoApoyo;
                 }
             }
-
-            return response()->json([
-                'message' =>  'Empresa creada exitosamente',
-                'empresa' => $empresa,
-                'apoyos' => $apoyos
-            ], 201);
-
-        } catch (\Exception $e) {
-            return response()->json(['error' => $e->getMessage()], 500);
         }
+            catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
+
+        return response()->json([
+            'message' =>  'Empresa creada exitosamente',
+        ], 200);
     }
 
 
@@ -138,8 +136,8 @@ class EmpresaApiController extends Controller
         return response()->json(["message" => "Empresa actualizada"], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
+    /*
+    Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
