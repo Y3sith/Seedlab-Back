@@ -294,7 +294,8 @@ class AliadoApiController extends Controller
     public function generos() //contador de cuantos usuarios son mujer/hombres u otros
     {
         try {
-            if (Auth::user()->id_rol != 3) {
+            
+            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
                 return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
             }
             $generos = DB::table('emprendedor')
@@ -316,10 +317,11 @@ class AliadoApiController extends Controller
                 }
             }
 
-
-
-
-            return response()->json($generos, 200);
+            return response()->json([
+                ['genero' => 'Femenino', 'total' => $femenino],
+                ['genero' => 'Masculino', 'total' => $masculino],
+                ['genero' => 'Otro', 'total' => $otro],
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
