@@ -22,41 +22,42 @@ class AuthController extends Controller
 
     public function login(Request $request)
     {
-
         $user = User::where('email', $request->email)->with('emprendedor')->first();
-        //dd($user->estado);
-
-        if (!$user || !Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Revisa tus credenciales de acceso'], 401);
+        if (!$user) {
+            return response()->json(['message' => 'Tu usuario no existe en el sistema'], 404);
         }
-
-        if($user->id_rol == 5 && $user->emprendedor->email_verified_at){
-            $user->estado = 1;
-            $user->save();
+        else{
+            if ($user->id_rol != 5 && $user->estado != 1){  
+                return response()->json(['message' => 'Tu usuario no esta activo en el sistema actualmente'], 401);
+            }
+            if (!Hash::check($request->password, $user->password)) {
+                return response()->json(['message' => 'Tu contraseña es incorrecta'], 401);
+            }
+            if ($user->id_rol == 5) {
+                if ($user->emprendedor->email_verified_at) {
+                    $user->estado = 1;
+                    $user->save();
+                } else {
+                    $verificationCode = mt_rand(10000, 99999);
+                    $user->emprendedor->cod_ver = $verificationCode;
+                    $user->emprendedor->save();
+                    Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
+                    return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
+                }
+            }
+            $tokenResult = $user->createToken('Personal Access Token');
+            $token = $tokenResult->token;
+            $token->save();
+    
+            $additionalInfo = $this->getAdditionalInfo($user);
+    
+            return response()->json([
+                'access_token' => $tokenResult->accessToken,
+                'token_type' => 'Bearer',
+                'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
+                'user' => $additionalInfo,
+            ],200);
         }
-        
- 
-        //Que el campo de verificacion de email del rol emprendedor no sea nullo
-        if ($user->id_rol == 5 && !$user->emprendedor->email_verified_at) {
-            $verificationCode = mt_rand(10000, 99999);
-            $user->emprendedor->cod_ver = $verificationCode;
-            $user->emprendedor->save();
-            Mail::to($user['email'])->send(new VerificationCodeEmail($verificationCode));
-            return response()->json(['message' => 'Por favor verifique su correo electronico'], 409);
-        }
-        $tokenResult = $user->createToken('Personal Access Token');
-        $token = $tokenResult->token;
-        $token->save();
-        //$token->expires_at = Carbon::now()->addMinutes(60);
-
-        $additionalInfo = $this->getAdditionalInfo($user);
-        //$info = [];
-        return response()->json([
-            'access_token' => $tokenResult->accessToken,
-            'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            'user' => $additionalInfo,
-        ]);
     }
 
     protected function getAdditionalInfo($user)
@@ -170,47 +171,49 @@ class AuthController extends Controller
     }
 
     protected function register(Request $data)
-    {
-        $response = null;
-        $statusCode = 200;
+{
+    $response = null;
+    $statusCode = 200;
 
-        $verificationCode = mt_rand(10000, 99999);
+    $verificationCode = mt_rand(10000, 99999);
 
-        if (strlen($data['password']) < 8) {
-            return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
-        }
-
-        DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
-            $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,?)', [
-                $data['documento'],
-                $data['nombretipodoc'],
-                $data['nombre'],
-                $data['apellido'],
-                $data['celular'],
-                $data['genero'],
-                $data['fecha_nacimiento'],
-                $data['municipio'],
-                $data['direccion'],
-                $data['email'],
-                Hash::make($data['password']),
-                $data['estado'],
-                $verificationCode,
-            ]);
-
-            if (!empty($results)) {
-                $response = $results[0]->mensaje;
-                if ($response === 'El numero de documento ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    $statusCode = 400;
-                } else {
-                    Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
-                    //el codigo de abajo ejecuta el job (aun no se ha definido si se usara ya que se necesita el comando "php artisan queue:work")
-                    //dispatch(new SendVerificationEmail($data['email'], $verificationCode));
-                }
-            }
-        });
-
-        return response()->json(['message' => $response, 'email' => $data->email], $statusCode);
+    if (strlen($data['password']) < 8) {
+        return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
     }
+
+    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
+        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            $data['documento'],
+            $data['nombretipodoc'],
+            $data['nombre'],
+            $data['apellido'],
+            $data['celular'],
+            $data['genero'],
+            $data['fecha_nacimiento'],
+            $data['municipio'],
+            $data['direccion'],
+            $data['email'],
+            Hash::make($data['password']),
+            $data['estado'],
+            $verificationCode,
+        ]);
+
+        if (!empty($results)) {
+            $response = $results[0]->mensaje;
+            if ($response === 'El numero de documento ya ha sido registrado en el sistema' ||
+                $response === 'El correo electrónico ya ha sido registrado anteriormente' ||
+                $response === 'Este numero de celular ya ha sido registrado anteriormente') {
+                $statusCode = 400;
+            } else {
+                Mail::to($data['email'])->send(new VerificationCodeEmail($verificationCode));
+                //el codigo de abajo ejecuta el job (aun no se ha definido si se usara ya que se necesita el comando "php artisan queue:work")
+                //dispatch(new SendVerificationEmail($data['email'], $verificationCode));
+            }
+        }
+    });
+
+    return response()->json(['message' => $response, 'email' => $data['email']], $statusCode);
+}
 
     protected function validate_email(Request $request)
     {

@@ -294,6 +294,7 @@ class AliadoApiController extends Controller
         $asignadas = Asesoria::where('id_aliado', $idAliado)
             ->where('asignacion', 1)
             ->count();
+            
 
         $sinAsignar = Asesoria::where('id_aliado', $idAliado)
             ->where('asignacion', 0)
