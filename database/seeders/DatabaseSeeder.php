@@ -33,6 +33,7 @@ class DatabaseSeeder extends Seeder
         $this->call(HorarioxAsesoriaSeeder::class);
         $this->call(OrientadorSeeder::class);
         $this->call(SuperadminSeeder::class);
+        $this->call(PersonalisazionSistemaSeeder::class);
 
 
 

@@ -40,10 +40,12 @@ Route::group([
 
 //Empresa
 Route::group([
+    'prefix' => 'empresa',
    'middleware' => 'auth:api'
 ], function(){
     Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
-    Route::apiResource('/empresa',EmpresaApiController::class);
+    //Route::put('/updateEmpresa', [EmpresaApiController::class, 'update']);
+    //Route::apiResource('/empresa',EmpresaApiController::class);
 });
 
 //Emprendedor
@@ -74,18 +76,20 @@ Route::group([
     'prefix' =>'superadmin',
     'middleware' => 'auth:api',
 ],function(){
-    Route::post('/personalizacion',[SuperAdminController::class,'personalizacionSis']);
+    Route::put('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
+    Route::post('/restaurarPersonalizacion/{id}',[SuperAdminController::class,'restore']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
     Route::put('/editarAdmin/{id}',[SuperAdminController::class,'editarSuperAdmin']);
     Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
     Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
+    Route::get('/conteoAsesorias', [SuperAdminController::class, 'asesoriasAsignadasSinAsignar']);
     Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
 });
 
-   
+
 //UbicacionController
 Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
 Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
@@ -109,6 +113,7 @@ Route::group([
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
+Route::get('/traerPersonalizacion',[SuperAdminController::class,'obtenerPersonalizacion']);
 
 
 
@@ -123,12 +128,6 @@ Route::group([
     Route::get('/rutasActivas',[RutaApiController::class,'rutasActivas']);
     Route::get('/rutaXid/{id}',[RutaApiController::class,'rutaxId']);
 });
-
-
-
-
-
-
 
 
 //Actividad
