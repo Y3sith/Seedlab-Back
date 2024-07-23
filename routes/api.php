@@ -105,7 +105,8 @@ Route::group([
     Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
     Route::get('/generoAliado',[AliadoApiController::class,'generos']);
-    
+    Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
+
 });
 
 //FanPage

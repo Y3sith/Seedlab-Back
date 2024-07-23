@@ -9,6 +9,9 @@ class Banner extends Model
 {
     use HasFactory;
 
+    
+    protected $table = 'banner';
+
     protected $fillable = [
         'urlImagen', 
         'descripcion', 
@@ -16,6 +19,8 @@ class Banner extends Model
         'color',
         'id_aliado'
     ];
+
+    public $timestamps = false;
 
     public function aliado(){
         return $this->hasMany(Aliado::class, 'id_aliado');

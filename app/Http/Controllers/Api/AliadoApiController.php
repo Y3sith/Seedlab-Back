@@ -74,12 +74,7 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            // $bannerUrl = null;
 
-            // if ($data->hasFile('banner') && $data->file('banner')->isValid()) {
-            //     $bannerPath = $data->file('banner')->store('public/banners');
-            //     $bannerUrl = Storage::url($bannerPath);
-            // }
 
             DB::transaction(function () use ($data, &$response, &$statusCode) {
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
@@ -106,6 +101,31 @@ class AliadoApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function crearBanner (Request $request)
+    {
+        if (Auth::user()->id_rol != 1) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+            $bannerUrl = null;
+
+            if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
+                $bannerPath = $request->file('urlImagen')->store('public/banners');
+                $bannerUrl = Storage::url($bannerPath);
+            }
+
+        $banner = Banner::create([
+            'urlImagen' => $bannerUrl,
+            'descripcion' => $request->descripcion,
+            'estado' => $request->estado,
+            'color' => $request->color,
+            'id_aliado' => $request->id_aliado,
+        ]);
+        return response()->json([
+           'message' => 'Banner creado exitosamente',
+        ], 201);
     }
 
 
