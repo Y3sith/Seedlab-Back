@@ -42,7 +42,7 @@ class EmpresaApiController extends Controller
                 'empresa.documento' => 'required|string|max:255',
                 'empresa.cargo' => 'required|string|max:255',
                 'empresa.razonSocial' => 'required|string|max:255',
-                'empresa.url_pagina' => 'required|url',
+                'empresa.url_pagina' => 'required',
                 'empresa.telefono' => 'required|string|max:20',
                 'empresa.celular' => 'required|string|max:20',
                 'empresa.direccion' => 'required|string|max:255',

@@ -40,10 +40,12 @@ Route::group([
 
 //Empresa
 Route::group([
+    'prefix' => 'empresa',
    'middleware' => 'auth:api'
 ], function(){
-    //Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
-    Route::apiResource('/empresa',EmpresaApiController::class);
+    Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
+    //Route::put('/updateEmpresa', [EmpresaApiController::class, 'update']);
+    //Route::apiResource('/empresa',EmpresaApiController::class);
 });
 
 //Emprendedor
