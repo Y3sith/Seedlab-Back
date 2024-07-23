@@ -33,20 +33,18 @@ class NivelesController extends Controller
     {
         //crear nivel solo asesor
         try {
-             if ( Auth:: user()->id_rol==3 && Auth::user()->id_rol==4  ) {
+            if (Auth::user()->id_rol != 1 &&  Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+                return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
+            }
             $niveles = Nivel::create([
-                'nombre'=>$request->nombre,
-                'descripcion'=>$request->descripcion,
-                'id_actividad'=>$request->id_actividad,
+                'nombre' => $request->nombre,
+                'descripcion' => $request->descripcion,
+                'id_actividad' => $request->id_actividad,
             ]);
-            return response()->json($niveles,201);
-        }else {
-            return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
-        }
+            return response()->json($niveles, 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-       
     }
 
     /**
@@ -72,23 +70,22 @@ class NivelesController extends Controller
     {
         //Edita solo el asesor
         try {
-            if (Auth::user()->id_rol==4) {
-            $niveles = Nivel::find($id);
-            if (!$niveles) {
-                return response()->json(["error"=>"Nivel no encontrado"],404);
-            }else {
-                $niveles->nombre=$request->nombre;
-                $niveles->descripcion=$request->descripcion;
-                $niveles->update();
-                return response(["messsaje"=>"Nivel actualizado correctamente"],200);
+            if (Auth::user()->id_rol == 4) {
+                $niveles = Nivel::find($id);
+                if (!$niveles) {
+                    return response()->json(["error" => "Nivel no encontrado"], 404);
+                } else {
+                    $niveles->nombre = $request->nombre;
+                    $niveles->descripcion = $request->descripcion;
+                    $niveles->update();
+                    return response(["messsaje" => "Nivel actualizado correctamente"], 200);
+                }
+            } else {
+                return response()->json(["error" => "no estas autorizado para editar"], 401);
             }
-        }else {
-            return response()->json(["error"=>"no estas autorizado para editar"],401);
-        }
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     /**
