@@ -28,62 +28,73 @@ class EmpresaApiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+        public function store(Request $request)
     {
-        // Verificar permisos de usuario
-        if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-        }
-        $empresaexiste = Empresa::where('documento', $request['empresa']['documento'])->first();
+        try {
+            // Verificar permisos de usuario
+            if (Auth::user()->id_rol != 5) {
+                return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
+            }
 
-        if ($empresaexiste) {
-            return response()->json([
-                'error' => 'La empresa ya existe',
-            ], 409);
-        }
-        // Crear la empresa
-        $empresa = Empresa::create([
-            "nombre" => $request['empresa']['nombre'],
-            "documento" => $request['empresa']['documento'],
-            "cargo" => $request['empresa']['cargo'],
-            "razonSocial" => $request['empresa']['razonSocial'],
-            "url_pagina" => $request['empresa']['url_pagina'],
-            "telefono" => $request['empresa']['telefono'],
-            "celular" => $request['empresa']['celular'],
-            "direccion" => $request['empresa']['direccion'],
-            "correo" => $request['empresa']['correo'],
-            "profesion" => $request['empresa']['profesion'],
-            "experiencia" => $request['empresa']['experiencia'],
-            "funciones" => $request['empresa']['funciones'],
-            "id_tipo_documento" => $request['empresa']['id_tipo_documento'],
-            "id_municipio" => $request['empresa']['id_municipio'],
-            "id_emprendedor" => $request['empresa']['id_emprendedor'],
-        ]);
+            // Validar la estructura del request
+            $request->validate([
+                'empresa.nombre' => 'required|string|max:255',
+                'empresa.documento' => 'required|string|max:255',
+                'empresa.cargo' => 'required|string|max:255',
+                'empresa.razonSocial' => 'required|string|max:255',
+                'empresa.url_pagina' => 'required',
+                'empresa.telefono' => 'required|string|max:20',
+                'empresa.celular' => 'required|string|max:20',
+                'empresa.direccion' => 'required|string|max:255',
+                'empresa.correo' => 'required|email|max:255',
+                'empresa.profesion' => 'required|string|max:255',
+                'empresa.experiencia' => 'required|string|max:255',
+                'empresa.funciones' => 'required|string|max:255',
+                'empresa.id_tipo_documento' => 'required|integer',
+                'empresa.id_municipio' => 'required|integer',
+                'empresa.id_emprendedor' => 'required|integer',
+            ]);
 
-        // Manejar apoyos
-        $apoyos = [];
-        if ($request->has('apoyos')) {
-            foreach ($request['apoyos'] as $apoyo) {
-                $Apoyoenempresaexiste = ApoyoEmpresa::where('id_empresa', $request['empresa']['documento'])->first();
-                $nuevoApoyo = ApoyoEmpresa::create([
-                    "documento" => $apoyo['documento'],
-                    "nombre" => $apoyo['nombre'],
-                    "apellido" => $apoyo['apellido'],
-                    "cargo" => $apoyo['cargo'],
-                    "telefono" => $apoyo['telefono'],
-                    "celular" => $apoyo['celular'],
-                    "email" => $apoyo['email'],
-                    "id_tipo_documento" => $apoyo['id_tipo_documento'],
-                    "id_empresa" => $empresa->documento,
-                ]);
-                $apoyos[] = $nuevoApoyo;
+            $empresaexiste = Empresa::where('documento', $request['empresa']['documento'])->first();
+
+            if ($empresaexiste) {
+                return response()->json([
+                    'error' => 'La empresa ya existe',
+                ], 409);
+            }
+
+            // Crear la empresa
+            $empresa = Empresa::create($request->input('empresa'));
+
+            // Manejar apoyos
+            $apoyos = [];
+            if ($request->has('apoyos')) {
+                foreach ($request['apoyos'] as $apoyo) {
+                    $Apoyoenempresaexiste = ApoyoEmpresa::where('id_empresa', $empresa->documento)->first();
+                    $nuevoApoyo = ApoyoEmpresa::create([
+                        "documento" => $apoyo['documento'],
+                        "nombre" => $apoyo['nombre'],
+                        "apellido" => $apoyo['apellido'],
+                        "cargo" => $apoyo['cargo'],
+                        "telefono" => $apoyo['telefono'],
+                        "celular" => $apoyo['celular'],
+                        "email" => $apoyo['email'],
+                        "id_tipo_documento" => $apoyo['id_tipo_documento'],
+                        "id_empresa" => $empresa->documento,
+                    ]);
+                    $apoyos[] = $nuevoApoyo;
+                }
             }
         }
+            catch (\Exception $e) {
+                return response()->json(['error' => $e->getMessage()], 500);
+            }
 
         return response()->json([
             'message' =>  'Empresa creada exitosamente',
         ], 200);
     }
+
 
     /**
      * Update the specified resource in storage.
@@ -125,8 +136,8 @@ class EmpresaApiController extends Controller
         return response()->json(["message" => "Empresa actualizada"], 200);
     }
 
-    /**
-     * Remove the specified resource from storage.
+    /*
+    Remove the specified resource from storage.
      */
     public function destroy(string $id)
     {
