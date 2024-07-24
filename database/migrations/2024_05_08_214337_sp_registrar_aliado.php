@@ -26,24 +26,27 @@ return new class extends Migration
         )
         BEGIN
             DECLARE v_idtipodato INT;
+            DECLARE v_id_aliado INT;
         
                     IF EXISTS (SELECT 1 FROM aliado WHERE nombre  = p_nombre limit 1) THEN
-                        SELECT 'El nombre del aliado ya se encuentra registrado' AS mensaje;
+                        SELECT 'El nombre del aliado ya se encuentra registrado' AS mensaje, NULL AS id;
                     ELSE
                         IF EXISTS ( SELECT 1 FROM users WHERE email = p_correo limit 1) THEN
-                            SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+                            SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje, NULL AS id;
                         ELSE
                             SELECT id INTO v_idtipodato FROM tipo_dato WHERE tipo_dato.nombre = p_tipodato;
         
                             INSERT INTO users (email, password, estado, id_rol)
                             VALUES (p_correo, p_contrasena, p_estado, 3);
         
-                            SELECT LAST_INSERT_ID() INTO @last_inserted_id;
+                            SELECT LAST_INSERT_ID() INTO @last_inserted_user_id;
         
                             INSERT INTO aliado (nombre, logo, descripcion, id_tipo_dato, ruta_multi, id_autentication)
-                            VALUES (p_nombre, p_logo, p_descripcion, v_idtipodato, p_ruta, @last_inserted_id);
+                            VALUES (p_nombre, p_logo, p_descripcion, v_idtipodato, p_ruta, @last_inserted_user_id);
+
+                            SELECT LAST_INSERT_ID() INTO v_id_aliado;
                             
-                            SELECT 'Se ha registrado exitosamente el aliado' AS mensaje;
+                            SELECT 'Se ha registrado exitosamente el aliado' AS mensaje,v_id_aliado AS id;
                         END IF;
                     END IF;
         END");

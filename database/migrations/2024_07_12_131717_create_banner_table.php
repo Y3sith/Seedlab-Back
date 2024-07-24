@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->text('urlImagen');
             $table->string('descripcion');
-            $table->string('estado');
+            $table->string('estadobanner');
             $table->string('color');
             $table->unsignedBigInteger('id_aliado');
             $table->foreign('id_aliado')->references('id')->on('aliado')->onDelete('cascade');

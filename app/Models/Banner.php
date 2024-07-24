@@ -15,7 +15,7 @@ class Banner extends Model
     protected $fillable = [
         'urlImagen', 
         'descripcion', 
-        'estado',
+        'estadobanner',
         'color',
         'id_aliado'
     ];
