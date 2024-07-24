@@ -96,9 +96,6 @@ class AliadoApiController extends Controller
                     $data['estado'],
                 ]);
                 
-                //Log::info('Aliado ID:', ['aliadoId' => $aliadoId]);
-                Log::info('Request data:', $data->all());
-                //Log::info('Files:', $data->allFiles());
 
                 if (!empty($results)) {
                     $response = $results[0]->mensaje;
@@ -111,24 +108,11 @@ class AliadoApiController extends Controller
                 }
             });
 
-            Log::info('Aliado creado:', ['aliadoId' => $aliadoId, 'response' => $response]);
-       
-            // Log::info('Aliado ID:', ['aliadoId' => $aliadoId]);
-            // Log::info('Banner data:', ['banners' => $data->get('banner')]);
-
             if (isset($aliadoId)) {
                 if ($data->hasFile('banner.urlImagen') && $data->file('banner.urlImagen')->isValid()) {
                     $bannerPath = $data->file('banner.urlImagen')->store('public/banners');
                     $bannerUrl = Storage::url($bannerPath);
                 
-                    
-                // Log::info('Creating banner:', [
-                //     'bannerUrl' => $bannerUrl,
-                //     'descripcion' => $data('descripcion'),
-                //     'estadobanner' => $data('estadobanner'),
-                //     'color' => $data->input('color'),
-                // ]);
-
                     Banner::create([
                         'urlImagen' => $bannerUrl,
                         'descripcion' => $data['banner']['descripcion'],
