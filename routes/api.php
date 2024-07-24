@@ -116,6 +116,8 @@ Route::group([
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class,'traerAliadosActivos'])->name('Traeraliadosactivos');
 Route::get('/traerPersonalizacion',[SuperAdminController::class,'obtenerPersonalizacion']);
+Route::get('/banner/{status}', [AliadoApiController::class,'traerBanners']);
+
 
 
 

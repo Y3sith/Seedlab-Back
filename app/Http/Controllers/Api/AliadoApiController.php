@@ -50,6 +50,22 @@ class AliadoApiController extends Controller
         return response()->json($aliadosTransformados);
     }
 
+    public function traerBanners ($status){
+        $banners = Banner::where('estadobanner', $status)
+        ->select ('urlImagen', 'descripcion','estadobanner', 'color')
+        ->get();
+
+        $bannersTransformados = $banners->map(function ($banner) {
+            return [
+                'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                'descripcion' => $banner->descripcion,
+                'estado' => $banner->estadobanner,
+                'color' => $banner->color
+            ];
+        });
+        return response()->json($bannersTransformados);
+    }
+
     private function correctImageUrl($path)
     {
         // Elimina cualquier '/storage' inicial
@@ -141,30 +157,30 @@ class AliadoApiController extends Controller
 
 
 
-    // public function crearBanner (Request $request)
-    // {
-    //     if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=3) {
-    //         return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-    //     }
+    public function crearBanner (Request $request)
+    {
+        if ( Auth::user()->id_rol !=3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
 
-    //         $bannerUrl = null;
+            $bannerUrl = null;
 
-    //         if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
-    //             $bannerPath = $request->file('urlImagen')->store('public/banners');
-    //             $bannerUrl = Storage::url($bannerPath);
-    //         }
+            if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
+                $bannerPath = $request->file('urlImagen')->store('public/banners');
+                $bannerUrl = Storage::url($bannerPath);
+            }
 
-    //     $banner = Banner::create([
-    //         'urlImagen' => $bannerUrl,
-    //         'descripcion' => $request->descripcion,
-    //         'estado' => $request->estado,
-    //         'color' => $request->color,
-    //         'id_aliado' => $request->id_aliado,
-    //     ]);
-    //     return response()->json([
-    //        'message' => 'Banner creado exitosamente',
-    //     ], 201);
-    // }
+        $banner = Banner::create([
+            'urlImagen' => $bannerUrl,
+            'descripcion' => $request->descripcion,
+            'estado' => $request->estado,
+            'color' => $request->color,
+            'id_aliado' => $request->id_aliado,
+        ]);
+        return response()->json([
+           'message' => 'Banner creado exitosamente',
+        ], 201);
+    }
 
 
     public function mostrarAliado(Request $request)
