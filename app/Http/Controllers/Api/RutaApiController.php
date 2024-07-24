@@ -70,13 +70,14 @@ class RutaApiController extends Controller
             if(Auth::user()->id_rol != 1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
-        // if ($request->hasFile('imagen_ruta')) {
-        //     $image = $request->file('imagen_ruta');
-        //     $encodedImage = base64_encode(file_get_contents($image->path()));
-        // } else {
-        //     $encodedImage = null;
-        // }
-
+        $existingRoute = Ruta::where('nombre', $request->nombre)->first();
+        if ($existingRoute) {
+            return response()->json(['message' => 'El nombre de la ruta ya ha sido registrado anteriormente'], 422);
+        }
+        $existingRoute2 = Ruta::where('imagen_ruta', $request->imagen_ruta)->first();
+        if ($existingRoute2) {
+            return response()->json(['message' => 'La imagen de la ruta ya ha sido registrada anteriormente'], 423);
+        }
             $ruta = Ruta::create([
             "nombre" => $request->nombre,
             "fecha_creacion"=> Carbon::now(),
@@ -84,6 +85,9 @@ class RutaApiController extends Controller
             "imagen_ruta"=>$request->imagen_ruta
             //$encodedImage
         ]);
+        
+
+
         return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -135,6 +139,25 @@ class RutaApiController extends Controller
         }
 
         $ruta = Ruta::find($id);
+
+        $newNombre = $request->input('nombre');
+        if ($newNombre && $newNombre !== $ruta->nombre) {
+            $existing = Ruta::where('nombre', $newNombre)->where('id', '!=', $id)->first();
+            if ($existing) {
+                return response()->json(['message' => 'El nombre ya ha sido registrado anteriormente'], 422);
+            }
+        }
+        
+        // $newImagen_ruta = $request->input('imagen_ruta');
+        // if ($newImagen_ruta && $newImagen_ruta !== $ruta->imagen_ruta) {
+        //     $existing = Ruta::where('imagen_ruta', $newImagen_ruta)->where('id', '!=', $id)->first();
+        //     if ($existing) {
+        //         return response()->json(['message' => 'La imagen ya ha sido registrada anteriormente'], 422);
+        //     }
+        // }
+
+
+
         if(!$ruta){
             return response()->json([
                'message' => 'Ruta no encontrada'], 404);

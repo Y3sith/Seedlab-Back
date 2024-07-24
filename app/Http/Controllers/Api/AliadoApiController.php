@@ -10,12 +10,14 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Asesoria;
 use App\Models\Asesor;
+use App\Models\Banner;
 use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
 use App\Models\TipoDato;
 use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Exception;
+use Illuminate\Support\Facades\Log;
 
 class AliadoApiController extends Controller
 {
@@ -24,17 +26,20 @@ class AliadoApiController extends Controller
      */
     public function traerAliadosActivos($status)
     {
+       // 
+
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('nombre', 'descripcion', 'logo', 'banner', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
+            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
+            //$banner = Banner::find($aliado->$id_aliado);
             return [
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
                 'logo' => $aliado->logo,
-                'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
+                //'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
                 'ruta_multi' => $aliado->ruta_multi,
                 'tipo_dato' => $aliado->tipoDato,
                 'email' => $aliado->auth->email,
@@ -59,6 +64,7 @@ class AliadoApiController extends Controller
         try {
             $response = null;
             $statusCode = 200;
+            $aliadoId = null;
 
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
@@ -70,18 +76,18 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            $bannerUrl = null;
-
-            if ($data->hasFile('banner') && $data->file('banner')->isValid()) {
-                $bannerPath = $data->file('banner')->store('public/banners');
-                $bannerUrl = Storage::url($bannerPath);
+            if (!$data->hasFile('banner.urlImagen') || !$data->file('banner.urlImagen')->isValid()) {
+                return response()->json(['error' => 'Se requiere una imagen válida para el banner'], 400);
             }
+    
+            DB::beginTransaction();
 
-            DB::transaction(function () use ($data, $bannerUrl, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            try {
+            DB::transaction(function () use ($data, &$response, &$statusCode, &$aliadoId) {
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['logo'],
-                    $bannerUrl,
+                    //$bannerUrl,
                     $data['descripcion'],
                     $data['tipodato'],
                     $data['ruta'],
@@ -89,20 +95,76 @@ class AliadoApiController extends Controller
                     Hash::make($data['password']),
                     $data['estado'],
                 ]);
+                
 
                 if (!empty($results)) {
                     $response = $results[0]->mensaje;
+                    $aliadoId = $results[0]->id;
+                    
                     if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
                         $statusCode = 400;
+                        throw new \Exception($response);
                     }
                 }
             });
 
-            return response()->json(['message' => $response], $statusCode);
+            if (isset($aliadoId)) {
+                if ($data->hasFile('banner.urlImagen') && $data->file('banner.urlImagen')->isValid()) {
+                    $bannerPath = $data->file('banner.urlImagen')->store('public/banners');
+                    $bannerUrl = Storage::url($bannerPath);
+                
+                    Banner::create([
+                        'urlImagen' => $bannerUrl,
+                        'descripcion' => $data['banner']['descripcion'],
+                        'estadobanner' => $data['banner']['estadobanner'],
+                        'color' => $data['banner']['color'],
+                        'id_aliado' => $aliadoId,
+                    ]);
+
+                    DB::commit();
+                    Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
+
+                    return response()->json(['message' => $response], $statusCode);
+                }
+            }
+
+            } catch (\Exception $e) {
+                DB::rollBack();
+                Log::error('Error al crear aliado y banner:', ['error' => $e->getMessage()]);
+                return response()->json(['error' => $e->getMessage()], 400);
+            }
+
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+
+
+    // public function crearBanner (Request $request)
+    // {
+    //     if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=3) {
+    //         return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+    //     }
+
+    //         $bannerUrl = null;
+
+    //         if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
+    //             $bannerPath = $request->file('urlImagen')->store('public/banners');
+    //             $bannerUrl = Storage::url($bannerPath);
+    //         }
+
+    //     $banner = Banner::create([
+    //         'urlImagen' => $bannerUrl,
+    //         'descripcion' => $request->descripcion,
+    //         'estado' => $request->estado,
+    //         'color' => $request->color,
+    //         'id_aliado' => $request->id_aliado,
+    //     ]);
+    //     return response()->json([
+    //        'message' => 'Banner creado exitosamente',
+    //     ], 201);
+    // }
 
 
     public function mostrarAliado(Request $request)
