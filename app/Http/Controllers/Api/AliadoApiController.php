@@ -278,39 +278,32 @@ class AliadoApiController extends Controller
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-
             $estado = $request->input('estado', 'Activo');
-
             $estadoBool = $estado === 'Activo' ? 1 : 0;
-
             $aliado = Aliado::find($id);
-
             if (!$aliado) {
                 return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
             }
-
             $asesores = Aliado::findOrFail($id)->asesor()
                 ->whereHas('auth', function ($query) use ($estadoBool) {
                     $query->where('estado', $estadoBool);
                 })
-                ->select('id', 'nombre', 'apellido', 'celular', 'id_autentication')
+                ->select('id', 'id_aliado','nombre', 'apellido', 'celular', 'id_autentication')
                 ->get();
-
             $asesoresConEstado = $asesores->map(function ($asesor) {
                 $user = User::find($asesor->id_autentication);
-
                 return [
                     'id' => $asesor->id,
                     'nombre' => $asesor->nombre,
                     'apellido' => $asesor->apellido,
                     'celular' => $asesor->celular,
+                    'id_aliado' => $asesor->id_aliado,
                     'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
                 ];
             });
-
             return response()->json($asesoresConEstado);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -363,7 +356,8 @@ class AliadoApiController extends Controller
     public function generos() //contador de cuantos usuarios son mujer/hombres u otros
     {
         try {
-            if (Auth::user()->id_rol != 3) {
+            
+            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
                 return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
             }
             $generos = DB::table('emprendedor')
@@ -385,10 +379,11 @@ class AliadoApiController extends Controller
                 }
             }
 
-
-
-
-            return response()->json($generos, 200);
+            return response()->json([
+                ['genero' => 'Femenino', 'total' => $femenino],
+                ['genero' => 'Masculino', 'total' => $masculino],
+                ['genero' => 'Otro', 'total' => $otro],
+            ], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

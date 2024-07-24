@@ -38,8 +38,8 @@ class ActividadController extends Controller
     public function store(Request $request)
     {
         // Crear actividad (solo el aliado)
-        try {
-            if (Auth::user()->id_rol !== 3) {
+        
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
             return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
         }
 
@@ -77,11 +77,7 @@ class ActividadController extends Controller
             'id_ruta' => $validatedData['id_ruta'],
             'id_aliado'=> $validatedData['id_aliado']
         ]);
-
-        return response()->json(['message' => 'Actividad creada con éxito'], 201);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
+        return response()->json(['message' => 'Actividad creada con éxito: ',$actividad], 201);
         
     }
 
@@ -178,7 +174,7 @@ class ActividadController extends Controller
     }
 
     public function tipoDato(){
-        if (Auth::user()->id_rol !=3 && Auth::user()->id_rol !=4) {
+        if (Auth::user()->id_rol !=1 &&Auth::user()->id_rol !=3 && Auth::user()->id_rol !=4) { //esto hay que cambiarlo para que solo lo puedan ver algunos roles
             return response()->json([
                 'messaje'=>'No tienes permisos para acceder a esta ruta'
             ],401);
