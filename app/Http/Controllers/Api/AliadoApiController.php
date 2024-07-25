@@ -373,7 +373,7 @@ class AliadoApiController extends Controller
     {
         try {
             
-            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
                 return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
             }
             $generos = DB::table('emprendedor')
