@@ -110,6 +110,8 @@ Route::group([
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
     Route::get('/generoAliado',[AliadoApiController::class,'generos']);
     Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
+    Route::delete('/eliminarbanner/{id}',[AliadoApiController::class,'eliminarBanner']);
+
 
 });
 

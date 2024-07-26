@@ -155,16 +155,18 @@ class AliadoApiController extends Controller
         }
     }
 
-
-
     public function crearBanner (Request $request)
     {
         if ( Auth::user()->id_rol !=3) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-            $bannerUrl = null;
+        $bannerCount = Banner::where('id_aliado', $request->id_aliado)->count();
 
+        if ($bannerCount >= 3) {
+            return response()->json(['error' => 'Ya existen 3 banners para este aliado. Debe eliminar un banner antes de crear uno nuevo.'], 400);
+        }
+    
             if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
                 $bannerPath = $request->file('urlImagen')->store('public/banners');
                 $bannerUrl = Storage::url($bannerPath);
@@ -173,7 +175,7 @@ class AliadoApiController extends Controller
         $banner = Banner::create([
             'urlImagen' => $bannerUrl,
             'descripcion' => $request->descripcion,
-            'estado' => $request->estado,
+            'estadobanner' => $request->estadobanner,
             'color' => $request->color,
             'id_aliado' => $request->id_aliado,
         ]);
@@ -181,6 +183,27 @@ class AliadoApiController extends Controller
            'message' => 'Banner creado exitosamente',
         ], 201);
     }
+
+    public function eliminarBanner ($id)
+    {
+        if ( Auth::user()->id_rol !=3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        
+        $banner = Banner::find($id);
+        if (!$banner) {
+            return response()->json(['error' => 'Banner no encontrado'], 404);
+        }
+
+        $url = str_replace('storage', 'public', $banner->urlImagen);
+
+       Storage::delete($url);
+        $banner->delete();
+        
+        return response()->json(['message' => 'Banner eliminado correctamente'], 200);
+
+    }
+
 
 
     public function mostrarAliado(Request $request)
