@@ -38,8 +38,8 @@ class AliadoApiController extends Controller
             return [
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
-                'logo' => $aliado->logo,
-                //'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
+                //'logo' => $aliado->logo,
+                'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
                 'ruta_multi' => $aliado->ruta_multi,
                 'tipo_dato' => $aliado->tipoDato,
                 'email' => $aliado->auth->email,
@@ -99,30 +99,39 @@ class AliadoApiController extends Controller
             DB::beginTransaction();
 
             try {
-            DB::transaction(function () use ($data, &$response, &$statusCode, &$aliadoId) {
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
-                    $data['nombre'],
-                    $data['logo'],
-                    //$bannerUrl,
-                    $data['descripcion'],
-                    $data['tipodato'],
-                    $data['ruta'],
-                    $data['email'],
-                    Hash::make($data['password']),
-                    $data['estado'],
-                ]);
-                
 
-                if (!empty($results)) {
-                    $response = $results[0]->mensaje;
-                    $aliadoId = $results[0]->id;
-                    
-                    if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                        $statusCode = 400;
-                        throw new \Exception($response);
-                    }
+                $logoUrl = null;
+
+                if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
+                    $logoPath = $data->file('logo')->store('public/logos');
+                    $logoUrl = Storage::url($logoPath);
                 }
-            });
+
+                    DB::transaction(function () use ($data, &$response, &$statusCode, &$aliadoId, $logoUrl) {
+                        $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
+                            $data['nombre'],
+                            //$data['logo'],
+                            $logoUrl,
+                            $data['descripcion'],
+                            $data['tipodato'],
+                            $data['ruta'],
+                            $data['email'],
+                            Hash::make($data['password']),
+                            $data['estado'],
+                        ]);
+                        
+                    
+                        if (!empty($results)) {
+                            $response = $results[0]->mensaje;
+                            $aliadoId = $results[0]->id;
+                            
+                            if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                                $statusCode = 400;
+                                throw new \Exception($response);
+                            }
+                        }
+                    });
+                //}
 
             if (isset($aliadoId)) {
                 if ($data->hasFile('banner.urlImagen') && $data->file('banner.urlImagen')->isValid()) {

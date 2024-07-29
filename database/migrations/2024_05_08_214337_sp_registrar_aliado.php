@@ -15,8 +15,8 @@ return new class extends Migration
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_aliado;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_aliado(
             IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_logo BLOB ,
-            -- IN p_banner TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            -- IN p_logo BLOB ,
+            IN p_logo TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_tipodato VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_ruta TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,

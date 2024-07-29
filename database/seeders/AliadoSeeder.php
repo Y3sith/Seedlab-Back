@@ -18,6 +18,13 @@ class AliadoSeeder extends Seeder
     public function run(): void
     {
 
+        // Crear la carpeta 'logos' en el directorio de almacenamiento público
+        $logosPath = storage_path('app/public/logos');
+        if (!File::exists($logosPath)) {
+            File::makeDirectory($logosPath, 0755, true);
+        }
+
+
         $aliados = [
             [
                 "nombre" => "Ecopetrol",
