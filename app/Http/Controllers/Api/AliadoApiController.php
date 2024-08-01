@@ -193,6 +193,50 @@ class AliadoApiController extends Controller
         ], 201);
     }
 
+    // public function editarAliado(Request $request, $id)
+    // {
+    //     try {
+    //         if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+    //             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+    //         }
+    //         $aliado = Aliado::find($id);
+
+    //         if ($aliado) {
+
+    //             if ($request->hasFile('logo')) {
+    //                 // Eliminar el logo anterior
+    //                 Storage::delete(str_replace('storage', 'public', $aliado->logo));
+                    
+    //                 // Guardar el nuevo logo
+    //                 $path = $request->file('logo')->store('public/logos');
+    //                 $aliado->logo = str_replace('public', 'storage', $path);
+    //             }
+
+    //             $aliado->nombre = $request->nombre;
+    //             $aliado->descripcion = $request->descripcion;
+    //             //$aliado->logo = $request->input('logo');
+    //             // $url = str_replace('storage', 'public', $aliado->logo);
+    //             // Storage::put($url);
+    //             $aliado->ruta_multi = $request->ruta_multi;
+    //             $aliado->save();
+
+    //             if ($aliado->auth) {
+    //                 $user = $aliado->auth;
+    //                 $user->email = $request->email;
+    //                 $user->password = Hash::make($request->password);
+    //                 $user->estado = $request->estado;
+    //                 $user->save();
+    //             }
+    //             return response()->json(['message' => 'Aliado actualizado correctamente']);
+    //         } else {
+    //             return response()->json(['message' => 'Aliado no encontrado'], 404);
+    //         }
+    //     } catch (Exception $e) {
+    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    //     }
+    // }
+
+
     public function eliminarBanner ($id)
     {
         if ( Auth::user()->id_rol !=3) {
@@ -241,28 +285,52 @@ class AliadoApiController extends Controller
         }
     }
 
-    public function editarAliado(Request $request)
+      public function editarAliado(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol != 1 || Auth::user()->id_rol != 3) {
-                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+            $aliado = Aliado::find($id);
+
+            if (Auth::user()->id_rol != 1 ) {
+                $user = $aliado->auth;
             }
-            $aliado = Aliado::find($request->input('id'));
+
+            $newNombre = $request->input('nombre');
+                if ($newNombre && $newNombre !== $aliado->nombre) {
+                    // Verificar si el nuevo email ya está en uso
+                    $existing = Aliado::where('nombre', $newNombre)->first();
+                    if ($existing) {
+                        return response()->json(['message' => 'El nombre ya ha sido registrado anteriormente'], 400);
+                    }
+                    $aliado->nombre = $newNombre;
+                }
 
             if ($aliado) {
-                $aliado->nombre = $request->input('nombre');
-                $aliado->descripcion = $request->input('descripcion');
-                $aliado->logo = $request->input('logo');
-                $aliado->ruta_multi = $request->input('ruta_multi');
+
+                if ($request->hasFile('logo')) {
+                    // //Eliminar el logo anterior
+                    // Storage::delete(str_replace('storage', 'public', $aliado->logo));
+                    
+                    // // Guardar el nuevo logo
+                    // $path = $request->file('logo')->store('public/logos');
+                    // $aliado->logo = str_replace('public', 'storage', $path);
+                }
+
+                $aliado->nombre = $request->nombre;
+                $aliado->descripcion = $request->descripcion;
+                //$aliado->logo = $request->input('logo');
+                // $url = str_replace('storage', 'public', $aliado->logo);
+                // Storage::put($url);
+                //$aliado->ruta_multi = $request->ruta_multi;
                 $aliado->save();
 
-                if ($aliado->auth) {
-                    $user = $aliado->auth;
-                    $user->email = $request->input('email');
-                    $user->password = Hash::make($request->input('password'));
-                    $user->estado = $request->input('estado');
-                    $user->save();
-                }
+                // if ($aliado->auth) {
+                //     $user = $aliado->auth;
+                //     $user->email = $request->email;
+                //     $user->password = Hash::make($request->password);
+                //     $user->estado = $request->estado;
+                //     $user->save();
+                // }
+                
                 return response()->json(['message' => 'Aliado actualizado correctamente']);
             } else {
                 return response()->json(['message' => 'Aliado no encontrado'], 404);
@@ -270,6 +338,13 @@ class AliadoApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
+    }
+
+
+    public function traerAliadoxId($id)
+    {
+        $aliado = Aliado::find($id);
+        return response()->json($aliado,200);
     }
 
     /**
