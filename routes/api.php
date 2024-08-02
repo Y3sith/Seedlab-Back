@@ -131,6 +131,7 @@ Route::group([
     Route::get('/mostrarRutaContenido/{id}',[RutaApiController::class,'mostrarRutaConContenido'])->name('mostrarRutaContenido');
     Route::get('/rutasActivas',[RutaApiController::class,'rutasActivas']);
     Route::get('/rutaXid/{id}',[RutaApiController::class,'rutaxId']);
+    
 });
 
 
@@ -141,6 +142,7 @@ Route::group([
 ],function(){
     Route::apiResource('/actividad',ActividadController::class);
     Route::post('/crearActividad',[ActividadController::class,'store']);
+    Route::put('/editar_actividad/{id}',[ActividadController::class,'editarActividad']);
     Route::get('/tipo_dato',[ActividadController::class,'tipoDato']);
     Route::get('/verActividadAliado/{id}',[ActividadController::class,'VerActividadAliado']);
 });

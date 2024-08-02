@@ -212,7 +212,7 @@ class AliadoApiController extends Controller
     public function editarAliado(Request $request)
     {
         try {
-            if (Auth::user()->id_rol != 1 || Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
             $aliado = Aliado::find($request->input('id'));
