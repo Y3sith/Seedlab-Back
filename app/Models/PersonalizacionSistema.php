@@ -17,6 +17,12 @@ class PersonalizacionSistema extends Model
         'color_principal',
         'color_secundario',
         'color_terciario',
+        'descripcion_footer',
+        'paginaWeb',
+        'email',
+        'telefono',
+        'direccion',
+        'ubicacion',
         'id_superadmin'
     ];
 
