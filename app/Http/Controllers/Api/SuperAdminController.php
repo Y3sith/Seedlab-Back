@@ -27,44 +27,49 @@ class SuperAdminController extends Controller
 
 
 
-    public function personalizacionSis(Request $request, $id)
-    {
-
-        if (Auth::user()->id_rol != 1) {
-            return response()->json([
-                'message' => 'No tienes permiso para acceder a esta ruta'
-            ], 401);
-        }
-        // Buscar la personalización existente
-        $personalizacion = PersonalizacionSistema::where('id', $id)->first();
-        //dd($personalizacion);
-        if (!$personalizacion) {
-            return response()->json([
-                'message' => 'Personalización no encontrada'
-            ], 404);
-        }
-
-
-        // Actualizar otros campos
-        $personalizacion->nombre_sistema = $request->input('nombre_sistema');
-        $personalizacion->color_principal = $request->input('color_principal');
-        $personalizacion->color_secundario = $request->input('color_secundario');
-        $personalizacion->color_terciario = $request->input('color_terciario');
-        $personalizacion->id_superadmin = $request->input('id_superadmin');
-        $personalizacion->imagen_logo = $request->input('imagen_logo');
-        $personalizacion->logo_footer = $request->input('logo_footer');
-        $personalizacion->descripcion_footer = $request->input('descripcion_footer');
-        $personalizacion->paginaWeb = $request->input('paginaWeb');
-        $personalizacion->email = $request->input('email');
-        $personalizacion->telefono = $request->input('telefono');
-        $personalizacion->direccion = $request->input('direccion');
-        $personalizacion->ubicacion = $request->input('ubicacion');
+     public function personalizacionSis(Request $request, $id)
+     {
+         if (Auth::user()->id_rol != 1) {
+             return response()->json([
+                 'message' => 'No tienes permiso para acceder a esta ruta'
+             ], 401);
+         }   
+         // Buscar la personalización existente
+         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
+         if (!$personalizacion) {
+             return response()->json([
+                 'message' => 'Personalización no encontrada'
+             ], 404);
+         }
      
-
-        $personalizacion->save();
-
-        return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
-    }
+         // Actualizar otros campos
+         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
+         $personalizacion->color_principal = $request->input('color_principal');
+         $personalizacion->color_secundario = $request->input('color_secundario');
+         $personalizacion->color_terciario = $request->input('color_terciario');
+         $personalizacion->id_superadmin = $request->input('id_superadmin');
+         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
+         $personalizacion->paginaWeb = $request->input('paginaWeb');
+         $personalizacion->email = $request->input('email');
+         $personalizacion->telefono = $request->input('telefono');
+         $personalizacion->direccion = $request->input('direccion');
+         $personalizacion->ubicacion = $request->input('ubicacion');
+     
+         // Manejo de archivos
+         if ($request->hasFile('logo_footer') && $request->file('logo_footer')->isValid()) {
+             $logoFooterPath = $request->file('logo_footer')->store('public/logos');
+             $personalizacion->logo_footer = Storage::url($logoFooterPath);
+         }
+     
+         if ($request->hasFile('imagen_logo') && $request->file('imagen_logo')->isValid()) {
+             $imagenLogoPath = $request->file('imagen_logo')->store('public/logos');
+             $personalizacion->imagen_logo = Storage::url($imagenLogoPath);
+         }
+     
+         $personalizacion->save();
+         
+         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
+     }
 
 
 
@@ -78,18 +83,18 @@ class SuperAdminController extends Controller
                 'message' => 'No se encontraron personalizaciones del sistema'
             ], 404);
         }
-        $imageBase64 = $personalizaciones->imagen_logo;
+       // $imageBase64 = $personalizaciones->imagen_logo;
         // if (strpos($imageBase64, 'data:image/png;base64,') === false) {
         //     // Si no contiene el prefijo, agregarlo
         //     $imageBase64 = 'data:image/png;base64,' . $imageBase64;
         // }
         return response()->json([
-            'imagen_Logo' => $imageBase64,
+            'imagen_logo' => $personalizaciones->imagen_logo ? $this->correctImageUrl($personalizaciones->imagen_logo) : null,
             'nombre_sistema' => $personalizaciones->nombre_sistema,
             'color_principal' => $personalizaciones->color_principal,
             'color_secundario' => $personalizaciones->color_secundario,
             'color_terciario' => $personalizaciones->color_terciario,
-            'logo_footer' => $personalizaciones->logo_footer,
+            'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
             'descripcion_footer' => $personalizaciones->descripcion_footer,
             'paginaWeb' => $personalizaciones->paginaWeb,
             'email' => $personalizaciones->email,
@@ -99,7 +104,14 @@ class SuperAdminController extends Controller
         ], 200);
     }
 
-    
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
+
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
 
 
     /**

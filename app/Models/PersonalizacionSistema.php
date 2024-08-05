@@ -12,7 +12,7 @@ class PersonalizacionSistema extends Model
     protected $table = 'personalizacion_sistema';
 
     protected $fillable = [
-        'imagen_Logo',
+        'imagen_logo',
         'nombre_sistema',
         'color_principal',
         'color_secundario',
