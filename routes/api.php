@@ -101,7 +101,9 @@ Route::group([
     'middleware' => 'auth:api',
 ], function(){
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
-    Route::put('/editaraliado', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
+    //Route::match(['post', 'put'],'/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
+    Route::post('/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
+    Route::get('/traeraliadoxid/{id}', [AliadoApiController::class, 'traerAliadoxId'])->name('traerAliadoxId');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado'); //////////
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
@@ -110,6 +112,9 @@ Route::group([
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
     Route::get('/generoAliado',[AliadoApiController::class,'generos']);
     Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
+    Route::post('/editarbanner/{id}',[AliadoApiController::class,'editarBanner']);
+    Route::delete('/eliminarbanner/{id}',[AliadoApiController::class,'eliminarBanner']);
+
 
 });
 
