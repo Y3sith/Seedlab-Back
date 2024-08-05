@@ -40,7 +40,7 @@ class AliadoApiController extends Controller
                 'descripcion' => $aliado->descripcion,
                 //'logo' => $aliado->logo,
                 'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
-                'ruta_multi' => $aliado->ruta_multi,
+                'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
                 'tipo_dato' => $aliado->tipoDato,
                 'email' => $aliado->auth->email,
                 'estado' => $aliado->auth->estado
@@ -79,84 +79,92 @@ class AliadoApiController extends Controller
             $response = null;
             $statusCode = 200;
             $aliadoId = null;
-
+    
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-
+    
             if (strlen($data['password']) < 8) {
-                $statusCode = 400;
-                $response = 'La contraseña debe tener al menos 8 caracteres';
-                return response()->json(['message' => $response], $statusCode);
+                return response()->json(['error' => 'La contraseña debe tener al menos 8 caracteres'], 400);
             }
-
-            if (!$data->hasFile('banner.urlImagen') || !$data->file('banner.urlImagen')->isValid()) {
+    
+            // Validación del banner
+            if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
                 return response()->json(['error' => 'Se requiere una imagen válida para el banner'], 400);
             }
     
             DB::beginTransaction();
-
+    
             try {
-
                 $logoUrl = null;
-
                 if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
                     $logoPath = $data->file('logo')->store('public/logos');
                     $logoUrl = Storage::url($logoPath);
                 }
-
-                    DB::transaction(function () use ($data, &$response, &$statusCode, &$aliadoId, $logoUrl) {
-                        $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
-                            $data['nombre'],
-                            //$data['logo'],
-                            $logoUrl,
-                            $data['descripcion'],
-                            $data['tipodato'],
-                            $data['ruta'],
-                            $data['email'],
-                            Hash::make($data['password']),
-                            $data['estado'],
-                        ]);
-                        
+    
+                $rutaMulti = null;
+                if ($data->hasFile('ruta_multi')) {
+                    $file = $data->file('ruta_multi');
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $mimeType = $file->getMimeType();
                     
-                        if (!empty($results)) {
-                            $response = $results[0]->mensaje;
-                            $aliadoId = $results[0]->id;
-                            
-                            if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                                $statusCode = 400;
-                                throw new \Exception($response);
-                            }
-                        }
-                    });
-                //}
-
-            if (isset($aliadoId)) {
-                if ($data->hasFile('banner.urlImagen') && $data->file('banner.urlImagen')->isValid()) {
-                    $bannerPath = $data->file('banner.urlImagen')->store('public/banners');
-                    $bannerUrl = Storage::url($bannerPath);
-                
-                    Banner::create([
-                        'urlImagen' => $bannerUrl,
-                        'descripcion' => $data['banner']['descripcion'],
-                        'estadobanner' => $data['banner']['estadobanner'],
-                        'color' => $data['banner']['color'],
-                        'id_aliado' => $aliadoId,
-                    ]);
-
-                    DB::commit();
-                    Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
-
-                    return response()->json(['message' => $response], $statusCode);
+                    if (strpos($mimeType, 'image') !== false) {
+                        $folder = 'imagenes';
+                    } elseif ($mimeType === 'application/pdf') {
+                        $folder = 'documentos';
+                    } else {
+                        return response()->json(['error' => 'Tipo de archivo no soportado para ruta_multi'], 400);
+                    }
+                    
+                    $path = $file->storeAs("public/$folder", $fileName);
+                    $rutaMulti = Storage::url($path);
+                } elseif ($data->input('ruta_multi') && filter_var($data->input('ruta_multi'), FILTER_VALIDATE_URL)) {
+                    $rutaMulti = $data->input('ruta_multi');
                 }
-            }
-
+    
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
+                    $data['nombre'],
+                    $logoUrl,
+                    $data['descripcion'],
+                    $data['tipodato'],
+                    $rutaMulti,
+                    $data['email'],
+                    Hash::make($data['password']),
+                    $data['estado'],
+                ]);
+    
+                if (empty($results)) {
+                    throw new \Exception('No se recibió respuesta del procedimiento almacenado');
+                }
+    
+                $response = $results[0]->mensaje;
+                $aliadoId = $results[0]->id;
+                
+                if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                    throw new \Exception($response);
+                }
+    
+                // Procesar el banner
+                $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
+                $bannerUrl = Storage::url($bannerPath);
+            
+                Banner::create([
+                    'urlImagen' => $bannerUrl,
+                    'estadobanner' => $data['banner_estadobanner'],
+                    'id_aliado' => $aliadoId,
+                ]);
+    
+                DB::commit();
+                Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
+    
+                return response()->json(['message' => $response], $statusCode);
+    
             } catch (\Exception $e) {
                 DB::rollBack();
                 Log::error('Error al crear aliado y banner:', ['error' => $e->getMessage()]);
                 return response()->json(['error' => $e->getMessage()], 400);
             }
-
+    
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

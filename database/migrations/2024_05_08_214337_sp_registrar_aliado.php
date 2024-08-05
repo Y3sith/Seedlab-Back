@@ -19,7 +19,7 @@ return new class extends Migration
             IN p_logo TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_tipodato VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_ruta TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_ruta_multi TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN
@@ -42,7 +42,7 @@ return new class extends Migration
                             SELECT LAST_INSERT_ID() INTO @last_inserted_user_id;
         
                             INSERT INTO aliado (nombre, logo, descripcion, id_tipo_dato, ruta_multi, id_autentication)
-                            VALUES (p_nombre, p_logo, p_descripcion, v_idtipodato, p_ruta, @last_inserted_user_id);
+                            VALUES (p_nombre, p_logo, p_descripcion, v_idtipodato, p_ruta_multi, @last_inserted_user_id);
 
                             SELECT LAST_INSERT_ID() INTO v_id_aliado;
                             
