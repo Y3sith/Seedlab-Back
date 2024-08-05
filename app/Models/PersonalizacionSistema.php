@@ -17,6 +17,7 @@ class PersonalizacionSistema extends Model
         'color_principal',
         'color_secundario',
         'color_terciario',
+        'logo_footer',
         'descripcion_footer',
         'paginaWeb',
         'email',
