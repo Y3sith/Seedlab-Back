@@ -247,102 +247,102 @@ public function editarAliado(Request $request, $id)
             return response()->json(['error' => 'Aliado no encontrado'], 404);
         }
 
-        if (Auth::user()->id_rol != 1) {
-
-                        // Validar nombre igual
-                        $newNombre = $request->input('nombre');
-                        if ($newNombre && $newNombre !== $aliado->nombre) {
-                            $existing = Aliado::where('nombre', $newNombre)->first();
-                            if ($existing) {
-                                    return response()->json(['message' => 'El nombre del Aliado ya ha sido registrado anteriormente'], 400);
-                                }
-                                $aliado->nombre = $newNombre;
-                            }
-                            $user = $aliado->auth;
-                
-                
-                        if ($request->hasFile('ruta_multi')) {
-                            // Si se está subiendo un nuevo archivo
-                            $file = $request->file('ruta_multi');
-                            $fileName = time() . '_' . $file->getClientOriginalName();
-                            
-                            // Determinar el tipo de archivo
-                            $mimeType = $file->getMimeType();
-                            
-                            if (strpos($mimeType, 'image') !== false) {
-                                $folder = 'logos';
-                            } elseif ($mimeType === 'application/pdf') {
-                                $folder = 'documentos';
-                            } else {
-                                return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
-                            }
-                            
-                            // Eliminar el archivo anterior si existe
-                            if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
-                                Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
-                            }
-                            
-                            // Guardar el nuevo archivo
-                            $path = $file->storeAs("public/$folder", $fileName);
-                            $aliado->ruta_multi = str_replace('public', 'storage', $path);
-                        } elseif ($request->input('ruta_multi') && filter_var($request->input('ruta_multi'), FILTER_VALIDATE_URL)) {
-                            // Si es una URL (asumiendo que es de YouTube)
-                            // Eliminar el archivo anterior si existe
-                            if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
-                                Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
-                            }
-                            $aliado->ruta_multi = $request->input('ruta_multi');
-                        }
-                
-                        if ($request->hasFile('logo')) {
-                                                    //Eliminar el logo anterior
-                                                    Storage::delete(str_replace('storage', 'public', $aliado->logo));
-                                                    
-                                                    // Guardar el nuevo logo
-                                                    $path = $request->file('logo')->store('public/logos');
-                                                    $aliado->logo = str_replace('public', 'storage', $path);
-                
-                                                
-                                                }
-            
-                
-                        // Actualizar los datos del aliado
-                        $aliado->update([
-                            'nombre' => $request->input('nombre'),
-                            'descripcion' => $request->input('descripcion'),
-                            'id_tipo_dato' => $request->input('id_tipo_dato')
-                        ]);
-                
-                        // Actualizar la contraseña del usuario si se proporciona una nueva
-                        $password = $request->input('password');
-                        if ($password) {
-                            $user->password = Hash::make($password);
-                        }
-                
-                        // Actualizar el email del usuario si es diferente
-                        $newEmail = $request->input('email');
-                        if ($newEmail && $newEmail !== $user->email) {
-                            $existingUser = User::where('email', $newEmail)->first();
-                            if ($existingUser) {
-                                return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
-                            }
-                            $user->email = $newEmail;
-                        }
-                
-                        // Actualizar el estado del usuario
-                        $user->estado = $request->input('estado');
-                        Log::info('Usuario antes de guardar:', $user->toArray());
-                        $user->save();
-                
-                        Log::info('Aliado antes de guardar:', $aliado->toArray());
-
-
-            return response()->json(['message' => 'Aliado actualizado', 'banner' => $banner], 200);
-      
-        
+        if (Auth::user()->id_rol !=1 && Auth::user()->id_rol !=3) {
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
+
         
-        return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        $user = $aliado->auth;
+        Log::info('Usuario antes de guardar:', $user->toArray());
+                    // Validar nombre igual
+                    $newNombre = $request->input('nombre');
+                    if ($newNombre && $newNombre !== $aliado->nombre) {
+                        $existing = Aliado::where('nombre', $newNombre)->first();
+                        if ($existing) {
+                                return response()->json(['message' => 'El nombre del Aliado ya ha sido registrado anteriormente'], 400);
+                            }
+                            $aliado->nombre = $newNombre;
+                        }
+            
+            
+                    if ($request->hasFile('ruta_multi')) {
+                        // Si se está subiendo un nuevo archivo
+                        $file = $request->file('ruta_multi');
+                        $fileName = time() . '_' . $file->getClientOriginalName();
+                        
+                        // Determinar el tipo de archivo
+                        $mimeType = $file->getMimeType();
+                        
+                        if (strpos($mimeType, 'image') !== false) {
+                            $folder = 'logos';
+                        } elseif ($mimeType === 'application/pdf') {
+                            $folder = 'documentos';
+                        } else {
+                            return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
+                        }
+                        
+                        // Eliminar el archivo anterior si existe
+                        if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
+                            Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
+                        }
+                        
+                        // Guardar el nuevo archivo
+                        $path = $file->storeAs("public/$folder", $fileName);
+                        $aliado->ruta_multi = str_replace('public', 'storage', $path);
+                    } elseif ($request->input('ruta_multi') && filter_var($request->input('ruta_multi'), FILTER_VALIDATE_URL)) {
+                        // Si es una URL (asumiendo que es de YouTube)
+                        // Eliminar el archivo anterior si existe
+                        if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
+                            Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
+                        }
+                        $aliado->ruta_multi = $request->input('ruta_multi');
+                    }
+            
+                    if ($request->hasFile('logo')) {
+                                                //Eliminar el logo anterior
+                                                Storage::delete(str_replace('storage', 'public', $aliado->logo));
+                                                
+                                                // Guardar el nuevo logo
+                                                $path = $request->file('logo')->store('public/logos');
+                                                $aliado->logo = str_replace('public', 'storage', $path);
+            
+                                            
+                                            }
+        
+            
+                    // Actualizar los datos del aliado
+                    $aliado->update([
+                        'nombre' => $request->input('nombre'),
+                        'descripcion' => $request->input('descripcion'),
+                        'id_tipo_dato' => $request->input('id_tipo_dato')
+                    ]);
+            
+                    // Actualizar la contraseña del usuario si se proporciona una nueva
+                    $password = $request->input('password');
+                    if ($password) {
+                        $user->password = Hash::make($password);
+                    }
+            
+                    // Actualizar el email del usuario si es diferente
+                    $newEmail = $request->input('email');
+                    if ($newEmail && $newEmail !== $user->email) {
+                        $existingUser = User::where('email', $newEmail)->first();
+                        if ($existingUser) {
+                            return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                        }
+                        $user->email = $newEmail;
+                    }
+            
+                    // Actualizar el estado del usuario
+                    $user->estado = $request->input('estado');
+                    Log::info('Usuario antes de guardar:', $user->toArray());
+                    $user->save();
+            
+                    Log::info('Aliado antes de guardar:', $aliado->toArray());
+
+
+        return response()->json(['message' => 'Aliado actualizado'], 200);
+        
         
     } catch (Exception $e) {
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
