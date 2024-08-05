@@ -189,6 +189,7 @@ Route::group([
     Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
     Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
     Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
+    Route::get('/listadoAsesores', [AsesorApiController::class, 'listarAsesores']);
 });
 
 //Asesorias
