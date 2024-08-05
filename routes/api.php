@@ -101,7 +101,7 @@ Route::group([
     'middleware' => 'auth:api',
 ], function(){
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
-    Route::put('/editaraliado/{id}', [AliadoApiController::class, 'editarAliado'])->name('Editaraliado');
+    Route::match(['post', 'put'],'/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
     Route::get('/traeraliadoxid/{id}', [AliadoApiController::class, 'traerAliadoxId'])->name('traerAliadoxId');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado'); //////////
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
