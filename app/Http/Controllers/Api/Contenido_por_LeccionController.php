@@ -69,24 +69,23 @@ class Contenido_por_LeccionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function editarContenidoLeccion(Request $request, string $id)
     {
         //editar solo el asesor
         try {
-            if (Auth::user()->id_rol == 4) {
-                $contenidoxleccion = ContenidoLeccion::find($id);
-                if (!$contenidoxleccion) {
-                    return response()->json(['error' => 'contenido no encontrado'], 404);
-                } else {
-                    $contenidoxleccion->titulo = $request->titulo;
-                    $contenidoxleccion->descripcion = $request->descripcion;
-                    $contenidoxleccion->fuente = $request->fuente;
-                    $contenidoxleccion->id_tipo_dato = $request->id_tipo_dato;
-                    $contenidoxleccion->update();
-                    return response(["message" => "Contenido actualizado correctamente"], 201);
-                }
-            } else {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
                 return response()->json(["message" => "No tienes permisos para editar contenido"], 401);
+            }
+            $contenidoxleccion = ContenidoLeccion::find($id);
+            if (!$contenidoxleccion) {
+                return response()->json(['error' => 'contenido no encontrado'], 404);
+            } else {
+                $contenidoxleccion->titulo = $request->titulo;
+                $contenidoxleccion->descripcion = $request->descripcion;
+                $contenidoxleccion->fuente = $request->fuente;
+                $contenidoxleccion->id_tipo_dato = $request->id_tipo_dato;
+                $contenidoxleccion->update();
+                return response(["message" => "Contenido actualizado correctamente"], 201);
             }
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

@@ -33,21 +33,17 @@ class LeccionController extends Controller
     {
         //crear leccion (solo el asesor)
         try {
-            if (Auth:: user()->id_rol!=1  && Auth:: user()->id_rol !=3 && Auth::user()->id_rol !=4) { 
-                 return response()->json(['error' => 'No tienes permisos para crear lecciones'], 401);
+            if (Auth::user()->id_rol != 1  && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+                return response()->json(['error' => 'No tienes permisos para crear lecciones'], 401);
             }
             $leccion = Leccion::create([
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,
             ]);
-            return response()->json($leccion,201);
-       
-           
-        
+            return response()->json($leccion, 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 
     /**
@@ -69,22 +65,21 @@ class LeccionController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function editarLeccion(Request $request, string $id)
     {
         //editar solo el asesor
         try {
-            if (Auth::user()->id_rol==4) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+                return response()->json(['error' => 'No tienes permisos para editar lecciones'], 401);
+            }
             $leccion = Leccion::find($id);
             if (!$leccion) {
                 return response()->json(['error' => 'Leccion no encontrada'], 404);
             } else {
                 $leccion->nombre = $request->nombre;
                 $leccion->update();
-                return response(["message"=>"Leccion actualizada correctamente"],201);
+                return response(["message" => "Leccion actualizada correctamente"], 201);
             }
-        }else {
-            return response()->json(['error' => 'No tienes permisos para editar lecciones'], 401);
-        }
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
