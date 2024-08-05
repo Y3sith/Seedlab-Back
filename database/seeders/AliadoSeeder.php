@@ -24,6 +24,11 @@ class AliadoSeeder extends Seeder
             File::makeDirectory($logosPath, 0755, true);
         }
 
+        $documentosPath = storage_path('app/public/documentos');
+        if (!File::exists($documentosPath)) {
+            File::makeDirectory($documentosPath, 0755, true);
+        }
+
 
         $aliados = [
             [

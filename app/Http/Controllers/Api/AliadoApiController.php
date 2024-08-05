@@ -52,15 +52,13 @@ class AliadoApiController extends Controller
 
     public function traerBanners ($status){
         $banners = Banner::where('estadobanner', $status)
-        ->select ('urlImagen', 'descripcion','estadobanner', 'color')
+        ->select ('urlImagen','estadobanner')
         ->get();
 
         $bannersTransformados = $banners->map(function ($banner) {
             return [
                 'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                'descripcion' => $banner->descripcion,
-                'estado' => $banner->estadobanner,
-                'color' => $banner->color
+                'estado' => $banner->estadobanner
             ];
         });
         return response()->json($bannersTransformados);
@@ -193,6 +191,52 @@ class AliadoApiController extends Controller
         ], 201);
     }
 
+    public function editarBanner(Request $request, $id){
+
+        if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $banner = Banner::find($id);
+        if ($request->hasFile('urlImagen')) {
+            //Eliminar el logo anterior
+            Storage::delete(str_replace('storage', 'public', $banner->urlImagen));
+            
+            // Guardar el nuevo logo
+            $paths = $request->file('urlImagen')->store('public/banners');
+            $banner->urlImagen = str_replace('public', 'storage', $paths);
+
+            $banner->estadobanner = $request->input('estadobanner');
+
+            $banner->save();
+
+        }
+        return response()->json([
+            'message' => 'Banner editado exitosamente', $banner
+        ], 201);
+
+    }
+
+    public function eliminarBanner ($id)
+    {
+        if ( Auth::user()->id_rol !=3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        
+        $banner = Banner::find($id);
+        if (!$banner) {
+            return response()->json(['error' => 'Banner no encontrado'], 404);
+        }
+
+        $url = str_replace('storage', 'public', $banner->urlImagen);
+
+       Storage::delete($url);
+        $banner->delete();
+        
+        return response()->json(['message' => 'Banner eliminado correctamente'], 200);
+
+    }
+
 
 public function editarAliado(Request $request, $id)
 {
@@ -203,112 +247,7 @@ public function editarAliado(Request $request, $id)
             return response()->json(['error' => 'Aliado no encontrado'], 404);
         }
 
-
-        if (Auth::user()->id_rol == 1) {
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-
-            
-
-
-            // Validar nombre igual
-            $newNombre = $request->input('nombre');
-            if ($newNombre && $newNombre !== $aliado->nombre) {
-                $existing = Aliado::where('nombre', $newNombre)->first();
-                if ($existing) {
-                        return response()->json(['message' => 'El nombre del Aliado ya ha sido registrado anteriormente'], 400);
-                    }
-                    $aliado->nombre = $newNombre;
-                }
-    
-            $user = $aliado->auth;
-            // Obtener el usuario asociado al aliado
-    
-            if ($request->hasFile('ruta_multi')) {
-                // Si se está subiendo un nuevo archivo
-                $file = $request->file('ruta_multi');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                
-                // Determinar el tipo de archivo
-                $mimeType = $file->getMimeType();
-                
-                if (strpos($mimeType, 'image') !== false) {
-                    $folder = 'imagenes';
-                } elseif ($mimeType === 'application/pdf') {
-                    $folder = 'documentos';
-                } else {
-                    return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
-                }
-                
-                // Eliminar el archivo anterior si existe
-                if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
-                    Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
-                }
-                
-                // Guardar el nuevo archivo
-                $path = $file->storeAs("public/$folder", $fileName);
-                $aliado->ruta_multi = str_replace('public', 'storage', $path);
-            } elseif ($request->input('ruta_multi') && filter_var($request->input('ruta_multi'), FILTER_VALIDATE_URL)) {
-                // Si es una URL (asumiendo que es de YouTube)
-                // Eliminar el archivo anterior si existe
-                if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
-                    Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
-                }
-                $aliado->ruta_multi = $request->input('ruta_multi');
-            }
-    
-            if ($request->hasFile('logo')) {
-                                        //Eliminar el logo anterior
-                                        Storage::delete(str_replace('storage', 'public', $aliado->logo));
-                                        
-                                        // Guardar el nuevo logo
-                                        $path = $request->file('logo')->store('public/logos');
-                                        $aliado->logo = str_replace('public', 'storage', $path);
-    
-                                    
-                                    }
-    
-            
-    
-            // Actualizar los datos del aliado
-            $aliado->update([
-                'nombre' => $request->input('nombre'),
-                'descripcion' => $request->input('descripcion'),
-                'id_tipo_dato' => $request->input('id_tipo_dato')
-            ]);
-    
-            // Actualizar la contraseña del usuario si se proporciona una nueva
-            $password = $request->input('password');
-            if ($password) {
-                $user->password = Hash::make($password);
-            }
-    
-            // Actualizar el email del usuario si es diferente
-            $newEmail = $request->input('email');
-            if ($newEmail && $newEmail !== $user->email) {
-                $existingUser = User::where('email', $newEmail)->first();
-                if ($existingUser) {
-                    return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
-                }
-                $user->email = $newEmail;
-            }
-    
-            // Actualizar el estado del usuario
-            $user->estado = $request->input('estado');
-            Log::info('Usuario antes de guardar:', $user->toArray());
-            $user->save();
-    
-            Log::info('Aliado antes de guardar:', $aliado->toArray());
-
-            return response()->json(['message' => 'Aliado actualizado'], 200);
-        }
-
-
-
-
-
-
-
-        if (Auth::user()->id_rol == 3) {
+        if (Auth::user()->id_rol != 1) {
 
                         // Validar nombre igual
                         $newNombre = $request->input('nombre');
@@ -319,6 +258,7 @@ public function editarAliado(Request $request, $id)
                                 }
                                 $aliado->nombre = $newNombre;
                             }
+                            $user = $aliado->auth;
                 
                 
                         if ($request->hasFile('ruta_multi')) {
@@ -330,7 +270,7 @@ public function editarAliado(Request $request, $id)
                             $mimeType = $file->getMimeType();
                             
                             if (strpos($mimeType, 'image') !== false) {
-                                $folder = 'imagenes';
+                                $folder = 'logos';
                             } elseif ($mimeType === 'application/pdf') {
                                 $folder = 'documentos';
                             } else {
@@ -373,8 +313,33 @@ public function editarAliado(Request $request, $id)
                             'id_tipo_dato' => $request->input('id_tipo_dato')
                         ]);
                 
+                        // Actualizar la contraseña del usuario si se proporciona una nueva
+                        $password = $request->input('password');
+                        if ($password) {
+                            $user->password = Hash::make($password);
+                        }
+                
+                        // Actualizar el email del usuario si es diferente
+                        $newEmail = $request->input('email');
+                        if ($newEmail && $newEmail !== $user->email) {
+                            $existingUser = User::where('email', $newEmail)->first();
+                            if ($existingUser) {
+                                return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                            }
+                            $user->email = $newEmail;
+                        }
+                
+                        // Actualizar el estado del usuario
+                        $user->estado = $request->input('estado');
+                        Log::info('Usuario antes de guardar:', $user->toArray());
+                        $user->save();
+                
+                        Log::info('Aliado antes de guardar:', $aliado->toArray());
 
-            return response()->json(['message' => 'Aliado actualizado'], 200);
+
+            return response()->json(['message' => 'Aliado actualizado', 'banner' => $banner], 200);
+      
+        
         }
         
         return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
@@ -385,25 +350,7 @@ public function editarAliado(Request $request, $id)
 }
 
 
-    public function eliminarBanner ($id)
-    {
-        if ( Auth::user()->id_rol !=3) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-        
-        $banner = Banner::find($id);
-        if (!$banner) {
-            return response()->json(['error' => 'Banner no encontrado'], 404);
-        }
-
-        $url = str_replace('storage', 'public', $banner->urlImagen);
-
-       Storage::delete($url);
-        $banner->delete();
-        
-        return response()->json(['message' => 'Banner eliminado correctamente'], 200);
-
-    }
+    
 
 
 
