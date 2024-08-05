@@ -70,7 +70,7 @@ class NivelesController extends Controller
     {
         //Edita solo el asesor
         try {
-            if (Auth::user()->id_rol == 4) {
+            if (Auth::user()->id_rol == 1 && Auth::user()->id_rol == 4) {
                 $niveles = Nivel::find($id);
                 if (!$niveles) {
                     return response()->json(["error" => "Nivel no encontrado"], 404);

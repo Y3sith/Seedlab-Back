@@ -170,7 +170,14 @@ Route::group([
 });
 
 //Contenido_por_Leccion
-Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
+Route::group([
+    'prefix' => 'contenido_por_leccion',
+    'middleware' => 'auth:api'
+],function(){
+    Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class);
+    Route::post('/crearContenidoPorLeccion',[Contenido_por_LeccionController::class,'store']);
+});
+//Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
 //Asesor
 Route::group([
