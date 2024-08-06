@@ -8,6 +8,7 @@ use App\Models\Ruta;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
 
 class RutaApiController extends Controller
@@ -78,17 +79,27 @@ class RutaApiController extends Controller
         if ($existingRoute2) {
             return response()->json(['message' => 'La imagen de la ruta ya ha sido registrada anteriormente'], 423);
         }
+
+
+        if ($request->hasFile('ruta.imagen_ruta') && $request->file('banner.imagen_ruta')->isValid()) {
+            $ImagenPath = $request->file('ruta.imagen_ruta')->store('public/ruta/imagenes');
+            $imagenUrl = Storage::url($ImagenPath);
+
             $ruta = Ruta::create([
             "nombre" => $request->nombre,
             "fecha_creacion"=> Carbon::now(),
             "estado" => 1,
-            "imagen_ruta"=>$request->imagen_ruta
+            "imagen_ruta"=>$imagenUrl
             //$encodedImage
         ]);
         
-
-
+    
+    
         return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
+
+        }
+
+
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
