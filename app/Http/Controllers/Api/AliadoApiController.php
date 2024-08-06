@@ -112,6 +112,8 @@ class AliadoApiController extends Controller
                         $folder = 'imagenes';
                     } elseif ($mimeType === 'application/pdf') {
                         $folder = 'documentos';
+                    } elseif ($mimeType === 'application/pdf') {
+                        $folder = 'documentos';
                     } else {
                         return response()->json(['error' => 'Tipo de archivo no soportado para ruta_multi'], 400);
                     }
@@ -126,7 +128,7 @@ class AliadoApiController extends Controller
                     $data['nombre'],
                     $logoUrl,
                     $data['descripcion'],
-                    $data['tipodato'],
+                    $data['id_tipo_dato'],
                     $rutaMulti,
                     $data['email'],
                     Hash::make($data['password']),
