@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre', 50);
             $table->text('descripcion');
-            $table->longBinary('logo'); //este campo llamado longbinary se creo y esta en el appserviceprovider (NO BORRAR NADA ALLI)
+            $table->text('logo'); //este campo llamado longbinary se creo y esta en el appserviceprovider (NO BORRAR NADA ALLI)
             //$table->text('banner')->nullable();
             $table->text('ruta_multi')->nullable();
             $table->unsignedBigInteger('id_autentication');
