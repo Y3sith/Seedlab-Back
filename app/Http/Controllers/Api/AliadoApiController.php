@@ -20,8 +20,9 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 
 class AliadoApiController extends Controller
+
 {
-    /**
+     /**
      * Display a listing of the resource.
      */
     public function traerAliadosActivos($status)
@@ -380,36 +381,6 @@ public function editarAliado(Request $request, $id)
         }
     }
 
-    public function editarAliado(Request $request)
-    {
-        try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            }
-            $aliado = Aliado::find($request->input('id'));
-
-            if ($aliado) {
-                $aliado->nombre = $request->input('nombre');
-                $aliado->descripcion = $request->input('descripcion');
-                $aliado->logo = $request->input('logo');
-                $aliado->ruta_multi = $request->input('ruta_multi');
-                $aliado->save();
-
-                if ($aliado->auth) {
-                    $user = $aliado->auth;
-                    $user->email = $request->input('email');
-                    $user->password = Hash::make($request->input('password'));
-                    $user->estado = $request->input('estado');
-                    $user->save();
-                }
-                return response()->json(['message' => 'Aliado actualizado correctamente']);
-            } else {
-                return response()->json(['message' => 'Aliado no encontrado'], 404);
-            }
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
-
     public function traerAliadoxId($id)
     {
         $aliado = Aliado::find($id);
@@ -657,7 +628,6 @@ public function editarAliado(Request $request, $id)
     //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     //     }
     // }
-
     public function verEmprendedoresxEmpresa()
     {
         if (Auth::user()->id_rol != 3) {
@@ -671,3 +641,5 @@ public function editarAliado(Request $request, $id)
         return response()->json($emprendedoresConEmpresas);
     }
 }
+   
+
