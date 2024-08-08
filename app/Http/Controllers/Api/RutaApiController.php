@@ -69,41 +69,40 @@ class RutaApiController extends Controller
     {
         try {
             if(Auth::user()->id_rol != 1){
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-        $existingRoute = Ruta::where('nombre', $request->nombre)->first();
-        if ($existingRoute) {
-            return response()->json(['message' => 'El nombre de la ruta ya ha sido registrado anteriormente'], 422);
-        }
-        $existingRoute2 = Ruta::where('imagen_ruta', $request->imagen_ruta)->first();
-        if ($existingRoute2) {
-            return response()->json(['message' => 'La imagen de la ruta ya ha sido registrada anteriormente'], 423);
-        }
-
-
-        if ($request->hasFile('ruta.imagen_ruta') && $request->file('banner.imagen_ruta')->isValid()) {
-            $ImagenPath = $request->file('ruta.imagen_ruta')->store('public/ruta/imagenes');
-            $imagenUrl = Storage::url($ImagenPath);
-
-            $ruta = Ruta::create([
-            "nombre" => $request->nombre,
-            "fecha_creacion"=> Carbon::now(),
-            "estado" => 1,
-            "imagen_ruta"=>$imagenUrl
-            //$encodedImage
-        ]);
-        
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
     
+            $existingRoute = Ruta::where('nombre', $request->nombre)->first();
+            if ($existingRoute) {
+                return response()->json(['message' => 'El nombre de la ruta ya ha sido registrado anteriormente'], 422);
+            }
     
-        return response()->json(["message"=>"Ruta creada exitosamente", $ruta],200);
-
-        }
-
-
+            if ($request->hasFile('imagen_ruta') && $request->file('imagen_ruta')->isValid()) {
+                $existingRoute2 = Ruta::where('imagen_ruta', $request->file('imagen_ruta')->hashName())->first();
+                if ($existingRoute2) {
+                    return response()->json(['message' => 'La imagen de la ruta ya ha sido registrada anteriormente'], 423);
+                }
+    
+                $ImagenPath = $request->file('imagen_ruta')->store('public/ruta/imagenes');
+                $imagenUrl = Storage::url($ImagenPath);
+    
+                $ruta = Ruta::create([
+                    "nombre" => $request->nombre,
+                    "fecha_creacion" => Carbon::now(),
+                    "estado" => 1,
+                    "imagen_ruta" => $imagenUrl
+                ]);
+    
+                return response()->json(["message" => "Ruta creada exitosamente", "ruta" => $ruta], 200);
+            } else {
+                return response()->json(["error" => "Imagen no válida o no proporcionada"], 422);
+            }
+    
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+    
 
 
 
