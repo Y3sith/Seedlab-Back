@@ -108,11 +108,13 @@ class ActividadController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function editarActividad(Request $request, string $id)
 {
     // Solo pueden editar la actividad los usuarios con roles 3 (aliado) o 4 (asesor)
     try {
-        if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 4) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+            return response()->json(["error" => "No tienes permisos para editar esta actividad"], 403);
+        }
         $actividad = Actividad::find($id);
         if (!$actividad) {
             return response()->json(["error" => "Actividad no encontrada"], 404);
@@ -155,9 +157,7 @@ class ActividadController extends Controller
         $actividad->save();
 
         return response()->json(["message" => "Actividad actualizada con éxito"], 200);
-    } else {
-        return response()->json(["error" => "No tienes permisos para editar esta actividad"], 403);
-    }
+    
     } catch (Exception $e) {
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }

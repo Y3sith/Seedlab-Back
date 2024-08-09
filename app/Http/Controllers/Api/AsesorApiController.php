@@ -268,4 +268,19 @@ class AsesorApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+
+    public function listarAsesores (){
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['error'=>'no tienes permiso para acceder']);
+            }
+            $asesores = Asesor::all()->select('id','nombre');
+            return response()->json($asesores);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+
+    }
+
 }

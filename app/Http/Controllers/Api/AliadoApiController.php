@@ -20,8 +20,9 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 
 class AliadoApiController extends Controller
+
 {
-    /**
+     /**
      * Display a listing of the resource.
      */
     public function traerAliadosActivos($status)
@@ -393,7 +394,6 @@ public function editarAliado(Request $request, $id)
         }
     }
 
-
     public function traerAliadoxId($id)
     {
         $aliado = Aliado::find($id);
@@ -533,7 +533,7 @@ public function editarAliado(Request $request, $id)
     {
         try {
             
-            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
                 return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
             }
             $generos = DB::table('emprendedor')
@@ -641,7 +641,6 @@ public function editarAliado(Request $request, $id)
     //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     //     }
     // }
-
     public function verEmprendedoresxEmpresa()
     {
         if (Auth::user()->id_rol != 3) {
@@ -655,3 +654,5 @@ public function editarAliado(Request $request, $id)
         return response()->json($emprendedoresConEmpresas);
     }
 }
+   
+

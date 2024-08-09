@@ -136,6 +136,7 @@ Route::group([
     Route::get('/mostrarRutaContenido/{id}',[RutaApiController::class,'mostrarRutaConContenido'])->name('mostrarRutaContenido');
     Route::get('/rutasActivas',[RutaApiController::class,'rutasActivas']);
     Route::get('/rutaXid/{id}',[RutaApiController::class,'rutaxId']);
+    
 });
 
 
@@ -146,10 +147,20 @@ Route::group([
 ],function(){
     Route::apiResource('/actividad',ActividadController::class);
     Route::post('/crearActividad',[ActividadController::class,'store']);
+    Route::put('/editar_actividad/{id}',[ActividadController::class,'editarActividad']);
     Route::get('/tipo_dato',[ActividadController::class,'tipoDato']);
     Route::get('/verActividadAliado/{id}',[ActividadController::class,'VerActividadAliado']);
 });
 
+//Nivel
+Route::group([
+    'prefix' => 'nivel',
+    'middleware' => 'auth:api'
+],function(){
+    Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
+    Route::post('/crearNivel',[NivelesController::class,'store']);
+    Route::put('/editar_nivel/{id}',[NivelesController::class,'editarNivel']);
+});
 
 //Leccion
 Route::group([
@@ -158,16 +169,10 @@ Route::group([
 ],function(){
     Route::apiResource('/leccion',LeccionController::class);
     Route::post('/crearLeccion',[LeccionController::class,'store']);
+    Route::put('/editar_leccion/{id}',[LeccionController::class,'editarLeccion']);
     //Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
 });
-//Nivel
-Route::group([
-    'prefix' => 'nivel',
-    'middleware' => 'auth:api'
-],function(){
-    Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
-    Route::post('/crearNivel',[NivelesController::class,'store']);
-});
+
 
 //Contenido_por_Leccion
 Route::group([
@@ -176,6 +181,7 @@ Route::group([
 ],function(){
     Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class);
     Route::post('/crearContenidoPorLeccion',[Contenido_por_LeccionController::class,'store']);
+    Route::put('/editarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'editarContenidoLeccion']);
 });
 //Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
@@ -188,6 +194,7 @@ Route::group([
     Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
     Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
     Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
+    Route::get('/listadoAsesores', [AsesorApiController::class, 'listarAsesores']);
 });
 
 //Asesorias
