@@ -66,22 +66,21 @@ class NivelesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function editarNivel(Request $request, string $id)
     {
         //Edita solo el asesor
         try {
-            if (Auth::user()->id_rol == 4) {
-                $niveles = Nivel::find($id);
-                if (!$niveles) {
-                    return response()->json(["error" => "Nivel no encontrado"], 404);
-                } else {
-                    $niveles->nombre = $request->nombre;
-                    $niveles->descripcion = $request->descripcion;
-                    $niveles->update();
-                    return response(["messsaje" => "Nivel actualizado correctamente"], 200);
-                }
-            } else {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "no estas autorizado para editar"], 401);
+            }
+            $niveles = Nivel::find($id);
+            if (!$niveles) {
+                return response()->json(["error" => "Nivel no encontrado"], 404);
+            } else {
+                $niveles->nombre = $request->nombre;
+                $niveles->descripcion = $request->descripcion;
+                $niveles->update();
+                return response(["messsaje" => "Nivel actualizado correctamente"], 200);
             }
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

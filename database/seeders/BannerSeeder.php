@@ -58,17 +58,13 @@ class BannerSeeder extends Seeder
 
         Banner::create([
             "urlImagen" => $bannerUrl,
-            "descripcion" => "Desarrolla e impulsa tu emprendimiento de alto impacto y/o de base tecnológica",
             "estadobanner" => "Activo",
-            "color" => "#20a8d8",
             "id_aliado" => 1
         ]);
 
         Banner::create([
             "urlImagen" => $bannerUrl2,
-            "descripcion" => "Desarrolla e impulsa tu emprendimiento de alto impacto y/o de base tecnológica",
             "estadobanner" => "Activo",
-            "color" => "#20a8d8",
             "id_aliado" => 1
         ]);
     }

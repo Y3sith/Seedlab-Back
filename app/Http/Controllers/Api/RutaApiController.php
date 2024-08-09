@@ -94,22 +94,35 @@ class RutaApiController extends Controller
         }
     }
 
+
+
+
     public function rutasActivas(){
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
             return response()->json(['Error'=>'No tienes permiso para realizar esta accion'],401);
         }
         $rutasActivas = Ruta::where('estado', 1)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
+        
         return response()->json($rutasActivas);
-    }
+    }   
 
-    /**
-     * Display the specified resource.
-     */
 
-     
+
+    
+
+
+
+
+
+
+
+
+
+
+    
      public function mostrarRutaConContenido($id)
     {
-        if(!Auth::user()){
+        if(Auth::user()->id_rol !=1){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
@@ -198,4 +211,11 @@ class RutaApiController extends Controller
             'message' => 'Ruta desactivada exitosamente'
         ], 200);
     }
+
+
+
+    
+
+
+    
 }

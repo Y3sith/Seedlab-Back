@@ -14,9 +14,7 @@ return new class extends Migration
         Schema::create('banner', function (Blueprint $table) {
             $table->id();
             $table->text('urlImagen');
-            $table->string('descripcion');
             $table->string('estadobanner');
-            $table->string('color');
             $table->unsignedBigInteger('id_aliado');
             $table->foreign('id_aliado')->references('id')->on('aliado')->onDelete('cascade');
             //$table->timestamps();
