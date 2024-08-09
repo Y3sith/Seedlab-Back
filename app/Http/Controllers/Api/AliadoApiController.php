@@ -82,16 +82,16 @@ class AliadoApiController extends Controller
             $aliadoId = null;
     
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
     
             if (strlen($data['password']) < 8) {
-                return response()->json(['error' => 'La contraseña debe tener al menos 8 caracteres'], 400);
+                return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
             }
     
             // Validación del banner
             if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
-                return response()->json(['error' => 'Se requiere una imagen válida para el banner'], 400);
+                return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
             }
     
             DB::beginTransaction();
@@ -116,7 +116,7 @@ class AliadoApiController extends Controller
                     } elseif ($mimeType === 'application/pdf') {
                         $folder = 'documentos';
                     } else {
-                        return response()->json(['error' => 'Tipo de archivo no soportado para ruta_multi'], 400);
+                        return response()->json(['message' => 'Tipo de archivo no soportado para ruta_multi'], 400);
                     }
                     
                     $path = $file->storeAs("public/$folder", $fileName);
@@ -163,16 +163,16 @@ class AliadoApiController extends Controller
                 DB::commit();
                 Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
     
-                return response()->json(['message' => $response], $statusCode);
+                return response()->json(['message' => 'Aliado creado exitosamente'], 201);
     
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error('Error al crear aliado y banner:', ['error' => $e->getMessage()]);
-                return response()->json(['error' => $e->getMessage()], 400);
+                Log::error('Error al crear aliado y banner:', ['message' => $e->getMessage()]);
+                return response()->json(['message' => $e->getMessage()], 400);
             }
     
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
