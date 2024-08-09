@@ -122,6 +122,9 @@ class AliadoApiController extends Controller
                     $rutaMulti = Storage::url($path);
                 } elseif ($data->input('ruta_multi') && filter_var($data->input('ruta_multi'), FILTER_VALIDATE_URL)) {
                     $rutaMulti = $data->input('ruta_multi');
+                }elseif ($data->input('ruta_multi')) {
+                    // Si se envió un texto en 'ruta_multi', se guarda como texto
+                    $rutaMulti = $data->input('ruta_multi');
                 }
     
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
