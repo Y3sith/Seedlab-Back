@@ -27,6 +27,7 @@ class EmpresaSeeder extends Seeder
             "experiencia"=> "nada",
             "funciones"=> "jefe",
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866,
             "id_emprendedor"=> "1098476011"
         ]);
@@ -44,6 +45,7 @@ class EmpresaSeeder extends Seeder
             "experiencia"=> "nada",
             "funciones"=> "jefe",
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866,
             "id_emprendedor"=> "1098476011"
         ]);
@@ -63,6 +65,7 @@ class EmpresaSeeder extends Seeder
             "experiencia"=> "nada",
             "funciones"=> "jefe",
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866,
             "id_emprendedor"=> "28358568"
         ]);
@@ -81,6 +84,7 @@ class EmpresaSeeder extends Seeder
             "experiencia"=> "nada",
             "funciones"=> "jefe",
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866,
             "id_emprendedor"=> "28358568"
         ]);
@@ -100,6 +104,7 @@ class EmpresaSeeder extends Seeder
             "experiencia"=> "nada",
             "funciones"=> "jefe",
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866,
             "id_emprendedor"=> "10101010"
         ]);
@@ -118,6 +123,7 @@ class EmpresaSeeder extends Seeder
             "experiencia"=> "nada",
             "funciones"=> "jefe",
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866,
             "id_emprendedor"=> "10101010"
         ]);

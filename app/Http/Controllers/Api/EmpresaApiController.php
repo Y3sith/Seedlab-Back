@@ -25,6 +25,25 @@ class EmpresaApiController extends Controller
         return new JsonResponse($empresa->items());
     }
 
+    public function getOnlyempresa($id_emprendedor, $documento)
+{
+    /* Muestra la empresa específica del emprendedor */
+    if (Auth::user()->id_rol != 5) {
+        return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+    }
+
+    // Encuentra la empresa específica del emprendedor con el id proporcionado
+    $empresa = Empresa::where('id_emprendedor', $id_emprendedor)
+                      ->where('documento', $documento) // Asumiendo que 'id' es el campo que identifica a la empresa
+                      ->first();
+
+    if (!$empresa) {
+        return response()->json(["error" => "Empresa no encontrada"], 404);
+    }
+
+    return response()->json($empresa, 200);
+}
+
     /**
      * Store a newly created resource in storage.
      */

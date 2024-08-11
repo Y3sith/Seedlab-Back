@@ -15,7 +15,7 @@ class UbicacionController extends Controller
         return response()->json($nombresDepartamentos, 200, [], JSON_UNESCAPED_UNICODE);
     }
 
-    public function listar_munxdep(Request $request)
+    public function listar_munxdep(Request $request)        
     {
         $nombreDepartamento = $request->input('dep_name');
         $departamento = Departamento::where('name', $nombreDepartamento)->first();
