@@ -31,12 +31,13 @@ class AliadoApiController extends Controller
 
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
+            ->select('id','nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
             //$banner = Banner::find($aliado->$id_aliado);
             return [
+                'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
                 //'logo' => $aliado->logo,
@@ -49,6 +50,35 @@ class AliadoApiController extends Controller
         });
 
         return response()->json($aliadosTransformados);
+    }
+
+    public function traerAliadoxId($id)
+    {
+        try {
+        if (Auth::user()->id_rol != 1) {
+            return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $aliado = Aliado::where('id', $id)
+        //->with('auth:id,email,estado')
+        ->select('id','nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato',"id_autentication")
+        ->first();
+        return [
+            'id'=>$aliado->id,
+            'nombre'=>$aliado->nombre,
+            'descripcion'=>$aliado->descripcion,
+            'logo'=>$aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
+            'ruta_multi'=>$aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
+            'id_tipo_dato'=>$aliado->id_tipo_dato,
+            'email'=>$aliado->auth->email,
+            'estado'=>$aliado->auth->estado == 1 ? 'Activo': 'Inactivo',
+            //'id_autentication' =>$asesor->auth->id_autentication    
+        ];
+    
+       // return response()->json($aliadoTransformado);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
     }
 
     public function traerBanners ($status){
@@ -325,6 +355,7 @@ public function editarAliado(Request $request, $id)
         
             
                     // Actualizar los datos del aliado
+                    Log::info('Datos recibidos para actualización:', $request->all());
                     $aliado->update([
                         'nombre' => $request->input('nombre'),
                         'descripcion' => $request->input('descripcion'),
@@ -348,7 +379,7 @@ public function editarAliado(Request $request, $id)
                     }
             
                     // Actualizar el estado del usuario
-                    $user->estado = $request->input('estado');
+                    $user->estado = $request->input('estado') === 'true' ? 1 : 0;
                     Log::info('Usuario antes de guardar:', $user->toArray());
                     $user->save();
             
@@ -359,6 +390,8 @@ public function editarAliado(Request $request, $id)
         
         
     } catch (Exception $e) {
+        Log::error('Error en editarAliado: ' . $e->getMessage());
+    Log::error('Datos de la solicitud: ' . json_encode($request->all()));
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
 }
@@ -394,11 +427,7 @@ public function editarAliado(Request $request, $id)
         }
     }
 
-    public function traerAliadoxId($id)
-    {
-        $aliado = Aliado::find($id);
-        return response()->json($aliado,200);
-    }
+
 
     /**
      * Store a newly created resource in storage.
