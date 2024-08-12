@@ -50,9 +50,18 @@ class NivelesController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function listarNiveles()
     {
         //proximamente mostrar niveles asociados a actividades o viseversa
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message'=> 'No tiened permisos '],401);
+            }
+        $nivel = Nivel::all()->select('id','nombre');
+        return response()->json($nivel);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

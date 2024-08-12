@@ -160,6 +160,7 @@ Route::group([
     Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
     Route::post('/crearNivel',[NivelesController::class,'store']);
     Route::put('/editar_nivel/{id}',[NivelesController::class,'editarNivel']);
+    Route::get('/listar-Nivel', [NivelesController::class,'listarNiveles']);
 });
 
 //Leccion
