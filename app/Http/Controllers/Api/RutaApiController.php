@@ -28,7 +28,7 @@ class RutaApiController extends Controller
             $estadoBool = $estado === 'Activo' ? 1 : 0;
 
             $rutaVer = Ruta::where('estado', $estadoBool)
-                ->get(['id', 'nombre', 'fecha_creacion', 'estado', 'imagen_ruta']);
+                ->get(['id', 'nombre', 'fecha_creacion', 'estado']);
 
             $rutasi = $rutaVer->map(function ($rutaVers) {
                 return [
