@@ -38,11 +38,22 @@ class EmpresaApiController extends Controller
                       ->first();
 
     if (!$empresa) {
-        return response()->json(["error" => "Empresa no encontrada"], 404);
+       return response()->json(["error" => "Empresa no encontrada"], 404);
     }
 
-    return response()->json($empresa, 200);
-}
+    $apoyo = ApoyoEmpresa::where('id_empresa', $empresa->documento)->first();
+
+    // Convierte la empresa en un array
+    $data = $empresa->toArray();
+
+    // Si hay un apoyo, lo agrega al array
+    if ($apoyo) {
+        $data['apoyo'] = $apoyo;
+    }
+
+    return response()->json($data, 200);
+    }
+    
 
     /**
      * Store a newly created resource in storage.
@@ -119,41 +130,51 @@ class EmpresaApiController extends Controller
      * Update the specified resource in storage.
      */
     public function update(Request $request, $documento)
-    {
-        // edita la empresa/edita y agrega apoyos
-        if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }
-
-        $empresa = Empresa::find($documento);
-
-        if (!$empresa) {
-            return response()->json([
-                'message' => 'Empresa no encontrada',
-            ], 404);
-        }
-
-        $empresa->update($request->all());
-
-        if ($request->filled('apoyoxempresa')) {
-            foreach ($request->apoyoxempresa as $apoyoData) {
-                if (isset($apoyoData['documento'])) {
-
-                    $apoyo = ApoyoEmpresa::where('documento', $apoyoData['documento'])->first();
-                    if ($apoyo) {
-
-                        $apoyo->update($apoyoData);
-                    } else {
-
-                        $nuevoApoyo = new ApoyoEmpresa($apoyoData);
-                        $nuevoApoyo->id_empresa = $empresa->documento;
-                        $nuevoApoyo->save();
-                    }
-                }
-            }
-        }
-        return response()->json(["message" => "Empresa actualizada"], 200);
+{
+    // Verifica si el usuario tiene permisos
+    if (Auth::user()->id_rol != 5) {
+        return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
     }
+
+    // Busca la empresa por el documento
+    $empresa = Empresa::find($documento);
+
+    // Verifica si la empresa existe
+    if (!$empresa) {
+        return response()->json(['message' => 'Empresa no encontrada'], 404);
+    }
+
+    // Actualiza la información de la empresa
+    $empresa->update($request->except('apoyo'));
+
+    // Maneja la actualización o creación de registros en `apoyo_empresa`
+    if ($request->has('apoyo')) {
+        $apoyoData = $request->input('apoyo');
+
+        // Verifica si el campo 'documento' está presente y no es nulo
+        if (isset($apoyoData['documento']) && !empty($apoyoData['documento'])) {
+            // Busca si ya existe un apoyo con el documento especificado
+            $apoyo = ApoyoEmpresa::where('documento', $apoyoData['documento'])->first();
+
+            if ($apoyo) {
+                // Actualiza el apoyo si ya existe
+                $apoyo->update($apoyoData);
+            } else {
+                // Crea un nuevo apoyo si no existe
+                $nuevoApoyo = new ApoyoEmpresa($apoyoData);
+                $nuevoApoyo->id_empresa = $empresa->documento; // Asegúrate de asignar el ID de la empresa
+                $nuevoApoyo->save();
+            }
+        } else {
+            // Si no hay datos de apoyo o el documento está vacío, no hacer nada con el apoyo
+            // Puedes optar por no hacer nada aquí o manejar un caso especial si es necesario
+        }
+    }
+
+    return response()->json(["message" => "Empresa actualizada"], 200);
+}
+
+
 
     /*
     Remove the specified resource from storage.
