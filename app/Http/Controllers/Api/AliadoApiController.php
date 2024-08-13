@@ -110,6 +110,8 @@ class AliadoApiController extends Controller
             $response = null;
             $statusCode = 200;
             $aliadoId = null;
+            $youtubeRegex = '/^https:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}$/';
+            $rutaMulti = trim($data->input('ruta_multi'));
     
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
@@ -123,7 +125,29 @@ class AliadoApiController extends Controller
             if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
                 return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
             }
-    
+
+            if (!$data->hasFile('logo') || !$data->file('logo')->isValid()) {
+                return response()->json(['message' => 'Se requiere una imagen válida para el logo'], 400);
+            }
+
+                if ($data->input('id_tipo_dato') == 3 || $data->input('id_tipo_dato') == 4) {
+                    if (!$data->hasFile('ruta_multi') || !$data->file('ruta_multi')->isValid()) {
+                        return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
+                    }
+                } elseif ($data->input('id_tipo_dato') == 1 || $data->input('id_tipo_dato') == 5) {
+                    if (trim($data->input('ruta_multi')) == null ) {
+                        return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
+                    }
+                    // if (trim($data->input('id_tipo_dato')) == 1 ){
+                    //     if (!preg_match($youtubeRegex, $rutaMulti)) {
+                    //         return response()->json(['message' => 'La URL proporcionada no es una dirección válida de YouTube'], 400);
+                    //     }
+                    // }
+                }
+
+
+        
+
             DB::beginTransaction();
     
             try {
@@ -166,7 +190,7 @@ class AliadoApiController extends Controller
                     $rutaMulti,
                     $data['email'],
                     Hash::make($data['password']),
-                    $data['estado'],
+                    $data['estado'] === 'true' ? 1 : 0,
                 ]);
     
                 if (empty($results)) {
