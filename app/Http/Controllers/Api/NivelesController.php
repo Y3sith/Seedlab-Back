@@ -38,7 +38,6 @@ class NivelesController extends Controller
             }
             $niveles = Nivel::create([
                 'nombre' => $request->nombre,
-                'descripcion' => $request->descripcion,
                 'id_actividad' => $request->id_actividad,
             ]);
             return response()->json($niveles, 201);
@@ -87,7 +86,6 @@ class NivelesController extends Controller
                 return response()->json(["error" => "Nivel no encontrado"], 404);
             } else {
                 $niveles->nombre = $request->nombre;
-                $niveles->descripcion = $request->descripcion;
                 $niveles->update();
                 return response(["messsaje" => "Nivel actualizado correctamente"], 200);
             }
