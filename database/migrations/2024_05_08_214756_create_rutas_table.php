@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('nombre',100);
             $table->date('fecha_creacion');
             $table->boolean('estado');
-            $table->text('imagen_ruta');
             //$table->timestamps();
         });
     }
