@@ -449,4 +449,23 @@ class SuperAdminController extends Controller
         }
        
     }
+
+    public function asesorisaTotalesAliado(Request $request){
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message'=>'no tienes permiso para esta funcion']);
+            }
+            $anio = $request->input('fecha', date('Y'));
+
+            $asesoriasporaliado = Asesoria::whereYear('fecha',$anio)
+            ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
+            ->select('aliado.nombre', DB::raw('COUNT(asesoria.id) as total_asesorias'))
+            ->groupBy('aliado.id','aliado.nombre')
+            ->get();
+            return response()->json($asesoriasporaliado, 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 401);
+         }
+    }
 }
