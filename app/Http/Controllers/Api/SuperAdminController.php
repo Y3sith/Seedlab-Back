@@ -499,22 +499,74 @@ class SuperAdminController extends Controller
         }
     }
 
-    public function asesorisaTotalesAliado(Request $request){
+    public function asesorisaTotalesAliado(Request $request)
+    {
         try {
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['message'=>'no tienes permiso para esta funcion']);
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
             $anio = $request->input('fecha', date('Y'));
 
-            $asesoriasporaliado = Asesoria::whereYear('fecha',$anio)
-            ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
-            ->select('aliado.nombre', DB::raw('COUNT(asesoria.id) as total_asesorias'))
-            ->groupBy('aliado.id','aliado.nombre')
-            ->get();
+            $asesoriasporaliado = Asesoria::whereYear('fecha', $anio)
+                ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
+                ->select('aliado.nombre', DB::raw('COUNT(asesoria.id) as total_asesorias'))
+                ->groupBy('aliado.id', 'aliado.nombre')
+                ->get();
             return response()->json($asesoriasporaliado, 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
+        }
+    }
+
+    public function promEmpresasXmes(Request $request)
+    {
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
+            }
+            ///me trae las empresas creadar por mes
+            $anio = $request->input('fecha', date('Y'));
+            $empresasPorMes = Empresa::whereYear('fecha_registro', $anio)
+                ->select(DB::raw('MONTH(fecha_registro) as mes, COUNT(*) as total_empresas'))
+                ->groupBy('mes')
+                ->get();
+            $totalMeses = $empresasPorMes->count();
+            $totalEmpresas = $empresasPorMes->sum('total_empresas');
+            $promedioEmpresasPorMes = $totalMeses > 0 ? $totalEmpresas / $totalMeses : 0;
+
+            return response()->json([
+                'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
+                'detalles' => $empresasPorMes
+            ], 200);
+
+
+            // // Obtener el total de empresas registradas por cada mes del año
+
+            // $anio = $request->input('anio', date('Y'));
+            // $empresasPorMes = Empresa::whereYear('fecha_registro', $anio)
+            //     ->select(DB::raw('MONTH(fecha_registro) as mes, COUNT(*) as total_empresas'))
+            //     ->groupBy('mes')
+            //     ->get()
+            //     ->keyBy('mes');
+            // // Asegurarse de que se consideren todos los meses, incluso si no hubo registros
+            // $meses = range(1, 12);
+            // $empresasPorMesCompleto = collect($meses)->map(function ($mes) use ($empresasPorMes) {
+            //     return [
+            //         'mes' => $mes,
+            //         'total_empresas' => $empresasPorMes->has($mes) ? $empresasPorMes[$mes]->total_empresas : 0
+            //     ];
+            // });
+            // // Calcular el promedio de empresas registradas por mes
+            // $totalEmpresas = $empresasPorMesCompleto->sum('total_empresas');
+            // $promedioEmpresasPorMes = $totalEmpresas / 12;  // Considerando todos los meses del año
+            // return response()->json([
+            //     'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
+            //     'detalles' => $empresasPorMesCompleto
+            // ], 200);
+
 
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 401);
-         }
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
+        }
     }
 }
