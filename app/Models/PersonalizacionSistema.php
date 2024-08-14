@@ -16,7 +16,7 @@ class PersonalizacionSistema extends Model
         'nombre_sistema',
         'color_principal',
         'color_secundario',
-        'color_terciario',
+        //'color_terciario',
         'logo_footer',
         'descripcion_footer',
         'paginaWeb',

@@ -340,14 +340,14 @@ class SuperAdminController extends Controller
 
         $result['topAliados'] = $top;
 
-       
+
         $result['conteoAsesorias'] = $this->asesoriasAsignadasSinAsignar();
 
 
 
         return response()->json($result);
     }
-    
+
 
     public function averageAsesorias2024()
     {
@@ -384,7 +384,8 @@ class SuperAdminController extends Controller
         return $topAliados;
     }
 
-    public function asesoriasAsignadasSinAsignar(){
+    public function asesoriasAsignadasSinAsignar()
+    {
         $asesoriasAsignadas = Asesoria::where('asignacion', 1)->count();
         $asesoriasSinAsignar = Asesoria::where('asignacion', 0)->count();
         return [
@@ -424,7 +425,6 @@ class SuperAdminController extends Controller
             return response()->json([
                 'message' => 'Personalización restaurada correctamente'
             ], 200);
-
         } catch (\Exception $e) {
             return response()->json([
                 'message' => 'Error al restaurar la personalización',
