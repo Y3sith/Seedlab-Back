@@ -28,6 +28,7 @@ class Empresa extends Model
         'experiencia',
         'funciones',
         'id_tipo_documento',
+        'id_departamento',
         'id_municipio',
         'id_emprendedor'
     ];
