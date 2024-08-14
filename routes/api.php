@@ -44,9 +44,12 @@ Route::group([
    'middleware' => 'auth:api'
 ], function(){
     Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
-    //Route::put('/updateEmpresa', [EmpresaApiController::class, 'update']);
+    Route::put('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
     //Route::apiResource('/empresa',EmpresaApiController::class);
+    Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyempresa']);
+    
 });
+
 
 //Emprendedor
 Route::group([
@@ -88,6 +91,9 @@ Route::group([
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);
+    Route::get('/asesoriastotalesAliado',[SuperAdminController::class,'asesorisaTotalesAliado']);
+    Route::get('/listRegistrosAnioMes', [SuperAdminController::class, 'conteoRegistrosAnioYMes']);
+    Route::get('/promEmpresas_Mes',[SuperAdminController::class,'promEmpresasXmes']);
 });
 
 
@@ -115,6 +121,7 @@ Route::group([
     Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
     Route::post('/editarbanner/{id}',[AliadoApiController::class,'editarBanner']);
     Route::delete('/eliminarbanner/{id}',[AliadoApiController::class,'eliminarBanner']);
+    Route::get('/asesorias_mes/{id}',[AliadoApiController::class,'asesoriasXmes']);
 
 
 });
@@ -161,6 +168,7 @@ Route::group([
     Route::apiResource('/nivel',NivelesController::class)->middleware('auth:api');
     Route::post('/crearNivel',[NivelesController::class,'store']);
     Route::put('/editar_nivel/{id}',[NivelesController::class,'editarNivel']);
+    Route::get('/listar_Nivel', [NivelesController::class,'listarNiveles']);
 });
 
 //Leccion
