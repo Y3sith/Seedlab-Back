@@ -54,11 +54,24 @@ class RutaApiController extends Controller
 
     public function rutaxId($id)
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+            // 'estado' => $ruta->estado == 1 ? 'Activo' : 'Inactivo';
+            //$ruta = Ruta::find($id);
+            $ruta = Ruta::where('id', $id)
+                ->select('id', 'nombre', 'fecha_creacion', 'estado')
+                ->first();
+            return [
+                'id' => $ruta->id,
+                'nombre' => $ruta->nombre,
+                'fecha_creacion' => $ruta->fecha_creacion,
+                'estado' => $ruta->estado == 1 ? 'Activo' : 'Inactivo',
+            ];
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        $ruta = Ruta::find($id);
-        return response()->json($ruta);
     }
 
 
@@ -101,20 +114,6 @@ class RutaApiController extends Controller
         return response()->json($rutasActivas);
     }
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     public function mostrarRutaConContenido($id)
     {
         if (Auth::user()->id_rol != 1) {
@@ -133,7 +132,6 @@ class RutaApiController extends Controller
         // Retornar la ruta con todas las relaciones cargadas
         return response()->json($ruta);
     }
-
 
 
     /**
@@ -171,7 +169,6 @@ class RutaApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
     /**
      * Remove the specified resource from storage.
      */
