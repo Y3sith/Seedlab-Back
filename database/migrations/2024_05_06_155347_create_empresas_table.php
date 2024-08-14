@@ -22,6 +22,7 @@ return new class extends Migration
             $table->string('direccion',50);
             $table->string('profesion',50);
             $table->string('correo',100);
+            $table->timestamp('fecha_registro')->useCurrent();
             $table->text('experiencia')->nullable();
             $table->text('funciones')->nullable();
             $table->unsignedBigInteger('id_tipo_documento');
