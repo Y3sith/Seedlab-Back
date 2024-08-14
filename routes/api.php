@@ -91,6 +91,7 @@ Route::group([
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);
+    Route::get('/listRegistrosAnioMes', [SuperAdminController::class, 'conteoRegistrosAnioYMes']);
 });
 
 

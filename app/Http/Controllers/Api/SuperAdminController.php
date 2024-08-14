@@ -27,49 +27,49 @@ class SuperAdminController extends Controller
 
 
 
-     public function personalizacionSis(Request $request, $id)
-     {
-         if (Auth::user()->id_rol != 1) {
-             return response()->json([
-                 'message' => 'No tienes permiso para acceder a esta ruta'
-             ], 401);
-         }   
-         // Buscar la personalización existente
-         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
-         if (!$personalizacion) {
-             return response()->json([
-                 'message' => 'Personalización no encontrada'
-             ], 404);
-         }
-     
-         // Actualizar otros campos
-         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
-         $personalizacion->color_principal = $request->input('color_principal');
-         $personalizacion->color_secundario = $request->input('color_secundario');
-         $personalizacion->color_terciario = $request->input('color_terciario');
-         $personalizacion->id_superadmin = $request->input('id_superadmin');
-         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
-         $personalizacion->paginaWeb = $request->input('paginaWeb');
-         $personalizacion->email = $request->input('email');
-         $personalizacion->telefono = $request->input('telefono');
-         $personalizacion->direccion = $request->input('direccion');
-         $personalizacion->ubicacion = $request->input('ubicacion');
-     
-         // Manejo de archivos
-         if ($request->hasFile('logo_footer') && $request->file('logo_footer')->isValid()) {
-             $logoFooterPath = $request->file('logo_footer')->store('public/logos');
-             $personalizacion->logo_footer = Storage::url($logoFooterPath);
-         }
-     
-         if ($request->hasFile('imagen_logo') && $request->file('imagen_logo')->isValid()) {
-             $imagenLogoPath = $request->file('imagen_logo')->store('public/logos');
-             $personalizacion->imagen_logo = Storage::url($imagenLogoPath);
-         }
-     
-         $personalizacion->save();
-         
-         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
-     }
+    public function personalizacionSis(Request $request, $id)
+    {
+        if (Auth::user()->id_rol != 1) {
+            return response()->json([
+                'message' => 'No tienes permiso para acceder a esta ruta'
+            ], 401);
+        }
+        // Buscar la personalización existente
+        $personalizacion = PersonalizacionSistema::where('id', $id)->first();
+        if (!$personalizacion) {
+            return response()->json([
+                'message' => 'Personalización no encontrada'
+            ], 404);
+        }
+
+        // Actualizar otros campos
+        $personalizacion->nombre_sistema = $request->input('nombre_sistema');
+        $personalizacion->color_principal = $request->input('color_principal');
+        $personalizacion->color_secundario = $request->input('color_secundario');
+        $personalizacion->color_terciario = $request->input('color_terciario');
+        $personalizacion->id_superadmin = $request->input('id_superadmin');
+        $personalizacion->descripcion_footer = $request->input('descripcion_footer');
+        $personalizacion->paginaWeb = $request->input('paginaWeb');
+        $personalizacion->email = $request->input('email');
+        $personalizacion->telefono = $request->input('telefono');
+        $personalizacion->direccion = $request->input('direccion');
+        $personalizacion->ubicacion = $request->input('ubicacion');
+
+        // Manejo de archivos
+        if ($request->hasFile('logo_footer') && $request->file('logo_footer')->isValid()) {
+            $logoFooterPath = $request->file('logo_footer')->store('public/logos');
+            $personalizacion->logo_footer = Storage::url($logoFooterPath);
+        }
+
+        if ($request->hasFile('imagen_logo') && $request->file('imagen_logo')->isValid()) {
+            $imagenLogoPath = $request->file('imagen_logo')->store('public/logos');
+            $personalizacion->imagen_logo = Storage::url($imagenLogoPath);
+        }
+
+        $personalizacion->save();
+
+        return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
+    }
 
 
 
@@ -83,7 +83,7 @@ class SuperAdminController extends Controller
                 'message' => 'No se encontraron personalizaciones del sistema'
             ], 404);
         }
-       // $imageBase64 = $personalizaciones->imagen_logo;
+        // $imageBase64 = $personalizaciones->imagen_logo;
         // if (strpos($imageBase64, 'data:image/png;base64,') === false) {
         //     // Si no contiene el prefijo, agregarlo
         //     $imageBase64 = 'data:image/png;base64,' . $imageBase64;
@@ -394,6 +394,56 @@ class SuperAdminController extends Controller
         ];
     }
 
+    public function conteoRegistrosAnioYMes()
+    {
+
+        // $averageMonthly = DB::table('users')
+        //     ->select(DB::raw('YEAR(fecha_registro) as year, MONTH(fecha_registro) as month, COUNT(*) as total'))
+        //     ->groupBy(DB::raw('YEAR(fecha_registro), MONTH(fecha_registro)'))
+        //     ->get();
+
+        // $monthlyAverage = $averageMonthly->avg('total');
+
+        // $averageYearly = DB::table('users')
+        //     ->select(DB::raw('YEAR(fecha_registro) as year, COUNT(*) as total'))
+        //     ->groupBy(DB::raw('YEAR(fecha_registro)'))
+        //     ->get();
+
+        // $yearlyAverage = $averageYearly->avg('total');
+
+        // $roleIdEmprendedor = 5; // Rol emprendedor
+        // $roleIdAliado = 3; // Rol aliado
+
+        // Promedio mensual para emprendedores
+        $averageMonthlyEmprendedor = DB::table('users')
+            ->select(
+                DB::raw("MONTH(fecha_registro) as mes"),
+                DB::raw("SUM(CASE WHEN id_rol = 5 THEN 1 ELSE 0 END) as emprendedores"),
+                DB::raw("SUM(CASE WHEN id_rol = 3 THEN 1 ELSE 0 END) as aliados")
+            )
+            ->groupBy('mes')
+            ->orderBy('mes', 'ASC')
+            ->get();
+
+
+        // // Promedio mensual para aliados
+        // $averageMonthlyAliado = DB::table('users')
+        //     ->select(DB::raw('YEAR(fecha_registro) as year, MONTH(fecha_registro) as month, COUNT(*) as total'))
+        //     ->where('id_rol', $roleIdAliado)
+        //     ->groupBy(DB::raw('YEAR(fecha_registro), MONTH(fecha_registro)'))
+        //     ->get();
+
+        // $monthlyAverageAliado = $averageMonthlyAliado->avg('total');
+
+
+        return response()->json([
+            // 'monthly_average' => $monthlyAverage,
+            // 'yearly_average' => $yearlyAverage,
+            'promedios' => $averageMonthlyEmprendedor,
+            // 'aliado' => $monthlyAverageAliado,
+        ]);
+    }
+
 
     public function restore($id)
     {
@@ -414,10 +464,10 @@ class SuperAdminController extends Controller
 
             // Restaurar los valores originales (puedes definir los valores originales manualmente o tenerlos guardados previamente)
             $personalizacion->nombre_sistema = 'SeedLab';
-            $personalizacion->color_principal = '#00B3ED'; 
-            $personalizacion->color_secundario = '#FA7D00'; 
+            $personalizacion->color_principal = '#00B3ED';
+            $personalizacion->color_secundario = '#FA7D00';
             $personalizacion->color_terciario = '#FFF';
-            $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg'; 
+            $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
 
             // Guardar los cambios
             $personalizacion->save();
@@ -433,20 +483,19 @@ class SuperAdminController extends Controller
         }
     }
 
-    public function listarAliados (){
+    public function listarAliados()
+    {
 
         try {
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['message'=>'No tienes permiso para esta funcion'],400);
+                return response()->json(['message' => 'No tienes permiso para esta funcion'], 400);
             }
-            $aliados = Aliado::whereHas('auth', function($query) {
+            $aliados = Aliado::whereHas('auth', function ($query) {
                 $query->where('estado', '1');
             })->get(['id', 'nombre']);
             return response()->json($aliados, 200);
-            
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 401);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
-       
     }
 }

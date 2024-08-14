@@ -19,7 +19,6 @@ class Emprendedor extends Model
         'documento',
         'celular',
         'genero',
-       //'password',
         'fecha_nac',
         'direccion',
         'id_municipio',

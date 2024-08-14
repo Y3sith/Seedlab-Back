@@ -18,6 +18,7 @@ return new class extends Migration
             $table->boolean('estado');
             $table->unsignedBigInteger('id_rol');
             $table->foreign('id_rol')->references('id')->on('rol');
+            $table->timestamp('fecha_registro')->useCurrent();
             $table->rememberToken();
             $table->string('reset_token')->nullable(); // Añadido para reset de contraseña
             $table->timestamp('token_created_at')->nullable(); // Añadido para reset de contraseña
