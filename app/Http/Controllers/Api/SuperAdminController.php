@@ -332,9 +332,6 @@ class SuperAdminController extends Controller
         $result['activos'] = round($activePercentage, 2) . '%';
         $result['inactivos'] = round($inactivePercentage, 2) . '%';
 
-        $averageAsesorias = $this->averageAsesorias2024();
-
-        $result['Promedio Anual de AsesoriasxEmprendedor'] = round($averageAsesorias, 2);
 
         $top = $this->topAliados();
 
@@ -349,17 +346,35 @@ class SuperAdminController extends Controller
     }
 
 
-    public function averageAsesorias2024()
+    public function averageAsesorias2024(Request $request)
     {
-        $averageAsesorias = Asesoria::whereRaw('YEAR(fecha) = 2024') // Cambiar aquí el año desde el front
+        $year = $request->input('year', 2024); // Por defecto, 2024 si no se proporciona año
+
+        $averageAsesoriasByMonth = DB::table('asesoria')
+            ->select(
+                DB::raw('MONTH(fecha) as mes'),
+                DB::raw('COUNT(*) / COUNT(DISTINCT doc_emprendedor) as promedio_asesorias')
+            )
+            ->whereRaw('YEAR(fecha) = ?', [$year])
+            ->groupBy(DB::raw('MONTH(fecha)'))
+            ->orderBy(DB::raw('MONTH(fecha)'))
+            ->get();
+
+        $averageTotal = Asesoria::whereRaw('YEAR(fecha) = ?', [$year])
             ->join(
-                DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = 2024 GROUP BY doc_emprendedor) as asesoria_counts'), // Cambiar aquí el año desde el front
+                DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = ? GROUP BY doc_emprendedor) as asesoria_counts'),
                 'asesoria_counts.doc_emprendedor',
                 '=',
                 'asesoria.doc_emprendedor'
-            )->selectRaw('AVG(asesoria_counts.asesoria_count) as average_asesorias')->value('average_asesorias');
+            )
+            ->selectRaw('AVG(asesoria_counts.asesoria_count) as average_asesorias')
+            ->setBindings([$year, $year]) // Asignar el año dos veces para la subconsulta
+            ->value('average_asesorias');
 
-        return $averageAsesorias;
+        return [
+            'promedio_mensual' => $averageAsesoriasByMonth,
+            'promedio_anual' => $averageTotal
+        ];
     }
 
     public function topAliados()
