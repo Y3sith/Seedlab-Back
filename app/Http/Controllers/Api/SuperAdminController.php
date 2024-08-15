@@ -18,6 +18,7 @@ use App\Models\Aliado;
 use App\Models\Asesor;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SuperAdminController extends Controller
 {
@@ -611,4 +612,22 @@ class SuperAdminController extends Controller
             return response()->json(['error'=>['Ocurrió un error al procesar la solicitud: '=> $e->getMessage()],401]);
         }
     }
+
+    public function emprendedoresPorMunicipioPDF (){
+        $emprendedoresPorMunicipio = Emprendedor::with('municipios')
+        ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
+        ->groupBy('id_municipio')
+        ->get()
+        ->map(function($emprendedor) {
+            return [
+                'municipio' => $emprendedor->municipios->nombre, 
+                'total_emprendedores' => $emprendedor->total_emprendedores,
+            ];
+        });
+
+        $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
+        return $pdf->download('reporte_emprendedores_municipio.pdf');
+    }
+
+
 }
