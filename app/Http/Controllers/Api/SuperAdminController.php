@@ -589,4 +589,26 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
     }
+
+    public function emprendedorXdepartamento(){
+        try {
+            if (Auth::user()->id_rol !=1 && Auth::user()->id_rol != 2) {
+                return response()->json(['message'=>'no tienes permisos para acceder a esta funcion'],404);
+            }
+           $emprendedoresPorMunicipio = Emprendedor::with('municipios')
+            ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
+            ->groupBy('id_municipio')
+            ->get()
+            ->map(function($emprendedor) {
+                return [
+                    'municipio' => $emprendedor->municipios->nombre, 
+                    'total_emprendedores' => $emprendedor->total_emprendedores,
+                ];
+            });
+            return response()->json($emprendedoresPorMunicipio);
+            
+        } catch (Exception $e) {
+            return response()->json(['error'=>['Ocurrió un error al procesar la solicitud: '=> $e->getMessage()],401]);
+        }
+    }
 }
