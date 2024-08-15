@@ -94,7 +94,7 @@ class SuperAdminController extends Controller
             'color_principal' => $personalizaciones->color_principal,
             'color_secundario' => $personalizaciones->color_secundario,
             'color_terciario' => $personalizaciones->color_terciario,
-            'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
+            //'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
             'descripcion_footer' => $personalizaciones->descripcion_footer,
             'paginaWeb' => $personalizaciones->paginaWeb,
             'email' => $personalizaciones->email,
