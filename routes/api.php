@@ -112,7 +112,7 @@ Route::group([
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     //Route::match(['post', 'put'],'/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
     Route::post('/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
-    Route::get('/banner/{id_aliado}', [AliadoApiController::class,'traerBannerssinestado'])->name('traerBannerssinestado');
+    Route::get('/banner/{id_aliado}', [AliadoApiController::class,'traerBannersxaliado'])->name('traerBannersxaliado');
     Route::get('/traeraliadoxid/{id}', [AliadoApiController::class, 'traerAliadoxId'])->name('traerAliadoxId');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado'); //////////
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
