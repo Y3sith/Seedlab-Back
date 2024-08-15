@@ -46,7 +46,7 @@ class SuperAdminController extends Controller
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
-        $personalizacion->color_terciario = $request->input('color_terciario');
+        //$personalizacion->color_terciario = $request->input('color_terciario');
         $personalizacion->id_superadmin = $request->input('id_superadmin');
         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
         $personalizacion->paginaWeb = $request->input('paginaWeb');
@@ -93,7 +93,7 @@ class SuperAdminController extends Controller
             'nombre_sistema' => $personalizaciones->nombre_sistema,
             'color_principal' => $personalizaciones->color_principal,
             'color_secundario' => $personalizaciones->color_secundario,
-            'color_terciario' => $personalizaciones->color_terciario,
+            //'color_terciario' => $personalizaciones->color_terciario,
             //'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
             'descripcion_footer' => $personalizaciones->descripcion_footer,
             'paginaWeb' => $personalizaciones->paginaWeb,
@@ -481,14 +481,19 @@ class SuperAdminController extends Controller
             $personalizacion->nombre_sistema = 'SeedLab';
             $personalizacion->color_principal = '#00B3ED';
             $personalizacion->color_secundario = '#FA7D00';
-            $personalizacion->color_terciario = '#FFF';
-            $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+            $personalizacion->descripcion_footer = 'Este programa estará enfocado en emprendimientos de base tecnológica, para ideas validadas, que cuenten con un codesarrollo, prototipado y pruebas de concepto. Se va a abordar en temas como Big Data, ciberseguridad e IA, herramientas de hardware y software, inteligencia competitiva, vigilancia tecnológica y propiedad intelectual.';
+            $personalizacion->paginaWeb = 'seedlab.com';
+            $personalizacion->email = 'email@seedlab.com';
+            $personalizacion->telefono = '(55) 5555-5555';
+            $personalizacion->direccion = 'Calle 48 # 28 - 40';
+            $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
+           // $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
 
             // Guardar los cambios
             $personalizacion->save();
 
             return response()->json([
-                'message' => 'Personalización restaurada correctamente'
+                'message' => 'Personalización restaurada correctamente',$personalizacion
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

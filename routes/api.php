@@ -79,7 +79,7 @@ Route::group([
     'prefix' =>'superadmin',
     'middleware' => 'auth:api',
 ],function(){
-    Route::put('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
+    Route::post('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
     Route::post('/restaurarPersonalizacion/{id}',[SuperAdminController::class,'restore']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
