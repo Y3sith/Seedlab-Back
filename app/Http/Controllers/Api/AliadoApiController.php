@@ -95,7 +95,7 @@ class AliadoApiController extends Controller
         return response()->json($bannersTransformados);
     }
 
-    public function traerBannerssinestado ($id_aliado){
+    public function traerBannersxaliado ($id_aliado){
         
         try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
@@ -110,7 +110,7 @@ class AliadoApiController extends Controller
                 return [
                     'id' => $banner->id,
                     'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                    'estado' => $banner->estadobanner,
+                    'estadobanner' => $banner->estadobanner,
                 ];
             });
             return response()->json($bannersTransformados);
