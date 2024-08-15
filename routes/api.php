@@ -79,7 +79,7 @@ Route::group([
     'prefix' =>'superadmin',
     'middleware' => 'auth:api',
 ],function(){
-    Route::put('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
+    Route::post('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
     Route::post('/restaurarPersonalizacion/{id}',[SuperAdminController::class,'restore']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
@@ -110,6 +110,7 @@ Route::group([
     Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
     //Route::match(['post', 'put'],'/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
     Route::post('/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
+    Route::get('/banner/{id_aliado}', [AliadoApiController::class,'traerBannerssinestado'])->name('traerBannerssinestado');
     Route::get('/traeraliadoxid/{id}', [AliadoApiController::class, 'traerAliadoxId'])->name('traerAliadoxId');
     Route::get('/mostrarAsesorAliado/{id}', [AliadoApiController::class, 'mostrarAsesorAliado'])->name('MostrarAsesorAliado'); //////////
     Route::delete('/{id}', [AliadoApiController::class, 'destroy'])->name('desactivarAliado');
