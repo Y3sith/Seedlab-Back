@@ -613,21 +613,21 @@ class SuperAdminController extends Controller
         }
     }
 
-    public function emprendedoresPorMunicipioPDF (){
-        $emprendedoresPorMunicipio = Emprendedor::with('municipios')
-        ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
-        ->groupBy('id_municipio')
-        ->get()
-        ->map(function($emprendedor) {
-            return [
-                'municipio' => $emprendedor->municipios->nombre, 
-                'total_emprendedores' => $emprendedor->total_emprendedores,
-            ];
-        });
+    // public function emprendedoresPorMunicipioPDF (){
+    //     $emprendedoresPorMunicipio = Emprendedor::with('municipios')
+    //     ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
+    //     ->groupBy('id_municipio')
+    //     ->get()
+    //     ->map(function($emprendedor) {
+    //         return [
+    //             'municipio' => $emprendedor->municipios->nombre, 
+    //             'total_emprendedores' => $emprendedor->total_emprendedores,
+    //         ];
+    //     });
 
-        $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
-        return $pdf->download('reporte_emprendedores_municipio.pdf');
-    }
+    //     $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
+    //     return $pdf->download('reporte_emprendedores_municipio.pdf');
+    // }
 
 
 }

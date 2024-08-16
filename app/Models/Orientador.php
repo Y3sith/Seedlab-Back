@@ -14,9 +14,13 @@ class Orientador extends Model
     protected $table = 'orientador';
 
     protected $fillable = [
-        'nombre', 
-        'apellido', 
-        'celular', 
+        'nombre',
+        'apellido',
+        'imagen_perfil',
+        'email',
+        'direccion',
+        'celular',
+        'genero',
         'id_autentication'
     ];
 

@@ -12,8 +12,13 @@ class SuperAdmin extends Model
     protected $table = 'superadmin';
 
     protected $fillable = [
-        'nombre', 
-        'apellidos',
+        'nombre',
+        'apellido',
+        'imagen_perfil',
+        'email',
+        'direccion',
+        'celular',
+        'genero',
         'id_autentication'
     ];
 

@@ -96,7 +96,7 @@ Route::group([
     Route::get('/promEmpresas_Mes',[SuperAdminController::class,'promEmpresasXmes']);
     Route::get('/emprendedor_departamento',[SuperAdminController::class,'emprendedorXdepartamento']);
     ////   reportes
-    Route::get('/reporte-emprendedores','SuperAdminController@emprendedoresPorMunicipioPDF');
+    //Route::get('/reporte-emprendedores','SuperAdminController@emprendedoresPorMunicipioPDF');
 });
 
 
