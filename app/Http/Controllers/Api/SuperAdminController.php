@@ -488,7 +488,7 @@ class SuperAdminController extends Controller
             $personalizacion->telefono = '(55) 5555-5555';
             $personalizacion->direccion = 'Calle 48 # 28 - 40';
             $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
-           // $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+           $personalizacion->imagen_logo = '/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
 
             // Guardar los cambios
             $personalizacion->save();
@@ -613,21 +613,21 @@ class SuperAdminController extends Controller
         }
     }
 
-    public function emprendedoresPorMunicipioPDF (){
-        $emprendedoresPorMunicipio = Emprendedor::with('municipios')
-        ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
-        ->groupBy('id_municipio')
-        ->get()
-        ->map(function($emprendedor) {
-            return [
-                'municipio' => $emprendedor->municipios->nombre, 
-                'total_emprendedores' => $emprendedor->total_emprendedores,
-            ];
-        });
+    // public function emprendedoresPorMunicipioPDF (){
+    //     $emprendedoresPorMunicipio = Emprendedor::with('municipios')
+    //     ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
+    //     ->groupBy('id_municipio')
+    //     ->get()
+    //     ->map(function($emprendedor) {
+    //         return [
+    //             'municipio' => $emprendedor->municipios->nombre, 
+    //             'total_emprendedores' => $emprendedor->total_emprendedores,
+    //         ];
+    //     });
 
-        $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
-        return $pdf->download('reporte_emprendedores_municipio.pdf');
-    }
+    //     $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
+    //     return $pdf->download('reporte_emprendedores_municipio.pdf');
+    // }
 
 
 }
