@@ -287,7 +287,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+        if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
             return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
         }
 
@@ -320,7 +320,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+        if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
             return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
         }
 
