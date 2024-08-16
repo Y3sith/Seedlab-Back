@@ -89,13 +89,13 @@ class AliadoApiController extends Controller
         $bannersTransformados = $banners->map(function ($banner) {
             return [
                 'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                'estado' => $banner->estadobanner
+                'estadobanner' => $banner->estadobanner
             ];
         });
         return response()->json($bannersTransformados);
     }
 
-    public function traerBannerssinestado ($id_aliado){
+    public function traerBannersxaliado ($id_aliado){
         
         try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
@@ -110,7 +110,33 @@ class AliadoApiController extends Controller
                 return [
                     'id' => $banner->id,
                     'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                    'estado' => $banner->estadobanner,
+                    'estadobanner' => $banner->estadobanner,
+                ];
+            });
+            return response()->json($bannersTransformados);
+           
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function traerBannersxID ($id){
+        
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+            
+            $banners = Banner::where('id', $id)
+            ->select ('id','urlImagen','estadobanner', 'id_aliado')
+            ->get();
+    
+            $bannersTransformados = $banners->map(function ($banner) {
+                return [
+                    'id' => $banner->id,
+                    'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                    'estadobanner' => $banner->estadobanner,
+                    'id_aliado' => $banner->id_aliado,
                 ];
             });
             return response()->json($bannersTransformados);
@@ -261,6 +287,10 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
+        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+        }
+
         $bannerCount = Banner::where('id_aliado', $request->id_aliado)->count();
 
         if ($bannerCount >= 3) {
@@ -288,6 +318,10 @@ class AliadoApiController extends Controller
 
         if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
         }
 
         $banner = Banner::find($id);
