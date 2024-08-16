@@ -283,11 +283,11 @@ class AliadoApiController extends Controller
 
     public function crearBanner (Request $request)
     {
-        if ( Auth::user()->id_rol !=3) {
+        if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+        if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
             return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
         }
 
@@ -304,9 +304,7 @@ class AliadoApiController extends Controller
 
         $banner = Banner::create([
             'urlImagen' => $bannerUrl,
-            'descripcion' => $request->descripcion,
             'estadobanner' => $request->estadobanner,
-            'color' => $request->color,
             'id_aliado' => $request->id_aliado,
         ]);
         return response()->json([
@@ -315,14 +313,15 @@ class AliadoApiController extends Controller
     }
 
     public function editarBanner(Request $request, $id){
+        try {
 
         if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
-            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
-        }
+        // if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+        //     return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+        // }
 
         $banner = Banner::find($id);
         if ($request->hasFile('urlImagen')) {
@@ -334,19 +333,25 @@ class AliadoApiController extends Controller
             $banner->urlImagen = str_replace('public', 'storage', $paths);
 
             $banner->estadobanner = $request->input('estadobanner');
-
+            Log::info('Aliado antes de guardar:', $banner->toArray());
             $banner->save();
 
         }
         return response()->json([
             'message' => 'Banner editado exitosamente', $banner
         ], 201);
+    } catch (Exception $e) {
+        Log::error('Error en editarAliado: ' . $e->getMessage());
+    Log::error('Datos de la solicitud: ' . json_encode($request->all()));
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
 
     }
 
     public function eliminarBanner ($id)
     {
-        if ( Auth::user()->id_rol !=3) {
+        
+        if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         
@@ -361,6 +366,8 @@ class AliadoApiController extends Controller
         $banner->delete();
         
         return response()->json(['message' => 'Banner eliminado correctamente'], 200);
+
+
 
     }
 
