@@ -79,7 +79,7 @@ Route::group([
     'prefix' =>'superadmin',
     'middleware' => 'auth:api',
 ],function(){
-    Route::put('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
+    Route::post('/personalizacion/{id}',[SuperAdminController::class,'personalizacionSis']);
     Route::post('/restaurarPersonalizacion/{id}',[SuperAdminController::class,'restore']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
@@ -94,6 +94,9 @@ Route::group([
     Route::get('/asesoriastotalesAliado',[SuperAdminController::class,'asesorisaTotalesAliado']);
     Route::get('/listRegistrosAnioMes', [SuperAdminController::class, 'conteoRegistrosAnioYMes']);
     Route::get('/promEmpresas_Mes',[SuperAdminController::class,'promEmpresasXmes']);
+    Route::get('/emprendedor_departamento',[SuperAdminController::class,'emprendedorXdepartamento']);
+    ////   reportes
+    Route::get('/reporte-emprendedores','SuperAdminController@emprendedoresPorMunicipioPDF');
 });
 
 

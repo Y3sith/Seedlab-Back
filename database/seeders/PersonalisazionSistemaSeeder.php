@@ -50,7 +50,7 @@ class PersonalisazionSistemaSeeder extends Seeder
             'color_principal' => '#00B3ED',
             'color_secundario' => '#FA7D00',
             //'color_terciario' => '#fff',
-            'logo_footer' => $logoUrl2,
+            //'logo_footer' => $logoUrl2,
             'descripcion_footer' => 'Este programa estará enfocado en emprendimientos de base tecnológica, para ideas validadas, que cuenten con un codesarrollo, prototipado y pruebas de concepto. Se va a abordar en temas como Big Data, ciberseguridad e IA, herramientas de hardware y software, inteligencia competitiva, vigilancia tecnológica y propiedad intelectual.',
             'paginaWeb' => 'seedlab.com',
             'email' => 'email@seedlab.com',

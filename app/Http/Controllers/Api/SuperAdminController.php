@@ -18,6 +18,7 @@ use App\Models\Aliado;
 use App\Models\Asesor;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class SuperAdminController extends Controller
 {
@@ -46,7 +47,7 @@ class SuperAdminController extends Controller
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
-        $personalizacion->color_terciario = $request->input('color_terciario');
+        //$personalizacion->color_terciario = $request->input('color_terciario');
         $personalizacion->id_superadmin = $request->input('id_superadmin');
         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
         $personalizacion->paginaWeb = $request->input('paginaWeb');
@@ -93,8 +94,8 @@ class SuperAdminController extends Controller
             'nombre_sistema' => $personalizaciones->nombre_sistema,
             'color_principal' => $personalizaciones->color_principal,
             'color_secundario' => $personalizaciones->color_secundario,
-            'color_terciario' => $personalizaciones->color_terciario,
-            'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
+            //'color_terciario' => $personalizaciones->color_terciario,
+            //'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
             'descripcion_footer' => $personalizaciones->descripcion_footer,
             'paginaWeb' => $personalizaciones->paginaWeb,
             'email' => $personalizaciones->email,
@@ -481,14 +482,19 @@ class SuperAdminController extends Controller
             $personalizacion->nombre_sistema = 'SeedLab';
             $personalizacion->color_principal = '#00B3ED';
             $personalizacion->color_secundario = '#FA7D00';
-            $personalizacion->color_terciario = '#FFF';
-            $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+            $personalizacion->descripcion_footer = 'Este programa estará enfocado en emprendimientos de base tecnológica, para ideas validadas, que cuenten con un codesarrollo, prototipado y pruebas de concepto. Se va a abordar en temas como Big Data, ciberseguridad e IA, herramientas de hardware y software, inteligencia competitiva, vigilancia tecnológica y propiedad intelectual.';
+            $personalizacion->paginaWeb = 'seedlab.com';
+            $personalizacion->email = 'email@seedlab.com';
+            $personalizacion->telefono = '(55) 5555-5555';
+            $personalizacion->direccion = 'Calle 48 # 28 - 40';
+            $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
+           // $personalizacion->logo_footer = 'public/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
 
             // Guardar los cambios
             $personalizacion->save();
 
             return response()->json([
-                'message' => 'Personalización restaurada correctamente'
+                'message' => 'Personalización restaurada correctamente',$personalizacion
             ], 200);
         } catch (\Exception $e) {
             return response()->json([
@@ -584,4 +590,44 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
     }
+
+    public function emprendedorXdepartamento(){
+        try {
+            if (Auth::user()->id_rol !=1 && Auth::user()->id_rol != 2) {
+                return response()->json(['message'=>'no tienes permisos para acceder a esta funcion'],404);
+            }
+           $emprendedoresPorMunicipio = Emprendedor::with('municipios')
+            ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
+            ->groupBy('id_municipio')
+            ->get()
+            ->map(function($emprendedor) {
+                return [
+                    'municipio' => $emprendedor->municipios->nombre, 
+                    'total_emprendedores' => $emprendedor->total_emprendedores,
+                ];
+            });
+            return response()->json($emprendedoresPorMunicipio);
+            
+        } catch (Exception $e) {
+            return response()->json(['error'=>['Ocurrió un error al procesar la solicitud: '=> $e->getMessage()],401]);
+        }
+    }
+
+    public function emprendedoresPorMunicipioPDF (){
+        $emprendedoresPorMunicipio = Emprendedor::with('municipios')
+        ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
+        ->groupBy('id_municipio')
+        ->get()
+        ->map(function($emprendedor) {
+            return [
+                'municipio' => $emprendedor->municipios->nombre, 
+                'total_emprendedores' => $emprendedor->total_emprendedores,
+            ];
+        });
+
+        $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
+        return $pdf->download('reporte_emprendedores_municipio.pdf');
+    }
+
+
 }
