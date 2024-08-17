@@ -133,10 +133,21 @@ class SuperAdminController extends Controller
             return response()->json(['message' => $response], $statusCode);
         }
 
+        $perfilUrl = null;
+                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                    $perfilUrl = Storage::url($logoPath);
+                }
+
+
         DB::transaction(function () use ($data, &$response, &$statusCode) {
-            $results = DB::select('CALL sp_registrar_superadmin(?,?,?,?,?)', [
+            $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?)', [
                 $data['nombre'],
                 $data['apellido'],
+                $data ['imagen_perfil'],
+                $data ['direccion'],
+                $data ['celular'],
+                $data ['genero'],
                 $data['email'],
                 Hash::make($data['password']),
                 $data['estado'],

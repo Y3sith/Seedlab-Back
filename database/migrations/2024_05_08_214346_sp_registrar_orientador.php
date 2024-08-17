@@ -16,7 +16,10 @@ return new class extends Migration
         DB::unprepared("CREATE PROCEDURE sp_registrar_orientador(
             IN p_nombre varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             In p_apellido varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN  -- Sin coma aquí
@@ -41,8 +44,8 @@ return new class extends Migration
             
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
-            INSERT INTO orientador (nombre, apellido, celular, id_autentication) 
-            VALUES (p_nombre,p_apellido,p_celular, @last_inserted_id);
+            INSERT INTO orientador (nombre, apellido, celular, id_autentication, imagen_perfil, direccion, genero) 
+            VALUES (p_nombre,p_apellido,p_celular, @last_inserted_id, p_imagen_perfil,p_direccion,p_genero);
 
             SELECT 'El orientador ha sido creado con exito' AS mensaje;
     END IF;            

@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class OrientadorApiController extends Controller
 {
@@ -40,14 +42,27 @@ class OrientadorApiController extends Controller
             if (Auth::user()->id_rol !== 1) {
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_orientador(?,?,?,?,?,?)', [
+
+            $perfilUrl = null;
+                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                    $perfilUrl = Storage::url($logoPath);
+                }
+                //dd($data->all());
+                
+            DB::transaction(function () use ($data, &$response, &$statusCode,$perfilUrl) {
+                Log::info($data->all());
+                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
+                    $perfilUrl,
+                    $data['direccion'],
                     $data['celular'],
+                    $data['genero'],
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
+
                 ]);
 
                 if (!empty($results)) {
