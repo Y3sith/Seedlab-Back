@@ -16,6 +16,10 @@ class OrientadorSeeder extends Seeder
         Orientador::create([
             "nombre"=> "David",
             "apellido"=> "Hernandez",
+            "imagen_perfil"=>"",
+            "email"=>"",
+            "direccion"=>"",
+            "genero"=>"",
             "celular"=> "3157683542",
             "id_autentication"=> "2",
         ]); 

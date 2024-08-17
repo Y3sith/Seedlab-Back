@@ -15,7 +15,6 @@ class Ruta extends Model
         'nombre',
         'fecha_creacion',
         'estado',
-        'imagen_ruta'
     ];
 
     public $timestamps = false;

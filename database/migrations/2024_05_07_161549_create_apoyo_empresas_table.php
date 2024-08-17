@@ -23,8 +23,7 @@ return new class extends Migration
             $table->unsignedBigInteger('id_tipo_documento');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
             $table->string('id_empresa', 50);
-            $table->foreign('id_empresa')->references('documento')->on('empresa'); // Cambiar 'id' por 'documento'
-            //$table->timestamps();
+            $table->foreign('id_empresa')->references('documento')->on('empresa')->onDelete('cascade')->onUpdate('cascade');
         });
     }
 

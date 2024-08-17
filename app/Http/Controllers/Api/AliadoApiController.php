@@ -20,8 +20,9 @@ use Exception;
 use Illuminate\Support\Facades\Log;
 
 class AliadoApiController extends Controller
+
 {
-    /**
+     /**
      * Display a listing of the resource.
      */
     public function traerAliadosActivos($status)
@@ -30,17 +31,18 @@ class AliadoApiController extends Controller
 
         $aliados = Aliado::whereHas('auth', fn ($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
+            ->select('id','nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
             //$banner = Banner::find($aliado->$id_aliado);
             return [
+                'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
-                'logo' => $aliado->logo,
-                //'banner' => $aliado->banner ? $this->correctImageUrl($aliado->banner) : null,
-                'ruta_multi' => $aliado->ruta_multi,
+                //'logo' => $aliado->logo,
+                'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
+                'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
                 'tipo_dato' => $aliado->tipoDato,
                 'email' => $aliado->auth->email,
                 'estado' => $aliado->auth->estado
@@ -50,20 +52,98 @@ class AliadoApiController extends Controller
         return response()->json($aliadosTransformados);
     }
 
+    public function traerAliadoxId($id)
+    {
+        try {
+        if (Auth::user()->id_rol != 1) {
+            return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $aliado = Aliado::where('id', $id)
+        //->with('auth:id,email,estado')
+        ->select('id','nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato',"id_autentication")
+        ->first();
+        return [
+            'id'=>$aliado->id,
+            'nombre'=>$aliado->nombre,
+            'descripcion'=>$aliado->descripcion,
+            'logo'=>$aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
+            'ruta_multi'=>$aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
+            'id_tipo_dato'=>$aliado->id_tipo_dato,
+            'email'=>$aliado->auth->email,
+            'estado'=>$aliado->auth->estado == 1 ? 'Activo': 'Inactivo',
+            //'id_autentication' =>$asesor->auth->id_autentication    
+        ];
+    
+       // return response()->json($aliadoTransformado);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+    }
+
     public function traerBanners ($status){
         $banners = Banner::where('estadobanner', $status)
-        ->select ('urlImagen', 'descripcion','estadobanner', 'color')
+        ->select ('urlImagen','estadobanner')
         ->get();
 
         $bannersTransformados = $banners->map(function ($banner) {
             return [
                 'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                'descripcion' => $banner->descripcion,
-                'estado' => $banner->estadobanner,
-                'color' => $banner->color
+                'estadobanner' => $banner->estadobanner
             ];
         });
         return response()->json($bannersTransformados);
+    }
+
+    public function traerBannersxaliado ($id_aliado){
+        
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+            
+            $banners = Banner::where('id_aliado', $id_aliado)
+            ->select ('id','urlImagen','estadobanner', 'id_aliado')
+            ->get();
+    
+            $bannersTransformados = $banners->map(function ($banner) {
+                return [
+                    'id' => $banner->id,
+                    'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                    'estadobanner' => $banner->estadobanner,
+                ];
+            });
+            return response()->json($bannersTransformados);
+           
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function traerBannersxID ($id){
+        
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+            
+            $banners = Banner::where('id', $id)
+            ->select ('id','urlImagen','estadobanner', 'id_aliado')
+            ->get();
+    
+            $bannersTransformados = $banners->map(function ($banner) {
+                return [
+                    'id' => $banner->id,
+                    'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                    'estadobanner' => $banner->estadobanner,
+                    'id_aliado' => $banner->id_aliado,
+                ];
+            });
+            return response()->json($bannersTransformados);
+           
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
     private function correctImageUrl($path)
@@ -81,81 +161,125 @@ class AliadoApiController extends Controller
             $response = null;
             $statusCode = 200;
             $aliadoId = null;
-
+            $youtubeRegex = '/^https:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}$/';
+            $rutaMulti = trim($data->input('ruta_multi'));
+    
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-            }
-
-            if (strlen($data['password']) < 8) {
-                $statusCode = 400;
-                $response = 'La contraseña debe tener al menos 8 caracteres';
-                return response()->json(['message' => $response], $statusCode);
-            }
-
-            if (!$data->hasFile('banner.urlImagen') || !$data->file('banner.urlImagen')->isValid()) {
-                return response()->json(['error' => 'Se requiere una imagen válida para el banner'], 400);
+                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
     
-            DB::beginTransaction();
+            if (strlen($data['password']) < 8) {
+                return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
+            }
+    
+            // Validación del banner
+            if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
+                return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+            }
 
+            if (!$data->hasFile('logo') || !$data->file('logo')->isValid()) {
+                return response()->json(['message' => 'Se requiere una imagen válida para el logo'], 400);
+            }
+
+                if ($data->input('id_tipo_dato') == 3 || $data->input('id_tipo_dato') == 4) {
+                    if (!$data->hasFile('ruta_multi') || !$data->file('ruta_multi')->isValid()) {
+                        return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
+                    }
+                } elseif ($data->input('id_tipo_dato') == 1 || $data->input('id_tipo_dato') == 5) {
+                    if (trim($data->input('ruta_multi')) == null ) {
+                        return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
+                    }
+                    // if (trim($data->input('id_tipo_dato')) == 1 ){
+                    //     if (!preg_match($youtubeRegex, $rutaMulti)) {
+                    //         return response()->json(['message' => 'La URL proporcionada no es una dirección válida de YouTube'], 400);
+                    //     }
+                    // }
+                }
+
+
+        
+
+            DB::beginTransaction();
+    
             try {
-            DB::transaction(function () use ($data, &$response, &$statusCode, &$aliadoId) {
+                $logoUrl = null;
+                if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
+                    $logoPath = $data->file('logo')->store('public/logos');
+                    $logoUrl = Storage::url($logoPath);
+                }
+    
+                $rutaMulti = null;
+                if ($data->hasFile('ruta_multi')) {
+                    $file = $data->file('ruta_multi');
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $mimeType = $file->getMimeType();
+                    
+                    if (strpos($mimeType, 'image') !== false) {
+                        $folder = 'imagenes';
+                    } elseif ($mimeType === 'application/pdf') {
+                        $folder = 'documentos';
+                    } elseif ($mimeType === 'application/pdf') {
+                        $folder = 'documentos';
+                    } else {
+                        return response()->json(['message' => 'Tipo de archivo no soportado para ruta_multi'], 400);
+                    }
+                    
+                    $path = $file->storeAs("public/$folder", $fileName);
+                    $rutaMulti = Storage::url($path);
+                } elseif ($data->input('ruta_multi') && filter_var($data->input('ruta_multi'), FILTER_VALIDATE_URL)) {
+                    $rutaMulti = $data->input('ruta_multi');
+                }elseif ($data->input('ruta_multi')) {
+                    // Si se envió un texto en 'ruta_multi', se guarda como texto
+                    $rutaMulti = $data->input('ruta_multi');
+                }
+    
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
-                    $data['logo'],
-                    //$bannerUrl,
+                    $logoUrl,
                     $data['descripcion'],
-                    $data['tipodato'],
-                    $data['ruta'],
+                    $data['id_tipo_dato'],
+                    $rutaMulti,
                     $data['email'],
                     Hash::make($data['password']),
-                    $data['estado'],
+                    $data['estado'] === 'true' ? 1 : 0,
                 ]);
-                
-
-                if (!empty($results)) {
-                    $response = $results[0]->mensaje;
-                    $aliadoId = $results[0]->id;
-                    
-                    if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                        $statusCode = 400;
-                        throw new \Exception($response);
-                    }
+    
+                if (empty($results)) {
+                    throw new \Exception('No se recibió respuesta del procedimiento almacenado');
                 }
-            });
-
-            if (isset($aliadoId)) {
-                if ($data->hasFile('banner.urlImagen') && $data->file('banner.urlImagen')->isValid()) {
-                    $bannerPath = $data->file('banner.urlImagen')->store('public/banners');
-                    $bannerUrl = Storage::url($bannerPath);
+    
+                $response = $results[0]->mensaje;
+                $aliadoId = $results[0]->id;
                 
-                    Banner::create([
-                        'urlImagen' => $bannerUrl,
-                        'descripcion' => $data['banner']['descripcion'],
-                        'estadobanner' => $data['banner']['estadobanner'],
-                        'color' => $data['banner']['color'],
-                        'id_aliado' => $aliadoId,
-                    ]);
-
-                    DB::commit();
-                    Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
-
-                    return response()->json(['message' => $response], $statusCode);
+                if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
+                    throw new \Exception($response);
                 }
-            }
-
+    
+                // Procesar el banner
+                $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
+                $bannerUrl = Storage::url($bannerPath);
+            
+                Banner::create([
+                    'urlImagen' => $bannerUrl,
+                    'estadobanner' => $data['banner_estadobanner'],
+                    'id_aliado' => $aliadoId,
+                ]);
+    
+                DB::commit();
+                Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
+    
+                return response()->json(['message' => 'Aliado creado exitosamente'], 201);
+    
             } catch (\Exception $e) {
                 DB::rollBack();
-                Log::error('Error al crear aliado y banner:', ['error' => $e->getMessage()]);
-                return response()->json(['error' => $e->getMessage()], 400);
+                Log::error('Error al crear aliado y banner:', ['message' => $e->getMessage()]);
+                return response()->json(['message' => $e->getMessage()], 400);
             }
-
+    
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
-
 
     public function crearBanner (Request $request)
     {
@@ -163,8 +287,16 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-            $bannerUrl = null;
+        if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
+            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+        }
 
+        $bannerCount = Banner::where('id_aliado', $request->id_aliado)->count();
+
+        if ($bannerCount >= 3) {
+            return response()->json(['error' => 'Ya existen 3 banners para este aliado. Debe eliminar un banner antes de crear uno nuevo.'], 400);
+        }
+    
             if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
                 $bannerPath = $request->file('urlImagen')->store('public/banners');
                 $bannerUrl = Storage::url($bannerPath);
@@ -173,7 +305,7 @@ class AliadoApiController extends Controller
         $banner = Banner::create([
             'urlImagen' => $bannerUrl,
             'descripcion' => $request->descripcion,
-            'estado' => $request->estado,
+            'estadobanner' => $request->estadobanner,
             'color' => $request->color,
             'id_aliado' => $request->id_aliado,
         ]);
@@ -181,6 +313,187 @@ class AliadoApiController extends Controller
            'message' => 'Banner creado exitosamente',
         ], 201);
     }
+
+    public function editarBanner(Request $request, $id){
+
+        if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
+            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+        }
+
+        $banner = Banner::find($id);
+        if ($request->hasFile('urlImagen')) {
+            //Eliminar el logo anterior
+            Storage::delete(str_replace('storage', 'public', $banner->urlImagen));
+            
+            // Guardar el nuevo logo
+            $paths = $request->file('urlImagen')->store('public/banners');
+            $banner->urlImagen = str_replace('public', 'storage', $paths);
+
+            $banner->estadobanner = $request->input('estadobanner');
+
+            $banner->save();
+
+        }
+        return response()->json([
+            'message' => 'Banner editado exitosamente', $banner
+        ], 201);
+
+    }
+
+    public function eliminarBanner ($id)
+    {
+        if ( Auth::user()->id_rol !=3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        
+        $banner = Banner::find($id);
+        if (!$banner) {
+            return response()->json(['error' => 'Banner no encontrado'], 404);
+        }
+
+        $url = str_replace('storage', 'public', $banner->urlImagen);
+
+       Storage::delete($url);
+        $banner->delete();
+        
+        return response()->json(['message' => 'Banner eliminado correctamente'], 200);
+
+    }
+
+
+public function editarAliado(Request $request, $id)
+{
+    try {
+        // Buscar al aliado por ID
+        $aliado = Aliado::find($id);
+        if (!$aliado) {
+            return response()->json(['error' => 'Aliado no encontrado'], 404);
+        }
+
+        if (Auth::user()->id_rol !=1 && Auth::user()->id_rol !=3) {
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
+
+        
+        $user = $aliado->auth;
+        Log::info('Usuario antes de guardar:', $user->toArray());
+                    // Validar nombre igual
+                    $newNombre = $request->input('nombre');
+                    if ($newNombre && $newNombre !== $aliado->nombre) {
+                        $existing = Aliado::where('nombre', $newNombre)->first();
+                        if ($existing) {
+                                return response()->json(['message' => 'El nombre del Aliado ya ha sido registrado anteriormente'], 400);
+                            }
+                            $aliado->nombre = $newNombre;
+                        }
+            
+            
+                    if ($request->hasFile('ruta_multi')) {
+                        // Si se está subiendo un nuevo archivo
+                        $file = $request->file('ruta_multi');
+                        $fileName = time() . '_' . $file->getClientOriginalName();
+                        
+                        // Determinar el tipo de archivo
+                        $mimeType = $file->getMimeType();
+                        
+                        if (strpos($mimeType, 'image') !== false) {
+                            $folder = 'imagenes';
+                        } elseif ($mimeType === 'application/pdf') {
+                            $folder = 'documentos';
+                        } else {
+                            return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
+                        }
+                        
+                        // Eliminar el archivo anterior si existe
+                        if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
+                            Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
+                        }
+                        
+                        // Guardar el nuevo archivo
+                        $path = $file->storeAs("public/$folder", $fileName);
+                        $aliado->ruta_multi = str_replace('public', 'storage', $path);
+                    } elseif ($request->filled('ruta_multi')) {
+                        $newRutaMulti = $request->input('ruta_multi');
+                        
+                        // Si es una URL (asumiendo que es de YouTube)
+                        if (filter_var($newRutaMulti, FILTER_VALIDATE_URL)) {
+                            // Tu código existente para manejar URLs
+                            if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
+                                Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
+                            }
+                            $aliado->ruta_multi = $newRutaMulti;
+                        } else {
+                            // Si es texto, simplemente guardarlo
+                            // Eliminar el archivo anterior si existe
+                            if ($aliado->ruta_multi && Storage::exists(str_replace('storage', 'public', $aliado->ruta_multi))) {
+                                Storage::delete(str_replace('storage', 'public', $aliado->ruta_multi));
+                            }
+                            $aliado->ruta_multi = $newRutaMulti;
+                        }
+                    }
+            
+                    if ($request->hasFile('logo')) {
+                                                //Eliminar el logo anterior
+                                                Storage::delete(str_replace('storage', 'public', $aliado->logo));
+                                                
+                                                // Guardar el nuevo logo
+                                                $path = $request->file('logo')->store('public/logos');
+                                                $aliado->logo = str_replace('public', 'storage', $path);
+            
+                                            
+                                            }
+        
+            
+                    // Actualizar los datos del aliado
+                    Log::info('Datos recibidos para actualización:', $request->all());
+                    $aliado->update([
+                        'nombre' => $request->input('nombre'),
+                        'descripcion' => $request->input('descripcion'),
+                        'id_tipo_dato' => $request->input('id_tipo_dato'),
+                        'ruta_multi' => $aliado->ruta_multi
+                    ]);
+            
+                    // Actualizar la contraseña del usuario si se proporciona una nueva
+                    $password = $request->input('password');
+                    if ($password) {
+                        $user->password = Hash::make($password);
+                    }
+            
+                    // Actualizar el email del usuario si es diferente
+                    $newEmail = $request->input('email');
+                    if ($newEmail && $newEmail !== $user->email) {
+                        $existingUser = User::where('email', $newEmail)->first();
+                        if ($existingUser) {
+                            return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+                        }
+                        $user->email = $newEmail;
+                    }
+            
+                    // Actualizar el estado del usuario
+                    $user->estado = filter_var($request->input('estado'), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
+                    Log::info('Usuario antes de guardar:', $user->toArray());
+                    $user->save();
+            
+                    Log::info('Aliado antes de guardar:', $aliado->toArray());
+
+
+        return response()->json(['message' => 'Aliado actualizado', $user], 200);
+        
+        
+    } catch (Exception $e) {
+        Log::error('Error en editarAliado: ' . $e->getMessage());
+    Log::error('Datos de la solicitud: ' . json_encode($request->all()));
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+}
+
+
+    
+
 
 
     public function mostrarAliado(Request $request)
@@ -209,36 +522,7 @@ class AliadoApiController extends Controller
         }
     }
 
-    public function editarAliado(Request $request)
-    {
-        try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            }
-            $aliado = Aliado::find($request->input('id'));
 
-            if ($aliado) {
-                $aliado->nombre = $request->input('nombre');
-                $aliado->descripcion = $request->input('descripcion');
-                $aliado->logo = $request->input('logo');
-                $aliado->ruta_multi = $request->input('ruta_multi');
-                $aliado->save();
-
-                if ($aliado->auth) {
-                    $user = $aliado->auth;
-                    $user->email = $request->input('email');
-                    $user->password = Hash::make($request->input('password'));
-                    $user->estado = $request->input('estado');
-                    $user->save();
-                }
-                return response()->json(['message' => 'Aliado actualizado correctamente']);
-            } else {
-                return response()->json(['message' => 'Aliado no encontrado'], 404);
-            }
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
-    }
 
     /**
      * Store a newly created resource in storage.
@@ -373,7 +657,7 @@ class AliadoApiController extends Controller
     {
         try {
             
-            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
                 return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
             }
             $generos = DB::table('emprendedor')
@@ -481,7 +765,6 @@ class AliadoApiController extends Controller
     //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     //     }
     // }
-
     public function verEmprendedoresxEmpresa()
     {
         if (Auth::user()->id_rol != 3) {
@@ -495,3 +778,4 @@ class AliadoApiController extends Controller
         return response()->json($emprendedoresConEmpresas);
     }
 }
+   

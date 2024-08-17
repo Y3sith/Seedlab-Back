@@ -16,10 +16,10 @@ class Emprendedor extends Model
     protected $fillable = [
         'nombre',
         'apellido',
+        'imagen_perfil',
         'documento',
         'celular',
         'genero',
-       //'password',
         'fecha_nac',
         'direccion',
         'id_municipio',

@@ -69,6 +69,8 @@ class AsesoriasController extends Controller
 
             $asesorexiste = Asesor::where('id', $request->input('id_asesor'))->first();
 
+            
+
         if (!$asesorexiste) {
             return response()->json(['message' => 'Este asesor no existe en el sistema'], 404);
         }
@@ -79,6 +81,11 @@ class AsesoriasController extends Controller
             'id_asesoria' => $request->input('id_asesoria'),
             'id_asesor' => $request->input('id_asesor'),
         ]);
+
+         // Actualizar el estado de la asesoría
+         $asesoria = Asesoria::find($request->input('id_asesoria'));
+         $asesoria->asignacion = 1; // Cambia este valor según el estado deseado
+         $asesoria->save();
 
             return response()->json(['message' => 'Se ha asignado correctamente el asesor para esta asesoria'], 201);
         } catch (Exception $e) {
@@ -261,7 +268,6 @@ class AsesoriasController extends Controller
     "nombreAliado": "Ecopetrol"
     }
      */
-
     public function MostrarAsesorias($aliadoId, $asignacion)
     {
         if (Auth::user()->id_rol != 3) {

@@ -25,9 +25,11 @@ class Empresa extends Model
         'direccion',
         'profesion',
         'correo',
+        'fecha_registro',
         'experiencia',
         'funciones',
         'id_tipo_documento',
+        'id_departamento',
         'id_municipio',
         'id_emprendedor'
     ];

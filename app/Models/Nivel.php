@@ -13,7 +13,6 @@ class Nivel extends Model
 
     protected $fillable = [
         'nombre',
-        'descripcion',
         'id_actividad'
     ];
 

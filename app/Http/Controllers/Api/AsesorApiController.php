@@ -11,6 +11,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\HorarioAsesoria;
 use Exception;
+use Illuminate\Support\Facades\Storage;
 
 class AsesorApiController extends Controller
 {
@@ -41,12 +42,21 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?,?)', [
+            $perfilUrl = null;
+                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                    $perfilUrl = Storage::url($logoPath);
+                }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl) {
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
+                    $perfilUrl,
+                    $data['direccion'],
+                    $data['genero'],
                     $data['celular'],
-                    $data['aliado'],
+                    $data['aliado'], //no el id el nombre
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
@@ -99,6 +109,9 @@ class AsesorApiController extends Controller
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
+                    'imagen_perfil'=>$request->imagen_perfil,
+                    'direccion'=>$request->direccion,
+                    'genero'=>$request->genero,
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
                 
@@ -268,4 +281,19 @@ class AsesorApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+
+    public function listarAsesores (){
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['error'=>'no tienes permiso para acceder']);
+            }
+            $asesores = Asesor::all()->select('id','nombre');
+            return response()->json($asesores);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+
+    }
+
 }
