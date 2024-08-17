@@ -16,7 +16,6 @@ return new class extends Migration
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->text('imagen_perfil');
-            $table->string('email', 50);
             $table->string('direccion', 50);
             $table->string('celular', 13);
             $table->string('genero', 20);
