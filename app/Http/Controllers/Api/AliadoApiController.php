@@ -284,17 +284,17 @@ class AliadoApiController extends Controller
     public function crearBanner (Request $request)
     {
         if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
         if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
-            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+           return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
         }
 
         $bannerCount = Banner::where('id_aliado', $request->id_aliado)->count();
 
         if ($bannerCount >= 3) {
-            return response()->json(['error' => 'Ya existen 3 banners para este aliado. Debe eliminar un banner antes de crear uno nuevo.'], 400);
+            return response()->json(['message' => 'Ya existen 3 banners para este aliado. Debe eliminar un banner antes de crear uno nuevo.'], 400);
         }
     
             if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
@@ -302,11 +302,13 @@ class AliadoApiController extends Controller
                 $bannerUrl = Storage::url($bannerPath);
             }
 
-        $banner = Banner::create([
-            'urlImagen' => $bannerUrl,
-            'estadobanner' => $request->estadobanner,
-            'id_aliado' => $request->id_aliado,
-        ]);
+            $banner = Banner::create([
+                'urlImagen' => $bannerUrl,
+                'estadobanner' => $request->estadobanner,
+                'id_aliado' => $request->id_aliado,
+            ]);
+            Log::info('Datos del banner antes de guardar:', $banner->toArray());
+
         return response()->json([
            'message' => 'Banner creado exitosamente',
         ], 201);
@@ -319,9 +321,9 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        // if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
-        //     return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
-        // }
+        if (!$data->hasFile('urlImagen') || !$data->file('urlImagen')->isValid()) {
+            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+        }
 
         $banner = Banner::find($id);
         if ($request->hasFile('urlImagen')) {
