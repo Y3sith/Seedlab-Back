@@ -189,6 +189,10 @@ class OrientadorApiController extends Controller
         return response()->json($orientadoresConEstado);
     }
 
+
+
+
+
     public function editarOrientador(Request $request, $id)
     {
         try {
@@ -201,6 +205,8 @@ class OrientadorApiController extends Controller
                 $orientador->apellido = $request->input('apellido');
                // $orientador->celular = $request->input('celular');
                $newCelular = $request->input('celular');
+               $orientador->direccion = $request->input('direccion');
+               $orientador->genero = $request->input('genero');
                     if ($newCelular && $newCelular !== $orientador->celular) {
                         // Verificar si el nuevo email ya está en uso
                         $existing = Orientador::where('celular', $newCelular)->first();
@@ -209,6 +215,15 @@ class OrientadorApiController extends Controller
                         }
                         $orientador->celular = $newCelular;
                     }
+
+                    if ($request->hasFile('imagen_perfil')) {
+                        //Eliminar el logo anterior
+                        Storage::delete(str_replace('storage', 'public', $orientador->imagen_perfil));
+                        
+                        // Guardar el nuevo logo
+                        $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                        $orientador->imagen_perfil = str_replace('public', 'storage', $path);
+                    } 
 
                 $orientador->save();
 
@@ -239,6 +254,9 @@ class OrientadorApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+
+
 
     public function userProfileOrientador($id)
     {

@@ -250,10 +250,21 @@ class SuperAdminController extends Controller
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
+            
             $admin = SuperAdmin::find($id);
             if ($admin) {
                 $admin->nombre = $request->input('nombre');
                 $admin->apellido = $request->input('apellido');
+                if ($request->hasFile('imagen_perfil')) {
+                    //Eliminar el logo anterior
+                    Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
+                    // Guardar el nuevo logo
+                    $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                    $admin->imagen_perfil = str_replace('public', 'storage', $path);
+                } 
+                $admin->celular = $request->input('celular');
+                $admin->direccion = $request->input('direccion');
+                $admin->genero = $request->input('genero');
                 $admin->save();
 
                 if ($admin->auth) {

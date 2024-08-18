@@ -105,11 +105,20 @@ class AsesorApiController extends Controller
                         $asesor->celular = $newCelular;
                     }
 
+                    if ($request->hasFile('imagen_perfil')) {
+                        //Eliminar el logo anterior
+                        Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
+                        
+                        // Guardar el nuevo logo
+                        $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                        $asesor->imagen_perfil = str_replace('public', 'storage', $path);
+                    }    
+
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
-                    'imagen_perfil'=>$request->imagen_perfil,
+                   //'imagen_perfil'=>$request->imagen_perfil,
                     'direccion'=>$request->direccion,
                     'genero'=>$request->genero,
                     //'email' => $request->email, no se sabe si pueda editar 
@@ -257,6 +266,16 @@ class AsesorApiController extends Controller
             'Asesorias Pendientes' => $pendientes,
         ]);
     }
+
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
+
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
+    
     public function userProfileAsesor($id)
     {
         try {
@@ -265,13 +284,16 @@ class AsesorApiController extends Controller
             }
             $asesor = Asesor::where('id', $id)
                 //->with('auth:id,email,estado')
-                ->select('id','nombre', 'apellido', 'celular', "id_autentication")
+                ->select('id','nombre', 'apellido', 'imagen_perfil' ,'direccion','celular', 'genero',"id_autentication")
                 ->first();
                 return [
                     'id'=>$asesor->id,
                     'nombre'=>$asesor->nombre,
                     'apellido'=>$asesor->apellido,
+                    'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->fotoPerfil) : null,
+                    'direccion'=>$asesor->direccion,
                     'celular'=>$asesor->celular,
+                    'genero'=>$asesor->genero,
                     'email'=>$asesor->auth->email,
                     'estado'=>$asesor->auth->estado == 1 ? 'Activo': 'Inactivo',
                     //'id_autentication' =>$asesor->auth->id_autentication    
