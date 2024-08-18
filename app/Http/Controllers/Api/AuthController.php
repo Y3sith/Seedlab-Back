@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 use Carbon\Carbon;
-
+use Illuminate\Support\Facades\Storage;
 use Laravel\Passport\Token;
 
 class AuthController extends Controller
@@ -107,20 +107,30 @@ class AuthController extends Controller
         }
         return $info;
     }
+    
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
 
-    public function userProfile($documento)
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
+
+    public function userProfileEmprendedor($documento)
     {
         if (Auth::user()->id_rol !== 5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $emprendedor = Emprendedor::where('documento', $documento)
             //->with('auth:id,email,estado')
-            ->select('nombre', 'apellido', 'documento', 'celular', 'genero', 'fecha_nac', 'direccion', 'id_municipio', 'id_autentication', 'id_tipo_documento')
+            ->select('nombre', 'apellido','imagen_perfil', 'documento', 'celular', 'genero', 'fecha_nac', 'direccion', 'id_municipio', 'id_autentication', 'id_tipo_documento')
             ->first();
             return[
                 'id'=>$emprendedor->auth->id,
                 'nombre'=>$emprendedor->nombre,
                 'apellido'=>$emprendedor->apellido,
+                'imagen_perfil'=>$emprendedor->imagen_perfil ? $this->correctImageUrl($emprendedor->fotoPerfil) : null,
                 'documento'=>$emprendedor->documento,
                 'celular'=>$emprendedor->celular,
                 'genero'=>$emprendedor->genero,
@@ -180,13 +190,19 @@ class AuthController extends Controller
     if (strlen($data['password']) < 8) {
         return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
     }
+    $perfilUrl = null;
+                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                    $perfilUrl = Storage::url($logoPath);
+                }
 
-    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
-        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode, $perfilUrl) {
+        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $data['documento'],
             $data['nombretipodoc'],
             $data['nombre'],
             $data['apellido'],
+            $perfilUrl,
             $data['celular'],
             $data['genero'],
             $data['fecha_nacimiento'],

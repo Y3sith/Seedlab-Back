@@ -9,6 +9,7 @@ use App\Models\Municipio;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 use Laravel\Passport\Token;
 
@@ -63,6 +64,7 @@ class EmprendedorApiController extends Controller
             return response()->json(["error" => "El emprendedor no fue encontrado"], 404);
         }
 
+        
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
@@ -73,18 +75,27 @@ class EmprendedorApiController extends Controller
             'id_municipio' => 'required|string|max:255', // Validar el nombre del municipio
             'id_tipo_documento' => 'required|integer',
             'password' => 'nullable|string|min:8',
+            'imagen_perfil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
             
         ]);
-
+        
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-
+        
         $municipio = Municipio::where('nombre', $request->id_municipio)->first();
         if (!$municipio) {
             return response()->json(["error" => "El municipio no fue encontrado"], 404);
         }
-
+        if ($request->hasFile('imagen_perfil')) {
+            //Eliminar el logo anterior
+            Storage::delete(str_replace('storage', 'public', $emprendedor->imagen_perfil));
+            
+            // Guardar el nuevo logo
+            $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+            $emprendedor->imagen_perfil = str_replace('public', 'storage', $path);
+        }
+        
         // Actualizar los datos del emprendedor con los valores proporcionados en la solicitud
         $emprendedor->nombre = $request->nombre;
         $emprendedor->apellido = $request->apellido;
@@ -94,6 +105,7 @@ class EmprendedorApiController extends Controller
         $emprendedor->direccion = $request->direccion;
         $emprendedor->id_municipio = $municipio->id;
         $emprendedor->id_tipo_documento = $request->id_tipo_documento;
+        
 
         // Verificar si se proporcionó una contraseña para actualizar
         if ($request->has('password')) {

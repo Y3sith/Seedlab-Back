@@ -57,7 +57,8 @@ Route::group([
     'middleware' => 'auth:api'
 ], function (){
     Route::apiResource('/emprendedor',EmprendedorApiController::class);
-    Route::get('/userProfile/{documento}', [AuthController::class, 'userProfile']);
+    Route::post('/editarEmprededor/{documento}',[EmprendedorApiController::class,'update']);
+    Route::get('/userProfileEmprendedor/{documento}', [AuthController::class, 'userProfileEmprendedor']);
 });
 
 //Orientador

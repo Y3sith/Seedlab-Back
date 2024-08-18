@@ -19,6 +19,7 @@ return new class extends Migration
             IN p_nombretipodoc VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_celular VARCHAR(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_genero VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -58,8 +59,8 @@ return new class extends Migration
 						
 						SELECT LAST_INSERT_ID() INTO @last_inserted_id;
 						
-						INSERT INTO emprendedor (documento, id_tipo_documento, nombre, apellido, celular, genero, fecha_nac, id_municipio, direccion, id_autentication, cod_ver) 
-						VALUES (p_num_documento, v_idtipodoc, p_nombre, p_apellido, p_celular, p_genero, v_fecha_nac, v_idmunicipio, p_direccion, @last_inserted_id, p_cod_ver);
+						INSERT INTO emprendedor (documento, id_tipo_documento, nombre, apellido, imagen_perfil, celular, genero, fecha_nac, id_municipio, direccion, id_autentication, cod_ver) 
+						VALUES (p_num_documento, v_idtipodoc, p_nombre, p_apellido, p_imagen_perfil, p_celular, p_genero, v_fecha_nac, v_idmunicipio, p_direccion, @last_inserted_id, p_cod_ver);
 
                         SELECT 'Tu usuario ha sido creado con exito' AS mensaje;
 				END IF;
