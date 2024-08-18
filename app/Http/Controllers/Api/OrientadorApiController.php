@@ -255,8 +255,14 @@ class OrientadorApiController extends Controller
         }
     }
 
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
 
-
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
 
     public function userProfileOrientador($id)
     {
@@ -272,7 +278,10 @@ class OrientadorApiController extends Controller
                 'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
+                'imagen_perfil'=>$orientador->imagen_perfil ? $this->correctImageUrl($orientador->fotoPerfil) : null,
+                'direccion' => $orientador->direccion,
                 'celular' => $orientador->celular,
+                'genero' => $orientador->genero,
                 'id_auth' => $orientador->auth->id,
                 'email' => $orientador->auth->email,
                 'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo'
