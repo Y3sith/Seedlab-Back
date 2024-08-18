@@ -87,7 +87,7 @@ Route::group([
     Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
     Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
     Route::get('/conteoAsesorias', [SuperAdminController::class, 'asesoriasAsignadasSinAsignar']);
-    Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
+    Route::get('/userProfileAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);

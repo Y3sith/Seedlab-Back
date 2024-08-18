@@ -285,7 +285,6 @@ class OrientadorApiController extends Controller
                 'id_auth' => $orientador->auth->id,
                 'email' => $orientador->auth->email,
                 'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo'
-
             ];
             return response()->json($response);
         } catch (Exception $e) {

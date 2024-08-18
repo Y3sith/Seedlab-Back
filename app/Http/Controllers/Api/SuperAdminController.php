@@ -185,12 +185,16 @@ class SuperAdminController extends Controller
             }
             $admin = SuperAdmin::where('id', $id)
                 ->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'apellido', "id_autentication")
+                ->select('id', 'nombre', 'apellido', 'imagen_perfil' ,'direccion','celular', 'genero', "id_autentication")
                 ->first();
             return [
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
+                'imagen_perfil'=>$admin->imagen_perfil ? $this->correctImageUrl($admin->fotoPerfil) : null,
+                'direccion'=>$admin->direccion,
+                'celular'=>$admin->celular,
+                'genero'=>$admin->genero,
                 'email' => $admin->auth->email,
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_auth' => $admin->id_autentication
