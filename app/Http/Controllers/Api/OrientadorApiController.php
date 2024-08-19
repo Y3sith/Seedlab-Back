@@ -43,22 +43,22 @@ class OrientadorApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
 
-            $perfilUrl = null;
-                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                    $perfilUrl = Storage::url($logoPath);
-                }
-                //dd($data->all());
+            // $perfilUrl = null;
+            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+            //         $perfilUrl = Storage::url($logoPath);
+            //     }
                 
-            DB::transaction(function () use ($data, &$response, &$statusCode,$perfilUrl) {
+                
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
                 Log::info($data->all());
-                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    $perfilUrl,
-                    $data['direccion'],
+                    //$perfilUrl,
+                    //$data['direccion'],
                     $data['celular'],
-                    $data['genero'],
+                    //$data['genero'],
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
@@ -278,7 +278,7 @@ class OrientadorApiController extends Controller
                 'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
-                'imagen_perfil'=>$orientador->imagen_perfil ? $this->correctImageUrl($orientador->fotoPerfil) : null,
+                'imagen_perfil'=>$orientador->imagen_perfil ? $this->correctImageUrl($orientador->imagen_perfil) : null,
                 'direccion' => $orientador->direccion,
                 'celular' => $orientador->celular,
                 'genero' => $orientador->genero,
