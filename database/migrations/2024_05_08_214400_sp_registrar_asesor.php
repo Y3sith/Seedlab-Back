@@ -16,10 +16,10 @@ return new class extends Migration
         DB::unprepared("CREATE PROCEDURE sp_registrar_asesor(
         In p_nombre varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_apellido varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        -- In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        -- In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        -- In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, --  //no el id el nombre
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -48,8 +48,8 @@ BEGIN
 
             SELECT id INTO v_idaliado FROM aliado WHERE aliado.nombre = p_aliado;
 
-            INSERT INTO asesor(nombre, apellido, celular, id_aliado, id_autentication, imagen_perfil,direccion,genero) 
-            VALUES (p_nombre, p_apellido, p_celular, v_idaliado, @last_inserted_id, p_imagen_perfil,p_direccion,p_genero);
+            INSERT INTO asesor(nombre, apellido, celular, id_aliado, id_autentication ) 
+            VALUES (p_nombre, p_apellido, p_celular, v_idaliado, @last_inserted_id);
 
             SELECT 'Se ha registrado exitosamente el asesor' AS mensaje;
         END IF;

@@ -42,19 +42,19 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            $perfilUrl = null;
-                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                    $perfilUrl = Storage::url($logoPath);
-                }
+            // $perfilUrl = null;
+            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+            //         $perfilUrl = Storage::url($logoPath);
+            //     }
 
-            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl) {
-                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    $perfilUrl,
-                    $data['direccion'],
-                    $data['genero'],
+                    //$perfilUrl,
+                    // $data['direccion'],
+                    // $data['genero'],
                     $data['celular'],
                     $data['aliado'], //no el id el nombre
                     $data['email'],
@@ -93,7 +93,7 @@ class AsesorApiController extends Controller
         try {
             $asesor = Asesor::find($id);
             //dd($request->estado);
-            if (Auth::user()->id_rol == 4 ) {
+            if (Auth::user()->id_rol == 4 ) { //rol asesor
 
                 $newCelular = $request->input('celular');
                     if ($newCelular && $newCelular !== $asesor->celular) {
@@ -118,7 +118,7 @@ class AsesorApiController extends Controller
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
-                   //'imagen_perfil'=>$request->imagen_perfil,
+                    //'imagen_perfil'=>$request->imagen_perfil,
                     'direccion'=>$request->direccion,
                     'genero'=>$request->genero,
                     //'email' => $request->email, no se sabe si pueda editar 
@@ -126,7 +126,7 @@ class AsesorApiController extends Controller
                 
                 return response()->json(['message' => 'Asesor actualizado', 200]);
             }
-            if(Auth::user()->id_rol == 3){
+            if(Auth::user()->id_rol == 3){ //rol aliado
                 $user = $asesor->auth;
 
                 $newCelular = $request->input('celular');
@@ -290,7 +290,7 @@ class AsesorApiController extends Controller
                     'id'=>$asesor->id,
                     'nombre'=>$asesor->nombre,
                     'apellido'=>$asesor->apellido,
-                    'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->fotoPerfil) : null,
+                    'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
                     'direccion'=>$asesor->direccion,
                     'celular'=>$asesor->celular,
                     'genero'=>$asesor->genero,
