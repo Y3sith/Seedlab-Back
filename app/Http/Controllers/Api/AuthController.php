@@ -130,7 +130,7 @@ class AuthController extends Controller
                 'id'=>$emprendedor->auth->id,
                 'nombre'=>$emprendedor->nombre,
                 'apellido'=>$emprendedor->apellido,
-                'imagen_perfil'=>$emprendedor->imagen_perfil ? $this->correctImageUrl($emprendedor->fotoPerfil) : null,
+                'imagen_perfil'=>$emprendedor->imagen_perfil ? $this->correctImageUrl($emprendedor->imagen_perfil) : null,
                 'documento'=>$emprendedor->documento,
                 'celular'=>$emprendedor->celular,
                 'genero'=>$emprendedor->genero,
@@ -190,19 +190,19 @@ class AuthController extends Controller
     if (strlen($data['password']) < 8) {
         return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
     }
-    $perfilUrl = null;
-                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                    $perfilUrl = Storage::url($logoPath);
-                }
+    // $perfilUrl = null;
+    //             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+    //                 $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+    //                 $perfilUrl = Storage::url($logoPath);
+    //             }
 
-    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode, $perfilUrl) {
-        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
+        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $data['documento'],
             $data['nombretipodoc'],
             $data['nombre'],
             $data['apellido'],
-            $perfilUrl,
+            //$perfilUrl,
             $data['celular'],
             $data['genero'],
             $data['fecha_nacimiento'],
