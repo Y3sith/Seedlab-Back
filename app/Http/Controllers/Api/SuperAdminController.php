@@ -136,21 +136,21 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            $perfilUrl = null;
-            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                $perfilUrl = Storage::url($logoPath);
-            }
+            // $perfilUrl = null;
+            // if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+            //     $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+            //     $perfilUrl = Storage::url($logoPath);
+            // }
 
 
-            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl) {
-                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    $perfilUrl,
-                    $data['direccion'],
+                    //$perfilUrl,
+                    //$data['direccion'],
                     $data['celular'],
-                    $data['genero'],
+                    //$data['genero'],
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
@@ -191,7 +191,7 @@ class SuperAdminController extends Controller
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
-                'imagen_perfil'=>$admin->imagen_perfil ? $this->correctImageUrl($admin->fotoPerfil) : null,
+                'imagen_perfil'=>$admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
                 'direccion'=>$admin->direccion,
                 'celular'=>$admin->celular,
                 'genero'=>$admin->genero,
