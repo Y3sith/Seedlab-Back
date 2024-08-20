@@ -42,22 +42,26 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            // $perfilUrl = null;
-            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-            //         $perfilUrl = Storage::url($logoPath);
-            //     }
+            $perfilUrl = null;
+                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                    $perfilUrl = Storage::url($logoPath);
+                }
 
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?)', [
+            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl) {
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    //$perfilUrl,
-                    // $data['direccion'],
-                    // $data['genero'],
+                    $data['documento']=>"N/A",
+                    $perfilUrl,
+                    $data['direccion'],
+                    $data['genero']=>"N/A",
                     $data['celular'],
                     $data['aliado'], //no el id el nombre
                     $data['email'],
+                    $data['id_municipio'],
+                    $data['fecha_nac']=>"N/A",
+                    $data['id_tipo_documento']=>"1",
                     Hash::make($data['password']),
                     $data['estado'],
                 ]);
