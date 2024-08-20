@@ -17,7 +17,7 @@ class OrientadorSeeder extends Seeder
             "nombre"=> "David",
             "apellido"=> "Hernandez",
             "imagen_perfil"=>"",
-            "email"=>"",
+            //"email"=>"",
             "direccion"=>"",
             "genero"=>"",
             "celular"=> "3157683542",

@@ -57,7 +57,8 @@ Route::group([
     'middleware' => 'auth:api'
 ], function (){
     Route::apiResource('/emprendedor',EmprendedorApiController::class);
-    Route::get('/userProfile/{documento}', [AuthController::class, 'userProfile']);
+    Route::post('/editarEmprededor/{documento}',[EmprendedorApiController::class,'update']);
+    Route::get('/userProfileEmprendedor/{documento}', [AuthController::class, 'userProfileEmprendedor']);
 });
 
 //Orientador
@@ -69,7 +70,7 @@ Route::group([
     Route::post('/asesorias/{idAsesoria}/asignar-aliado', [OrientadorApiController::class, 'asignarAsesoriaAliado']);
     Route::get('/listaAliado', [OrientadorApiController::class,'listarAliados']);
     Route::get('/listaOrientador/{status}', [OrientadorApiController::class,'mostrarOrientadores']);
-    Route::put('/editarOrientador/{id}', [OrientadorApiController::class,'editarOrientador']);
+    Route::post('/editarOrientador/{id}', [OrientadorApiController::class,'editarOrientador']);
     Route::get('/userProfileOrientador/{id}', [OrientadorApiController::class,'userProfileOrientador']);
 });
 
@@ -83,11 +84,11 @@ Route::group([
     Route::post('/restaurarPersonalizacion/{id}',[SuperAdminController::class,'restore']);
     Route::post('/crearSuperAdmin',[SuperAdminController::class,'crearSuperAdmin']);
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
-    Route::put('/editarAdmin/{id}',[SuperAdminController::class,'editarSuperAdmin']);
+    Route::post('/editarAdmin/{id}',[SuperAdminController::class,'editarSuperAdmin']);
     Route::get('/averageAsesorias2024', [SuperAdminController::class, 'averageAsesorias2024']);
     Route::get('/contar-usuarios', [SuperAdminController::class, 'enumerarUsuarios']);
     Route::get('/conteoAsesorias', [SuperAdminController::class, 'asesoriasAsignadasSinAsignar']);
-    Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
+    Route::get('/userProfileAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);
@@ -96,7 +97,7 @@ Route::group([
     Route::get('/promEmpresas_Mes',[SuperAdminController::class,'promEmpresasXmes']);
     Route::get('/emprendedor_departamento',[SuperAdminController::class,'emprendedorXdepartamento']);
     ////   reportes
-    //Route::get('/reporte-emprendedores','SuperAdminController@emprendedoresPorMunicipioPDF');
+    Route::get('/reporte-emprendedores','SuperAdminController@emprendedoresPorMunicipioPDF');
 });
 
 
@@ -204,6 +205,7 @@ Route::group([
     'middleware' => 'auth:api'
 ], function(){
     Route::apiResource('/asesor', AsesorApiController::class);
+    Route::post('/editarAsesor/{id}',[AsesorApiController::class, 'update']);
     Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
     Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
     Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
@@ -238,11 +240,3 @@ Route::group([
 });
 
 Route::get('/respuestas_empresa/{id_empresa}', [RespuestasApiController::class, 'getAnswers']);
-
-
-
-
-
-
-
-

@@ -16,6 +16,10 @@ return new class extends Migration
         DB::unprepared("CREATE PROCEDURE sp_registrar_superadmin(
         IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        -- In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        -- In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        -- In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_estado BOOLEAN  
@@ -31,8 +35,9 @@ return new class extends Migration
 
         SELECT LAST_INSERT_ID() INTO last_inserted_id;
 
-        INSERT INTO superadmin (nombre, apellido, id_autentication) 
-        VALUES (p_nombre, p_apellido, last_inserted_id);
+        INSERT INTO superadmin (nombre, apellido, id_autentication, celular) 
+        VALUES (p_nombre, p_apellido, last_inserted_id, p_celular);
+
 
         SELECT 'Tu SuperAdmin ha sido creado con exito' AS mensaje;
     END IF;

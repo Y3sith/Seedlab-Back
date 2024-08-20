@@ -17,7 +17,6 @@ class SuperadminSeeder extends Seeder
         SuperAdmin::create([
             "nombre"=> "Esneider",
             "apellido"=> "Jerez",
-            "email"=>"",
             "direccion"=>"",
             "genero"=>"",
             "celular"=>"",

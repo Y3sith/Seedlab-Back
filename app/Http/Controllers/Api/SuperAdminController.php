@@ -120,42 +120,53 @@ class SuperAdminController extends Controller
      */
     public function crearSuperAdmin(Request $data)
     {
-        $response = null;
-        $statusCode = 200;
 
-        if (Auth::user()->id_rol != 1) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
 
-        if (strlen($data['password']) < 8) {
-            $statusCode = 400;
-            $response = 'La contraseña debe tener al menos 8 caracteres';
-            return response()->json(['message' => $response], $statusCode);
-        }
+        try {
+            $response = null;
+            $statusCode = 200;
 
-        DB::transaction(function () use ($data, &$response, &$statusCode) {
-            $results = DB::select('CALL sp_registrar_superadmin(?,?,?,?,?)', [
-                $data['nombre'],
-                $data['apellido'],
-                $data['email'],
-                Hash::make($data['password']),
-                $data['estado'],
-            ]);
-
-            if (!empty($results)) {
-                $response = $results[0]->mensaje;
-                //dd($response);
-                if ($response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    $statusCode = 400;
-                }
-                if ($response === 'Superadmin creado exitosamente') {
-                    $statusCode = 200;
-                }
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-        });
-        //return response()->json(['message' => 'SuperAdministrador creado exitosamente'], 200);
 
-        return response()->json(['message' => $response], $statusCode);
+            if (strlen($data['password']) < 8) {
+                $statusCode = 400;
+                $response = 'La contraseña debe tener al menos 8 caracteres';
+                return response()->json(['message' => $response], $statusCode);
+            }
+
+            // $perfilUrl = null;
+            // if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+            //     $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+            //     $perfilUrl = Storage::url($logoPath);
+            // }
+
+
+            DB::transaction(function () use ($data, &$response, &$statusCode) {
+                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?)', [
+                    $data['nombre'],
+                    $data['apellido'],
+                    //$perfilUrl,
+                    //$data['direccion'],
+                    $data['celular'],
+                    //$data['genero'],
+                    $data['email'],
+                    Hash::make($data['password']),
+                    $data['estado'],
+                ]);
+
+                if (!empty($results)) {
+                    $response = $results[0]->mensaje;
+                    if ($response === 'El correo electrónico ya ha sido registrado anteriormente' || $response === 'El numero de celular ya ha sido registrado en el sistema') {
+                        $statusCode = 400;
+                    }
+                }
+            });
+            return response()->json(['message' => $response], $statusCode);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 
     /**
@@ -174,12 +185,16 @@ class SuperAdminController extends Controller
             }
             $admin = SuperAdmin::where('id', $id)
                 ->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'apellido', "id_autentication")
+                ->select('id', 'nombre', 'apellido', 'imagen_perfil' ,'direccion','celular', 'genero', "id_autentication")
                 ->first();
             return [
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
+                'imagen_perfil'=>$admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
+                'direccion'=>$admin->direccion,
+                'celular'=>$admin->celular,
+                'genero'=>$admin->genero,
                 'email' => $admin->auth->email,
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_auth' => $admin->id_autentication
@@ -239,10 +254,21 @@ class SuperAdminController extends Controller
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
+            
             $admin = SuperAdmin::find($id);
             if ($admin) {
                 $admin->nombre = $request->input('nombre');
                 $admin->apellido = $request->input('apellido');
+                if ($request->hasFile('imagen_perfil')) {
+                    //Eliminar el logo anterior
+                    Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
+                    // Guardar el nuevo logo
+                    $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                    $admin->imagen_perfil = str_replace('public', 'storage', $path);
+                } 
+                $admin->celular = $request->input('celular');
+                $admin->direccion = $request->input('direccion');
+                $admin->genero = $request->input('genero');
                 $admin->save();
 
                 if ($admin->auth) {
@@ -488,13 +514,14 @@ class SuperAdminController extends Controller
             $personalizacion->telefono = '(55) 5555-5555';
             $personalizacion->direccion = 'Calle 48 # 28 - 40';
             $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
-           $personalizacion->imagen_logo = '/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+            $personalizacion->imagen_logo = '/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
 
             // Guardar los cambios
             $personalizacion->save();
 
             return response()->json([
-                'message' => 'Personalización restaurada correctamente',$personalizacion
+                'message' => 'Personalización restaurada correctamente',
+                $personalizacion
             ], 200);
         } catch (\Exception $e) {
             return response()->json([

@@ -15,7 +15,7 @@ return new class extends Migration
             $table->string('documento', 50)->primary()->collation('utf8mb4_unicode_ci');
             $table->string('nombre', 50)->collation('utf8mb4_unicode_ci');
             $table->string('apellido', 50)->collation('utf8mb4_unicode_ci');
-            $table->text('imagen_perfil');
+            $table->text('imagen_perfil')->nullable();
             $table->string('celular', 13)->collation('utf8mb4_unicode_ci');
             $table->string('genero', 20)->collation('utf8mb4_unicode_ci');
             $table->date('fecha_nac')->collation('utf8mb4_unicode_ci');

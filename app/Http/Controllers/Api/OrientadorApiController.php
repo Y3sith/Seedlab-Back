@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Storage;
 
 class OrientadorApiController extends Controller
 {
@@ -40,14 +42,27 @@ class OrientadorApiController extends Controller
             if (Auth::user()->id_rol !== 1) {
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
+
+            // $perfilUrl = null;
+            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+            //         $perfilUrl = Storage::url($logoPath);
+            //     }
+                
+                
             DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_orientador(?,?,?,?,?,?)', [
+                Log::info($data->all());
+                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
+                    //$perfilUrl,
+                    //$data['direccion'],
                     $data['celular'],
+                    //$data['genero'],
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
+
                 ]);
 
                 if (!empty($results)) {
@@ -174,6 +189,10 @@ class OrientadorApiController extends Controller
         return response()->json($orientadoresConEstado);
     }
 
+
+
+
+
     public function editarOrientador(Request $request, $id)
     {
         try {
@@ -186,6 +205,8 @@ class OrientadorApiController extends Controller
                 $orientador->apellido = $request->input('apellido');
                // $orientador->celular = $request->input('celular');
                $newCelular = $request->input('celular');
+               $orientador->direccion = $request->input('direccion');
+               $orientador->genero = $request->input('genero');
                     if ($newCelular && $newCelular !== $orientador->celular) {
                         // Verificar si el nuevo email ya está en uso
                         $existing = Orientador::where('celular', $newCelular)->first();
@@ -194,6 +215,15 @@ class OrientadorApiController extends Controller
                         }
                         $orientador->celular = $newCelular;
                     }
+
+                    if ($request->hasFile('imagen_perfil')) {
+                        //Eliminar el logo anterior
+                        Storage::delete(str_replace('storage', 'public', $orientador->imagen_perfil));
+                        
+                        // Guardar el nuevo logo
+                        $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                        $orientador->imagen_perfil = str_replace('public', 'storage', $path);
+                    } 
 
                 $orientador->save();
 
@@ -225,6 +255,15 @@ class OrientadorApiController extends Controller
         }
     }
 
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
+
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
+
     public function userProfileOrientador($id)
     {
         try {
@@ -239,11 +278,13 @@ class OrientadorApiController extends Controller
                 'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
+                'imagen_perfil'=>$orientador->imagen_perfil ? $this->correctImageUrl($orientador->imagen_perfil) : null,
+                'direccion' => $orientador->direccion,
                 'celular' => $orientador->celular,
+                'genero' => $orientador->genero,
                 'id_auth' => $orientador->auth->id,
                 'email' => $orientador->auth->email,
                 'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo'
-
             ];
             return response()->json($response);
         } catch (Exception $e) {
