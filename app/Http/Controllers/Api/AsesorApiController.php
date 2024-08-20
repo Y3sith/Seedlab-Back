@@ -330,6 +330,8 @@ class AsesorApiController extends Controller
                     'nombre'=>$asesor->nombre,
                     'apellido'=>$asesor->apellido,
                     'documento'=>$asesor->documento,
+                    'id_tipo_documento'=>$asesor->id_tipo_documento,
+                    'fecha_nac'=>$asesor->fecha_nac,
                     'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
                     'direccion'=>$asesor->direccion,
                     'celular'=>$asesor->celular,
