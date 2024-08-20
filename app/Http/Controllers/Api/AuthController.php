@@ -196,13 +196,22 @@ class AuthController extends Controller
     //                 $perfilUrl = Storage::url($logoPath);
     //             }
 
-    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
-        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+    if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+        $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+        $perfilUrl = Storage::url($logoPath);
+    } else {
+        // Usar la imagen por defecto
+        $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+
+    }
+
+    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode,$perfilUrl) {
+        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $data['documento'],
             $data['nombretipodoc'],
             $data['nombre'],
             $data['apellido'],
-            //$perfilUrl,
+            $perfilUrl,
             $data['celular'],
             $data['genero'],
             $data['fecha_nacimiento'],
