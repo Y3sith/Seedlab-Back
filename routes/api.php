@@ -123,7 +123,7 @@ Route::group([
     Route::get('/dashboardAliado/{idAliado}', [AliadoApiController::class,'dashboardAliado']);
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
     Route::get('/generoAliado',[AliadoApiController::class,'generos']);
-    Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
+    Route::post('/crearbannerr',[AliadoApiController::class,'crearBanner']);
     Route::post('/editarbanner/{id}',[AliadoApiController::class,'editarBanner']);
     Route::delete('/eliminarbanner/{id}',[AliadoApiController::class,'eliminarBanner']);
     Route::get('/asesorias_mes/{id}',[AliadoApiController::class,'asesoriasXmes']);

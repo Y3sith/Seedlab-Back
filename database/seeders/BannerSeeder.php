@@ -58,13 +58,13 @@ class BannerSeeder extends Seeder
 
         Banner::create([
             "urlImagen" => $bannerUrl,
-            "estadobanner" => "Activo",
+            "estadobanner" => 1,
             "id_aliado" => 1
         ]);
 
         Banner::create([
             "urlImagen" => $bannerUrl2,
-            "estadobanner" => "Activo",
+            "estadobanner" => 1,
             "id_aliado" => 1
         ]);
     }

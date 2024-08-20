@@ -89,7 +89,7 @@ class AliadoApiController extends Controller
         $bannersTransformados = $banners->map(function ($banner) {
             return [
                 'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                'estadobanner' => $banner->estadobanner
+                'estadobanner'=>$banner->estadobanner == 1 ? 'Activo': 'Inactivo'
             ];
         });
         return response()->json($bannersTransformados);
@@ -110,7 +110,7 @@ class AliadoApiController extends Controller
                 return [
                     'id' => $banner->id,
                     'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                    'estadobanner' => $banner->estadobanner,
+                    'estadobanner'=>$banner->estadobanner == 1 ? 'Activo': 'Inactivo'
                 ];
             });
             return response()->json($bannersTransformados);
@@ -135,7 +135,7 @@ class AliadoApiController extends Controller
                 return [
                     'id' => $banner->id,
                     'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                    'estadobanner' => $banner->estadobanner,
+                    'estadobanner'=>$banner->estadobanner == 1 ? 'Activo': 'Inactivo',
                     'id_aliado' => $banner->id_aliado,
                 ];
             });
@@ -321,9 +321,9 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
-        if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
-            return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
-        }
+        // if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
+        //     return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
+        // }
 
         $banner = Banner::find($id);
         if ($request->hasFile('urlImagen')) {
@@ -334,7 +334,7 @@ class AliadoApiController extends Controller
             $paths = $request->file('urlImagen')->store('public/banners');
             $banner->urlImagen = str_replace('public', 'storage', $paths);
 
-            $banner->estadobanner = $request->input('estadobanner');
+            $banner->estadobanner = filter_var($request->input('estadobanner'), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
             Log::info('Aliado antes de guardar:', $banner->toArray());
             $banner->save();
 
