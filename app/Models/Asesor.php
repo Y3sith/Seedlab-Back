@@ -20,7 +20,9 @@ class Asesor extends Model
         'celular',
         'genero',
         'id_autentication',
-        'id_aliado'
+        'id_aliado',
+        'id_tipo_documento',
+        'id_municipio'
     ];
 
     public $timestamps = false;
@@ -44,5 +46,13 @@ class Asesor extends Model
 
     public function asesorias() {
         return $this->belongsToMany(Asesoria::class, 'asesoriaxasesor', 'id_asesor', 'id_asesoria');
+    }
+
+    public function municipios(){
+        return $this->belongsTo(Municipio::class, 'id_municipio');
+    }
+
+    public function tipoDocumento(){
+        return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 }

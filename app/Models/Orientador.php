@@ -21,11 +21,21 @@ class Orientador extends Model
         'direccion',
         'celular',
         'genero',
-        'id_autentication'
+        'id_autentication',
+        'id_tipo_documento',
+        'id_municipio'
     ];
 
 
     public function auth(){
         return $this->belongsTo(User::class, 'id_autentication');
+    }
+
+    public function municipios(){
+        return $this->belongsTo(Municipio::class, 'id_municipio');
+    }
+
+    public function tipoDocumento(){
+        return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 }

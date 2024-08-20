@@ -19,7 +19,9 @@ class SuperAdmin extends Model
         'direccion',
         'celular',
         'genero',
-        'id_autentication'
+        'id_autentication',
+        'id_tipo_documento',
+        'id_municipio'
     ];
 
     public $timestamps = false;
@@ -30,5 +32,13 @@ class SuperAdmin extends Model
 
     public function personalizacionSistema(){
         return $this->hasMany(PersonalizacionSistema::class, 'id_super_admin');
+    }
+
+    public function municipios(){
+        return $this->belongsTo(Municipio::class, 'id_municipio');
+    }
+
+    public function tipoDocumento(){
+        return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
     }
 }
