@@ -42,26 +42,43 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            $perfilUrl = null;
-                if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                    $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                    $perfilUrl = Storage::url($logoPath);
-                }
+            // $perfilUrl = null;
+            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+            //         $perfilUrl = Storage::url($logoPath);
+            //     }
 
-            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl) {
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                $perfilUrl = Storage::url($logoPath);
+            } else {
+                // Usar la imagen por defecto
+                $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+
+            }
+            
+            //$documento = $data->input('documento','0000000');
+            $direccion = $data->input('direccion','Dirección por defecto');
+            //$genero = $data->input('genero','Masculino');  
+            //$celular = $data->input('celular','0000000000');
+            $fecha_nac = $data->input('fecha_nac','2000-01-01');
+            
+
+            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    $data['documento']=>"N/A",
-                    $perfilUrl,
-                    $data['direccion'],
-                    $data['genero']=>"N/A",
+                    $data['documento'],
+                    $perfilUrl ,
                     $data['celular'],
+                    $data['genero'],
+                    $direccion,
                     $data['aliado'], //no el id el nombre
+                    $data['id_tipo_documento'],
+                    $data['municipio'],
+                    $fecha_nac,
                     $data['email'],
-                    $data['id_municipio'],
-                    $data['fecha_nac']=>"N/A",
-                    $data['id_tipo_documento']=>"1",
+                    //$data['fecha_nac'],
                     Hash::make($data['password']),
                     $data['estado'],
                 ]);
@@ -123,13 +140,17 @@ class AsesorApiController extends Controller
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
                     //'imagen_perfil'=>$request->imagen_perfil,
+                    'documento'=> $request->documento,
                     'direccion'=>$request->direccion,
                     'genero'=>$request->genero,
+                    'fecha_nac'=>$request->fecha_nac,
+                    'id_tipo_documento'=>$request->id_tipo_documento,
+                    'id_municipio'=>$request->id_municipio
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
-                
-                return response()->json(['message' => 'Asesor actualizado', 200]);
+                return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
             }
+
             if(Auth::user()->id_rol == 3){ //rol aliado
                 $user = $asesor->auth;
 
@@ -142,10 +163,24 @@ class AsesorApiController extends Controller
                     }
                     $asesor->celular = $newCelular;
                 }
+                if ($request->hasFile('imagen_perfil')) {
+                    //Eliminar el logo anterior
+                    Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
+                    
+                    // Guardar el nuevo logo
+                    $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                    $asesor->imagen_perfil = str_replace('public', 'storage', $path);
+                } 
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
-                    'celular' => $request->celular
+                    'celular' => $request->celular,
+                    'documento'=>$request->documento,
+                    'direccion'=>$request->direccion,
+                    'genero'=>$request->genero,
+                    'fecha_nac'=>$request->fecha_nac,
+                    'id_tipo_documento'=>$request->id_tipo_documento,
+                    'id_municipio'=>$request->id_municipio
                 ]);
 
                 
@@ -288,16 +323,18 @@ class AsesorApiController extends Controller
             }
             $asesor = Asesor::where('id', $id)
                 //->with('auth:id,email,estado')
-                ->select('id','nombre', 'apellido', 'imagen_perfil' ,'direccion','celular', 'genero',"id_autentication")
+                ->select('id','nombre', 'apellido', 'documento','imagen_perfil' ,'direccion','celular', 'genero','id_municipio', "id_autentication")
                 ->first();
                 return [
                     'id'=>$asesor->id,
                     'nombre'=>$asesor->nombre,
                     'apellido'=>$asesor->apellido,
+                    'documento'=>$asesor->documento,
                     'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
                     'direccion'=>$asesor->direccion,
                     'celular'=>$asesor->celular,
                     'genero'=>$asesor->genero,
+                    'id_municipio'=>$asesor->id_municipio,
                     'email'=>$asesor->auth->email,
                     'estado'=>$asesor->auth->estado == 1 ? 'Activo': 'Inactivo',
                     //'id_autentication' =>$asesor->auth->id_autentication    

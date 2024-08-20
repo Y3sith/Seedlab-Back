@@ -29,10 +29,7 @@ class AliadoSeeder extends Seeder
             File::makeDirectory($documentosPath, 0755, true);
         }
 
-        $fotoPerfilPath = storage_path('app/public/fotoPerfil');
-        if (!File::exists($fotoPerfilPath)) {
-            File::makeDirectory($fotoPerfilPath, 0755, true);
-        }
+        
 
 
         $aliados = [

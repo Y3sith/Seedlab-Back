@@ -14,11 +14,13 @@ class Asesor extends Model
     protected $fillable = [
         'nombre',
         'apellido',
+        'documento',
         'imagen_perfil',
         'email',
         'direccion',
         'celular',
         'genero',
+        'fecha_nac',
         'id_autentication',
         'id_aliado',
         'id_tipo_documento',
