@@ -17,9 +17,10 @@ class AsesorSeedeer extends Seeder
             "id"=> "1",
             "nombre"=> "Juan",
             "apellido"=> "Perez",
+            "documento"=>"N/A",
             "imagen_perfil"=>"",
             "fecha_nac"=>"2024-05-21",
-            "id_aliado"=>"Ecopetrol",
+            "id_aliado"=>"1",
             "id_tipo_documento"=>"1",
             "id_municipio"=>"866",
             //"email"=>"",
@@ -27,7 +28,7 @@ class AsesorSeedeer extends Seeder
             "genero"=>"N/A",
             "celular" => "N/A",
             "id_autentication"=> "4",
-            "id_aliado"=> "2",
+            //"id_aliado"=> "1",
         ]);
     }
 }
