@@ -55,7 +55,7 @@ class AliadoApiController extends Controller
     public function traerAliadoxId($id)
     {
         try {
-        if (Auth::user()->id_rol != 1) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=3) {
             return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
@@ -169,6 +169,8 @@ class AliadoApiController extends Controller
             if (strlen($data['password']) < 8) {
                 return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
             }
+
+            
     
             // Validación del banner
             if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
@@ -252,6 +254,14 @@ class AliadoApiController extends Controller
                 if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
                     throw new \Exception($response);
                 }
+
+                $descripcion = $data->input('descripcion');
+            if (strlen($descripcion) < 206) {
+                return response()->json(['message' => 'La descripción debe tener al menos 206 caracteres'], 400);
+            }
+            if (strlen($descripcion) > 314) {
+                return response()->json(['message' => 'La descripción no puede tener más de 312 caracteres'], 400);
+            }
     
                 // Procesar el banner
                 $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
@@ -383,6 +393,13 @@ public function editarAliado(Request $request, $id)
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
 
+        $descripcion = $request->input('descripcion');
+        if (strlen($descripcion) < 206) {
+            return response()->json(['error' => 'La descripción debe tener al menos 206 caracteres'], 400);
+        }
+        if (strlen($descripcion) > 312) {
+            return response()->json(['error' => 'La descripción no puede tener más de 312 caracteres'], 400);
+        }
         
         $user = $aliado->auth;
         Log::info('Usuario antes de guardar:', $user->toArray());
