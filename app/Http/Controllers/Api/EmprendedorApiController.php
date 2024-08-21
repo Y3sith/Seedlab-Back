@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
 use App\Models\Municipio;
+use App\Models\TipoDocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -165,5 +166,10 @@ class EmprendedorApiController extends Controller
         $emprendedor->save();
             
         return response()->json(['message' => 'Emprendedor desactivado exitosamente. Por favor, inicie sesión de nuevo.'], 200);
+    }
+
+    public function tipoDocumento(){
+        $tipoDocumento = TipoDocumento::all();
+        return response()->json($tipoDocumento);
     }
 }

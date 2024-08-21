@@ -287,6 +287,8 @@ class AuthController extends Controller
         return response()->json(['message' => 'Te hemos enviado un email con tu nueva contraseña temporal,Cambiala cuando recien inicies sesion'], 200);
     }
 
+    
+
     /*public function sendVerificationEmail(Request $request)
 {
 $request->validate([

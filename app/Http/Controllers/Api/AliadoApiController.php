@@ -584,6 +584,7 @@ public function editarAliado(Request $request, $id)
         ], 403);
     }
 
+
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
@@ -600,7 +601,8 @@ public function editarAliado(Request $request, $id)
                 ->whereHas('auth', function ($query) use ($estadoBool) {
                     $query->where('estado', $estadoBool);
                 })
-                ->select('id', 'id_aliado','nombre', 'apellido', 'celular', 'id_autentication')
+                ->select('id', 'id_aliado','nombre', 'apellido', 'imagen_perfil', 'documento','id_tipo_documento',
+                 'fecha_nac', 'direccion', 'genero', 'id_municipio' ,'celular', 'id_autentication')
                 ->get();
             $asesoresConEstado = $asesores->map(function ($asesor) {
                 $user = User::find($asesor->id_autentication);
@@ -608,7 +610,14 @@ public function editarAliado(Request $request, $id)
                     'id' => $asesor->id,
                     'nombre' => $asesor->nombre,
                     'apellido' => $asesor->apellido,
+                    'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
+                    'documento' => $asesor->documento,
+                    'id_tipo_documento' => $asesor->id_tipo_documento,
+                    'fecha_nac' => $asesor->fecha_nac,
+                    'direccion' => $asesor->direccion,
+                    'genero' => $asesor->genero,
                     'celular' => $asesor->celular,
+                    'id_municipio' => $asesor->id_municipio,
                     'id_aliado' => $asesor->id_aliado,
                     'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
                 ];
