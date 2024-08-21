@@ -17,10 +17,14 @@ class SuperadminSeeder extends Seeder
         SuperAdmin::create([
             "nombre"=> "Esneider",
             "apellido"=> "Jerez",
-            "direccion"=>"",
-            "genero"=>"",
+            "documento"=> "213456",
+            "direccion"=>"N/A",
+            "fecha_nac"=>"2024-05-21",
+            "id_tipo_documento"=>"1",
+            "id_municipio"=>"866",
+            "genero"=>"N/A",
             "celular"=>"",
-            "imagen_perfil"=>"",
+            "imagen_perfil"=>"N/A",
             "id_autentication"=> "1",
         ]); 
     }

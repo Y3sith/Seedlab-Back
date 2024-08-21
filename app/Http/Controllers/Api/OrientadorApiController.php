@@ -48,17 +48,34 @@ class OrientadorApiController extends Controller
             //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
             //         $perfilUrl = Storage::url($logoPath);
             //     }
+
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                $perfilUrl = Storage::url($logoPath);
+            } else {
+                // Usar la imagen por defecto
+                $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+
+            }
+
+            $direccion = $data->input('direccion','Dirección por defecto');
+            $fecha_nac = $data->input('fecha_nac','2000-01-01');
+            
                 
                 
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
+            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl,$direccion,$fecha_nac) {
                 Log::info($data->all());
-                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    //$perfilUrl,
-                    //$data['direccion'],
+                    $data['documento'],
+                    $perfilUrl,
+                    $direccion,
                     $data['celular'],
-                    //$data['genero'],
+                    $data['genero'],
+                    $fecha_nac,
+                    $data['id_tipo_documento'],
+                    $data['municipio'],
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
@@ -203,10 +220,13 @@ class OrientadorApiController extends Controller
             if ($orientador) {
                 $orientador->nombre = $request->input('nombre');
                 $orientador->apellido = $request->input('apellido');
-               // $orientador->celular = $request->input('celular');
+               $orientador->documento = $request->input('documento');
                $newCelular = $request->input('celular');
                $orientador->direccion = $request->input('direccion');
                $orientador->genero = $request->input('genero');
+               $orientador->id_tipo_documento = $request->input('id_tipo_documento');
+               $orientador->id_municipio = $request->input('id_municipio');
+               $orientador->fecha_nac = $request->input('fecha_nac');
                     if ($newCelular && $newCelular !== $orientador->celular) {
                         // Verificar si el nuevo email ya está en uso
                         $existing = Orientador::where('celular', $newCelular)->first();
@@ -246,7 +266,7 @@ class OrientadorApiController extends Controller
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
-                return response()->json(['message' => 'Orientador actualizado correctamente'], 200);
+                return response()->json(['message' => 'Orientador actualizado correctamente', $orientador], 200);
             } else {
                 return response()->json(['message' => 'Orientador no encontrado'], 404);
             }
@@ -278,6 +298,10 @@ class OrientadorApiController extends Controller
                 'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
+                'documento' => $orientador->documento,
+                'id_tipo_documento' => $orientador->id_tipo_documento,
+                'id_municipio' => $orientador->id_municipio,
+                'fecha_nac' => $orientador->fecha_nac,
                 'imagen_perfil'=>$orientador->imagen_perfil ? $this->correctImageUrl($orientador->imagen_perfil) : null,
                 'direccion' => $orientador->direccion,
                 'celular' => $orientador->celular,
