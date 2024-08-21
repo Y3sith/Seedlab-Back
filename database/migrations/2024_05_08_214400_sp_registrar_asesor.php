@@ -32,6 +32,7 @@ return new class extends Migration
 BEGIN
     DECLARE v_idaliado VARCHAR(50); 
     DECLARE last_inserted_id INT;
+    DECLARE v_idmunicipio INT;
 
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -47,6 +48,8 @@ BEGIN
             SELECT 'El numero de celular ya ha sido registrado en el sistema' AS mensaje;
         ELSE
 
+            SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
+
             INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 4);
 
@@ -57,7 +60,7 @@ BEGIN
             INSERT INTO asesor(nombre, apellido, documento, imagen_perfil, celular, genero,
            direccion, id_aliado, id_tipo_documento, id_municipio,fecha_nac,id_autentication) 
             VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero,
-            p_direccion, v_idaliado, p_tipo_documento,p_municipio, p_fecha_nac,@last_inserted_id);
+            p_direccion, v_idaliado, p_tipo_documento,v_idmunicipio, p_fecha_nac,@last_inserted_id);
 
             SELECT 'Se ha registrado exitosamente el asesor' AS mensaje;
         END IF;
