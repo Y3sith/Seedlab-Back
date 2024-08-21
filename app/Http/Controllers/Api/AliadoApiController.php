@@ -312,40 +312,38 @@ class AliadoApiController extends Controller
         ], 201);
     }
 
-    public function editarBanner(Request $request, $id){
+    public function editarBanner(Request $request, $id)
+    {
         try {
-
-        if ( Auth::user()->id_rol !=3 && Auth::user()->id_rol !=1) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+    
+            $banner = Banner::find($id);
+    
+            // Actualizar la imagen si se envió una nueva
+            if ($request->hasFile('urlImagen')) {
+                // Eliminar la imagen anterior
+                Storage::delete(str_replace('storage', 'public', $banner->urlImagen));
+    
+                // Guardar la nueva imagen
+                $paths = $request->file('urlImagen')->store('public/banners');
+                $banner->urlImagen = str_replace('public', 'storage', $paths);
+            }
+    
+            // Actualizar el estado del banner
+            $banner->estadobanner = $request->input('estadobanner');
+            $banner->save();
+    
+            return response()->json([
+                'message' => 'Banner editado exitosamente',
+                'banner' => $banner
+            ], 201);
+        } catch (Exception $e) {
+            Log::error('Error en editarBanner: ' . $e->getMessage());
+            Log::error('Datos de la solicitud: ' . json_encode($request->all()));
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-
-        // if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
-        //     return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
-        // }
-
-        $banner = Banner::find($id);
-        if ($request->hasFile('urlImagen')) {
-            //Eliminar el logo anterior
-            Storage::delete(str_replace('storage', 'public', $banner->urlImagen));
-            
-            // Guardar el nuevo logo
-            $paths = $request->file('urlImagen')->store('public/banners');
-            $banner->urlImagen = str_replace('public', 'storage', $paths);
-
-            $banner->update([
-                'estadobanner' => $request->input('estadobanner')
-            ]);
-
-        }
-        return response()->json([
-            'message' => 'Banner editado exitosamente', $banner
-        ], 201);
-    } catch (Exception $e) {
-        Log::error('Error en editarAliado: ' . $e->getMessage());
-    Log::error('Datos de la solicitud: ' . json_encode($request->all()));
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    }
-
     }
 
     public function eliminarBanner ($id)
