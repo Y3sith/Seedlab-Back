@@ -126,7 +126,6 @@ Route::group([
     Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
     Route::post('/editarbanner/{id}',[AliadoApiController::class,'editarBanner']);
     Route::delete('/eliminarbanner/{id}',[AliadoApiController::class,'eliminarBanner']);
-    Route::get('/asesorias_mes/{id}',[AliadoApiController::class,'asesoriasXmes']);
     
 
 });
@@ -145,7 +144,8 @@ function () {
     Route::get('/promEmpresas_Mes', [DashboardSuperAdminController::class, 'promEmpresasXmes']);
     Route::get('/generoAliado',[DashboardSuperAdminController::class,'generos']);
     Route::get('/dashboardAliado/{idAliado}', [DashboardSuperAdminController::class,'dashboardAliado']);
-    Route::get('/asesoriastotalesAliado',[DashboardSuperAdminController::class,'asesorisaTotalesAliado']);
+    Route::get('/asesoriasTotalesAliado',[DashboardSuperAdminController::class,'asesoriasTotalesAliado']);
+    Route::get('/asesorias_mes/{id}',[DashboardSuperAdminController::class,'asesoriasXmes']);
 
 }
 );

@@ -322,7 +322,8 @@ class DashboardSuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    public function asesorisaTotalesAliado(Request $request)
+
+    public function asesoriasTotalesAliado(Request $request)
     {
         try {
             if (Auth::user()->id_rol != 1) {
@@ -338,6 +339,25 @@ class DashboardSuperAdminController extends Controller
             return response()->json($asesoriasporaliado, 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
+        }
+    }
+
+    public function asesoriasXmes($id)
+    {
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'No tienes permisos para acceder a esta funciona.']);
+            }
+            $ano = date('Y');
+            $asesorias = Asesoria::where('id_aliado', $id)
+                ->whereYear('fecha', $ano)
+                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //selecciona el mes y luego cuenta las asesorias
+                ->groupBy('mes')
+                ->get();
+
+            return response()->json($asesorias);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 }
