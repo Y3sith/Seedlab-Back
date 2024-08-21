@@ -129,17 +129,15 @@ class AliadoApiController extends Controller
             
             $banners = Banner::where('id', $id)
             ->select ('id','urlImagen','estadobanner', 'id_aliado')
-            ->get();
-    
-            $bannersTransformados = $banners->map(function ($banner) {
+            ->first();
                 return [
-                    'id' => $banner->id,
-                    'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
-                    'estadobanner'=>$banner->estadobanner == 1 ? 'Activo': 'Inactivo',
-                    'id_aliado' => $banner->id_aliado,
+                    'id' => $banners->id,
+                    'urlImagen' => $banners->urlImagen ? $this->correctImageUrl($banners->urlImagen) : null,
+                    'estadobanner'=>$banners->estadobanner == 1 ? 'Activo': 'Inactivo',
+                    'id_aliado' => $banners->id_aliado,
                 ];
-            });
-            return response()->json($bannersTransformados);
+
+            //return response()->json($bannersTransformados);
            
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -334,9 +332,9 @@ class AliadoApiController extends Controller
             $paths = $request->file('urlImagen')->store('public/banners');
             $banner->urlImagen = str_replace('public', 'storage', $paths);
 
-            $banner->estadobanner = filter_var($request->input('estadobanner'), FILTER_VALIDATE_BOOLEAN) ? 1 : 0;
-            Log::info('Aliado antes de guardar:', $banner->toArray());
-            $banner->save();
+            $banner->update([
+                'estadobanner' => $request->input('estadobanner')
+            ]);
 
         }
         return response()->json([
