@@ -16,6 +16,7 @@ class OrientadorSeeder extends Seeder
         Orientador::create([
             "nombre"=> "David",
             "apellido"=> "Hernandez",
+            "documento"=> "213456",
             "imagen_perfil"=>"",
             "fecha_nac"=>"2024-05-21",
             "id_tipo_documento"=>"1",

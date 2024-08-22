@@ -597,6 +597,7 @@ public function editarAliado(Request $request, $id)
         ], 403);
     }
 
+
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
@@ -613,7 +614,8 @@ public function editarAliado(Request $request, $id)
                 ->whereHas('auth', function ($query) use ($estadoBool) {
                     $query->where('estado', $estadoBool);
                 })
-                ->select('id', 'id_aliado','nombre', 'apellido', 'celular', 'id_autentication')
+                ->select('id', 'id_aliado','nombre', 'apellido', 'imagen_perfil', 'documento','id_tipo_documento',
+                 'fecha_nac', 'direccion', 'genero', 'id_municipio' ,'celular', 'id_autentication')
                 ->get();
             $asesoresConEstado = $asesores->map(function ($asesor) {
                 $user = User::find($asesor->id_autentication);
@@ -621,7 +623,14 @@ public function editarAliado(Request $request, $id)
                     'id' => $asesor->id,
                     'nombre' => $asesor->nombre,
                     'apellido' => $asesor->apellido,
+                    'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
+                    'documento' => $asesor->documento,
+                    'id_tipo_documento' => $asesor->id_tipo_documento,
+                    'fecha_nac' => $asesor->fecha_nac,
+                    'direccion' => $asesor->direccion,
+                    'genero' => $asesor->genero,
                     'celular' => $asesor->celular,
+                    'id_municipio' => $asesor->id_municipio,
                     'id_aliado' => $asesor->id_aliado,
                     'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
                 ];
@@ -798,6 +807,25 @@ public function editarAliado(Request $request, $id)
         $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
 
         return response()->json($emprendedoresConEmpresas);
+    }
+
+    public function asesoriasXmes($id)
+    {
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'No tienes permisos para acceder a esta funciona.']);
+            }
+            $ano = date('Y');
+            $asesorias = Asesoria::where('id_aliado', $id)
+                ->whereYear('fecha', $ano)
+                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //selecciona el mes y luego cuenta las asesorias
+                ->groupBy('mes')
+                ->get();
+
+            return response()->json($asesorias);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 }
    

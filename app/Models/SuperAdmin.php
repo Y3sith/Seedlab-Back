@@ -14,6 +14,8 @@ class SuperAdmin extends Model
     protected $fillable = [
         'nombre',
         'apellido',
+        'documento',
+        'fecha_nac',
         'imagen_perfil',
         'email',
         'direccion',

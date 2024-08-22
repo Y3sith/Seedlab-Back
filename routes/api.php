@@ -35,7 +35,10 @@ Route::group([
     Route::post('/validate_email_em', [AuthController::class, 'validate_email'])->name('validate_email');
     Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
     Route::post('/logout', [AuthController::class, 'logout']);
+    
 });
+
+    
 
 
 //Empresa
@@ -47,7 +50,6 @@ Route::group([
     Route::put('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
     //Route::apiResource('/empresa',EmpresaApiController::class);
     Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyempresa']);
-    
 });
 
 
@@ -60,6 +62,7 @@ Route::group([
     Route::post('/editarEmprededor/{documento}',[EmprendedorApiController::class,'update']);
     Route::get('/userProfileEmprendedor/{documento}', [AuthController::class, 'userProfileEmprendedor']);
 });
+Route::get('/tipo_documento',[EmprendedorApiController::class,'tipoDocumento']);
 
 //Orientador
 Route::group([
@@ -211,6 +214,7 @@ Route::group([
     Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
     Route::get('/listadoAsesores', [AsesorApiController::class, 'listarAsesores']);
 });
+
 
 //Asesorias
 Route::group([

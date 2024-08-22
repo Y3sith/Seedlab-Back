@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
 use App\Models\HorarioAsesoria;
+use App\Models\TipoDocumento;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 
@@ -48,16 +49,37 @@ class AsesorApiController extends Controller
             //         $perfilUrl = Storage::url($logoPath);
             //     }
 
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?)', [
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                $perfilUrl = Storage::url($logoPath);
+            } else {
+                // Usar la imagen por defecto
+                $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+
+            }
+            
+            //$documento = $data->input('documento','0000000');
+            $direccion = $data->input('direccion','Dirección por defecto');
+            //$genero = $data->input('genero','Masculino');  
+            //$celular = $data->input('celular','0000000000');
+            $fecha_nac = $data->input('fecha_nac','2000-01-01');
+            
+
+            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    //$perfilUrl,
-                    // $data['direccion'],
-                    // $data['genero'],
+                    $data['documento'],
+                    $perfilUrl ,
                     $data['celular'],
+                    $data['genero'],
+                    $direccion,
                     $data['aliado'], //no el id el nombre
+                    $data['id_tipo_documento'],
+                    $data['municipio'],
+                    $fecha_nac,
                     $data['email'],
+                    //$data['fecha_nac'],
                     Hash::make($data['password']),
                     $data['estado'],
                 ]);
@@ -119,13 +141,17 @@ class AsesorApiController extends Controller
                     'apellido' => $request->apellido,
                     'celular' => $request->celular,
                     //'imagen_perfil'=>$request->imagen_perfil,
+                    'documento'=> $request->documento,
                     'direccion'=>$request->direccion,
                     'genero'=>$request->genero,
+                    'fecha_nac'=>$request->fecha_nac,
+                    'id_tipo_documento'=>$request->id_tipo_documento,
+                    'id_municipio'=>$request->id_municipio
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
-                
-                return response()->json(['message' => 'Asesor actualizado', 200]);
+                return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
             }
+
             if(Auth::user()->id_rol == 3){ //rol aliado
                 $user = $asesor->auth;
 
@@ -138,10 +164,24 @@ class AsesorApiController extends Controller
                     }
                     $asesor->celular = $newCelular;
                 }
+                if ($request->hasFile('imagen_perfil')) {
+                    //Eliminar el logo anterior
+                    Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
+                    
+                    // Guardar el nuevo logo
+                    $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                    $asesor->imagen_perfil = str_replace('public', 'storage', $path);
+                } 
                 $asesor->update([
                     'nombre' => $request->nombre,
                     'apellido' => $request->apellido,
-                    'celular' => $request->celular
+                    'celular' => $request->celular,
+                    'documento'=>$request->documento,
+                    'direccion'=>$request->direccion,
+                    'genero'=>$request->genero,
+                    'fecha_nac'=>$request->fecha_nac,
+                    'id_tipo_documento'=>$request->id_tipo_documento,
+                    'id_municipio'=>$request->id_municipio
                 ]);
 
                 
@@ -277,32 +317,57 @@ class AsesorApiController extends Controller
     }
     
     public function userProfileAsesor($id)
-    {
-        try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol!= 3) {
-                return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            }
-            $asesor = Asesor::where('id', $id)
-                //->with('auth:id,email,estado')
-                ->select('id','nombre', 'apellido', 'imagen_perfil' ,'direccion','celular', 'genero',"id_autentication")
-                ->first();
-                return [
-                    'id'=>$asesor->id,
-                    'nombre'=>$asesor->nombre,
-                    'apellido'=>$asesor->apellido,
-                    'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
-                    'direccion'=>$asesor->direccion,
-                    'celular'=>$asesor->celular,
-                    'genero'=>$asesor->genero,
-                    'email'=>$asesor->auth->email,
-                    'estado'=>$asesor->auth->estado == 1 ? 'Activo': 'Inactivo',
-                    //'id_autentication' =>$asesor->auth->id_autentication    
-                ];
-            //return response()->json($asesor);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
+
+        $asesor = Asesor::where('asesor.id', $id)
+            ->join('municipios', 'asesor.id_municipio', '=', 'municipios.id')
+            ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+            ->select(
+                'asesor.id', 
+                'asesor.nombre', 
+                'asesor.apellido', 
+                'asesor.documento', 
+                'asesor.id_tipo_documento', 
+                'asesor.imagen_perfil', 
+                'asesor.direccion', 
+                'asesor.celular', 
+                'asesor.fecha_nac', 
+                'asesor.genero', 
+                'asesor.id_municipio', 
+                'municipios.nombre as municipio_nombre',
+                'departamentos.name as departamento_nombre',
+                'departamentos.id as id_departamento',
+                'asesor.id_autentication'
+            )
+            ->first();
+        return [
+            'id' => $asesor->id,
+            'nombre' => $asesor->nombre,
+            'apellido' => $asesor->apellido,
+            'documento' => $asesor->documento,
+            'id_tipo_documento' => $asesor->id_tipo_documento,
+            'fecha_nac' => $asesor->fecha_nac,
+            'imagen_perfil' => $asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
+            'direccion' => $asesor->direccion,
+            'celular' => $asesor->celular,
+            'genero' => $asesor->genero,
+            'id_municipio' => $asesor->id_municipio,
+            'municipio_nombre' => $asesor->municipio_nombre,
+            'departamento_nombre' => $asesor->departamento_nombre,
+            'id_departamento' => $asesor->id_departamento,
+            'email' => $asesor->auth->email,
+            'estado' => $asesor->auth->estado == 1 ? 'Activo' : 'Inactivo',
+        ];
+
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
+
 
 
     public function listarAsesores (){
@@ -317,5 +382,8 @@ class AsesorApiController extends Controller
         }
 
     }
+
+
+    
 
 }

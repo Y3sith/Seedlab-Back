@@ -16,11 +16,15 @@ return new class extends Migration
         DB::unprepared("CREATE PROCEDURE sp_registrar_asesor(
         In p_nombre varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_apellido varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        -- In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        -- In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_documento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        -- In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, --  //no el id el nombre
+        In p_tipo_documento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_municipio varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_fecha_nac DATE,
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_estado BOOLEAN  
@@ -28,6 +32,7 @@ return new class extends Migration
 BEGIN
     DECLARE v_idaliado VARCHAR(50); 
     DECLARE last_inserted_id INT;
+    DECLARE v_idmunicipio INT;
 
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -38,9 +43,13 @@ BEGIN
     IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
         SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
     ELSE
+    
         IF EXISTS (SELECT 1 FROM asesor WHERE celular = p_celular LIMIT 1) THEN
             SELECT 'El numero de celular ya ha sido registrado en el sistema' AS mensaje;
         ELSE
+
+            SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
+
             INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 4);
 
@@ -48,8 +57,10 @@ BEGIN
 
             SELECT id INTO v_idaliado FROM aliado WHERE aliado.nombre = p_aliado;
 
-            INSERT INTO asesor(nombre, apellido, celular, id_aliado, id_autentication ) 
-            VALUES (p_nombre, p_apellido, p_celular, v_idaliado, @last_inserted_id);
+            INSERT INTO asesor(nombre, apellido, documento, imagen_perfil, celular, genero,
+           direccion, id_aliado, id_tipo_documento, id_municipio,fecha_nac,id_autentication) 
+            VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero,
+            p_direccion, v_idaliado, p_tipo_documento,v_idmunicipio, p_fecha_nac,@last_inserted_id);
 
             SELECT 'Se ha registrado exitosamente el asesor' AS mensaje;
         END IF;

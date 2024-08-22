@@ -142,15 +142,30 @@ class SuperAdminController extends Controller
             //     $perfilUrl = Storage::url($logoPath);
             // }
 
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+                $perfilUrl = Storage::url($logoPath);
+            } else {
+                // Usar la imagen por defecto
+                $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
 
-            DB::transaction(function () use ($data, &$response, &$statusCode) {
-                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?)', [
+            }
+
+            $direccion = $data->input('direccion','Dirección por defecto');
+            $fecha_nac = $data->input('fecha_nac','2000-01-01');
+
+            DB::transaction(function () use ($data, &$response, &$statusCode,$perfilUrl,$direccion,$fecha_nac ) {
+                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
-                    //$perfilUrl,
-                    //$data['direccion'],
+                    $data['documento'],
+                    $perfilUrl,
                     $data['celular'],
-                    //$data['genero'],
+                    $data['genero'],
+                    $direccion,
+                    $data['id_tipo_documento'],
+                    $data['municipio'],
+                    $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
@@ -185,16 +200,21 @@ class SuperAdminController extends Controller
             }
             $admin = SuperAdmin::where('id', $id)
                 ->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'apellido', 'imagen_perfil' ,'direccion','celular', 'genero', "id_autentication")
+                ->select('id', 'nombre', 'apellido','documento','id_tipo_documento','fecha_nac','id_municipio' ,'imagen_perfil',
+                'direccion','celular', 'genero', "id_autentication")
                 ->first();
             return [
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
+                'documento'=>$admin->documento,
+                'id_tipo_documento'=>$admin->id_tipo_documento,
+                'fecha_nac'=>$admin->fecha_nac,
                 'imagen_perfil'=>$admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
                 'direccion'=>$admin->direccion,
                 'celular'=>$admin->celular,
                 'genero'=>$admin->genero,
+                'id_municipio'=>$admin->id_municipio,
                 'email' => $admin->auth->email,
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_auth' => $admin->id_autentication
@@ -259,6 +279,7 @@ class SuperAdminController extends Controller
             if ($admin) {
                 $admin->nombre = $request->input('nombre');
                 $admin->apellido = $request->input('apellido');
+                $admin->documento = $request->input('documento');
                 if ($request->hasFile('imagen_perfil')) {
                     //Eliminar el logo anterior
                     Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
@@ -267,8 +288,11 @@ class SuperAdminController extends Controller
                     $admin->imagen_perfil = str_replace('public', 'storage', $path);
                 } 
                 $admin->celular = $request->input('celular');
-                $admin->direccion = $request->input('direccion');
                 $admin->genero = $request->input('genero');
+                $admin->direccion = $request->input('direccion');
+                $admin->id_tipo_documento = $request->input('id_tipo_documento');
+                $admin->id_municipio = $request->input('id_municipio');
+                $admin->fecha_nac = $request->input('fecha_nac');
                 $admin->save();
 
                 if ($admin->auth) {
