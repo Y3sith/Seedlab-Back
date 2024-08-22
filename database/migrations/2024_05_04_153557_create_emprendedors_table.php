@@ -26,6 +26,8 @@ return new class extends Migration
             $table->foreign('id_autentication')->references('id')->on('users')->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_tipo_documento')->collation('utf8mb4_unicode_ci');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento')->collation('utf8mb4_unicode_ci');
+            $table->unsignedBigInteger('id_departamento')->collation('utf8mb4_unicode_ci');
+            $table->foreign('id_departamento')->references('id')->on('departamentos')->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_municipio')->collation('utf8mb4_unicode_ci');
             $table->foreign('id_municipio')->references('id')->on('municipios')->collation('utf8mb4_unicode_ci');
             //$table->timestamps();

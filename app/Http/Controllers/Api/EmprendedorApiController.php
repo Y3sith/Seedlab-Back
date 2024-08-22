@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
 use App\Models\Municipio;
+use App\Models\Departamento;
 use App\Models\TipoDocumento;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -73,6 +74,7 @@ class EmprendedorApiController extends Controller
             'genero' => 'required|string|',
             'fecha_nac' => 'required|date',
             'direccion' => 'required|string|max:255',
+            'id_departamento' => 'required|string|max:255',
             'id_municipio' => 'required|string|max:255', // Validar el nombre del municipio
             'id_tipo_documento' => 'required|integer',
             'password' => 'nullable|string|min:8',
@@ -84,9 +86,14 @@ class EmprendedorApiController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
         
-        $municipio = Municipio::where('nombre', $request->id_municipio)->first();
+        $municipio = Municipio::where('id', $request->id_municipio)->first();
         if (!$municipio) {
             return response()->json(["error" => "El municipio no fue encontrado"], 404);
+        }
+
+        $departamento = Departamento::where('id', $request->id_departamento)->first();
+        if (!$departamento) {
+            return response()->json(["error" => "El departamento no fue encontrado"], 404);
         }
         if ($request->hasFile('imagen_perfil')) {
             //Eliminar el logo anterior
@@ -104,6 +111,7 @@ class EmprendedorApiController extends Controller
         $emprendedor->genero = $request->genero;
         $emprendedor->fecha_nac = $request->fecha_nac;
         $emprendedor->direccion = $request->direccion;
+        $emprendedor->id_departamento = $departamento->id;
         $emprendedor->id_municipio = $municipio->id;
         $emprendedor->id_tipo_documento = $request->id_tipo_documento;
         

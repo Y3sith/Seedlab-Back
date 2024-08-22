@@ -26,6 +26,7 @@ class EmprendedorSeeder extends Seeder
             "cod_ver"=> "153567",
             "id_autentication"=> 5,
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866
         ]);
         Emprendedor::create([
@@ -41,6 +42,7 @@ class EmprendedorSeeder extends Seeder
             "cod_ver"=> "183567",
             "id_autentication"=> 16,
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866
         ]);
         Emprendedor::create([
@@ -56,6 +58,7 @@ class EmprendedorSeeder extends Seeder
             "cod_ver"=> "113562",
             "id_autentication"=> 15,
             "id_tipo_documento"=> 1,
+            "id_departamento"=> 27,
             "id_municipio"=> 866
         ]);
         
