@@ -52,7 +52,7 @@ class AsesorApiController extends Controller
 
             }
             $direccion = $data->input('direccion','Dirección por defecto');
-            $fecha_nac = $data->input('fecha_nac','2000-01-01');
+            $fecha_nac = $data->input('fecha_nac','01-01-2000');
             DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
