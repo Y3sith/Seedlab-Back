@@ -43,12 +43,6 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            // $perfilUrl = null;
-            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-            //         $perfilUrl = Storage::url($logoPath);
-            //     }
-
             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
                 $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
                 $perfilUrl = Storage::url($logoPath);
@@ -57,14 +51,8 @@ class AsesorApiController extends Controller
                 $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
 
             }
-            
-            //$documento = $data->input('documento','0000000');
             $direccion = $data->input('direccion','Dirección por defecto');
-            //$genero = $data->input('genero','Masculino');  
-            //$celular = $data->input('celular','0000000000');
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
-            
-
             DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
@@ -79,12 +67,9 @@ class AsesorApiController extends Controller
                     $data['municipio'],
                     $fecha_nac,
                     $data['email'],
-                    //$data['fecha_nac'],
                     Hash::make($data['password']),
                     $data['estado'],
                 ]);
-
-
                 if (!empty($results)) {
                     $response = $results[0]->mensaje;
                     if ($response === 'El numero de celular ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
