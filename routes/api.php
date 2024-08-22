@@ -126,7 +126,8 @@ Route::group([
     Route::post('/create_aliado', [AliadoApiController::class, 'crearAliado'])->name('crearaliado');
     Route::put('/editarAsesorAliado/{id}', [AliadoApiController::class,'editarAsesorXaliado'])->name('EditarAsesorAliado');
     Route::get('/emprendedores&empresa',[AliadoApiController::class,'verEmprendedoresxEmpresa']);
-    Route::post('/crearbanner',[AliadoApiController::class,'crearBanner']);
+    Route::get('/generoAliado',[AliadoApiController::class,'generos']);
+    Route::post('/crearbannerr',[AliadoApiController::class,'crearBanner']);
     Route::post('/editarbanner/{id}',[AliadoApiController::class,'editarBanner']);
     Route::delete('/eliminarbanner/{id}',[AliadoApiController::class,'eliminarBanner']);
     
