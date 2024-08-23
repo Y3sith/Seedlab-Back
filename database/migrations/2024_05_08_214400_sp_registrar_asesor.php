@@ -23,8 +23,8 @@ return new class extends Migration
         In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, --  //no el id el nombre
         In p_tipo_documento INT,
-        In p_municipio INT,
-        In p_fecha_nac DATE,
+        In p_id_municipio INT,
+        IN p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_estado BOOLEAN  
@@ -32,6 +32,7 @@ return new class extends Migration
 BEGIN
     DECLARE v_idaliado VARCHAR(50); 
     DECLARE last_inserted_id INT;
+    
 
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
     BEGIN
@@ -47,7 +48,8 @@ BEGIN
             SELECT 'El numero de celular ya ha sido registrado en el sistema' AS mensaje;
         ELSE
 
-
+            
+            
             INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 4);
 
@@ -58,7 +60,7 @@ BEGIN
             INSERT INTO asesor(nombre, apellido, documento, imagen_perfil, celular, genero,
            direccion, id_aliado, id_tipo_documento, id_municipio,fecha_nac,id_autentication) 
             VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero,
-            p_direccion, v_idaliado, p_tipo_documento,p_municipio, p_fecha_nac,@last_inserted_id);
+            p_direccion, v_idaliado, p_tipo_documento,p_id_municipio, p_fecha_nac,@last_inserted_id);
 
             SELECT 'Se ha registrado exitosamente el asesor' AS mensaje;
         END IF;
