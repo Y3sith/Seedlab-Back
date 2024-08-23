@@ -124,7 +124,7 @@ class AuthController extends Controller
         }
         $emprendedor = Emprendedor::where('documento', $documento)
             //->with('auth:id,email,estado')
-            ->select('nombre', 'apellido','imagen_perfil', 'documento', 'celular', 'genero', 'fecha_nac', 'direccion', 'id_municipio', 'id_autentication', 'id_tipo_documento')
+            ->select('nombre', 'apellido','imagen_perfil', 'documento', 'celular', 'genero', 'fecha_nac', 'direccion', 'id_departamento', 'id_municipio', 'id_autentication', 'id_tipo_documento')
             ->first();
             return[
                 'id'=>$emprendedor->auth->id,
@@ -136,6 +136,7 @@ class AuthController extends Controller
                 'genero'=>$emprendedor->genero,
                 'fecha_nac'=>$emprendedor->fecha_nac,
                 'direccion'=>$emprendedor->direccion,
+                'id_departamento'=>$emprendedor->id_departamento,
                 'id_municipio'=>$emprendedor->id_municipio,
                 'id_autentication'=>$emprendedor->id_autentication,
                 'id_tipo_documento'=>$emprendedor->id_tipo_documento,
