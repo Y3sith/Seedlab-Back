@@ -21,9 +21,9 @@ return new class extends Migration
             In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            In p_fecha_nac DATE,
-            In p_tipo_documento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            In p_municipio varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            In p_tipo_documento INT,
+            In p_id_municipio INT,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_estado BOOLEAN  -- Sin coma aquí
@@ -49,7 +49,7 @@ return new class extends Migration
             SELECT LAST_INSERT_ID() INTO @last_inserted_id;
         
             INSERT INTO orientador (nombre, apellido, id_autentication, documento, imagen_perfil, direccion, celular, genero, fecha_nac, id_tipo_documento,id_municipio) 
-            VALUES (p_nombre,p_apellido, @last_inserted_id,p_documento, p_imagen_perfil, p_direccion, p_celular, p_genero, p_fecha_nac, p_tipo_documento, p_municipio);
+            VALUES (p_nombre,p_apellido, @last_inserted_id,p_documento, p_imagen_perfil, p_direccion, p_celular, p_genero, p_fecha_nac, p_tipo_documento, p_id_municipio);
 
             SELECT 'El orientador ha sido creado con exito' AS mensaje;
     END IF;            
