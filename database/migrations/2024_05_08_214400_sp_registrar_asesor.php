@@ -22,8 +22,8 @@ return new class extends Migration
         In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, --  //no el id el nombre
-        In p_tipo_documento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-        In p_municipio varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_tipo_documento INT,
+        In p_municipio INT,
         In p_fecha_nac DATE,
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -46,6 +46,7 @@ BEGIN
         IF EXISTS (SELECT 1 FROM asesor WHERE celular = p_celular LIMIT 1) THEN
             SELECT 'El numero de celular ya ha sido registrado en el sistema' AS mensaje;
         ELSE
+
 
             INSERT INTO users (email, password, estado, id_rol) 
             VALUES (p_correo, p_contrasena, p_estado, 4);

@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('aliado', function (Blueprint $table) {
             $table->id();
             $table->string('nombre', 50);
-            $table->text('descripcion');
+            $table->text('descripcion', 312);
             $table->text('logo'); //este campo llamado longbinary se creo y esta en el appserviceprovider (NO BORRAR NADA ALLI)
             //$table->text('banner')->nullable();
             $table->text('ruta_multi')->nullable();
