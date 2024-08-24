@@ -43,12 +43,6 @@ class OrientadorApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
 
-            // $perfilUrl = null;
-            //     if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-            //         $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-            //         $perfilUrl = Storage::url($logoPath);
-            //     }
-
             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
                 $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
                 $perfilUrl = Storage::url($logoPath);
@@ -61,8 +55,6 @@ class OrientadorApiController extends Controller
             $direccion = $data->input('direccion','Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
             
-                
-                
             DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl,$direccion,$fecha_nac) {
                 Log::info($data->all());
                 $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
@@ -70,12 +62,12 @@ class OrientadorApiController extends Controller
                     $data['apellido'],
                     $data['documento'],
                     $perfilUrl,
-                    $direccion,
                     $data['celular'],
                     $data['genero'],
-                    $fecha_nac,
+                    $direccion,
                     $data['id_tipo_documento'],
-                    $data['municipio'],
+                    $data['id_municipio'],
+                    $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'],
@@ -89,7 +81,8 @@ class OrientadorApiController extends Controller
                     }
                 }
             });
-            return response()->json(['message' => $response], $statusCode);
+            //return response()->json(['message' => $response], $statusCode);
+            return response()->json($data);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -290,27 +283,46 @@ class OrientadorApiController extends Controller
             if (Auth::user()->id_rol != 2 && Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
-            $orientador = Orientador::where('id', $id)
-                ->with('auth:id,email,estado')
-                //->select('id', 'nombre', 'apellido', 'celular', "id_autentication")
-                ->first();
-            $response = [
+
+            $orientador = Orientador::where('orientador.id', $id)
+            ->join('municipios', 'orientador.id_municipio', '=', 'municipios.id')
+            ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+            ->select(
+                'orientador.id',
+                'orientador.nombre',
+                'orientador.apellido',
+                'orientador.documento',
+                'orientador.id_tipo_documento',
+                'orientador.imagen_perfil',
+                'orientador.direccion',
+                'orientador.celular',
+                'orientador.fecha_nac',
+                'orientador.genero',
+                'orientador.id_municipio',
+                'municipios.nombre as municipio_nombre',
+                'departamentos.name as departamento_nombre',
+                'departamentos.id as id_departamento',
+                'orientador.id_autentication'
+            )
+            ->first();
+            return [
                 'id' => $orientador->id,
                 'nombre' => $orientador->nombre,
                 'apellido' => $orientador->apellido,
                 'documento' => $orientador->documento,
                 'id_tipo_documento' => $orientador->id_tipo_documento,
-                'id_municipio' => $orientador->id_municipio,
                 'fecha_nac' => $orientador->fecha_nac,
-                'imagen_perfil'=>$orientador->imagen_perfil ? $this->correctImageUrl($orientador->imagen_perfil) : null,
+                'imagen_perfil' => $orientador->imagen_perfil ? $this->correctImageUrl($orientador->imagen_perfil) : null,
                 'direccion' => $orientador->direccion,
                 'celular' => $orientador->celular,
                 'genero' => $orientador->genero,
-                'id_auth' => $orientador->auth->id,
+                'id_municipio' => $orientador->id_municipio,
+                'municipio_nombre' => $orientador->municipio_nombre,
+                'departamento_nombre' => $orientador->departamento_nombre,
+                'id_departamento' => $orientador->id_departamento,
                 'email' => $orientador->auth->email,
-                'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo'
+                'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo',
             ];
-            return response()->json($response);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

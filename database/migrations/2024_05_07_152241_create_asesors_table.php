@@ -17,7 +17,6 @@ return new class extends Migration
             $table->string('apellido', 50);
             $table->string('documento', 50);
             $table->text('imagen_perfil');
-            //$table->string('email', 50);
             $table->string('celular', 13);
             $table->string('genero', 20);
             $table->date('fecha_nac');
