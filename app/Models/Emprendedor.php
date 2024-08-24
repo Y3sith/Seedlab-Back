@@ -22,6 +22,7 @@ class Emprendedor extends Model
         'genero',
         'fecha_nac',
         'direccion',
+        'id_emprendedor',
         'id_municipio',
         'id_autentication',
         'id_tipo_documento',
