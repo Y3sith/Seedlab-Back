@@ -54,7 +54,7 @@ class AsesorApiController extends Controller
             $direccion = $data->input('direccion','Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
             DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
-                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
@@ -64,6 +64,7 @@ class AsesorApiController extends Controller
                     $direccion,
                     $data['aliado'], //no el id el nombre
                     $data['id_tipo_documento'],
+                    $data['departamento'],
                     $data['municipio'],
                     $fecha_nac,
                     $data['email'],
@@ -341,8 +342,6 @@ class AsesorApiController extends Controller
             'celular' => $asesor->celular,
             'genero' => $asesor->genero,
             'id_municipio' => $asesor->id_municipio,
-            'municipio_nombre' => $asesor->municipio_nombre,
-            'departamento_nombre' => $asesor->departamento_nombre,
             'id_departamento' => $asesor->id_departamento,
             'email' => $asesor->auth->email,
             'estado' => $asesor->auth->estado == 1 ? 'Activo' : 'Inactivo',
