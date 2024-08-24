@@ -41,6 +41,7 @@ class SuperadminSeeder extends Seeder
             "direccion"=>"Cra 28 # 39-06",
             "fecha_nac"=>"2024-05-21",
             "id_tipo_documento"=>"1",
+            "id_departamento"=>"27",
             "id_municipio"=>"866",
             "genero"=>"Masculino",
             "celular"=>"320147941",

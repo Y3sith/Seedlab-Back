@@ -141,14 +141,6 @@ class EmprendedorApiController extends Controller
     }
 
 
-
-
-
-   
-
-
-
-
     public function destroy($documento)
     {
         if (Auth::user()->id_rol != 5) {

@@ -24,6 +24,8 @@ return new class extends Migration
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('users');
             $table->unsignedBigInteger('id_tipo_documento');
+            $table->unsignedBigInteger('id_departamento');
+            $table->foreign('id_departamento')->references('id')->on('departamentos');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
             $table->unsignedBigInteger('id_municipio');
             $table->foreign('id_municipio')->references('id')->on('municipios');
