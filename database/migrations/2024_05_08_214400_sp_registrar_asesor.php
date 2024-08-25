@@ -12,71 +12,62 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
-        DB::unprepared("CREATE PROCEDURE sp_registrar_superadmin(
-            IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_documento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_imagen_perfil TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_celular VARCHAR(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_genero VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_direccion VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_tipo_documento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_departamento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_municipio VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_fecha_nac DATE,
-            IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_estado BOOLEAN  
-        )
-        BEGIN
-            DECLARE last_inserted_id INT;
-            DECLARE v_iddepartamento INT;
-            DECLARE v_idmunicipio INT;
-            
-           
-            START TRANSACTION;
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_asesor;');
+        DB::unprepared("CREATE PROCEDURE sp_registrar_asesor(
+        In p_nombre varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_apellido varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_documento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, --  //no el id el nombre
+        In p_tipo_documento INT,
+        IN p_departamento INT,
+        In p_id_municipio INT,
+        IN p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_estado BOOLEAN  
+)
+BEGIN
+    DECLARE v_idaliado VARCHAR(50); 
+    DECLARE last_inserted_id INT;
+    
+
+    DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+
+    IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
+        SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+    ELSE
+    
+        IF EXISTS (SELECT 1 FROM asesor WHERE celular = p_celular LIMIT 1) THEN
+            SELECT 'El numero de celular ya ha sido registrado en el sistema' AS mensaje;
+        ELSE
 
             
-            IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
-                SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
-                ROLLBACK; -- Deshacer la transacción si el correo ya existe
-            ELSE
-                -- Insertar en la tabla de usuarios
-                INSERT INTO users (email, password, estado, id_rol) 
-                VALUES (p_correo, p_contrasena, p_estado, 1); 
+            
+            INSERT INTO users (email, password, estado, id_rol) 
+            VALUES (p_correo, p_contrasena, p_estado, 4);
 
-                -- Obtener el ID insertado en la tabla users
-                SELECT LAST_INSERT_ID() INTO last_inserted_id;
+            SELECT LAST_INSERT_ID() INTO @last_inserted_id;
 
-                -- Obtener el ID del departamento
-                SELECT id INTO v_iddepartamento FROM departamentos WHERE nombre = p_departamento LIMIT 1;
+            SELECT id INTO v_idaliado FROM aliado WHERE aliado.nombre = p_aliado;
 
-                -- Verificar si se encontró el departamento
-                IF v_iddepartamento IS NULL THEN
-                    SELECT 'Departamento no encontrado' AS mensaje;
-                    ROLLBACK; -- Deshacer la transacción si no se encuentra el departamento
-                ELSE
-                    -- Obtener el ID del municipio
-                    SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
+            INSERT INTO asesor(nombre, apellido, documento, imagen_perfil, celular, genero,
+           direccion, id_aliado, id_tipo_documento, id_departamento, id_municipio,fecha_nac,id_autentication)
+            
+            VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero,
+            p_direccion, v_idaliado, p_tipo_documento, p_departamento,p_id_municipio, p_fecha_nac,@last_inserted_id);
 
-                    -- Verificar si se encontró el municipio
-                    IF v_idmunicipio IS NULL THEN
-                        SELECT 'Municipio no encontrado' AS mensaje;
-                        ROLLBACK; -- Deshacer la transacción si no se encuentra el municipio
-                    ELSE
-                        -- Insertar en la tabla de superadmin
-                        INSERT INTO superadmin (nombre, apellido, documento, imagen_perfil, celular, genero, direccion, id_tipo_documento, id_departamento, id_municipio, fecha_nac, id_autentication) 
-                        VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero, p_direccion, p_tipo_documento, v_iddepartamento, v_idmunicipio, p_fecha_nac, last_inserted_id);
-
-                        -- Confirmar la transacción
-                        COMMIT;
-
-                        SELECT 'Tu Asesor ha sido creado con éxito' AS mensaje;
-                    END IF;
-                END IF;
-            END IF;
-        END");
+            SELECT 'Se ha registrado exitosamente el asesor' AS mensaje;
+        END IF;
+    END IF;
+END");
     }
 
     /**
@@ -84,6 +75,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
+        DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_asesor;');
     }
 };
