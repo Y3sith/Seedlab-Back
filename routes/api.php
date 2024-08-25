@@ -91,6 +91,7 @@ Route::group([
     Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
     Route::post('/editarAdmin/{id}',[SuperAdminController::class,'editarSuperAdmin']);
     Route::get('/userProfileAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
+    Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);
