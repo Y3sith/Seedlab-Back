@@ -214,14 +214,14 @@ class OrientadorApiController extends Controller
             if ($orientador) {
                 $orientador->nombre = $request->input('nombre');
                 $orientador->apellido = $request->input('apellido');
-               $orientador->documento = $request->input('documento');
-               $newCelular = $request->input('celular');
-               $orientador->direccion = $request->input('direccion');
-               $orientador->genero = $request->input('genero');
-               $orientador->id_tipo_documento = $request->input('id_tipo_documento');
-               $orientador->id_departamento = $request->input('id_departamento');
-               $orientador->id_municipio = $request->input('id_municipio');
-               $orientador->fecha_nac = $request->input('fecha_nac');
+                $orientador->documento = $request->input('documento');
+                $newCelular = $request->input('celular');
+                $orientador->direccion = $request->input('direccion');
+                $orientador->genero = $request->input('genero');
+                $orientador->id_tipo_documento = $request->input('id_tipo_documento');
+                //$orientador->departamento = $request->input('id_departamento');
+                $orientador->id_municipio = $request->input('id_municipio');
+                $orientador->fecha_nac = $request->input('fecha_nac');
                     if ($newCelular && $newCelular !== $orientador->celular) {
                         // Verificar si el nuevo email ya está en uso
                         $existing = Orientador::where('celular', $newCelular)->first();
