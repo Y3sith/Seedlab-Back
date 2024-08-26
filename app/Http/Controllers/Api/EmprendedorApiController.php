@@ -51,7 +51,7 @@ class EmprendedorApiController extends Controller
         return response()->json($empresa->items(), 200);
     }
 
-    public function update(Request $request, $documento)
+    public function updateEmprendedor(Request $request, $documento)
     {
         // Verificar si el usuario autenticado tiene el rol adecuado
         if (Auth::user()->id_rol != 5) {
@@ -60,6 +60,16 @@ class EmprendedorApiController extends Controller
 
         // Obtener el emprendedor actual basado en el documento proporcionado
         $emprendedor = Emprendedor::where('documento', $documento)->first();
+
+        $newCelular = $request->input('celular');
+                if ($newCelular && $newCelular !== $emprendedor->celular) {
+                    // Verificar si el nuevo email ya está en uso
+                    $existing = Emprendedor::where('celular', $newCelular)->first();
+                    if ($existing) {
+                        return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+                    }
+                    $emprendedor->celular = $newCelular;
+                }
 
         // Validar si se encontró el emprendedor
         if (!$emprendedor) {
@@ -74,8 +84,8 @@ class EmprendedorApiController extends Controller
             'genero' => 'required|string|',
             'fecha_nac' => 'required|date',
             'direccion' => 'required|string|max:255',
-            'id_departamento' => 'required|string|max:255',
-            'id_municipio' => 'required|string|max:255', // Validar el nombre del municipio
+            'id_departamento' => 'required|max:255',
+            'id_municipio' => 'required|max:255', // Validar el nombre del municipio
             'id_tipo_documento' => 'required|integer',
             'password' => 'nullable|string|min:8',
             'imagen_perfil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
@@ -95,6 +105,7 @@ class EmprendedorApiController extends Controller
         if (!$departamento) {
             return response()->json(["error" => "El departamento no fue encontrado"], 404);
         }
+        
         if ($request->hasFile('imagen_perfil')) {
             //Eliminar el logo anterior
             Storage::delete(str_replace('storage', 'public', $emprendedor->imagen_perfil));
@@ -111,9 +122,9 @@ class EmprendedorApiController extends Controller
         $emprendedor->genero = $request->genero;
         $emprendedor->fecha_nac = $request->fecha_nac;
         $emprendedor->direccion = $request->direccion;
-        $emprendedor->id_departamento = $departamento->id;
-        $emprendedor->id_municipio = $municipio->id;
-        $emprendedor->id_tipo_documento = $request->id_tipo_documento;
+        $emprendedor->id_departamento = $request->id_departamento;
+        $emprendedor->id_municipio = $request->id_departamento;
+        // $emprendedor->id_tipo_documento = $request->id_tipo_documento;
         
 
         // Verificar si se proporcionó una contraseña para actualizar
