@@ -20,6 +20,7 @@ class OrientadorSeeder extends Seeder
             "imagen_perfil"=>"",
             "fecha_nac"=>"2024-05-21",
             "id_tipo_documento"=>"1",
+            "id_departamento"=>"27",
             "id_municipio"=>"866",
             //"email"=>"",
             "direccion"=>"N/A",

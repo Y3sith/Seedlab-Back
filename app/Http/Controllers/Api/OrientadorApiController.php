@@ -57,7 +57,7 @@ class OrientadorApiController extends Controller
             
             DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl,$direccion,$fecha_nac) {
                 Log::info($data->all());
-                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
@@ -66,7 +66,8 @@ class OrientadorApiController extends Controller
                     $data['genero'],
                     $direccion,
                     $data['id_tipo_documento'],
-                    $data['id_municipio'],
+                    $data['departamento'],
+                    $data['municipio'],
                     $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
@@ -81,8 +82,8 @@ class OrientadorApiController extends Controller
                     }
                 }
             });
-            //return response()->json(['message' => $response], $statusCode);
-            return response()->json($data);
+            return response()->json(['message' => $response], $statusCode);
+            //return response()->json($data);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -218,6 +219,7 @@ class OrientadorApiController extends Controller
                $orientador->direccion = $request->input('direccion');
                $orientador->genero = $request->input('genero');
                $orientador->id_tipo_documento = $request->input('id_tipo_documento');
+               $orientador->departamento = $request->input('id_departamento');
                $orientador->id_municipio = $request->input('id_municipio');
                $orientador->fecha_nac = $request->input('fecha_nac');
                     if ($newCelular && $newCelular !== $orientador->celular) {

@@ -38,20 +38,16 @@ return new class extends Migration
         INSERT INTO users (email, password, estado, id_rol) 
         VALUES (p_correo, p_contrasena, p_estado, 1); 
 
-                -- Obtener el ID insertado en la tabla users
-                SELECT LAST_INSERT_ID() INTO last_inserted_id;
+        SELECT LAST_INSERT_ID() INTO last_inserted_id;
 
         INSERT INTO superadmin (nombre, apellido, documento, imagen_perfil, celular, genero, direccion ,id_tipo_documento, id_departamento, id_municipio, fecha_nac, id_autentication ) 
         VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero, p_direccion, p_tipo_documento, p_departamento, p_municipio, p_fecha_nac, last_inserted_id );
 
-                        -- Confirmar la transacción
-                        COMMIT;
 
-                        SELECT 'Tu SuperAdmin ha sido creado con éxito' AS mensaje;
-                    END IF;
-                END IF;
-            END IF;
-        END");
+        SELECT 'Tu SuperAdmin ha sido creado con exito' AS mensaje;
+    END IF;
+END");
+    
     }
 
     /**
