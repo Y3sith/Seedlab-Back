@@ -14,60 +14,35 @@ return new class extends Migration
     {
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_superadmin;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_superadmin(
-            IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_documento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_imagen_perfil TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_celular VARCHAR(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_genero VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_direccion VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_tipo_documento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_departamento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_municipio VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_fecha_nac DATE,
-            IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_estado BOOLEAN  
-        )
-        BEGIN
-            DECLARE last_inserted_id INT;
-            DECLARE v_iddepartamento INT;
-            DECLARE v_idmunicipio INT;
-            
-           
-            START TRANSACTION;
+        IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_documento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_imagen_perfil text CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_celular varchar(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_genero varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_tipo_documento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_departamento varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_municipio varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        In p_fecha_nac DATE,
+        IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_contrasena VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+        IN p_estado BOOLEAN  
+    )
+    BEGIN
+    DECLARE last_inserted_id INT;
 
-            
-            IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
-                SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
-                ROLLBACK; -- Deshacer la transacción si el correo ya existe
-            ELSE
-                -- Insertar en la tabla de usuarios
-                INSERT INTO users (email, password, estado, id_rol) 
-                VALUES (p_correo, p_contrasena, p_estado, 1); 
+    IF EXISTS (SELECT 1 FROM users WHERE email = p_correo) THEN
+        SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
+    ELSE
+        INSERT INTO users (email, password, estado, id_rol) 
+        VALUES (p_correo, p_contrasena, p_estado, 1); 
 
                 -- Obtener el ID insertado en la tabla users
                 SELECT LAST_INSERT_ID() INTO last_inserted_id;
 
-                -- Obtener el ID del departamento
-                SELECT id INTO v_iddepartamento FROM departamentos WHERE nombre = p_departamento LIMIT 1;
-
-                -- Verificar si se encontró el departamento
-                IF v_iddepartamento IS NULL THEN
-                    SELECT 'Departamento no encontrado' AS mensaje;
-                    ROLLBACK; -- Deshacer la transacción si no se encuentra el departamento
-                ELSE
-                    -- Obtener el ID del municipio
-                    SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
-
-                    -- Verificar si se encontró el municipio
-                    IF v_idmunicipio IS NULL THEN
-                        SELECT 'Municipio no encontrado' AS mensaje;
-                        ROLLBACK; -- Deshacer la transacción si no se encuentra el municipio
-                    ELSE
-                        -- Insertar en la tabla de superadmin
-                        INSERT INTO superadmin (nombre, apellido, documento, imagen_perfil, celular, genero, direccion, id_tipo_documento, id_departamento, id_municipio, fecha_nac, id_autentication) 
-                        VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero, p_direccion, p_tipo_documento, v_iddepartamento, v_idmunicipio, p_fecha_nac, last_inserted_id);
+        INSERT INTO superadmin (nombre, apellido, documento, imagen_perfil, celular, genero, direccion ,id_tipo_documento, id_departamento, id_municipio, fecha_nac, id_autentication ) 
+        VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero, p_direccion, p_tipo_documento, p_departamento, p_municipio, p_fecha_nac, last_inserted_id );
 
                         -- Confirmar la transacción
                         COMMIT;

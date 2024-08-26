@@ -23,8 +23,8 @@ return new class extends Migration
         In p_direccion varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         In p_aliado varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci, --  //no el id el nombre
         In p_tipo_documento INT,
-        IN p_departamento INT, --el id
-        In p_id_municipio INT, --el id
+        In p_departamento INT,
+        In p_id_municipio INT,
         IN p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
         IN p_contrasena VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -59,7 +59,7 @@ BEGIN
             SELECT id INTO v_idaliado FROM aliado WHERE aliado.nombre = p_aliado;
 
             INSERT INTO asesor(nombre, apellido, documento, imagen_perfil, celular, genero,
-           direccion, id_aliado, id_tipo_documento, id_departamento, id_municipio,fecha_nac,id_autentication)
+           direccion, id_aliado, id_tipo_documento, id_departamento,id_municipio,fecha_nac,id_autentication)
             
             VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero,
             p_direccion, v_idaliado, p_tipo_documento, p_departamento,p_id_municipio, p_fecha_nac,@last_inserted_id);

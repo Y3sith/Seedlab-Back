@@ -15,7 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 
-class DashboardSuperAdminController extends Controller
+class DashboardsController extends Controller
 {
     public function enumerarUsuarios()
     {

@@ -54,6 +54,7 @@ class AsesorApiController extends Controller
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
             DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
@@ -130,6 +131,7 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
+                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
@@ -165,6 +167,7 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
+                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                 ]);
 

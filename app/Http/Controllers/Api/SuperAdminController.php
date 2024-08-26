@@ -190,7 +190,7 @@ class SuperAdminController extends Controller
             }
             $admin = SuperAdmin::where('id', $id)
                 ->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'apellido','documento','id_tipo_documento','fecha_nac','id_departamento','id_municipio' ,'imagen_perfil',
+                ->select('id', 'nombre', 'apellido','documento','id_tipo_documento','fecha_nac', 'id_departamento','id_municipio' ,'imagen_perfil',
                 'direccion','celular', 'genero', "id_autentication")
                 ->first();
             return [
@@ -282,6 +282,7 @@ class SuperAdminController extends Controller
                 $admin->genero = $request->input('genero');
                 $admin->direccion = $request->input('direccion');
                 $admin->id_tipo_documento = $request->input('id_tipo_documento');
+                $admin->id_departamento = $request->input('id_departamento');
                 $admin->id_municipio = $request->input('id_municipio');
                 $admin->fecha_nac = $request->input('fecha_nac');
                 $admin->save();
