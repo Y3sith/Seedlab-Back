@@ -131,12 +131,6 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            // $perfilUrl = null;
-            // if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-            //     $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-            //     $perfilUrl = Storage::url($logoPath);
-            // }
-
             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
                 $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
                 $perfilUrl = Storage::url($logoPath);

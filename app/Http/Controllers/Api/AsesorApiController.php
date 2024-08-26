@@ -25,7 +25,7 @@ class AsesorApiController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * crear
      */
     public function store(Request $data)
     {
@@ -168,11 +168,6 @@ class AsesorApiController extends Controller
                     'id_municipio' => $request->id_municipio
                 ]);
 
-
-                // $password = $request->input('password');
-                // if ($password) {
-                //     $user->password =  Hash::make($request->input('password'));
-                // }
                 $password = $request->input('password');
                 if ($password) {
                     if (strlen($password) < 8) {
