@@ -219,7 +219,7 @@ class OrientadorApiController extends Controller
                $orientador->direccion = $request->input('direccion');
                $orientador->genero = $request->input('genero');
                $orientador->id_tipo_documento = $request->input('id_tipo_documento');
-               $orientador->departamento = $request->input('id_departamento');
+               $orientador->id_departamento = $request->input('id_departamento');
                $orientador->id_municipio = $request->input('id_municipio');
                $orientador->fecha_nac = $request->input('fecha_nac');
                     if ($newCelular && $newCelular !== $orientador->celular) {
