@@ -25,7 +25,7 @@ class AsesorApiController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * crear
      */
     public function store(Request $data)
     {
@@ -63,8 +63,8 @@ class AsesorApiController extends Controller
                     $direccion,
                     $data['aliado'], //no el id el nombre
                     $data['id_tipo_documento'],
-                    $data['id_departamento'],
-                    $data['id_municipio'],
+                    $data['departamento'],
+                    $data['municipio'],
                     $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
@@ -130,7 +130,6 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
@@ -166,15 +165,9 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                 ]);
 
-
-                // $password = $request->input('password');
-                // if ($password) {
-                //     $user->password =  Hash::make($request->input('password'));
-                // }
                 $password = $request->input('password');
                 if ($password) {
                     if (strlen($password) < 8) {
@@ -315,49 +308,48 @@ class AsesorApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
 
-            $asesor = Asesor::where('asesor.id', $id)
-                ->join('municipios', 'asesor.id_municipio', '=', 'municipios.id')
-                ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
-                ->select(
-                    'asesor.id',
-                    'asesor.nombre',
-                    'asesor.apellido',
-                    'asesor.documento',
-                    'asesor.id_tipo_documento',
-                    'asesor.imagen_perfil',
-                    'asesor.direccion',
-                    'asesor.celular',
-                    'asesor.fecha_nac',
-                    'asesor.genero',
-                    'asesor.id_municipio',
-                    'municipios.nombre as municipio_nombre',
-                    'departamentos.name as departamento_nombre',
-                    'departamentos.id as id_departamento',
-                    'asesor.id_autentication'
-                )
-                ->first();
-            return [
-                'id' => $asesor->id,
-                'nombre' => $asesor->nombre,
-                'apellido' => $asesor->apellido,
-                'documento' => $asesor->documento,
-                'id_tipo_documento' => $asesor->id_tipo_documento,
-                'fecha_nac' => $asesor->fecha_nac,
-                'imagen_perfil' => $asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
-                'direccion' => $asesor->direccion,
-                'celular' => $asesor->celular,
-                'genero' => $asesor->genero,
-                'id_municipio' => $asesor->id_municipio,
-                'municipio_nombre' => $asesor->municipio_nombre,
-                'departamento_nombre' => $asesor->departamento_nombre,
-                'id_departamento' => $asesor->id_departamento,
-                'email' => $asesor->auth->email,
-                'estado' => $asesor->auth->estado == 1 ? 'Activo' : 'Inactivo',
-            ];
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
+        $asesor = Asesor::where('asesor.id', $id)
+            ->join('municipios', 'asesor.id_municipio', '=', 'municipios.id')
+            ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+            ->select(
+                'asesor.id', 
+                'asesor.nombre', 
+                'asesor.apellido', 
+                'asesor.documento', 
+                'asesor.id_tipo_documento', 
+                'asesor.imagen_perfil', 
+                'asesor.direccion', 
+                'asesor.celular', 
+                'asesor.fecha_nac', 
+                'asesor.genero', 
+                'asesor.id_municipio', 
+                'municipios.nombre as municipio_nombre',
+                'departamentos.name as departamento_nombre',
+                'departamentos.id as id_departamento',
+                'asesor.id_autentication'
+            )
+            ->first();
+        return [
+            'id' => $asesor->id,
+            'nombre' => $asesor->nombre,
+            'apellido' => $asesor->apellido,
+            'documento' => $asesor->documento,
+            'id_tipo_documento' => $asesor->id_tipo_documento,
+            'fecha_nac' => $asesor->fecha_nac,
+            'imagen_perfil' => $asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
+            'direccion' => $asesor->direccion,
+            'celular' => $asesor->celular,
+            'genero' => $asesor->genero,
+            'id_municipio' => $asesor->id_municipio,
+            'id_departamento' => $asesor->id_departamento,
+            'email' => $asesor->auth->email,
+            'estado' => $asesor->auth->estado == 1 ? 'Activo' : 'Inactivo',
+        ];
+
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
 
 
 
