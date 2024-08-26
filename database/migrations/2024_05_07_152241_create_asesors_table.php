@@ -27,6 +27,8 @@ return new class extends Migration
             $table->foreign('id_aliado')->references('id')->on('aliado');
             $table->unsignedBigInteger('id_tipo_documento');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
+            $table->unsignedBigInteger('id_departamento');
+            $table->foreign('id_departamento')->references('id')->on('departamentos');
             $table->unsignedBigInteger('id_municipio');
             $table->foreign('id_municipio')->references('id')->on('municipios');
             //$table->timestamps();

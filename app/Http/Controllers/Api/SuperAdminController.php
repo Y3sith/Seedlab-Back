@@ -131,12 +131,6 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            // $perfilUrl = null;
-            // if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-            //     $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-            //     $perfilUrl = Storage::url($logoPath);
-            // }
-
             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
                 $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
                 $perfilUrl = Storage::url($logoPath);
@@ -150,7 +144,7 @@ class SuperAdminController extends Controller
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
 
             DB::transaction(function () use ($data, &$response, &$statusCode,$perfilUrl,$direccion,$fecha_nac ) {
-                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
@@ -159,7 +153,8 @@ class SuperAdminController extends Controller
                     $data['genero'],
                     $direccion,
                     $data['id_tipo_documento'],
-                    $data['municipio'],
+                    $data['id_departamento'],
+                    $data['id_municipio'],
                     $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
@@ -195,7 +190,7 @@ class SuperAdminController extends Controller
             }
             $admin = SuperAdmin::where('id', $id)
                 ->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'apellido','documento','id_tipo_documento','fecha_nac','id_municipio' ,'imagen_perfil',
+                ->select('id', 'nombre', 'apellido','documento','id_tipo_documento','fecha_nac', 'id_departamento','id_municipio' ,'imagen_perfil',
                 'direccion','celular', 'genero', "id_autentication")
                 ->first();
             return [
@@ -209,6 +204,7 @@ class SuperAdminController extends Controller
                 'direccion'=>$admin->direccion,
                 'celular'=>$admin->celular,
                 'genero'=>$admin->genero,
+                'id_departamento'=>$admin->id_departamento,
                 'id_municipio'=>$admin->id_municipio,
                 'email' => $admin->auth->email,
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
@@ -286,6 +282,7 @@ class SuperAdminController extends Controller
                 $admin->genero = $request->input('genero');
                 $admin->direccion = $request->input('direccion');
                 $admin->id_tipo_documento = $request->input('id_tipo_documento');
+                $admin->id_departamento = $request->input('id_departamento');
                 $admin->id_municipio = $request->input('id_municipio');
                 $admin->fecha_nac = $request->input('fecha_nac');
                 $admin->save();
@@ -306,13 +303,13 @@ class SuperAdminController extends Controller
                             return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
                         }
                         $user->email = $newEmail;
+                        $user->estado = $request->input('estado');
                     }
                     // $user->email = $request->input('email');
                     // //  if ($user->email) {
                     // //      return response()->json(['message'=>'El correo electrónico ya ha sido registrado anteriormente'],501);
                     // //  }
                     // //dd($user->email);
-                    $user->estado = $request->input('estado');
                     $user->save();
                 }
                 return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
@@ -320,7 +317,7 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 500);
         }
     }
     
