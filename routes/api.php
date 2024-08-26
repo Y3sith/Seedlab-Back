@@ -16,6 +16,7 @@ use App\Http\Controllers\Api\LeccionController;
 use App\Http\Controllers\Api\NivelesController;
 use App\Http\Controllers\Api\AsesorApiController;
 use App\Http\Controllers\Api\DashboardAliadoController;
+use App\Http\Controllers\Api\DashboardsController;
 use App\Http\Controllers\Api\DashboardSuperAdminController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
@@ -95,12 +96,6 @@ Route::group([
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class,'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class,'listarAliados']);
-    Route::get('/emprendedor_departamento',[DashboardSuperAdminController::class,'emprendedorXdepartamento']);
-    Route::get('/averageAsesorias2024', [DashboardSuperAdminController::class, 'averageAsesorias2024']);
-    Route::get('/contar-usuarios', [DashboardSuperAdminController::class, 'enumerarUsuarios']);
-    Route::get('/conteoAsesorias', [DashboardSuperAdminController::class, 'asesoriasAsignadasSinAsignar']);
-    Route::get('/listRegistrosAnioMes', [DashboardSuperAdminController::class, 'conteoRegistrosAnioYMes']);
-    Route::get('/promEmpresas_Mes',[DashboardSuperAdminController::class,'promEmpresasXmes']);
     
     ////   reportes
     Route::get('/reporte-emprendedores','SuperAdminController@emprendedoresPorMunicipioPDF');
@@ -141,16 +136,16 @@ Route::group([
     'middleware' => 'auth:api'
 ],
 function () {
-    Route::get('/emprendedor_departamento', [DashboardSuperAdminController::class, 'emprendedorXdepartamento']);
-    Route::get('/averageAsesorias2024', [DashboardSuperAdminController::class, 'averageAsesorias2024']);
-    Route::get('/contar-usuarios', [DashboardSuperAdminController::class, 'enumerarUsuarios']);
-    Route::get('/conteoAsesorias', [DashboardSuperAdminController::class, 'asesoriasAsignadasSinAsignar']);
-    Route::get('/listRegistrosAnioMes', [DashboardSuperAdminController::class, 'conteoRegistrosAnioYMes']);
-    Route::get('/promEmpresas_Mes', [DashboardSuperAdminController::class, 'promEmpresasXmes']);
-    Route::get('/generoAliado',[DashboardSuperAdminController::class,'generos']);
-    Route::get('/dashboardAliado/{idAliado}', [DashboardSuperAdminController::class,'dashboardAliado']);
-    Route::get('/asesoriasTotalesAliado',[DashboardSuperAdminController::class,'asesoriasTotalesAliado']);
-    Route::get('/asesorias_mes/{id}',[DashboardSuperAdminController::class,'asesoriasXmes']);
+    Route::get('/emprendedor_departamento', [DashboardsController::class, 'emprendedorXdepartamento']);
+    Route::get('/averageAsesorias2024', [DashboardsController::class, 'averageAsesorias2024']);
+    Route::get('/contar-usuarios', [DashboardsController::class, 'enumerarUsuarios']);
+    Route::get('/conteoAsesorias', [DashboardsController::class, 'asesoriasAsignadasSinAsignar']);
+    Route::get('/listRegistrosAnioMes', [DashboardsController::class, 'conteoRegistrosAnioYMes']);
+    Route::get('/promEmpresas_Mes', [DashboardsController::class, 'promEmpresasXmes']);
+    Route::get('/generoAliado',[DashboardsController::class,'generos']);
+    Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class,'dashboardAliado']);
+    Route::get('/asesoriasTotalesAliado',[DashboardsController::class,'asesoriasTotalesAliado']);
+    Route::get('/asesorias_mes/{id}',[DashboardsController::class,'asesoriasXmes']);
 
 }
 );
