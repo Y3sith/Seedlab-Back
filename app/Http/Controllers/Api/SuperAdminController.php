@@ -159,8 +159,8 @@ class SuperAdminController extends Controller
                     $data['genero'],
                     $direccion,
                     $data['id_tipo_documento'],
-                    $data['departamento'],
-                    $data['municipio'],
+                    $data['id_departamento'],
+                    $data['id_municipio'],
                     $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
@@ -309,13 +309,13 @@ class SuperAdminController extends Controller
                             return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
                         }
                         $user->email = $newEmail;
+                        $user->estado = $request->input('estado');
                     }
                     // $user->email = $request->input('email');
                     // //  if ($user->email) {
                     // //      return response()->json(['message'=>'El correo electrónico ya ha sido registrado anteriormente'],501);
                     // //  }
                     // //dd($user->email);
-                    $user->estado = $request->input('estado');
                     $user->save();
                 }
                 return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
@@ -323,7 +323,7 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 500);
         }
     }
     
