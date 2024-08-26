@@ -130,7 +130,6 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
@@ -166,7 +165,6 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                 ]);
 

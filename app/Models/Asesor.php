@@ -24,7 +24,6 @@ class Asesor extends Model
         'id_autentication',
         'id_aliado',
         'id_tipo_documento',
-        'id_departamento',
         'id_municipio'
     ];
 
@@ -57,9 +56,5 @@ class Asesor extends Model
 
     public function tipoDocumento(){
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
-    }
-
-    public function departamento(){
-        return $this->belongsTo(Departamento::class, 'id_departamento');
     }
 }

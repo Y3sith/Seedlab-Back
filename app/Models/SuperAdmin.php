@@ -23,7 +23,6 @@ class SuperAdmin extends Model
         'genero',
         'id_autentication',
         'id_tipo_documento',
-        'id_departamento',
         'id_municipio'
     ];
 
@@ -43,9 +42,5 @@ class SuperAdmin extends Model
 
     public function tipoDocumento(){
         return $this->belongsTo(TipoDocumento::class, 'id_tipo_documento');
-    }
-
-    public function departamento(){
-        return $this->belongsTo(Departamento::class, 'id_departamento');
     }
 }
