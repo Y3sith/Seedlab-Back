@@ -153,8 +153,8 @@ class SuperAdminController extends Controller
                     $data['genero'],
                     $direccion,
                     $data['id_tipo_documento'],
-                    $data['id_departamento'],
-                    $data['id_municipio'],
+                    $data['departamento'],
+                    $data['municipio'],
                     $fecha_nac,
                     $data['email'],
                     Hash::make($data['password']),
@@ -188,11 +188,28 @@ class SuperAdminController extends Controller
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
-            $admin = SuperAdmin::where('id', $id)
-                ->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'apellido','documento','id_tipo_documento','fecha_nac', 'id_departamento','id_municipio' ,'imagen_perfil',
-                'direccion','celular', 'genero', "id_autentication")
+            $admin = SuperAdmin::where('superadmin.id', $id)
+                ->join('municipios', 'superadmin.id_municipio', '=', 'municipios.id')
+                ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+                ->select(
+                'superadmin.id',
+                'superadmin.nombre',
+                'superadmin.apellido',
+                'superadmin.documento',
+                'superadmin.id_tipo_documento',
+                'superadmin.fecha_nac',
+                'superadmin.imagen_perfil',
+                'superadmin.direccion',
+                'superadmin.celular',
+                'superadmin.genero',
+                'superadmin.id_municipio',
+                'municipios.nombre as municipio_nombre',
+                'departamentos.name as departamento_nombre',
+                'departamentos.id as id_departamento',
+                'superadmin.id_autentication'
+                )
                 ->first();
+
             return [
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
