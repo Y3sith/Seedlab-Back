@@ -299,7 +299,7 @@ class SuperAdminController extends Controller
                 $admin->genero = $request->input('genero');
                 $admin->direccion = $request->input('direccion');
                 $admin->id_tipo_documento = $request->input('id_tipo_documento');
-                $admin->id_departamento = $request->input('id_departamento');
+                //$admin->id_departamento = $request->input('id_departamento');
                 $admin->id_municipio = $request->input('id_municipio');
                 $admin->fecha_nac = $request->input('fecha_nac');
                 $admin->save();
