@@ -197,22 +197,23 @@ class AuthController extends Controller
     //                 $perfilUrl = Storage::url($logoPath);
     //             }
 
-    if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-        $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-        $perfilUrl = Storage::url($logoPath);
-    } else {
-        // Usar la imagen por defecto
-        $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+    // if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+    //     $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
+    //     $perfilUrl = Storage::url($logoPath);
+    // } else {
+    //     // Usar la imagen por defecto
+    //     $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
 
-    }
+    // }
 
-    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode,$perfilUrl) {
+    DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode) {
         $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $data['documento'],
             $data['id_tipo_documento'],
             $data['nombre'],
             $data['apellido'],
-            $perfilUrl,
+            $data['imagen_perfil'],
+            //$perfilUrl,
             $data['celular'],
             $data['genero'],
             $data['fecha_nacimiento'],
