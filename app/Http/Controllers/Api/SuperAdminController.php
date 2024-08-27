@@ -322,11 +322,6 @@ class SuperAdminController extends Controller
                         $user->email = $newEmail;
                         $user->estado = $request->input('estado');
                     }
-                    // $user->email = $request->input('email');
-                    // //  if ($user->email) {
-                    // //      return response()->json(['message'=>'El correo electrónico ya ha sido registrado anteriormente'],501);
-                    // //  }
-                    // //dd($user->email);
                     $user->save();
                 }
                 return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);

@@ -184,7 +184,6 @@ class AsesorApiController extends Controller
                     }
                     $user->email = $newEmail;
                 }
-
                 $user->estado = $request->input('estado');
                 $user->save();
                 return response()->json(['message' => 'Asesor actualizado', 200]);
