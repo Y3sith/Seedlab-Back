@@ -319,8 +319,6 @@ class OrientadorApiController extends Controller
                 'celular' => $orientador->celular,
                 'genero' => $orientador->genero,
                 'id_municipio' => $orientador->id_municipio,
-                'municipio_nombre' => $orientador->municipio_nombre,
-                'departamento_nombre' => $orientador->departamento_nombre,
                 'id_departamento' => $orientador->id_departamento,
                 'email' => $orientador->auth->email,
                 'estado' => $orientador->auth->estado == 1 ? 'Activo' : 'Inactivo',
