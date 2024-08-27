@@ -16,15 +16,15 @@ return new class extends Migration
         DB::unprepared('DROP PROCEDURE IF EXISTS sp_registrar_emprendedor;');
         DB::unprepared("CREATE PROCEDURE sp_registrar_emprendedor(
             IN p_num_documento VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-    IN p_nombretipodoc VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    IN p_id_tipo_documento INT,
     IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_apellido VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_imagen_perfil TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_celular VARCHAR(13) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_genero VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_fecha_nac VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-    IN p_id_departamento VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-    IN p_id_municipio VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+    IN p_id_departamento INT,
+    IN p_id_municipio INT,
     IN p_direccion VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
     IN p_password VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
@@ -32,9 +32,9 @@ return new class extends Migration
     IN p_cod_ver VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 )
 BEGIN
-    DECLARE v_idtipodoc INT;
-    DECLARE v_iddepartamento INT;
-    DECLARE v_idmunicipio INT;
+    -- DECLARE v_idtipodoc INT;
+    -- DECLARE v_iddepartamento INT;
+    -- DECLARE v_idmunicipio INT;
     DECLARE v_fecha_nac DATE;
     
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION
@@ -52,9 +52,9 @@ BEGIN
             IF EXISTS (SELECT 1 FROM users WHERE email = p_correo LIMIT 1) THEN
                 SELECT 'El correo electrónico ya ha sido registrado anteriormente' AS mensaje;
             ELSE
-                SELECT id INTO v_idtipodoc FROM tipo_documento WHERE nombre = p_nombretipodoc LIMIT 1;
-                SELECT id INTO v_iddepartamento FROM departamentos WHERE nombre = p_departamento LIMIT 1;
-                SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
+                -- SELECT id INTO v_idtipodoc FROM tipo_documento WHERE nombre = p_nombretipodoc LIMIT 1;
+                -- SELECT id INTO v_iddepartamento FROM departamentos WHERE nombre = p_departamento LIMIT 1;
+                -- SELECT id INTO v_idmunicipio FROM municipios WHERE nombre = p_municipio LIMIT 1;
                 
                 SET v_fecha_nac = STR_TO_DATE(p_fecha_nac, '%Y-%m-%d');
                 

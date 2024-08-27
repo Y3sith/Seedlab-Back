@@ -207,16 +207,17 @@ class AuthController extends Controller
     }
 
     DB::transaction(function () use ($data, $verificationCode, &$response, &$statusCode,$perfilUrl) {
-        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+        $results = DB::select('CALL sp_registrar_emprendedor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $data['documento'],
-            $data['nombretipodoc'],
+            $data['id_tipo_documento'],
             $data['nombre'],
             $data['apellido'],
             $perfilUrl,
             $data['celular'],
             $data['genero'],
             $data['fecha_nacimiento'],
-            $data['municipio'],
+            $data['id_departamento'],
+            $data['id_municipio'],
             $data['direccion'],
             $data['email'],
             Hash::make($data['password']),
