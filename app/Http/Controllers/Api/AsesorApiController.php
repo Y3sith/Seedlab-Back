@@ -87,51 +87,26 @@ class AsesorApiController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, $id)
+    public function updateAsesor(Request $request, $id)
     {
         try {
-            $asesor = Asesor::find($id);
             //dd($request->estado);
-            if (Auth::user()->id_rol == 4) { //rol asesor
-
-                $newCelular = $request->input('celular');
-                if ($newCelular && $newCelular !== $asesor->celular) {
-                    // Verificar si el nuevo email ya está en uso
-                    $existing = Asesor::where('celular', $newCelular)->first();
-                    if ($existing) {
-                        return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
-                    }
-                    $asesor->celular = $newCelular;
-                }
-
-                if ($request->hasFile('imagen_perfil')) {
-                    //Eliminar el logo anterior
-                    Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
-
-                    // Guardar el nuevo logo
-                    $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
-                    $asesor->imagen_perfil = str_replace('public', 'storage', $path);
-                }
-
-                $asesor->update([
-                    'nombre' => $request->nombre,
-                    'apellido' => $request->apellido,
-                    'celular' => $request->celular,
-                    //'imagen_perfil'=>$request->imagen_perfil,
-                    'documento' => $request->documento,
-                    'direccion' => $request->direccion,
-                    'genero' => $request->genero,
-                    'fecha_nac' => $request->fecha_nac,
-                    'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_departamento' => $request->id_departamento,
-                    'id_municipio' => $request->id_municipio,
-                    //'email' => $request->email, no se sabe si pueda editar 
-                ]);
-                return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
+            if (Auth::user()->id_rol != 4) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
 
-            if (Auth::user()->id_rol == 3) { //rol aliado
-                $user = $asesor->auth;
+                $asesor = Asesor::find($id);
+                if ($asesor) {
+                $asesor->nombre = $request->input('nombre');
+                $asesor->apellido = $request->input('apellido');
+                $newCelular = $request->input('celular');
+                $asesor->documento = $request->input('documento');
+                $asesor->direccion = $request->input('direccion');
+                $asesor->genero = $request->input('genero');
+                $asesor->fecha_nac = $request->input('fecha_nac');
+                $asesor->id_tipo_documento = $request->input('id_tipo_documento');
+                $asesor->id_departamento = $request->input('id_departamento');
+                $asesor->id_municipio = $request->input('id_municipio');
 
                 $newCelular = $request->input('celular');
                 if ($newCelular && $newCelular !== $asesor->celular) {
@@ -142,6 +117,7 @@ class AsesorApiController extends Controller
                     }
                     $asesor->celular = $newCelular;
                 }
+
                 if ($request->hasFile('imagen_perfil')) {
                     //Eliminar el logo anterior
                     Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
@@ -150,26 +126,70 @@ class AsesorApiController extends Controller
                     $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
                     $asesor->imagen_perfil = str_replace('public', 'storage', $path);
                 }
-                $asesor->update([
-                    'nombre' => $request->nombre,
-                    'apellido' => $request->apellido,
-                    'celular' => $request->celular,
-                    'documento' => $request->documento,
-                    'direccion' => $request->direccion,
-                    'genero' => $request->genero,
-                    'fecha_nac' => $request->fecha_nac,
-                    'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_departamento' => $request->id_departamento,
-                    'id_municipio' => $request->id_municipio
-                ]);
 
+
+                $asesor->save();
+                return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
+        }
+        return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function updateAsesorxaliado(Request $request, $id)
+    {
+        try {
+            //dd($request->estado);
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion']);
+            }
+            
+                $asesor = Asesor::find($id);
+                if ($asesor) {
+                $asesor->nombre = $request->input('nombre');
+                $asesor->apellido = $request->input('apellido');
+                $newCelular = $request->input('celular');
+                $asesor->documento = $request->input('documento');
+                $asesor->direccion = $request->input('direccion');
+                $asesor->genero = $request->input('genero');
+                $asesor->fecha_nac = $request->input('fecha_nac');
+                $asesor->id_tipo_documento = $request->input('id_tipo_documento');
+                $asesor->id_departamento = $request->input('id_departamento');
+                $asesor->id_municipio = $request->input('id_municipio');
+
+                $newCelular = $request->input('celular');
+                if ($newCelular && $newCelular !== $asesor->celular) {
+                    // Verificar si el nuevo email ya está en uso
+                    $existing = Asesor::where('celular', $newCelular)->first();
+                    if ($existing) {
+                        return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+                    }
+                    $asesor->celular = $newCelular;
+                }
+
+                if ($request->hasFile('imagen_perfil')) {
+                    //Eliminar el logo anterior
+                    Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
+
+                    // Guardar el nuevo logo
+                    $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+                    $asesor->imagen_perfil = str_replace('public', 'storage', $path);
+                }
+
+
+                $asesor->save();
+
+                if ($asesor->auth) {
+                    $user = $asesor->auth;
                 $password = $request->input('password');
                 if ($password) {
                     if (strlen($password) < 8) {
                         return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
                     }
-                    $user->password = Hash::make($password);
+                    $user->password =  Hash::make($request->input('password'));
                 }
+
                 $newEmail = $request->input('email');
                 if ($newEmail && $newEmail !== $user->email) {
                     // Verificar si el nuevo email ya está en uso
@@ -179,17 +199,72 @@ class AsesorApiController extends Controller
                     }
                     $user->email = $newEmail;
                 }
+
                 $user->estado = $request->input('estado');
                 $user->save();
-                return response()->json(['message' => 'Asesor actualizado', 200]);
             }
-            return response()->json([
-                'message' => 'No tienes permisos para realizar esta acción'
-            ], 403);
+                return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
+        }
+        return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    
+            // if (Auth::user()->id_rol == 3) { //rol aliado
+            //     $user = $asesor->auth;
+
+            //     $newCelular = $request->input('celular');
+            //     if ($newCelular && $newCelular !== $asesor->celular) {
+            //         // Verificar si el nuevo email ya está en uso
+            //         $existing = Asesor::where('celular', $newCelular)->first();
+            //         if ($existing) {
+            //             return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+            //         }
+            //         $asesor->celular = $newCelular;
+            //     }
+            //     if ($request->hasFile('imagen_perfil')) {
+            //         //Eliminar el logo anterior
+            //         Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
+
+            //         // Guardar el nuevo logo
+            //         $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
+            //         $asesor->imagen_perfil = str_replace('public', 'storage', $path);
+            //     }
+            //     $asesor->update([
+            //         'nombre' => $request->nombre,
+            //         'apellido' => $request->apellido,
+            //         'celular' => $request->celular,
+            //         'documento' => $request->documento,
+            //         'direccion' => $request->direccion,
+            //         'genero' => $request->genero,
+            //         'fecha_nac' => $request->fecha_nac,
+            //         'id_tipo_documento' => $request->id_tipo_documento,
+            //         'id_departamento' => $request->id_departamento,
+            //         'id_municipio' => $request->id_municipio
+            //     ]);
+
+            //     $password = $request->input('password');
+            //     if ($password) {
+            //         if (strlen($password) < 8) {
+            //             return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
+            //         }
+            //         $user->password = Hash::make($password);
+            //     }
+            //     $newEmail = $request->input('email');
+            //     if ($newEmail && $newEmail !== $user->email) {
+            //         // Verificar si el nuevo email ya está en uso
+            //         $existingUser = User::where('email', $newEmail)->first();
+            //         if ($existingUser) {
+            //             return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
+            //         }
+            //         $user->email = $newEmail;
+            //     }
+            //     $user->estado = $request->input('estado');
+            //     $user->save();
+            //     return response()->json(['message' => 'Asesor actualizado', 200]);
+            // }
 
     /**
      * Remove the specified resource from storage.
@@ -317,8 +392,8 @@ class AsesorApiController extends Controller
                 'asesor.fecha_nac', 
                 'asesor.genero', 
                 'asesor.id_municipio', 
-                'municipios.nombre as municipio_nombre',
-                'departamentos.name as departamento_nombre',
+                // 'departamentos.name as departamento_nombre',
+                // 'municipios.nombre as municipio_nombre',
                 'departamentos.id as id_departamento',
                 'asesor.id_autentication'
             )
@@ -334,8 +409,8 @@ class AsesorApiController extends Controller
             'direccion' => $asesor->direccion,
             'celular' => $asesor->celular,
             'genero' => $asesor->genero,
-            'id_municipio' => $asesor->id_municipio,
             'id_departamento' => $asesor->id_departamento,
+            'id_municipio' => $asesor->id_municipio,
             'email' => $asesor->auth->email,
             'estado' => $asesor->auth->estado == 1 ? 'Activo' : 'Inactivo',
         ];

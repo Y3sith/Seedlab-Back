@@ -224,7 +224,8 @@ Route::group([
     'middleware' => 'auth:api'
 ], function(){
     Route::apiResource('/asesor', AsesorApiController::class);
-    Route::post('/editarAsesor/{id}',[AsesorApiController::class, 'update']);
+    Route::post('/editarAsesor/{id}',[AsesorApiController::class, 'updateAsesor']);
+    Route::post('/editarAsesorxaliado/{id}',[AsesorApiController::class, 'updateAsesorxaliado']);
     Route::get('/mostrarAsesoriasAsesor/{id}/{conHorario}', [AsesorApiController::class, 'mostrarAsesoriasAsesor']);
     Route::get('/contarAsesorias/{idAsesor}',[AsesorApiController::class,'contarAsesorias']);
     Route::get('/userProfileAsesor/{id}', [AsesorApiController::class,'userProfileAsesor'])->name('UserProfileAsesor');
