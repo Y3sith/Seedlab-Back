@@ -288,6 +288,23 @@ class SuperAdminController extends Controller
                 $admin->nombre = $request->input('nombre');
                 $admin->apellido = $request->input('apellido');
                 $admin->documento = $request->input('documento');
+                $newCelular = $request->input('celular');
+                $admin->genero = $request->input('genero');
+                $admin->direccion = $request->input('direccion');
+                $admin->id_tipo_documento = $request->input('id_tipo_documento');
+                //$admin->id_departamento = $request->input('id_departamento');
+                $admin->id_municipio = $request->input('id_municipio');
+                $admin->fecha_nac = $request->input('fecha_nac');
+                //$admin->celular = $request->input('celular');
+                if ($newCelular && $newCelular !== $admin->celular) {
+                    // Verificar si el nuevo email ya está en uso
+                    $existing = SuperAdmin::where('celular', $newCelular)->first();
+                    if ($existing) {
+                        return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 402);
+                    }
+                    $admin->celular = $newCelular;
+                }
+                
                 if ($request->hasFile('imagen_perfil')) {
                     //Eliminar el logo anterior
                     Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
@@ -295,13 +312,7 @@ class SuperAdminController extends Controller
                     $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
                     $admin->imagen_perfil = str_replace('public', 'storage', $path);
                 } 
-                $admin->celular = $request->input('celular');
-                $admin->genero = $request->input('genero');
-                $admin->direccion = $request->input('direccion');
-                $admin->id_tipo_documento = $request->input('id_tipo_documento');
-                //$admin->id_departamento = $request->input('id_departamento');
-                $admin->id_municipio = $request->input('id_municipio');
-                $admin->fecha_nac = $request->input('fecha_nac');
+
                 $admin->save();
 
                 if ($admin->auth) {
@@ -320,8 +331,8 @@ class SuperAdminController extends Controller
                             return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
                         }
                         $user->email = $newEmail;
-                        $user->estado = $request->input('estado');
                     }
+                    $user->estado = $request->input('estado');
                     $user->save();
                 }
                 return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
