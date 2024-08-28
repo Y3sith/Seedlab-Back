@@ -96,15 +96,15 @@ class EmprendedorApiController extends Controller
             return response()->json(['errors' => $validator->errors()], 400);
         }
         
-        $municipio = Municipio::where('id', $request->id_municipio)->first();
-        if (!$municipio) {
-            return response()->json(["error" => "El municipio no fue encontrado"], 404);
-        }
+        // $municipio = Municipio::where('id', $request->id_municipio)->first();
+        // if (!$municipio) {
+        //     return response()->json(["error" => "El municipio no fue encontrado"], 404);
+        // }
 
-        $departamento = Departamento::where('id', $request->id_departamento)->first();
-        if (!$departamento) {
-            return response()->json(["error" => "El departamento no fue encontrado"], 404);
-        }
+        // $departamento = Departamento::where('id', $request->id_departamento)->first();
+        // if (!$departamento) {
+        //     return response()->json(["error" => "El departamento no fue encontrado"], 404);
+        // }
         
         if ($request->hasFile('imagen_perfil')) {
             //Eliminar el logo anterior
@@ -123,7 +123,7 @@ class EmprendedorApiController extends Controller
         $emprendedor->fecha_nac = $request->fecha_nac;
         $emprendedor->direccion = $request->direccion;
         $emprendedor->id_departamento = $request->id_departamento;
-        $emprendedor->id_municipio = $request->id_departamento;
+        $emprendedor->id_municipio = $request->id_municipio;
         // $emprendedor->id_tipo_documento = $request->id_tipo_documento;
         
 
