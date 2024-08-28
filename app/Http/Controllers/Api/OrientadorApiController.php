@@ -43,25 +43,16 @@ class OrientadorApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
 
-            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                $perfilUrl = Storage::url($logoPath);
-            } else {
-                // Usar la imagen por defecto
-                $perfilUrl ='storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
-
-            }
-
             $direccion = $data->input('direccion','Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
             
-            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl,$direccion,$fecha_nac) {
+            DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac) {
                 Log::info($data->all());
                 $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $perfilUrl,
+                    $data['imagen_perfil'],
                     $data['celular'],
                     $data['genero'],
                     $direccion,
