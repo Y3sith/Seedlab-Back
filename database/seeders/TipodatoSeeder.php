@@ -14,7 +14,6 @@ class TipodatoSeeder extends Seeder
     public function run(): void
     {
         TipoDato::create(['nombre' => 'Video']);
-        TipoDato::create(['nombre' => 'Multimedia']);
         TipoDato::create(['nombre' => 'Imagen']);
         TipoDato::create(['nombre' => 'Pdf']);
         TipoDato::create(['nombre' => 'Texto']);
