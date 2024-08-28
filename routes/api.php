@@ -50,7 +50,7 @@ Route::group([
    'middleware' => 'auth:api'
 ], function(){
     Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
-    Route::put('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
+    Route::post('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
     //Route::apiResource('/empresa',EmpresaApiController::class);
     Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyempresa']);
 });

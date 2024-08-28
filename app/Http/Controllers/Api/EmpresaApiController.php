@@ -144,32 +144,74 @@ class EmpresaApiController extends Controller
         return response()->json(['message' => 'Empresa no encontrada'], 404);
     }
 
-    // Actualiza la información de la empresa
-    $empresa->update($request->except('apoyo'));
+    if ($empresa) {
+        $newDocumento = $request->input('documento');
+        $empresa->nombre = $request->input('nombre');
+        $empresa->cargo = $request->input('cargo');
+        $empresa->razonSocial = $request->input('razonSocial');
+        $empresa->url_pagina = $request->input('url_pagina');
+        $empresa->telefono = $request->input('telefono');
+        $newCelular = $request->input('celular');
+        $empresa->direccion = $request->input('direccion');
+        $empresa->profesion = $request->input('profesion');
+        $empresa->correo = $request->input('correo');
+        $empresa->experiencia = $request->input('experiencia');
+        $empresa->funciones = $request->input('funciones');
+        $empresa->id_tipo_documento = $request->input('id_tipo_documento');
+        $empresa->id_departamento = $request->input('id_departamento');
+        $empresa->id_municipio = $request->input('id_municipio');
+        $empresa->id_emprendedor = $request->input('id_emprendedor');
 
-    // Maneja la actualización o creación de registros en `apoyo_empresa`
-    if ($request->has('apoyo')) {
-        $apoyoData = $request->input('apoyo');
-
-        // Verifica si el campo 'documento' está presente y no es nulo
-        if (isset($apoyoData['documento']) && !empty($apoyoData['documento'])) {
-            // Busca si ya existe un apoyo con el documento especificado
-            $apoyo = ApoyoEmpresa::where('documento', $apoyoData['documento'])->first();
-
-            if ($apoyo) {
-                // Actualiza el apoyo si ya existe
-                $apoyo->update($apoyoData);
-            } else {
-                // Crea un nuevo apoyo si no existe
-                $nuevoApoyo = new ApoyoEmpresa($apoyoData);
-                $nuevoApoyo->id_empresa = $empresa->documento; // Asegúrate de asignar el ID de la empresa
-                $nuevoApoyo->save();
+        $newCelular = $request->input('celular');
+        if ($newCelular && $newCelular !== $empresa->celular) {
+            // Verificar si el nuevo email ya está en uso
+            $existing = Empresa::where('celular', $newCelular)->first();
+            if ($existing) {
+                return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
             }
-        } else {
-            // Si no hay datos de apoyo o el documento está vacío, no hacer nada con el apoyo
-            // Puedes optar por no hacer nada aquí o manejar un caso especial si es necesario
+            $empresa->celular = $newCelular;
         }
-    }
+
+        $newDocumento = $request->input('documento');
+        if ($newDocumento && $newDocumento !== $empresa->celular) {
+            // Verificar si el nuevo email ya está en uso
+            $existing = Empresa::where('documento', $newDocumento)->first();
+            if ($existing) {
+                return response()->json(['message' => 'El numero de documento ya ha sido registrado anteriormente'], 400);
+            }
+            $empresa->documento = $newDocumento;
+        }
+
+        $empresa->save();
+        return response()->json(['message' => 'Empresa actualizado', $empresa, 200]);
+}
+
+    // // Actualiza la información de la empresa
+    // $empresa->update($request->except('apoyo'));
+
+    // // Maneja la actualización o creación de registros en `apoyo_empresa`
+    // if ($request->has('apoyo')) {
+    //     $apoyoData = $request->input('apoyo');
+
+    //     // Verifica si el campo 'documento' está presente y no es nulo
+    //     if (isset($apoyoData['documento']) && !empty($apoyoData['documento'])) {
+    //         // Busca si ya existe un apoyo con el documento especificado
+    //         $apoyo = ApoyoEmpresa::where('documento', $apoyoData['documento'])->first();
+
+    //         if ($apoyo) {
+    //             // Actualiza el apoyo si ya existe
+    //             $apoyo->update($apoyoData);
+    //         } else {
+    //             // Crea un nuevo apoyo si no existe
+    //             $nuevoApoyo = new ApoyoEmpresa($apoyoData);
+    //             $nuevoApoyo->id_empresa = $empresa->documento; // Asegúrate de asignar el ID de la empresa
+    //             $nuevoApoyo->save();
+    //         }
+    //     } else {
+    //         // Si no hay datos de apoyo o el documento está vacío, no hacer nada con el apoyo
+    //         // Puedes optar por no hacer nada aquí o manejar un caso especial si es necesario
+    //     }
+    // }
 
     return response()->json(["message" => "Empresa actualizada"], 200);
 }
