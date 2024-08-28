@@ -15,34 +15,12 @@ class AsesorSeedeer extends Seeder
      */
     public function run(): void
     {
-        Artisan::call('storage:link'); 
-
-        $fotoPerfilPath = storage_path('app/public/fotoPerfil');
-        if (!File::exists($fotoPerfilPath)) {
-            File::makeDirectory($fotoPerfilPath, 0755, true);
-        }
-
-        $sourceImagePaths = base_path('resources/imagen/usuario.jpg');
-                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
-                $destinationImagePaths = $fotoPerfilPath . '/' . $destinationImageNames;
-       
-                // Copiar la imagen a la carpeta 'banners
-                if (File::exists($sourceImagePaths)) {
-                    File::copy($sourceImagePaths, $destinationImagePaths);
-                    $this->command->info('The image has been copied to the banners folder successfully!');
-                } else {
-                    $this->command->error('The source image does not exist.');
-                }
-       
-                // URL de la imagen para guardar en la base de datos
-                $bannerUrl2 = 'storage/fotoPerfil/' . $destinationImageNames;
 
         Asesor::create([
             "id" => "1",
             "nombre" => "Juan",
             "apellido" => "Perez",
             "documento" => "N/A",
-            "imagen_perfil" => $bannerUrl2,
             "fecha_nac" => "2024-05-21",
             "id_aliado" => "1",
             "id_tipo_documento" => "1",
