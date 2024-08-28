@@ -43,21 +43,14 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
-                $logoPath = $data->file('imagen_perfil')->store('public/fotoPerfil');
-                $perfilUrl = Storage::url($logoPath);
-            } else {
-                // Usar la imagen por defecto
-                $perfilUrl = 'storage/fotoPerfil/5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
-            }
             $direccion = $data->input('direccion', 'Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
-            DB::transaction(function () use ($data, &$response, &$statusCode, $perfilUrl, $direccion, $fecha_nac) {
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $perfilUrl,
+                    $data['imagen_perfil'],
                     $data['celular'],
                     $data['genero'],
                     $direccion,
@@ -130,7 +123,8 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
-                    'id_municipio' => $request->id_municipio
+                    'id_departamento' => $request->id_departamento,
+                    'id_municipio' => $request->id_municipio,
                     //'email' => $request->email, no se sabe si pueda editar 
                 ]);
                 return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
@@ -165,6 +159,7 @@ class AsesorApiController extends Controller
                     'genero' => $request->genero,
                     'fecha_nac' => $request->fecha_nac,
                     'id_tipo_documento' => $request->id_tipo_documento,
+                    'id_departamento' => $request->id_departamento,
                     'id_municipio' => $request->id_municipio
                 ]);
 
