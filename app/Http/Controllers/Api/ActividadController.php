@@ -46,7 +46,7 @@ class ActividadController extends Controller
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string|max:1000',
-            'ruta_multi' => 'required|string|max:255',
+            'fuente' => 'required|string|max:255',
             'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
             'id_asesor' => 'required|integer|exists:asesor,id',
             'id_ruta' => 'required|integer|exists:ruta,id',
@@ -57,7 +57,7 @@ class ActividadController extends Controller
         $existingActividad = Actividad::where([
             ['nombre', $validatedData['nombre']],
             ['descripcion', $validatedData['descripcion']],
-            ['ruta_multi', $validatedData['ruta_multi']],
+            ['fuente', $validatedData['fuente']],
             ['id_tipo_dato', $validatedData['id_tipo_dato']],
             ['id_asesor', $validatedData['id_asesor']],
             ['id_ruta', $validatedData['id_ruta']],
@@ -71,7 +71,7 @@ class ActividadController extends Controller
         $actividad = Actividad::create([
             'nombre' => $validatedData['nombre'],
             'descripcion' => $validatedData['descripcion'],
-            'ruta_multi' => $validatedData['ruta_multi'],
+            'fuente' => $validatedData['fuente'],
             'id_tipo_dato' => $validatedData['id_tipo_dato'],
             'id_asesor' => $validatedData['id_asesor'],
             'id_ruta' => $validatedData['id_ruta'],
@@ -123,7 +123,7 @@ class ActividadController extends Controller
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string|max:1000',
-            'ruta_multi' => 'required|string|max:255',
+            'fuente' => 'required|string|max:255',
             'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
             'id_asesor' => 'required|integer|exists:asesor,id',
         ]);
@@ -138,8 +138,8 @@ class ActividadController extends Controller
             $actividad->descripcion = $validatedData['descripcion'];
             $cambios = true;
         }
-        if ($actividad->ruta_multi !== $validatedData['ruta_multi']) {
-            $actividad->ruta_multi = $validatedData['ruta_multi'];
+        if ($actividad->fuente !== $validatedData['fuente']) {
+            $actividad->fuente = $validatedData['fuente'];
             $cambios = true;
         }
         if ($actividad->id_tipo_dato !== $validatedData['id_tipo_dato']) {
@@ -190,7 +190,7 @@ class ActividadController extends Controller
             ],401);
         }
         $actividades = Actividad::where('id_aliado', $id)
-                    ->select('id', 'nombre', 'descripcion','ruta_multi','id_tipo_dato','id_asesor','id_ruta',)
+                    ->select('id', 'nombre', 'descripcion','fuente','id_tipo_dato','id_asesor','id_ruta',)
                     ->get();
             return response()->json($actividades);
     }
