@@ -37,47 +37,51 @@ class ActividadController extends Controller
      */
     public function store(Request $request)
     {
-        // Crear actividad (solo el aliado)
-        
+        try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-            return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
-        }
-
-        $validatedData = $request->validate([
-            'nombre' => 'required|string|max:255',
-            'descripcion' => 'required|string|max:1000',
-            'fuente' => 'required|string|max:255',
-            'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
-            'id_asesor' => 'required|integer|exists:asesor,id',
-            'id_ruta' => 'required|integer|exists:ruta,id',
-            'id_aliado'=> 'required|integer|exists:aliado,id'
-        ]);
-
-        // Verificar si la actividad ya existe
-        $existingActividad = Actividad::where([
-            ['nombre', $validatedData['nombre']],
-            ['descripcion', $validatedData['descripcion']],
-            ['fuente', $validatedData['fuente']],
-            ['id_tipo_dato', $validatedData['id_tipo_dato']],
-            ['id_asesor', $validatedData['id_asesor']],
-            ['id_ruta', $validatedData['id_ruta']],
-            ['id_aliado', $validatedData['id_aliado']]
-        ])->first();
-
-        if ($existingActividad) {
-            return response()->json(['error' => 'La actividad ya existe'], 409);
-        }
-
-        $actividad = Actividad::create([
-            'nombre' => $validatedData['nombre'],
-            'descripcion' => $validatedData['descripcion'],
-            'fuente' => $validatedData['fuente'],
-            'id_tipo_dato' => $validatedData['id_tipo_dato'],
-            'id_asesor' => $validatedData['id_asesor'],
-            'id_ruta' => $validatedData['id_ruta'],
-            'id_aliado'=> $validatedData['id_aliado']
-        ]);
-        return response()->json(['message' => 'Actividad creada con éxito: ',$actividad], 201);
+                return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
+            }
+    
+            $validatedData = $request->validate([
+                'nombre' => 'required|string|max:255',
+                'descripcion' => 'required|string|max:1000',
+                'fuente' => 'required|string|max:255',
+                'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
+                'id_asesor' => 'required|integer|exists:asesor,id',
+                'id_ruta' => 'required|integer|exists:ruta,id',
+                'id_aliado'=> 'required|integer|exists:aliado,id'
+            ]);
+    
+            // Verificar si la actividad ya existe
+            $existingActividad = Actividad::where([
+                ['nombre', $validatedData['nombre']],
+                ['descripcion', $validatedData['descripcion']],
+                ['fuente', $validatedData['fuente']],
+                ['id_tipo_dato', $validatedData['id_tipo_dato']],
+                ['id_asesor', $validatedData['id_asesor']],
+                ['id_ruta', $validatedData['id_ruta']],
+                ['id_aliado', $validatedData['id_aliado']]
+            ])->first();
+    
+            if ($existingActividad) {
+                return response()->json(['error' => 'La actividad ya existe'], 409);
+            }
+    
+            $actividad = Actividad::create([
+                'nombre' => $validatedData['nombre'],
+                'descripcion' => $validatedData['descripcion'],
+                'fuente' => $validatedData['fuente'],
+                'id_tipo_dato' => $validatedData['id_tipo_dato'],
+                'id_asesor' => $validatedData['id_asesor'],
+                'id_ruta' => $validatedData['id_ruta'],
+                'id_aliado'=> $validatedData['id_aliado']
+            ]);
+            return response()->json(['message' => 'Actividad creada con éxito: ',$actividad], 201);
+            
+        }catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+       }
+        
         
     }
 
