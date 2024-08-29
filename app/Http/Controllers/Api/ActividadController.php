@@ -43,11 +43,11 @@ class ActividadController extends Controller
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
 
-            if ($request->input('id_tipo_dato') == 2 || $request->input('id_tipo_dato') == 3) {
-                if (!$request->hasFile('fuente') || !$request->file('fuente')->isValid()) {
-                    return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
-                }
-            } 
+            // if ($request->input('id_tipo_dato') == 2 || $request->input('id_tipo_dato') == 3) {
+            //     if (!$request->hasFile('fuente') || !$request->file('fuente')->isValid()) {
+            //         return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
+            //     }
+            // } 
     
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
