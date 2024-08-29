@@ -9,6 +9,7 @@ use App\Models\TipoDato;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class ActividadController extends Controller
 {
@@ -41,11 +42,17 @@ class ActividadController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
+
+            if ($request->input('id_tipo_dato') == 2 || $request->input('id_tipo_dato') == 3) {
+                if (!$request->hasFile('fuente') || !$request->file('fuente')->isValid()) {
+                    return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
+                }
+            } 
     
             $validatedData = $request->validate([
                 'nombre' => 'required|string|max:255',
                 'descripcion' => 'required|string|max:1000',
-                'fuente' => 'required|string|max:255',
+                // 'fuente' => 'required',
                 'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
                 'id_asesor' => 'required|integer|exists:asesor,id',
                 'id_ruta' => 'required|integer|exists:ruta,id',
@@ -56,7 +63,7 @@ class ActividadController extends Controller
             $existingActividad = Actividad::where([
                 ['nombre', $validatedData['nombre']],
                 ['descripcion', $validatedData['descripcion']],
-                ['fuente', $validatedData['fuente']],
+                // ['fuente', $validatedData['fuente']],
                 ['id_tipo_dato', $validatedData['id_tipo_dato']],
                 ['id_asesor', $validatedData['id_asesor']],
                 ['id_ruta', $validatedData['id_ruta']],
@@ -66,11 +73,37 @@ class ActividadController extends Controller
             if ($existingActividad) {
                 return response()->json(['error' => 'La actividad ya existe'], 409);
             }
+
+            $fuente = null;
+                if ($request->hasFile('fuente')) {
+                    $file = $request->file('fuente');
+                    $fileName = time() . '_' . $file->getClientOriginalName();
+                    $mimeType = $file->getMimeType();
+
+                    if (strpos($mimeType, 'image') !== false) {
+                        $folder = 'imagenes';
+                    } elseif ($mimeType === 'application/pdf') {
+                        $folder = 'documentos';
+                    } elseif ($mimeType === 'application/pdf') {
+                        $folder = 'documentos';
+                    } else {
+                        return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
+                    }
+
+                    $path = $file->storeAs("public/$folder", $fileName);
+                    $fuente = Storage::url($path);
+                } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
+                    $fuente = $request->input('fuente');
+                } elseif ($request->input('fuente')) {
+                    // Si se envió un texto en 'fuente', se guarda como texto
+                    $fuente = $request->input('fuente');
+                }
     
             $actividad = Actividad::create([
                 'nombre' => $validatedData['nombre'],
                 'descripcion' => $validatedData['descripcion'],
-                'fuente' => $validatedData['fuente'],
+                //'fuente' => $validatedData['fuente'],
+                $fuente,
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
                 'id_asesor' => $validatedData['id_asesor'],
                 'id_ruta' => $validatedData['id_ruta'],
@@ -127,7 +160,7 @@ class ActividadController extends Controller
         $validatedData = $request->validate([
             'nombre' => 'required|string|max:255',
             'descripcion' => 'required|string|max:1000',
-            'fuente' => 'required|string|max:255',
+            'fuente' => 'required',
             'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
             'id_asesor' => 'required|integer|exists:asesor,id',
         ]);
