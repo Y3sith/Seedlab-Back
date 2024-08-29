@@ -103,7 +103,7 @@ class ActividadController extends Controller
                 'nombre' => $validatedData['nombre'],
                 'descripcion' => $validatedData['descripcion'],
                 //'fuente' => $validatedData['fuente'],
-                $fuente,
+                'fuente' => $fuente, 
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
                 'id_asesor' => $validatedData['id_asesor'],
                 'id_ruta' => $validatedData['id_ruta'],
