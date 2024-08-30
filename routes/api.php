@@ -193,6 +193,7 @@ Route::group([
     Route::post('/crearNivel',[NivelesController::class,'store']);
     Route::put('/editar_nivel/{id}',[NivelesController::class,'editarNivel']);
     Route::get('/listar_Nivel', [NivelesController::class,'listarNiveles']);
+    Route::get('/nivelXactividad/{id}',[NivelesController::class,'NivelxActividad']);
 });
 
 //Leccion
