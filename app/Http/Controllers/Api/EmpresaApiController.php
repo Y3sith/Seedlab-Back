@@ -8,6 +8,8 @@ use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Exception;
 
 class EmpresaApiController extends Controller
 {
@@ -53,7 +55,99 @@ class EmpresaApiController extends Controller
 
     return response()->json($data, 200);
     }
+
+    public function getApoyosxEmpresa($id_empresa)
+    {
+        try {
+
+            if (Auth::user()->id_rol != 5) {
+                return response()->json(['error' => 'no tienes permiso para acceder']);
+            }
+
+            $apoyos = ApoyoEmpresa::all()->where('id_empresa', $id_empresa);
+            return response()->json($apoyos, 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function getApoyoxDocumento($documento)
+    {
+        try {
+
+            if (Auth::user()->id_rol != 5) {
+                return response()->json(['error' => 'no tienes permiso para acceder']);
+            }
+
+            $apoyos = ApoyoEmpresa::all()->where('documento', $documento)->first();
+            return response()->json($apoyos, 200);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function crearApoyos(Request $request)
+    {
+        try{
+
+            if (Auth::user()->id_rol != 5) {
+                return response()->json(['error' => 'no tienes permiso para acceder']);
+            }
+
+            $apoyo = ApoyoEmpresa::create([
+                'documento' => $request->documento,
+                'nombre' => $request->nombre,
+                'apellido' => $request->apellido,
+                'cargo' => $request->cargo,
+                'telefono' => $request->telefono,
+                'celular' => $request->celular,
+                'email' => $request->email,
+                'id_tipo_documento' => $request->id_tipo_documento,
+                'id_empresa' => $request->id_empresa,
+
+            ]);
+            return response()->json(['message' => 'Apoyo creado con exito'], 201);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
     
+    public function editarApoyo (Request $request, $documento)
+    {
+        try{
+
+            if (Auth::user()->id_rol != 5) {
+                return response()->json(['error' => 'no tienes permiso para acceder']);
+            }
+            
+            $apoyo = ApoyoEmpresa::where('documento', $documento);
+            
+            if (!$apoyo) {
+            return response()->json(['error' => 'Apoyo no encontrado'], 404);
+            }
+
+            $apoyo->update([
+                'documento' => $request->input('documento'),
+                'nombre' => $request->input('nombre'),
+                'cargo' => $request->input('cargo'),
+                'telefono' => $request->input('telefono'),
+                'celular' => $request->input('celular'),
+                'email' => $request->input('email'),
+                'id_tipo_documento' => $request->input('id_tipo_documento'),
+            ]);
+
+            return response()->json([
+                'message' => 'Apoyo editado exitosamente'], 201);
+
+        }catch (Exception $e){
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+
 
     /**
      * Store a newly created resource in storage.
@@ -81,6 +175,7 @@ class EmpresaApiController extends Controller
                 'empresa.experiencia' => 'required|string|max:255',
                 'empresa.funciones' => 'required|string|max:255',
                 'empresa.id_tipo_documento' => 'required|integer',
+                'empresa.id_departamento' => 'required|integer',
                 'empresa.id_municipio' => 'required|integer',
                 'empresa.id_emprendedor' => 'required|integer',
             ]);
@@ -144,74 +239,32 @@ class EmpresaApiController extends Controller
         return response()->json(['message' => 'Empresa no encontrada'], 404);
     }
 
-    if ($empresa) {
-        $newDocumento = $request->input('documento');
-        $empresa->nombre = $request->input('nombre');
-        $empresa->cargo = $request->input('cargo');
-        $empresa->razonSocial = $request->input('razonSocial');
-        $empresa->url_pagina = $request->input('url_pagina');
-        $empresa->telefono = $request->input('telefono');
-        $newCelular = $request->input('celular');
-        $empresa->direccion = $request->input('direccion');
-        $empresa->profesion = $request->input('profesion');
-        $empresa->correo = $request->input('correo');
-        $empresa->experiencia = $request->input('experiencia');
-        $empresa->funciones = $request->input('funciones');
-        $empresa->id_tipo_documento = $request->input('id_tipo_documento');
-        $empresa->id_departamento = $request->input('id_departamento');
-        $empresa->id_municipio = $request->input('id_municipio');
-        $empresa->id_emprendedor = $request->input('id_emprendedor');
+    // Actualiza la información de la empresa
+    $empresa->update($request->except('apoyo'));
 
-        $newCelular = $request->input('celular');
-        if ($newCelular && $newCelular !== $empresa->celular) {
-            // Verificar si el nuevo email ya está en uso
-            $existing = Empresa::where('celular', $newCelular)->first();
-            if ($existing) {
-                return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+    // Maneja la actualización o creación de registros en `apoyo_empresa`
+    if ($request->has('apoyo')) {
+        $apoyoData = $request->input('apoyo');
+
+        // Verifica si el campo 'documento' está presente y no es nulo
+        if (isset($apoyoData['documento']) && !empty($apoyoData['documento'])) {
+            // Busca si ya existe un apoyo con el documento especificado
+            $apoyo = ApoyoEmpresa::where('documento', $apoyoData['documento'])->first();
+
+            if ($apoyo) {
+                // Actualiza el apoyo si ya existe
+                $apoyo->update($apoyoData);
+            } else {
+                // Crea un nuevo apoyo si no existe
+                $nuevoApoyo = new ApoyoEmpresa($apoyoData);
+                $nuevoApoyo->id_empresa = $empresa->documento; // Asegúrate de asignar el ID de la empresa
+                $nuevoApoyo->save();
             }
-            $empresa->celular = $newCelular;
+        } else {
+            // Si no hay datos de apoyo o el documento está vacío, no hacer nada con el apoyo
+            // Puedes optar por no hacer nada aquí o manejar un caso especial si es necesario
         }
-
-        $newDocumento = $request->input('documento');
-        if ($newDocumento && $newDocumento !== $empresa->celular) {
-            // Verificar si el nuevo email ya está en uso
-            $existing = Empresa::where('documento', $newDocumento)->first();
-            if ($existing) {
-                return response()->json(['message' => 'El numero de documento ya ha sido registrado anteriormente'], 400);
-            }
-            $empresa->documento = $newDocumento;
-        }
-
-        $empresa->save();
-        return response()->json(['message' => 'Empresa actualizado', $empresa, 200]);
-}
-
-    // // Actualiza la información de la empresa
-    // $empresa->update($request->except('apoyo'));
-
-    // // Maneja la actualización o creación de registros en `apoyo_empresa`
-    // if ($request->has('apoyo')) {
-    //     $apoyoData = $request->input('apoyo');
-
-    //     // Verifica si el campo 'documento' está presente y no es nulo
-    //     if (isset($apoyoData['documento']) && !empty($apoyoData['documento'])) {
-    //         // Busca si ya existe un apoyo con el documento especificado
-    //         $apoyo = ApoyoEmpresa::where('documento', $apoyoData['documento'])->first();
-
-    //         if ($apoyo) {
-    //             // Actualiza el apoyo si ya existe
-    //             $apoyo->update($apoyoData);
-    //         } else {
-    //             // Crea un nuevo apoyo si no existe
-    //             $nuevoApoyo = new ApoyoEmpresa($apoyoData);
-    //             $nuevoApoyo->id_empresa = $empresa->documento; // Asegúrate de asignar el ID de la empresa
-    //             $nuevoApoyo->save();
-    //         }
-    //     } else {
-    //         // Si no hay datos de apoyo o el documento está vacío, no hacer nada con el apoyo
-    //         // Puedes optar por no hacer nada aquí o manejar un caso especial si es necesario
-    //     }
-    // }
+    }
 
     return response()->json(["message" => "Empresa actualizada"], 200);
 }

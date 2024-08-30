@@ -50,9 +50,13 @@ Route::group([
    'middleware' => 'auth:api'
 ], function(){
     Route::post('/createEmpresa', [EmpresaApiController::class, 'store']);
-    Route::post('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
+    Route::post('/createApoyo', [EmpresaApiController::class, 'crearApoyos']);
+    Route::put('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
     //Route::apiResource('/empresa',EmpresaApiController::class);
     Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyempresa']);
+    Route::get('/getApoyo/{id_empresa}', [EmpresaApiController::class, 'getApoyosxEmpresa']);
+    Route::get('/getApoyoxdocumento/{documento}', [EmpresaApiController::class, 'getApoyoxDocumento']);
+    Route::put('/updateApoyo/{documento}', [EmpresaApiController::class, 'editarApoyo']);
 });
 
 
