@@ -54,6 +54,21 @@ class LeccionController extends Controller
         //
     }
 
+
+    public function LeccionxNivel($id){
+        //mostrar niveles asociados a una actividad
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['message'=> 'No tienes permisos '],401);
+            }
+            $leccion = Leccion::where('id_nivel', $id)->select('id','nombre')->get();
+            return response()->json($leccion);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 500);
+        }
+    }
+
+
     /**
      * Show the form for editing the specified resource.
      */

@@ -7,6 +7,7 @@ use App\Models\ContenidoLeccion;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class Contenido_por_LeccionController extends Controller
 {
@@ -36,10 +37,34 @@ class Contenido_por_LeccionController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["message" => "No tienes permisos para crear contenido"], 401);
             }
+            $fuente = null;
+                    if ($request->hasFile('fuente')) {
+                        $file = $request->file('fuente');
+                        $fileName = time() . '_' . $file->getClientOriginalName();
+                        $mimeType = $file->getMimeType();
+
+                        if (strpos($mimeType, 'image') !== false) {
+                            $folder = 'imagenes';
+                        } elseif ($mimeType === 'application/pdf') {
+                            $folder = 'documentos';
+                        } elseif ($mimeType === 'application/pdf') {
+                            $folder = 'documentos';
+                        } else {
+                            return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
+                        }
+
+                        $path = $file->storeAs("public/$folder", $fileName);
+                        $fuente = Storage::url($path);
+                    } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
+                        $fuente = $request->input('fuente');
+                    } elseif ($request->input('fuente')) {
+                        // Si se envió un texto en 'fuente', se guarda como texto
+                        $fuente = $request->input('fuente');
+                    }
             $contenidoxleccion = ContenidoLeccion::create([
                 'titulo' => $request->titulo,
                 'descripcion' => $request->descripcion,
-                'fuente' => $request->fuente,
+                'fuente' => $fuente,
                 'id_tipo_dato' => $request->id_tipo_dato,
                 'id_leccion' => $request->id_leccion,
 

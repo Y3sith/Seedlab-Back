@@ -203,6 +203,7 @@ Route::group([
 ],function(){
     Route::apiResource('/leccion',LeccionController::class);
     Route::post('/crearLeccion',[LeccionController::class,'store']);
+    Route::get('/leccionXnivel/{id}',[LeccionController::class,'LeccionxNivel']);
     Route::put('/editar_leccion/{id}',[LeccionController::class,'editarLeccion']);
     //Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
 });
