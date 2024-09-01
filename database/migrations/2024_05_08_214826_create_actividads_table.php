@@ -15,7 +15,7 @@ return new class extends Migration
             $table->id();
             $table->string('nombre',50);
             $table->text('descripcion');
-            $table->string('fuente');
+            $table->text('fuente');
             $table->unsignedBigInteger('id_tipo_dato');
             $table->foreign('id_tipo_dato')->references('id')->on('tipo_dato');
             $table->unsignedBigInteger('id_asesor');
