@@ -207,6 +207,7 @@ Route::group([
 ],function(){
     Route::apiResource('/leccion',LeccionController::class);
     Route::post('/crearLeccion',[LeccionController::class,'store']);
+    Route::get('/leccionXnivel/{id}',[LeccionController::class,'LeccionxNivel']);
     Route::put('/editar_leccion/{id}',[LeccionController::class,'editarLeccion']);
     //Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
 });
@@ -220,6 +221,7 @@ Route::group([
     Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class);
     Route::post('/crearContenidoPorLeccion',[Contenido_por_LeccionController::class,'store']);
     Route::put('/editarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'editarContenidoLeccion']);
+    Route::get('/tipo_dato',[Contenido_por_LeccionController::class,'tipoDatoContenido']);
 });
 //Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
