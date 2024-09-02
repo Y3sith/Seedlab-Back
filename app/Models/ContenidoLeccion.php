@@ -14,7 +14,7 @@ class ContenidoLeccion extends Model
     protected $fillable = [
         'titulo',
         'descripcion',
-        'fuente',
+        'fuente_contenido',
         'id_tipo_dato',
         'id_leccion',
     ];

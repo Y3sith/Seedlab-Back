@@ -217,6 +217,7 @@ Route::group([
     Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class);
     Route::post('/crearContenidoPorLeccion',[Contenido_por_LeccionController::class,'store']);
     Route::put('/editarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'editarContenidoLeccion']);
+    Route::get('/tipo_dato',[Contenido_por_LeccionController::class,'tipoDatoContenido']);
 });
 //Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
