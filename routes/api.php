@@ -22,6 +22,7 @@ use App\Http\Controllers\Api\FormResponsesController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
+use App\Http\Controllers\Api\PuntajeController;
 use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
@@ -145,6 +146,7 @@ Route::group(
         Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
         Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
         Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
+        Route::get('/graficaFormulario', [DashboardsController::class, 'getRadarChartData']);
     }
 );
 
@@ -153,6 +155,14 @@ Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos
 Route::get('/traerPersonalizacion', [SuperAdminController::class, 'obtenerPersonalizacion']);
 Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
 
+
+//Puntaje
+Route::group([
+    
+], function () {
+    Route::post('/puntajes', [PuntajeController::class, 'store']);
+    Route::get('/puntajeXemprendedor/{id}', [PuntajeController::class, 'getPuntajeXEmpresa']);
+});
 
 
 
