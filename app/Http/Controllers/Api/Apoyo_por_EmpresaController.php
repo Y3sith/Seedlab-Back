@@ -59,7 +59,7 @@ class Apoyo_por_EmpresaController extends Controller
             return response()->json(['message' => 'Apoyo creado con exito'], 201);
 
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
