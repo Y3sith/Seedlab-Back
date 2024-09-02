@@ -69,10 +69,8 @@ class AliadoApiController extends Controller
                 'id_tipo_dato' => $aliado->id_tipo_dato,
                 'email' => $aliado->auth->email,
                 'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
-                //'id_autentication' =>$asesor->auth->id_autentication    
             ];
 
-            // return response()->json($aliadoTransformado);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -188,11 +186,6 @@ class AliadoApiController extends Controller
                 if (trim($data->input('ruta_multi')) == null) {
                     return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
                 }
-                // if (trim($data->input('id_tipo_dato')) == 1 ){
-                //     if (!preg_match($youtubeRegex, $rutaMulti)) {
-                //         return response()->json(['message' => 'La URL proporcionada no es una dirección válida de YouTube'], 400);
-                //     }
-                // }
             }
 
 
