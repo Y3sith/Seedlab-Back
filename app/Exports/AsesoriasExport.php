@@ -13,24 +13,26 @@ class AsesoriasExport implements FromCollection, WithHeadings
     * @return \Illuminate\Support\Collection
     */
 
-    protected $fech_inicio;
-    protected $fech_fin;
+    protected $tipo_reporte;
+    protected $fecha_inicio;
+    protected $fecha_fin;
 
-    public function __construct($fech_inicio, $fech_fin)
+    public function __construct($tipo_reporte, $fecha_inicio, $fecha_fin)
     {
-        $this->fech_inicio = $fech_inicio;
-        $this->fech_fin = $fech_fin;
+        $this->tipo_reporte = $tipo_reporte;
+        $this->fecha_inicio = $fecha_inicio;
+        $this->fecha_fin = $fecha_fin;
     }
 
     public function collection()
     {
-        $query = DB::table('asesoria')
+        $query = DB::table($this->tipo_reporte)
         ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
         ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
-        ->select('asesoria.*', 'aliado.nombre as nombre_aliado', 'emprendedor.nombre as nombre_emprendedor', 'emprendedor.documento');
+        ->select("{$this->tipo_reporte}.*", 'aliado.nombre as nombre_aliado', 'emprendedor.nombre as nombre_emprendedor', 'emprendedor.documento');
 
-        if($this->fech_inicio && $this->fech_fin){
-            $query->whereBetween('asesoria.fecha', [$this->fech_inicio, $this->fech_fin]);
+        if($this->fecha_inicio && $this->fecha_fin){
+            $query->whereBetween('asesoria.fecha', [$this->fecha_inicio, $this->fecha_fin]);
         }
 
         return $query->get();

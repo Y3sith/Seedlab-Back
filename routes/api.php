@@ -23,6 +23,7 @@ use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
 use App\Http\Controllers\Api\OrientadorApiController;
 use App\Http\Controllers\Api\PuntajeController;
+use App\Http\Controllers\Api\ReportesController;
 use App\Http\Controllers\Api\RespuestasApiController;
 use App\Models\Asesoria;
 
@@ -150,6 +151,14 @@ Route::group(
     }
 );
 
+//Reportes
+
+Route::post('/reporte_roles', [ReportesController::class, 'exportarExcelRoles']);
+Route::post('/reporte_empresas', [ReportesController::class, 'exportarEmpresasRegistradas']);
+Route::post('/reporte_asesorias', [ReportesController::class, 'exportarAsesorias']);
+Route::get('/reportes_disponibles', [ReportesController::class,'obtenerReportesDisponibles']);
+
+
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
 Route::get('/traerPersonalizacion', [SuperAdminController::class, 'obtenerPersonalizacion']);
@@ -157,14 +166,10 @@ Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
 
 
 //Puntaje
-Route::group([
-    
-], function () {
+Route::group([], function () {
     Route::post('/puntajes', [PuntajeController::class, 'store']);
     Route::get('/puntajeXemprendedor/{id}', [PuntajeController::class, 'getPuntajeXEmpresa']);
 });
-
-
 
 
 //Rutas

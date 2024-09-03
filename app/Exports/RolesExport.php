@@ -10,25 +10,37 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 
 class RolesExport implements FromCollection, WithHeadings, WithMapping
 {
-    protected $rol;
-    protected $fechaInicio;
-    protected $fechaFin;
+    protected $tipo_reporte;
+    protected $fecha_inicio;
+    protected $fecha_fin;
 
-    public function __construct($rol, $fechaInicio, $fechaFin )
+    public function __construct($tipo_reporte, $fecha_inicio, $fecha_fin)
     {
-        $this->rol = $rol;
-        $this->fechaInicio = $fechaInicio;
-        $this->fechaFin = $fechaFin;    
+        $this->tipo_reporte = $tipo_reporte;
+        $this->fecha_inicio = $fecha_inicio;
+        $this->fecha_fin = $fecha_fin;
     }
 
     public function collection()
     {
+
+        // Validación de tipo_reporte
+        $validTipos = ['aliado', 'emprendedor', 'orientador', 'empresa', 'asesoria'];
+        if (!in_array($this->tipo_reporte, $validTipos)) {
+            throw new \Exception("Tipo de reporte no válido.");
+        }
+
+        // Validación de fechas
+        if (!$this->fecha_inicio || !$this->fecha_fin) {
+            throw new \Exception("Fechas de inicio y fin son requeridas.");
+        }
+
         $query = DB::table('users')
-            ->join($this->rol, 'users.id', '=', $this->rol.'.id_autentication')
-            ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', "{$this->rol}.*")
-            ->whereBetween('users.fecha_registro', [$this->fechaInicio, $this->fechaFin]);
-            
-            return $query->get();
+            ->join($this->tipo_reporte, 'users.id', '=', $this->tipo_reporte . '.id_autentication')
+            ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', "{$this->tipo_reporte}.*")
+            ->whereBetween('users.fecha_registro', [$this->fecha_inicio, $this->fecha_fin]);
+
+        return $query->get();
     }
 
     public function headings(): array

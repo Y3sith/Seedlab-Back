@@ -13,20 +13,22 @@ class EmpresasExport implements FromCollection, WithHeadings
      * @return \Illuminate\Support\Collection
      */
 
+    protected $tipo_reporte;
     protected $fecha_inicio;
     protected $fecha_fin;
 
-    public function __construct($fecha_inicio, $fecha_fin)
+    public function __construct($tipo_reporte, $fecha_inicio, $fecha_fin)
     {
+        $this->tipo_reporte = $tipo_reporte;
         $this->fecha_inicio = $fecha_inicio;
         $this->fecha_fin = $fecha_fin;
     }
 
     public function collection()
     {
-        $query = DB::table('empresa')
+        $query = DB::table($this->tipo_reporte)
             ->join('emprendedor', 'empresa.documento', '=', 'emprendedor.id')
-            ->select('empresa.*', 'emprendedor.documento', 'emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.celular');
+            ->select("{$this->tipo_reporte}.*", 'emprendedor.documento', 'emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.celular');
 
         // Filtrar por rango de fechas solo si están definidos ambos
         if ($this->fecha_inicio && $this->fecha_fin) {
