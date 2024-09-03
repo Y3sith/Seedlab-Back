@@ -178,7 +178,7 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => 'Se requiere una imagen válida para el logo'], 400);
             }
 
-            if ($data->input('id_tipo_dato') == 3 || $data->input('id_tipo_dato') == 4) {
+            if ($data->input('id_tipo_dato') == 2 || $data->input('id_tipo_dato') == 3) {
                 if (!$data->hasFile('ruta_multi') || !$data->file('ruta_multi')->isValid()) {
                     return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
                 }
