@@ -8,6 +8,8 @@ use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use Exception;
 
 class EmpresaApiController extends Controller
 {
@@ -53,7 +55,6 @@ class EmpresaApiController extends Controller
 
     return response()->json($data, 200);
     }
-    
 
     /**
      * Store a newly created resource in storage.
@@ -81,6 +82,7 @@ class EmpresaApiController extends Controller
                 'empresa.experiencia' => 'required|string|max:255',
                 'empresa.funciones' => 'required|string|max:255',
                 'empresa.id_tipo_documento' => 'required|integer',
+                'empresa.id_departamento' => 'required|integer',
                 'empresa.id_municipio' => 'required|integer',
                 'empresa.id_emprendedor' => 'required|integer',
             ]);
