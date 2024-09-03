@@ -94,7 +94,7 @@ class RutaApiController extends Controller
                 "fecha_creacion" => Carbon::now(),
                 "estado" => 1,
             ]);
-            return response()->json(["message" => "Ruta creada exitosamente", "ruta" => $ruta], 200);
+            return response()->json(["message" => "Ruta creada exitosamente",$ruta], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -163,7 +163,7 @@ class RutaApiController extends Controller
                 'estado' => $request->estado,
             ]);
 
-            return response()->json(['message' => 'ruta actualizada correctamente', $ruta], 200); //mostrar ruta al actualizar
+            return response()->json(['message' => 'Ruta actualizada correctamente', $ruta], 200); //mostrar ruta al actualizar
             //return response()->json(['message'=>'ruta actualizada correctamente'], 200); //mostrar solo el mensaje
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

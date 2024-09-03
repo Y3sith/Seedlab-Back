@@ -70,7 +70,7 @@ class Contenido_por_LeccionController extends Controller
                 'id_leccion' => $request->id_leccion,
 
             ]);
-            return response()->json($contenidoxleccion, 201);
+            return response()->json(['message' => 'Contenido de Lección creada con éxito: ',$contenidoxleccion], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
