@@ -68,7 +68,6 @@ class Contenido_por_LeccionController extends Controller
                 'fuente_contenido' => $fuente,
                 'id_tipo_dato' => $request->id_tipo_dato,
                 'id_leccion' => $request->id_leccion,
-
             ]);
             return response()->json(['message' => 'Contenido de Lección creada con éxito: ',$contenidoxleccion], 201);
         } catch (Exception $e) {
