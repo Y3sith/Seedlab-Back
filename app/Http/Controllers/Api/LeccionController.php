@@ -36,6 +36,14 @@ class LeccionController extends Controller
             if (Auth::user()->id_rol != 1  && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para crear lecciones'], 401);
             }
+
+            $existingNivel = Leccion::where('nombre', $request->nombre)
+                ->where('id_nivel', $request->id_nivel)
+                ->first();
+
+            if ($existingNivel) {
+                return response()->json(['message' => 'Ya existe una leccion con este nombre para este nivel'], 422);
+            }
             $leccion = Leccion::create([
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,

@@ -33,14 +33,23 @@ class NivelesController extends Controller
     {
         //crear nivel solo asesor
         try {
-            if (Auth::user()->id_rol != 1 &&  Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
             }
+
+            $existingNivel = Nivel::where('nombre', $request->nombre)
+                ->where('id_actividad', $request->id_actividad)
+                ->first();
+
+            if ($existingNivel) {
+                return response()->json(['message' => 'Ya existe un nivel con este nombre para esta actividad'], 422);
+            }
+
             $niveles = Nivel::create([
                 'nombre' => $request->nombre,
                 'id_actividad' => $request->id_actividad,
             ]);
-            return response()->json(['message' => 'Nivel creado con éxito: ',$niveles], 201);
+            return response()->json(['message' => 'Nivel creado con éxito: ', $niveles], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -54,25 +63,26 @@ class NivelesController extends Controller
         //proximamente mostrar niveles asociados a actividades o viseversa
         try {
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['message'=> 'No tiened permisos '],401);
+                return response()->json(['message' => 'No tiened permisos '], 401);
             }
-        $nivel = Nivel::all()->select('id','nombre');
-        return response()->json($nivel);
+            $nivel = Nivel::all()->select('id', 'nombre');
+            return response()->json($nivel);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
-    public function NivelxActividad($id){
+    public function NivelxActividad($id)
+    {
         //mostrar niveles asociados a una actividad
         try {
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['message'=> 'No tienes permisos '],401);
+                return response()->json(['message' => 'No tienes permisos '], 401);
             }
-            $nivel = Nivel::where('id_actividad', $id)->select('id','nombre')->get();
+            $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre')->get();
             return response()->json($nivel);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 

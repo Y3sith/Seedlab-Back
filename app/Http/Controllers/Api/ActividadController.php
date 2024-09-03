@@ -43,13 +43,29 @@ class ActividadController extends Controller
                     return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
                 }
                 $validatedData = $request->validate([
-                    'nombre' => 'required|string|max:255',
-                    'descripcion' => 'required|string|max:1000',
+                    'nombre' => 'required|string',
+                    'descripcion' => 'required|string',
                     'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
                     'id_asesor' => 'required|integer|exists:asesor,id',
                     'id_ruta' => 'required|integer|exists:ruta,id',
                     'id_aliado'=> 'required|integer|exists:aliado,id'
                 ]);
+
+                $nombre = $request->input('nombre');
+                if (strlen($nombre)>70) {
+                    return response()->json(['message' => 'El nombre no puede tener más de 70 caracteres'], 400);
+                }
+                if (strlen($nombre)<1) {
+                    return response()->json(['message' => 'El nombre debe tener al menos 1 caracter'], 400);
+                }
+                
+                $descripcion = $request->input('descripcion');
+                if (strlen($descripcion)<300) {
+                    return response()->json(['message' => 'La descripción debe tener al menos 300 caracteres'], 400);
+                }
+                if (strlen($descripcion)>470) {
+                    return response()->json(['message' => 'La descripción no puede tener más de 470 caracteres'], 400);
+                }
         
                 // Verificar si la actividad ya existe
                 $existingActividad = Actividad::where([
@@ -89,10 +105,12 @@ class ActividadController extends Controller
                         // Si se envió un texto en 'fuente', se guarda como texto
                         $fuente = $request->input('fuente');
                     }
-        
+
                 $actividad = Actividad::create([
-                    'nombre' => $validatedData['nombre'],
-                    'descripcion' => $validatedData['descripcion'],
+                    //'nombre' => $validatedData['nombre'],
+                    //'descripcion' => $validatedData['descripcion'],
+                    'nombre' => $nombre,
+                    'descripcion' => $descripcion,
                     'fuente' => $fuente, 
                     'id_tipo_dato' => $validatedData['id_tipo_dato'],
                     'id_asesor' => $validatedData['id_asesor'],
@@ -148,7 +166,7 @@ class ActividadController extends Controller
         }
 
         $validatedData = $request->validate([
-            'nombre' => 'required|string|max:255',
+            'nombre' => 'required|string|max:255', //colocar el limite de caracteres para editar son 70
             'descripcion' => 'required|string|max:1000',
             'fuente' => 'required',
             'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',

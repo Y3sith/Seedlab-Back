@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('nivel', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre',50);
+            $table->string('nombre');
             $table->unsignedBigInteger('id_actividad');
             $table->foreign('id_actividad')->references('id')->on('actividad');
             //$table->timestamps();
