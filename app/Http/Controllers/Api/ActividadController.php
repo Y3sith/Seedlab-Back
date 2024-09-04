@@ -46,7 +46,7 @@ class ActividadController extends Controller
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
                 'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
-                'id_asesor' => 'required|integer|exists:asesor,id',
+                'id_asesor' => 'nullable|integer|exists:asesor,id',
                 'id_ruta' => 'required|integer|exists:ruta,id',
                 'id_aliado' => 'required|integer|exists:aliado,id'
             ]);
@@ -111,7 +111,7 @@ class ActividadController extends Controller
                 'descripcion' => $descripcion,
                 'fuente' => $fuente,
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
-                'id_asesor' => $validatedData['id_asesor'],
+                'id_asesor' => $validatedData['id_asesor'] ?? null,
                 'id_ruta' => $validatedData['id_ruta'],
                 'id_aliado' => $validatedData['id_aliado']
             ]);
