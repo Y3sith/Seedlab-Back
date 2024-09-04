@@ -85,16 +85,22 @@ class RutaApiController extends Controller
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
+            $nombreRuta = $request->nombre;
+
+            if (strlen($nombreRuta) > 70) {
+                return response()->json(['message' => 'El nombre de la ruta no puede tener más de 70 caracteres'], 422);
+            }
+
             $existingRoute = Ruta::where('nombre', $request->nombre)->first();
             if ($existingRoute) {
                 return response()->json(['message' => 'El nombre de la ruta ya ha sido registrado anteriormente'], 422);
             }
             $ruta = Ruta::create([
-                "nombre" => $request->nombre,
+                "nombre" => $nombreRuta,
                 "fecha_creacion" => Carbon::now(),
                 "estado" => 1,
             ]);
-            return response()->json(["message" => "Ruta creada exitosamente",$ruta], 200);
+            return response()->json(["message" => "Ruta creada exitosamente", $ruta], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -147,6 +153,13 @@ class RutaApiController extends Controller
             $ruta = Ruta::find($id);
 
             $newNombre = $request->input('nombre');
+
+            if (strlen($newNombre) > 70) {
+                return response()->json(['message' => 'El nombre de la ruta no puede tener más de 70 caracteres'], 422);
+            }
+
+
+            $newNombre = $request->input('nombre');
             if ($newNombre && $newNombre !== $ruta->nombre) {
                 $existing = Ruta::where('nombre', $newNombre)->where('id', '!=', $id)->first();
                 if ($existing) {
@@ -159,12 +172,13 @@ class RutaApiController extends Controller
                 ], 404);
             }
             $ruta->update([
-                'nombre' => $request->nombre,
+                //'nombre' => $request->nombre,
+                'nombre' => $newNombre,
                 'estado' => $request->estado,
             ]);
 
-            return response()->json(['message' => 'Ruta actualizada correctamente', $ruta], 200); //mostrar ruta al actualizar
-            //return response()->json(['message'=>'ruta actualizada correctamente'], 200); //mostrar solo el mensaje
+            //return response()->json(['message' => 'Ruta actualizada correctamente', $ruta], 200); //mostrar ruta al actualizar
+            return response()->json(['message'=>'ruta actualizada correctamente'], 200); //mostrar solo el mensaje
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

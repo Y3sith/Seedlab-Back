@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('ruta', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre',100);
+            $table->string('nombre');
             $table->date('fecha_creacion');
             $table->boolean('estado');
             //$table->timestamps();

@@ -8,6 +8,7 @@ use App\Models\Asesor;
 use App\Models\Asesoria;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
+use App\Models\puntaje;
 use App\Models\Rol;
 use App\Models\User;
 use Exception;
@@ -360,4 +361,20 @@ class DashboardsController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    public function getRadarChartData()
+{
+    // Consulta para obtener los puntajes de todas las empresas
+    $puntajes = puntaje::select(
+            'documento_empresa',
+            'info_general',
+            'info_financiera',
+            'info_mercado',
+            'info_trl',
+            'info_tecnica'
+        )
+        ->get();
+
+    return response()->json($puntajes);
+}
 }
