@@ -205,4 +205,25 @@ class RutaApiController extends Controller
             'message' => 'Ruta desactivada exitosamente'
         ], 200);
     }
+
+
+    public function actnivleccontXruta($id){
+        try {
+            if (Auth::user()->id_rol != 1) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+
+            // $ruta = Ruta::find($id);
+            // if (!$ruta) {
+            //     return response()->json([
+            //         'message' => 'Ruta no encontrada'
+            //     ], 404);
+            // }
+            $ruta = Ruta::where('id',$id)-> with('actividades.nivel.lecciones.contenidoLecciones')->get();
+            return response()->json($ruta);
+            
+        }catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
 }
