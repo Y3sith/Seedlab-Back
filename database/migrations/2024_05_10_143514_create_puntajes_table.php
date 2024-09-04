@@ -13,14 +13,14 @@ return new class extends Migration
     {
         Schema::create('puntaje', function (Blueprint $table) {
             $table->id();
-            $table->double('info_gen');
-            $table->double('info_fin');
-            $table->double('info_mer');
-            $table->double('info_op');
+            $table->double('info_general');
+            $table->double('info_financiera');
+            $table->double('info_mercado');
             $table->double('info_trl');
-            $table->string('documento_emp');
+            $table->double('info_tecnica');
+            $table->string('documento_empresa');
             $table->unsignedTinyInteger('ver_form');
-            $table->foreign('documento_emp')->references('documento')->on('empresa');
+            $table->foreign('documento_empresa')->references('documento')->on('empresa');
         });
     }
 
