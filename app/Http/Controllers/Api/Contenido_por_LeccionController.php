@@ -38,19 +38,6 @@ class Contenido_por_LeccionController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["message" => "No tienes permisos para crear contenido"], 401);
             }
-            $titulo = $request->input('titulo');
-            if (strlen($titulo) > 70) {
-                return response()->json(['message' => 'El titulo no puede tener más de 70 caracteres'], 400);
-            }
-
-            $descripcion = $request->input('descripcion');
-            if (strlen($descripcion) < 370) {
-                return response()->json(['message' => 'La descripción debe tener al menos 370 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 620) {
-                return response()->json(['message' => 'La descripción no puede tener más de 620 caracteres'], 400);
-            }
-
             $fuente = null;
             if ($request->hasFile('fuente_contenido')) {
                 $file = $request->file('fuente_contenido');
@@ -76,8 +63,8 @@ class Contenido_por_LeccionController extends Controller
                 $fuente = $request->input('fuente_contenido');
             }
             $contenidoxleccion = ContenidoLeccion::create([
-                'titulo' => $request->$titulo,
-                'descripcion' => $request->$descripcion,
+                'titulo' => $request->titulo,
+                'descripcion' => $request->descripcion,
                 'fuente_contenido' => $fuente,
                 'id_tipo_dato' => $request->id_tipo_dato,
                 'id_leccion' => $request->id_leccion,

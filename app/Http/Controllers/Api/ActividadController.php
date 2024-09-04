@@ -53,10 +53,10 @@ class ActividadController extends Controller
 
                 $nombre = $request->input('nombre');
                 if (strlen($nombre)>70) {
-                    return response()->json(['message' => 'El nombre no puede tener más de 70 caracteres'], 400);
+                    return response()->json(['message' => 'El nombre de la actividad no puede tener más de 70 caracteres'], 400);
                 }
                 if (strlen($nombre)<1) {
-                    return response()->json(['message' => 'El nombre debe tener al menos 1 caracter'], 400);
+                    return response()->json(['message' => 'El nombre de la actividad debe tener al menos 1 caracter'], 400);
                 }
                 
                 $descripcion = $request->input('descripcion');
