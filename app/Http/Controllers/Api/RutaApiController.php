@@ -107,7 +107,15 @@ class RutaApiController extends Controller
     }
 
 
+    public function rutas()
+    {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
+            return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
+        }
+        $rutasActivas = Ruta::where('estado', 1)->get();
 
+        return response()->json($rutasActivas);
+    }
 
 
     public function rutasActivas()
@@ -210,7 +218,7 @@ class RutaApiController extends Controller
     public function actnivleccontXruta($id)
     {
         try {
-            if (Auth::user()->id_rol != 1) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
             $ruta = Ruta::where('id', $id)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
