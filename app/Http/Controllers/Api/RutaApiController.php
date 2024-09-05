@@ -178,7 +178,7 @@ class RutaApiController extends Controller
             ]);
 
             //return response()->json(['message' => 'Ruta actualizada correctamente', $ruta], 200); //mostrar ruta al actualizar
-            return response()->json(['message'=>'ruta actualizada correctamente'], 200); //mostrar solo el mensaje
+            return response()->json(['message' => 'ruta actualizada correctamente'], 200); //mostrar solo el mensaje
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -207,22 +207,30 @@ class RutaApiController extends Controller
     }
 
 
-    public function actnivleccontXruta($id){
+    public function actnivleccontXruta($id)
+    {
         try {
             if (Auth::user()->id_rol != 1) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
+            $ruta = Ruta::where('id', $id)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
 
-            // $ruta = Ruta::find($id);
-            // if (!$ruta) {
-            //     return response()->json([
-            //         'message' => 'Ruta no encontrada'
-            //     ], 404);
-            // }
-            $ruta = Ruta::where('id',$id)-> with('actividades.nivel.lecciones.contenidoLecciones')->get();
-            return response()->json($ruta);
+            foreach ($ruta as $r) {
+                foreach ($r->actividades as $actividad) {
+                    if (is_null($actividad->id_asesor)) {
+                        $actividad->id_asesor = 'Ninguno';
+                    }
+                }
+            }
+
+            if ($actividad->aliado) {
+                $actividad->nombre_aliado = $actividad->aliado->nombre;
+            } else {
+                $actividad->nombre_aliado = 'sin aliado';
+            }
             
-        }catch (Exception $e) {
+            return response()->json($ruta);
+        } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
