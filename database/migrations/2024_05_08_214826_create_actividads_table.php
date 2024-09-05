@@ -13,12 +13,12 @@ return new class extends Migration
     {
         Schema::create('actividad', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre',50);
+            $table->string('nombre');
             $table->text('descripcion');
             $table->text('fuente');
             $table->unsignedBigInteger('id_tipo_dato');
             $table->foreign('id_tipo_dato')->references('id')->on('tipo_dato');
-            $table->unsignedBigInteger('id_asesor');
+            $table->unsignedBigInteger('id_asesor')->nullable();
             $table->foreign('id_asesor')->references('id')->on('asesor');
             $table->unsignedBigInteger('id_ruta');
             $table->foreign('id_ruta')->references('id')->on('ruta');

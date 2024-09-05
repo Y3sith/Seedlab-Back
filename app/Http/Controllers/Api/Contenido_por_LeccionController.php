@@ -39,38 +39,37 @@ class Contenido_por_LeccionController extends Controller
                 return response()->json(["message" => "No tienes permisos para crear contenido"], 401);
             }
             $fuente = null;
-                    if ($request->hasFile('fuente_contenido')) {
-                        $file = $request->file('fuente_contenido');
-                        $fileName = time() . '_' . $file->getClientOriginalName();
-                        $mimeType = $file->getMimeType();
+            if ($request->hasFile('fuente_contenido')) {
+                $file = $request->file('fuente_contenido');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $mimeType = $file->getMimeType();
 
-                        if (strpos($mimeType, 'image') !== false) {
-                            $folder = 'imagenes';
-                        } elseif ($mimeType === 'application/pdf') {
-                            $folder = 'documentos';
-                        } elseif ($mimeType === 'application/pdf') {
-                            $folder = 'documentos';
-                        } else {
-                            return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
-                        }
+                if (strpos($mimeType, 'image') !== false) {
+                    $folder = 'imagenes';
+                } elseif ($mimeType === 'application/pdf') {
+                    $folder = 'documentos';
+                } elseif ($mimeType === 'application/pdf') {
+                    $folder = 'documentos';
+                } else {
+                    return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
+                }
 
-                        $path = $file->storeAs("public/$folder", $fileName);
-                        $fuente = Storage::url($path);
-                    } elseif ($request->input('fuente_contenido') && filter_var($request->input('fuente_contenido'), FILTER_VALIDATE_URL)) {
-                        $fuente = $request->input('fuente_contenido');
-                    } elseif ($request->input('fuente_contenido')) {
-                        // Si se envió un texto en 'fuente', se guarda como texto
-                        $fuente = $request->input('fuente_contenido');
-                    }
+                $path = $file->storeAs("public/$folder", $fileName);
+                $fuente = Storage::url($path);
+            } elseif ($request->input('fuente_contenido') && filter_var($request->input('fuente_contenido'), FILTER_VALIDATE_URL)) {
+                $fuente = $request->input('fuente_contenido');
+            } elseif ($request->input('fuente_contenido')) {
+                // Si se envió un texto en 'fuente', se guarda como texto
+                $fuente = $request->input('fuente_contenido');
+            }
             $contenidoxleccion = ContenidoLeccion::create([
                 'titulo' => $request->titulo,
                 'descripcion' => $request->descripcion,
                 'fuente_contenido' => $fuente,
                 'id_tipo_dato' => $request->id_tipo_dato,
                 'id_leccion' => $request->id_leccion,
-
             ]);
-            return response()->json($contenidoxleccion, 201);
+            return response()->json(['message' => 'Contenido de Lección creada con éxito: ', $contenidoxleccion], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -126,13 +125,14 @@ class Contenido_por_LeccionController extends Controller
         //
     }
 
-    public function tipoDatoContenido(){
-        if (Auth::user()->id_rol !=1 &&Auth::user()->id_rol !=3 && Auth::user()->id_rol !=4) { //esto hay que cambiarlo para que solo lo puedan ver algunos roles
+    public function tipoDatoContenido()
+    {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) { //esto hay que cambiarlo para que solo lo puedan ver algunos roles
             return response()->json([
-                'messaje'=>'No tienes permisos para acceder a esta ruta'
-            ],401);
+                'messaje' => 'No tienes permisos para acceder a esta ruta'
+            ], 401);
         }
-        $dato= TipoDato::get(['id','nombre']);
+        $dato = TipoDato::get(['id', 'nombre']);
         return response()->json($dato);
     }
 }

@@ -14,12 +14,12 @@ class puntaje extends Model
     protected $table = 'puntaje';
 
     protected $fillable = [
-        'info_gen',
-        'info_fin',
-        'info_mer',
-        'info_op',
+        'info_general',
+        'info_financiera',
+        'info_mercado',
         'info_trl',
-        'id_empresa',
+        'info_tecnica',
+        'documento_empresa',
         'ver_form',
     ];
 
