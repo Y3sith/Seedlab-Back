@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('cargo',50);
             $table->string('razonSocial',50);
             $table->string('url_pagina')->nullable();
-            $table->string('telefono',10);
+            $table->string('telefono',10)->nullable();
             $table->string('celular',13);
             $table->string('direccion',50);
             $table->string('profesion',50);
