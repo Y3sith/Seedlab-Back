@@ -51,13 +51,13 @@ class ActividadController extends Controller
                 'id_aliado' => 'required|integer|exists:aliado,id'
             ]);
 
-            $nombre = $request->input('nombre');
-            if (strlen($nombre) > 70) {
-                return response()->json(['message' => 'El nombre de la actividad no puede tener más de 70 caracteres'], 400);
-            }
-            if (strlen($nombre) < 1) {
-                return response()->json(['message' => 'El nombre de la actividad debe tener al menos 1 caracter'], 400);
-            }
+            // $nombre = $request->input('nombre');
+            // if (strlen($nombre) > 70) {
+            //     return response()->json(['message' => 'El nombre de la actividad no puede tener más de 70 caracteres'], 400);
+            // }
+            // if (strlen($nombre) < 1) {
+            //     return response()->json(['message' => 'El nombre de la actividad debe tener al menos 1 caracter'], 400);
+            // }
 
             $descripcion = $request->input('descripcion');
             if (strlen($descripcion) < 300) {
@@ -107,13 +107,14 @@ class ActividadController extends Controller
             }
 
             $actividad = Actividad::create([
-                'nombre' => $nombre,
+                'nombre' => $validatedData['nombre'],
                 'descripcion' => $descripcion,
                 'fuente' => $fuente,
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
                 'id_asesor' => $validatedData['id_asesor'] ?? null,
                 'id_ruta' => $validatedData['id_ruta'],
-                'id_aliado' => $validatedData['id_aliado']
+                'id_aliado' => $validatedData['id_aliado'],
+                'estado' => 1
             ]);
             return response()->json(['message' => 'Actividad creada con éxito: ', $actividad], 201);
 
@@ -161,41 +162,7 @@ class ActividadController extends Controller
                 return response()->json(["error" => "Actividad no encontrada"], 404);
             }
 
-            $validatedData = $request->validate([
-                'nombre' => 'required|string|max:255', //colocar el limite de caracteres para editar son 70
-                'descripcion' => 'required|string|max:1000',
-                'fuente' => 'required',
-                'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
-                'id_asesor' => 'required|integer|exists:asesor,id',
-            ]);
 
-            // Verificar si los valores nuevos son diferentes de los existentes
-            $cambios = false;
-            if ($actividad->nombre !== $validatedData['nombre']) {
-                $actividad->nombre = $validatedData['nombre'];
-                $cambios = true;
-            }
-            if ($actividad->descripcion !== $validatedData['descripcion']) {
-                $actividad->descripcion = $validatedData['descripcion'];
-                $cambios = true;
-            }
-            if ($actividad->fuente !== $validatedData['fuente']) {
-                $actividad->fuente = $validatedData['fuente'];
-                $cambios = true;
-            }
-            if ($actividad->id_tipo_dato !== $validatedData['id_tipo_dato']) {
-                $actividad->id_tipo_dato = $validatedData['id_tipo_dato'];
-                $cambios = true;
-            }
-            if ($actividad->id_asesor !== $validatedData['id_asesor']) {
-                $actividad->id_asesor = $validatedData['id_asesor'];
-                $cambios = true;
-            }
-
-            if (!$cambios) {
-                return response()->json(["message" => "No se realizaron cambios, los datos son iguales"], 400);
-            }
-            $actividad->save();
 
             return response()->json(["message" => "Actividad actualizada con éxito"], 200);
 
