@@ -51,7 +51,7 @@ class EmprendedorSeeder extends Seeder
             "id_autentication"=> 5,
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
-            "id_municipio"=> 866
+            "id_municipio"=> 904
         ]);
         Emprendedor::create([
             "documento"=> "28358568",
@@ -67,7 +67,7 @@ class EmprendedorSeeder extends Seeder
             "id_autentication"=> 16,
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
-            "id_municipio"=> 866
+            "id_municipio"=> 904
         ]);
         Emprendedor::create([
             "documento"=> "10101010",
@@ -83,7 +83,7 @@ class EmprendedorSeeder extends Seeder
             "id_autentication"=> 15,
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
-            "id_municipio"=> 866
+            "id_municipio"=> 904
         ]);
         
     }
