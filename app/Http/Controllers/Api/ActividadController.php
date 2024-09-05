@@ -46,7 +46,7 @@ class ActividadController extends Controller
                     'nombre' => 'required|string|max:255',
                     'descripcion' => 'required|string|max:1000',
                     'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
-                    'id_asesor' => 'required|integer|exists:asesor,id',
+                    'id_asesor' => 'nullable|integer|exists:asesor,id',
                     'id_ruta' => 'required|integer|exists:ruta,id',
                     'id_aliado'=> 'required|integer|exists:aliado,id'
                 ]);

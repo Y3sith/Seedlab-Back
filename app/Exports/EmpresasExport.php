@@ -27,12 +27,12 @@ class EmpresasExport implements FromCollection, WithHeadings
     public function collection()
     {
         $query = DB::table($this->tipo_reporte)
-            ->join('emprendedor', 'empresa.documento', '=', 'emprendedor.id')
+            ->join('emprendedor', 'empresa.id_emprendedor', '=', 'emprendedor.documento')
             ->select("{$this->tipo_reporte}.*", 'emprendedor.documento', 'emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.celular');
 
         // Filtrar por rango de fechas solo si están definidos ambos
         if ($this->fecha_inicio && $this->fecha_fin) {
-            $query->whereBetween('empresa.fecha_creacion', [$this->fecha_inicio, $this->fecha_fin]);
+            $query->whereBetween('empresa.fecha_registro', [$this->fecha_inicio, $this->fecha_fin]);
         }
 
         return $query->get();
