@@ -50,15 +50,6 @@ class ActividadController extends Controller
                 'id_ruta' => 'required|integer|exists:ruta,id',
                 'id_aliado' => 'required|integer|exists:aliado,id'
             ]);
-
-            // $nombre = $request->input('nombre');
-            // if (strlen($nombre) > 70) {
-            //     return response()->json(['message' => 'El nombre de la actividad no puede tener más de 70 caracteres'], 400);
-            // }
-            // if (strlen($nombre) < 1) {
-            //     return response()->json(['message' => 'El nombre de la actividad debe tener al menos 1 caracter'], 400);
-            // }
-
             $descripcion = $request->input('descripcion');
             if (strlen($descripcion) < 300) {
                 return response()->json(['message' => 'La descripción debe tener al menos 300 caracteres'], 400);
@@ -150,27 +141,72 @@ class ActividadController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function editarActividad(Request $request, string $id)
+    public function editarActividad(Request $request, $id)
     {
-        // Solo pueden editar la actividad los usuarios con roles 3 (aliado) o 4 (asesor)
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
-                return response()->json(["error" => "No tienes permisos para editar esta actividad"], 403);
+            // Verificar permisos del usuario
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(["error" => "No tienes permisos para editar esta actividad"], 401);
             }
+
+            // Validar datos de entrada
+            $validatedData = $request->validate([
+                'nombre' => 'required|string',
+                'descripcion' => 'required|string',
+                'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
+                //'fuentes' => 'nullable',
+                'id_asesor' => 'nullable|integer|exists:asesor,id',
+                'id_aliado' => 'required|integer|exists:aliado,id',
+                'estado' => 'required'
+            ]);
+
+            // Obtener la actividad a editar
             $actividad = Actividad::find($id);
             if (!$actividad) {
-                return response()->json(["error" => "Actividad no encontrada"], 404);
+                return response()->json(['error' => 'Actividad no encontrada'], 404);
+            }
+            // Actualizar fuente si se ha proporcionado un archivo o una URL
+            $fuente = $actividad->fuente;
+            if ($request->hasFile('fuente')) {
+                $file = $request->file('fuente');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $mimeType = $file->getMimeType();
+
+                if (strpos($mimeType, 'image') !== false) {
+                    $folder = 'imagenes';
+                } elseif ($mimeType === 'application/pdf') {
+                    $folder = 'documentos';
+                } else {
+                    return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
+                }
+
+                // Guardar archivo y actualizar URL de fuente
+                $path = $file->storeAs("public/$folder", $fileName);
+                $fuente = Storage::url($path);
+            } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
+                $fuente = $request->input('fuente');
+            } elseif ($request->input('fuente')) {
+                $fuente = $request->input('fuente');
             }
 
+            // Actualizar la actividad
+            $actividad->update([
+                'nombre' => $validatedData['nombre'],
+                'descripcion' => $validatedData['descripcion'],
+                'fuente' => $fuente,
+                'id_tipo_dato' => $validatedData['id_tipo_dato'],
+                'id_asesor' => $validatedData['id_asesor'] ?? null,
+                'id_aliado' => $validatedData['id_aliado'],
+                'estado' => $validatedData['estado']
+            ]);
 
-
-            return response()->json(["message" => "Actividad actualizada con éxito"], 200);
+            return response()->json(['message' => 'Actividad actualizada con éxito', 'actividad' => $actividad], 200);
 
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-
     }
+
 
 
     /**
