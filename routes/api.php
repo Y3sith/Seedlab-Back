@@ -168,7 +168,7 @@ Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
 
 //Puntaje
 Route::group([], function () {
-    Route::post('/puntajes', [PuntajeController::class, 'store']);
+    Route::post('/puntajes/{documento}', [PuntajeController::class, 'store']);
     Route::get('/puntajeXemprendedor/{id}', [PuntajeController::class, 'getPuntajeXEmpresa']);
 });
 
