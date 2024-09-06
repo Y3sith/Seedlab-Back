@@ -207,6 +207,24 @@ class ActividadController extends Controller
         }
     }
 
+    public function Activar_Desactivar_Actividad($id){
+        try {
+            if (Auth::user()->id_rol !=1) {
+                return response()->json('no tienes permiso para desactivar la actividad',400);
+            }
+
+            $actividad = Actividad::find($id);
+            if (!$actividad) {
+                return response()->json('Actividad no encontradas',400);
+            }
+            $nuevoEstado = !$actividad->estado;
+            $actividad->update(['estado' => $nuevoEstado]);
+            return response()->json(['message'=> 'Estado de la Actividad actualizado correctamente']);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+       }
+    }
+
 
 
     /**
