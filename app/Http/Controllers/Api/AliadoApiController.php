@@ -578,11 +578,9 @@ class AliadoApiController extends Controller
         ], 403);
     }
 
-
-    public function mostrarAsesorAliado(Request $request, $id)
-{
-    try {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+    public function mostrarAsesorAliado($id)
+    {
+        if(Auth::user()->id_rol != 3){
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         $estado = $request->input('estado', 'Activo');
@@ -591,39 +589,31 @@ class AliadoApiController extends Controller
         if (!$aliado) {
             return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
         }
-        $asesores = Aliado::findOrFail($id)->asesor()
-            ->whereHas('auth', function ($query) use ($estadoBool) {
-                $query->where('estado', $estadoBool);
-            })
-            ->select('id', 'id_aliado','nombre', 'apellido', 'imagen_perfil', 'documento','id_tipo_documento',
-                     'fecha_nac', 'direccion', 'genero', 'id_municipio' ,'celular', 'id_autentication')
-            ->get();
-        $asesoresConEstado = $asesores->map(function ($asesor) {
-            $user = User::find($asesor->id_autentication);
-            return [
-                'id' => $asesor->id,
-                'nombre' => $asesor->nombre,
-                'apellido' => $asesor->apellido,
-                'imagen_perfil'=>$asesor->imagen_perfil ? $this->correctImageUrl($asesor->imagen_perfil) : null,
-                'documento' => $asesor->documento,
-                'id_tipo_documento' => $asesor->id_tipo_documento,
-                'fecha_nac' => $asesor->fecha_nac,
-                'direccion' => $asesor->direccion,
-                'genero' => $asesor->genero,
-                'celular' => $asesor->celular,
-                'id_municipio' => $asesor->id_municipio,
-                'id_aliado' => $asesor->id_aliado,
-                'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo',
-                'email' => $user->email
-            ];
-        });
-        return response()->json($asesoresConEstado);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+
+        $asesores = Aliado::findorFail($id)->asesor()->select('nombre', 'apellido', 'celular')->get();
+        return response()->json($asesores);
+    }    
+
+    public function dashboardAliado($idAliado){
+        //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (ACTIVAS O FINALIZADAS)
+        $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Finalizada');
+        })->count();
+
+        $activas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function($query) {
+            $query->where('estado', 'Activa');
+        })->count();
+        
+        //CONTAR # DE ASESORES DE ESE ALIADO
+        $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
+
+        return response()->json([
+            'Asesorias Finalizadas' => $finalizadas,
+            'Asesorias Activas' => $activas,
+            'Mis Asesores' => $numAsesores,
+        ]);
+
     }
-}
-
-
 
     public function gestionarAsesoria(Request $request)
     {
