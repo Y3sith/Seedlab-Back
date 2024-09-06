@@ -213,10 +213,12 @@ class RutaApiController extends Controller
             if (Auth::user()->id_rol != 1) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-            $ruta = Ruta::where('id', $id)->with('actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado')->get();
+            $ruta = Ruta::where('id', $id)->with('actividades', 'actividades.aliado')->get();
             $ruta = $ruta->map(function ($r) {
                 $r->actividades = $r->actividades->map(function ($actividad) {
-                    $actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
+                    $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+                    unset($actividad->asesor);
+                    //$actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
                     $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
                     $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
                     unset($actividad->aliado);

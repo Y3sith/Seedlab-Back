@@ -207,24 +207,24 @@ class ActividadController extends Controller
         }
     }
 
-    public function Activar_Desactivar_Actividad($id){
+    public function Activar_Desactivar_Actividad($id)
+    {
         try {
-            if (Auth::user()->id_rol !=1) {
-                return response()->json('no tienes permiso para desactivar la actividad',400);
+            if (Auth::user()->id_rol != 1) {
+                return response()->json('no tienes permiso para desactivar la actividad', 400);
             }
 
             $actividad = Actividad::find($id);
             if (!$actividad) {
-                return response()->json('Actividad no encontradas',400);
+                return response()->json('Actividad no encontradas', 400);
             }
             $nuevoEstado = !$actividad->estado;
             $actividad->update(['estado' => $nuevoEstado]);
-            return response()->json(['message'=> 'Estado de la Actividad actualizado correctamente']);
+            return response()->json(['message' => 'Estado de la Actividad actualizado correctamente']);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-       }
+        }
     }
-
 
 
     /**
@@ -257,5 +257,31 @@ class ActividadController extends Controller
             ->select('id', 'nombre', 'descripcion', 'fuente', 'id_tipo_dato', 'id_asesor', 'id_ruta', )
             ->get();
         return response()->json($actividades);
+    }
+
+    public function ActiNivelLeccionContenido($id)
+    { //traer actividad,nivel,leccion y contenido por leccion a base de la actividad
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json([
+                    'messaje' => 'No tienes permisos para acceder a esta ruta'
+                ], 401);
+            }
+            $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
+                ->where('id', $id)
+                ->first();
+            $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+            unset($actividad->asesor);
+            $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+            unset($actividad->aliado);
+
+            if (!$actividad) {
+                return response()->json(['message' => 'Actividad no encontrada'], 404);
+            }
+            return response()->json($actividad);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 }

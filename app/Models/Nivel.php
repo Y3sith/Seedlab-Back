@@ -15,9 +15,7 @@ class Nivel extends Model
         'nombre',
         'id_actividad'
     ];
-
     public $timestamps = false;
-
     public function actividad(){
         return $this->belongsTo(Actividad::class, 'id_actividad');
     }
@@ -25,6 +23,4 @@ class Nivel extends Model
     public function lecciones(){
         return $this->hasMany(Leccion::class, 'id_nivel');
     }
-
-    
 }
