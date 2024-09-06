@@ -162,7 +162,7 @@ Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosRe
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
-Route::get('/traerPersonalizacion', [SuperAdminController::class, 'obtenerPersonalizacion']);
+Route::get('/traerPersonalizacion/{id}', [SuperAdminController::class, 'obtenerPersonalizacion']);
 Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
 
 

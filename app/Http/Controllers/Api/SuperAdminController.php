@@ -86,7 +86,7 @@ class SuperAdminController extends Controller
             return response()->json(json_decode($personalizacion), 200);
         }
 
-        $personalizacion = PersonalizacionSistema::first();
+        $personalizacion = PersonalizacionSistema::where('id', $id)->first();
         //dd($personalizaciones);
 
         if (!$personalizacion) {
