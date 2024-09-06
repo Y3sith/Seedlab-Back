@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Exports\AliadosExport;
 use App\Exports\AsesoriasExport;
+use App\Exports\AsesoriasOrientadorExport;
 use App\Exports\EmpresasExport;
 use App\Exports\RolesExport;
 use App\Http\Controllers\Controller;
@@ -54,10 +55,13 @@ class ReportesController extends Controller
                 return Excel::download(new EmpresasExport($tipo_reporte, $fechaInicio, $fechaFin), 'empresas_registradas.xlsx');
             case 'asesoria':
                 return Excel::download(new AsesoriasExport($tipo_reporte, $fechaInicio, $fechaFin), 'asesorias_solicitadas.xlsx');
+            case 'asesorias_orientador':
+                return Excel::download(new AsesoriasOrientadorExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_asesorias_orientador.xlsx');
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
     }
+
 
     public function obtenerDatosReporte(Request $request)
     {
@@ -78,24 +82,57 @@ class ReportesController extends Controller
             case 'emprendedor':
                 $data = DB::table('users')
                     ->join('emprendedor', 'users.id', '=', 'emprendedor.id_autentication')
-                    ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', 'emprendedor.documento',
-                    'emprendedor.nombre','emprendedor.apellido','emprendedor.celular','emprendedor.genero','emprendedor.fecha_nac','emprendedor.direccion',)
+                    ->select(
+                        'users.id',
+                        'users.email',
+                        'users.fecha_registro',
+                        'users.estado',
+                        'emprendedor.documento',
+                        'emprendedor.nombre',
+                        'emprendedor.apellido',
+                        'emprendedor.celular',
+                        'emprendedor.genero',
+                        'emprendedor.fecha_nac',
+                        'emprendedor.direccion',
+                    )
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
             case 'orientador':
                 $data = DB::table('users')
                     ->join('orientador', 'users.id', '=', 'orientador.id_autentication')
-                    ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', 'orientador.nombre', 'orientador.apellido',
-                    'orientador.documento', 'orientador.celular', 'orientador.genero', 'orientador.fecha_nac', 'orientador.direccion')
+                    ->select(
+                        'users.id',
+                        'users.email',
+                        'users.fecha_registro',
+                        'users.estado',
+                        'orientador.nombre',
+                        'orientador.apellido',
+                        'orientador.documento',
+                        'orientador.celular',
+                        'orientador.genero',
+                        'orientador.fecha_nac',
+                        'orientador.direccion'
+                    )
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
             case 'empresa':
                 $data = DB::table('empresa')
                     ->join('emprendedor', 'empresa.id_emprendedor', '=', 'emprendedor.documento')
-                    ->select('empresa.documento','empresa.razonSocial','empresa.url_pagina','empresa.telefono', 'empresa.celular', 
-                    'empresa.direccion','empresa.correo','empresa.fecha_registro','emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.celular as celular_emprendedor')
+                    ->select(
+                        'empresa.documento',
+                        'empresa.razonSocial',
+                        'empresa.url_pagina',
+                        'empresa.telefono',
+                        'empresa.celular',
+                        'empresa.direccion',
+                        'empresa.correo',
+                        'empresa.fecha_registro',
+                        'emprendedor.nombre',
+                        'emprendedor.apellido',
+                        'emprendedor.celular as celular_emprendedor'
+                    )
                     ->whereBetween('fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
@@ -103,10 +140,16 @@ class ReportesController extends Controller
                 $data = DB::table('asesoria')
                     ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
                     ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
-                    ->select('asesoria.Nombre_sol', 'asesoria.notas','asesoria.fecha','aliado.nombre as nombre_aliado', 'emprendedor.nombre as emprendedor')
+                    ->select('asesoria.Nombre_sol', 'asesoria.notas', 'asesoria.fecha', 'aliado.nombre as nombre_aliado', 'emprendedor.nombre as emprendedor')
                     ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
+            case 'asesorias_orientador':
+                $data = DB::table('asesoria')
+                    ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
+                    ->select('asesoria.Nombre_sol', 'asesoria.notas', 'asesoria.fecha', 'emprendedor.nombre as nombre_emprendedor', 'emprendedor.documento')
+                    ->where('isorientador', 1)
+                    ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin]);
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }

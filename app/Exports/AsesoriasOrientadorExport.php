@@ -7,7 +7,7 @@ use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class AsesoriasExport implements FromCollection, WithHeadings
+class AsesoriasOrientadorExport implements FromCollection
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -26,15 +26,14 @@ class AsesoriasExport implements FromCollection, WithHeadings
 
     public function collection()
     {
-        $query = DB::table($this->tipo_reporte)
-            ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
+        $query =  DB::table('asesoria')
             ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
-            ->select("{$this->tipo_reporte}.*", 'aliado.nombre as nombre_aliado', 'emprendedor.nombre as nombre_emprendedor', 'emprendedor.documento');
-
+            ->select('asesoria.Nombre_sol', 'asesoria.notas', 'asesoria.fecha', 'emprendedor.nombre as nombre_emprendedor', 'emprendedor.documento')
+            ->where('isorientador', 1);
+            
         if ($this->fecha_inicio && $this->fecha_fin) {
             $query->whereBetween('asesoria.fecha', [$this->fecha_inicio, $this->fecha_fin]);
         }
-
         return $query->get();
     }
 
@@ -42,12 +41,11 @@ class AsesoriasExport implements FromCollection, WithHeadings
     {
         return [
             'ID',
-            'Nombre Emprendedor',
-            'Documento Emprendedor',
             'Nombre Asesoria',
             'Descripción',
             'Fecha',
-            'Nombre Aliado',
+            'Emprendedor Solcitante',
+            'Documento Emprendedor'
         ];
     }
 }
