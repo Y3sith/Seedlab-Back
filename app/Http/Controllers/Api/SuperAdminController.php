@@ -87,7 +87,6 @@ class SuperAdminController extends Controller
         }
 
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
-        //dd($personalizaciones);
 
         if (!$personalizacion) {
             return response()->json([
@@ -95,26 +94,31 @@ class SuperAdminController extends Controller
             ], 404);
         }
 
+        // Preparar los datos para guardar en Redis y para la respuesta
+        $personalizacionParaCache = $personalizacion->toArray();
+        $personalizacionParaCache['imagen_logo'] = $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null;
+
         // Guardar la personalización en Redis para la próxima vez
-        Redis::set($personalizacionKey, json_encode($personalizacion)); // Guardar como JSON
+        Redis::set($personalizacionKey, json_encode($personalizacionParaCache));
         Redis::expire($personalizacionKey, 3600); // Opcional: expira en 1 hora
 
-        return response()->json([
-            'imagen_logo' => $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null,
+        // Preparar la respuesta
+        $respuesta = [
+            'imagen_logo' => $personalizacionParaCache['imagen_logo'],
             'nombre_sistema' => $personalizacion->nombre_sistema,
             'color_principal' => $personalizacion->color_principal,
             'color_secundario' => $personalizacion->color_secundario,
-            //'color_terciario' => $personalizacion->color_terciario,
-            //'logo_footer' => $personalizacion->logo_footer ? $this->correctImageUrl($personalizacion->logo_footer) : null,
             'descripcion_footer' => $personalizacion->descripcion_footer,
             'paginaWeb' => $personalizacion->paginaWeb,
             'email' => $personalizacion->email,
             'telefono' => $personalizacion->telefono,
             'direccion' => $personalizacion->direccion,
             'ubicacion' => $personalizacion->ubicacion,
-        ], 200);
-    }
+        ];
 
+        return response()->json($respuesta, 200);
+    }
+    
     private function correctImageUrl($path)
     {
         // Elimina cualquier '/storage' inicial
