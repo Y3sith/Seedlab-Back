@@ -31,8 +31,7 @@ use App\Models\Asesoria;
 
 
 
-
-//Rutas de login y registro
+Route::get('/procesar-respuestas/{idEmprendedor}', [RespuestasApiController::class, 'procesarRespuestas']);//Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
 ], function () {
