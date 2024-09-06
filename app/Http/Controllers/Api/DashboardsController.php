@@ -15,11 +15,21 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Redis;
 
 class DashboardsController extends Controller
 {
     public function enumerarUsuarios()
     {
+        $cacheKey = 'dashboard:enumerarUsuarios';
+
+        $cachedData = Redis::get($cacheKey);
+
+        if ($cachedData) {
+            // Si los datos están en Redis, devolverlos directamente
+            return response()->json(json_decode($cachedData), 200);
+        }
+
         $roles = Rol::all();
         $result = [];
 
@@ -50,11 +60,11 @@ class DashboardsController extends Controller
         $top = $this->topAliados();
 
         $result['topAliados'] = $top;
-
-
         $result['conteoAsesorias'] = $this->asesoriasAsignadasSinAsignar();
 
-
+        // Guardar los datos en Redis para futuras solicitudes
+        Redis::set($cacheKey, json_encode($result));
+        Redis::expire($cacheKey, 3600); // Expiración de 1 hora (opcional)
 
         return response()->json($result);
     }
@@ -291,6 +301,13 @@ class DashboardsController extends Controller
     public function generos() //contador de cuantos usuarios son mujer/hombres u otros
     {
         try {
+            $cacheKey = 'dashboar:datosGeneros';
+
+            $cachedData = Redis::get($cacheKey);
+
+            if ($cachedData) {
+                return response()->json(json_decode($cachedData), 200);
+            }
 
             if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
                 return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
@@ -314,11 +331,18 @@ class DashboardsController extends Controller
                 }
             }
 
-            return response()->json([
+            $result = [
                 ['genero' => 'Femenino', 'total' => $femenino],
                 ['genero' => 'Masculino', 'total' => $masculino],
                 ['genero' => 'Otro', 'total' => $otro],
-            ], 200);
+            ];
+
+            // Almacena los datos en Redis para futuras solicitudes
+            Redis::set($cacheKey, json_encode($result));
+            Redis::expire($cacheKey, 3600); // Expiración de 1 hora (opcional)
+
+            // Devuelve la respuesta con los datos calculados
+            return response()->json($result, 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -363,9 +387,9 @@ class DashboardsController extends Controller
     }
 
     public function getRadarChartData()
-{
-    // Consulta para obtener los puntajes de todas las empresas
-    $puntajes = puntaje::select(
+    {
+        // Consulta para obtener los puntajes de todas las empresas
+        $puntajes = puntaje::select(
             'documento_empresa',
             'info_general',
             'info_financiera',
@@ -373,8 +397,8 @@ class DashboardsController extends Controller
             'info_trl',
             'info_tecnica'
         )
-        ->get();
+            ->get();
 
-    return response()->json($puntajes);
-}
+        return response()->json($puntajes);
+    }
 }

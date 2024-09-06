@@ -25,7 +25,7 @@ class RolesExport implements FromCollection, WithHeadings, WithMapping
     {
 
         // Validación de tipo_reporte
-        $validTipos = ['aliado', 'emprendedor', 'orientador', 'empresa', 'asesoria'];
+        $validTipos = ['emprendedor', 'orientador', 'empresa'];
         if (!in_array($this->tipo_reporte, $validTipos)) {
             throw new \Exception("Tipo de reporte no válido.");
         }
@@ -60,20 +60,20 @@ class RolesExport implements FromCollection, WithHeadings, WithMapping
         ];
     }
 
-    public function map($emprendedor): array
+    public function map($rol): array
     {
         return [
-            $emprendedor->id,
-            $emprendedor->email,
-            $emprendedor->fecha_registro,
-            $emprendedor->estado,
-            $emprendedor->nombre,
-            $emprendedor->apellido,
-            $emprendedor->documento,
-            $emprendedor->celular,
-            $emprendedor->genero,
-            $emprendedor->fecha_nac,
-            $emprendedor->direccion,
+            $rol->id,
+            $rol->email,
+            $rol->fecha_registro,
+            $rol->estado,
+            $rol->nombre,
+            $rol->apellido,
+            $rol->documento,
+            $rol->celular,
+            $rol->genero,
+            $rol->fecha_nac,
+            $rol->direccion,
         ];
     }
 }

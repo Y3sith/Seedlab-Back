@@ -14,6 +14,7 @@ use App\Models\Aliado;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
+use Illuminate\Support\Facades\Redis;
 
 class SuperAdminController extends Controller
 {
@@ -64,42 +65,60 @@ class SuperAdminController extends Controller
 
         $personalizacion->save();
 
+        // Almacenar la personalización en Redis para futuras consultas
+        $personalizacionKey = 'personalizacion:' . $id;
+        Redis::set($personalizacionKey, json_encode($personalizacion)); // Guarda como JSON
+        Redis::expire($personalizacionKey, 3600); // Opcional, expira en 1 hora
+
         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
     }
 
 
 
-    public function obtenerPersonalizacion()
+    public function obtenerPersonalizacion($id)
     {
-        $personalizaciones = PersonalizacionSistema::first();
-        //dd($personalizaciones);
+        // Buscar en Redis primero
+        $personalizacionKey = 'personalizacion:' . $id;
+        $personalizacion = Redis::get($personalizacionKey);
 
-        if (!$personalizaciones) {
+        if ($personalizacion) {
+            // Si está en Redis, devolver la personalización desde el caché
+            return response()->json(json_decode($personalizacion), 200);
+        }
+
+        $personalizacion = PersonalizacionSistema::where('id', $id)->first();
+
+        if (!$personalizacion) {
             return response()->json([
                 'message' => 'No se encontraron personalizaciones del sistema'
             ], 404);
         }
-        // $imageBase64 = $personalizaciones->imagen_logo;
-        // if (strpos($imageBase64, 'data:image/png;base64,') === false) {
-        //     // Si no contiene el prefijo, agregarlo
-        //     $imageBase64 = 'data:image/png;base64,' . $imageBase64;
-        // }
-        return response()->json([
-            'imagen_logo' => $personalizaciones->imagen_logo ? $this->correctImageUrl($personalizaciones->imagen_logo) : null,
-            'nombre_sistema' => $personalizaciones->nombre_sistema,
-            'color_principal' => $personalizaciones->color_principal,
-            'color_secundario' => $personalizaciones->color_secundario,
-            //'color_terciario' => $personalizaciones->color_terciario,
-            //'logo_footer' => $personalizaciones->logo_footer ? $this->correctImageUrl($personalizaciones->logo_footer) : null,
-            'descripcion_footer' => $personalizaciones->descripcion_footer,
-            'paginaWeb' => $personalizaciones->paginaWeb,
-            'email' => $personalizaciones->email,
-            'telefono' => $personalizaciones->telefono,
-            'direccion' => $personalizaciones->direccion,
-            'ubicacion' => $personalizaciones->ubicacion,
-        ], 200);
-    }
 
+        // Preparar los datos para guardar en Redis y para la respuesta
+        $personalizacionParaCache = $personalizacion->toArray();
+        $personalizacionParaCache['imagen_logo'] = $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null;
+
+        // Guardar la personalización en Redis para la próxima vez
+        Redis::set($personalizacionKey, json_encode($personalizacionParaCache));
+        Redis::expire($personalizacionKey, 3600); // Opcional: expira en 1 hora
+
+        // Preparar la respuesta
+        $respuesta = [
+            'imagen_logo' => $personalizacionParaCache['imagen_logo'],
+            'nombre_sistema' => $personalizacion->nombre_sistema,
+            'color_principal' => $personalizacion->color_principal,
+            'color_secundario' => $personalizacion->color_secundario,
+            'descripcion_footer' => $personalizacion->descripcion_footer,
+            'paginaWeb' => $personalizacion->paginaWeb,
+            'email' => $personalizacion->email,
+            'telefono' => $personalizacion->telefono,
+            'direccion' => $personalizacion->direccion,
+            'ubicacion' => $personalizacion->ubicacion,
+        ];
+
+        return response()->json($respuesta, 200);
+    }
+    
     private function correctImageUrl($path)
     {
         // Elimina cualquier '/storage' inicial
@@ -131,10 +150,10 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            $direccion = $data->input('direccion','Dirección por defecto');
-            $fecha_nac = $data->input('fecha_nac','2000-01-01');
+            $direccion = $data->input('direccion', 'Dirección por defecto');
+            $fecha_nac = $data->input('fecha_nac', '2000-01-01');
 
-            DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac ) {
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac) {
                 $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
@@ -183,21 +202,21 @@ class SuperAdminController extends Controller
                 ->join('municipios', 'superadmin.id_municipio', '=', 'municipios.id')
                 ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
                 ->select(
-                'superadmin.id',
-                'superadmin.nombre',
-                'superadmin.apellido',
-                'superadmin.documento',
-                'superadmin.id_tipo_documento',
-                'superadmin.fecha_nac',
-                'superadmin.imagen_perfil',
-                'superadmin.direccion',
-                'superadmin.celular',
-                'superadmin.genero',
-                'superadmin.id_municipio',
-                'municipios.nombre as municipio_nombre',
-                'departamentos.name as departamento_nombre',
-                'departamentos.id as id_departamento',
-                'superadmin.id_autentication'
+                    'superadmin.id',
+                    'superadmin.nombre',
+                    'superadmin.apellido',
+                    'superadmin.documento',
+                    'superadmin.id_tipo_documento',
+                    'superadmin.fecha_nac',
+                    'superadmin.imagen_perfil',
+                    'superadmin.direccion',
+                    'superadmin.celular',
+                    'superadmin.genero',
+                    'superadmin.id_municipio',
+                    'municipios.nombre as municipio_nombre',
+                    'departamentos.name as departamento_nombre',
+                    'departamentos.id as id_departamento',
+                    'superadmin.id_autentication'
                 )
                 ->first();
 
@@ -205,15 +224,15 @@ class SuperAdminController extends Controller
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
                 'apellido' => $admin->apellido,
-                'documento'=>$admin->documento,
-                'id_tipo_documento'=>$admin->id_tipo_documento,
-                'fecha_nac'=>$admin->fecha_nac,
-                'imagen_perfil'=>$admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
-                'direccion'=>$admin->direccion,
-                'celular'=>$admin->celular,
-                'genero'=>$admin->genero,
-                'id_departamento'=>$admin->id_departamento,
-                'id_municipio'=>$admin->id_municipio,
+                'documento' => $admin->documento,
+                'id_tipo_documento' => $admin->id_tipo_documento,
+                'fecha_nac' => $admin->fecha_nac,
+                'imagen_perfil' => $admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
+                'direccion' => $admin->direccion,
+                'celular' => $admin->celular,
+                'genero' => $admin->genero,
+                'id_departamento' => $admin->id_departamento,
+                'id_municipio' => $admin->id_municipio,
                 'email' => $admin->auth->email,
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_auth' => $admin->id_autentication
@@ -273,7 +292,7 @@ class SuperAdminController extends Controller
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
-            
+
             $admin = SuperAdmin::find($id);
             if ($admin) {
                 $admin->nombre = $request->input('nombre');
@@ -295,14 +314,14 @@ class SuperAdminController extends Controller
                     }
                     $admin->celular = $newCelular;
                 }
-                
+
                 if ($request->hasFile('imagen_perfil')) {
                     //Eliminar el logo anterior
                     Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
                     // Guardar el nuevo logo
                     $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
                     $admin->imagen_perfil = str_replace('public', 'storage', $path);
-                } 
+                }
 
                 $admin->save();
 
@@ -331,10 +350,10 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    
+
     public function restore($id)
     {
         try {
@@ -395,14 +414,14 @@ class SuperAdminController extends Controller
         }
     }
 
-    
 
-    
 
-   
-    
-    
-    
+
+
+
+
+
+
 
     // public function emprendedoresPorMunicipioPDF (){
     //     $emprendedoresPorMunicipio = Emprendedor::with('municipios')
