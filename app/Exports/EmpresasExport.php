@@ -28,7 +28,15 @@ class EmpresasExport implements FromCollection, WithHeadings
     {
         $query = DB::table($this->tipo_reporte)
             ->join('emprendedor', 'empresa.id_emprendedor', '=', 'emprendedor.documento')
-            ->select("{$this->tipo_reporte}.*", 'emprendedor.documento', 'emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.celular');
+            ->join('departamentos', 'empresa.id_departamento', 'departamentos.id')
+            ->join('municipios', 'empresa.id_municipio', '=', 'municipios.id')
+            ->select("$this->tipo_reporte.documento", "$this->tipo_reporte.nombre","$this->tipo_reporte.razonSocial",
+            "$this->tipo_reporte.url_pagina","$this->tipo_reporte.celular","$this->tipo_reporte.direccion","$this->tipo_reporte.correo", "$this->tipo_reporte.fecha_registro",
+            'departamentos.name','municipios.nombre as municipio',
+            'emprendedor.documento as documento_emprendedor', 
+            'emprendedor.nombre as nombre_emprendedor', 
+            "emprendedor.apellido as apellido_emprendedor", 
+            "emprendedor.celular as celular_emprendedor");
 
         // Filtrar por rango de fechas solo si están definidos ambos
         if ($this->fecha_inicio && $this->fecha_fin) {
@@ -45,18 +53,17 @@ class EmpresasExport implements FromCollection, WithHeadings
             'Documento',
             'Nombre Empresa',
             'Razon Social',
-            'Telefono',
+            'Pagína Web',
             'Celular',
             'Dirección',
             'Correo',
-            'Pagína Web',
             'Fecha Registro',
             'Departamento',
             'Municipio',
+            'Documento Emprendedor',
             'Nombre Emprendedor',
             'Apellido Emprendedor',
-            'Documento Emprendedor',
-            'N° Celular Emprendedor',
+            'Celular Emprendedor',
         ];
     }
 }

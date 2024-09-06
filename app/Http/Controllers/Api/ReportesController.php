@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Exports\AliadosExport;
 use App\Exports\AsesoriasExport;
 use App\Exports\EmpresasExport;
 use App\Exports\RolesExport;
@@ -44,7 +45,7 @@ class ReportesController extends Controller
 
         switch ($tipo_reporte) {
             case 'aliado':
-                return Excel::download(new RolesExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_roles.xlsx');
+                return Excel::download(new AliadosExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_roles.xlsx');
             case 'emprendedor':
                 return Excel::download(new RolesExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_emprendedor.xlsx');
             case 'orientador':
@@ -70,7 +71,7 @@ class ReportesController extends Controller
             case 'aliado':
                 $data = DB::table('users')
                     ->join('aliado', 'users.id', '=', 'aliado.id_autentication')
-                    ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', 'aliado.nombre', 'aliado.descripcion')
+                    ->select('users.id', 'aliado.nombre', 'users.email', 'users.fecha_registro', 'users.estado',  'aliado.descripcion')
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
@@ -94,7 +95,7 @@ class ReportesController extends Controller
                 $data = DB::table('empresa')
                     ->join('emprendedor', 'empresa.id_emprendedor', '=', 'emprendedor.documento')
                     ->select('empresa.documento','empresa.razonSocial','empresa.url_pagina','empresa.telefono', 'empresa.celular', 
-                    'empresa.direccion','empresa.correo','empresa.fecha_registro','emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.documento')
+                    'empresa.direccion','empresa.correo','empresa.fecha_registro','emprendedor.nombre', 'emprendedor.apellido', 'emprendedor.celular as celular_emprendedor')
                     ->whereBetween('fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
