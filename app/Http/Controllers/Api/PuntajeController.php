@@ -18,13 +18,15 @@ class PuntajeController extends Controller
             'info_trl' => 'nullable|numeric',
             'info_tecnica' => 'nullable|numeric',
             'documento_empresa' => 'required|integer',
-            'ver_form' => 'nullable|boolean',
+            'ver_form' => 'nullable|numeric',
         ]);
 
         // Obtener el registro de puntaje de la empresa
         $puntaje = DB::table('puntaje')
             ->where('documento_empresa', $documentoEmpresa)
             ->first();
+
+        $ver_form = $puntaje ? $puntaje->ver_form : 0;
 
         $puntaje = Puntaje::updateOrCreate(
             ['documento_empresa' => $data['documento_empresa']],
@@ -34,7 +36,7 @@ class PuntajeController extends Controller
                 'info_mercado' => $data['info_mercado'],
                 'info_trl' => $data['info_trl'],
                 'info_tecnica' => $data['info_tecnica'],
-                'ver_form' => $puntaje->ver_form + 1,
+                'ver_form' => $ver_form + 1,
             ]
         );
 

@@ -277,8 +277,8 @@ Route::group([
 ], function () {
     Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
     Route::apiResource('/respuestas', RespuestasApiController::class);
-    Route::post('/form/section/{sectionId}', [FormResponsesController::class, 'storeSection']);
+    Route::post('/form/section/{id_empresa}/{sectionId}', [FormResponsesController::class, 'storeSection']);
     Route::get('/form/section/{sectionId}', [FormResponsesController::class, 'getSection']);
+    Route::get('/getRespuestasRedis/{empresaId}', [FormResponsesController::class, 'getAllRespuestasFromRedis']);
 });
 
-Route::get('/respuestas_empresa/{id_empresa}', [RespuestasApiController::class, 'getAnswers']);
