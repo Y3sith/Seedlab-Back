@@ -156,9 +156,7 @@ Route::group(
 
 //Reportes
 
-Route::post('/reporte_roles', [ReportesController::class, 'exportarExcelRoles']);
-Route::post('/reporte_empresas', [ReportesController::class, 'exportarEmpresasRegistradas']);
-Route::post('/reporte_asesorias', [ReportesController::class, 'exportarAsesorias']);
+route::get('/exportar-formExcel/{idEmprendedor}', [ReportesController::class, 'procesarRespuestas']);
 Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
 
