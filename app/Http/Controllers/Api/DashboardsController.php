@@ -386,19 +386,27 @@ class DashboardsController extends Controller
         }
     }
 
-    public function getRadarChartData()
+    public function getRadarChartData($id_empresa)
     {
         // Consulta para obtener los puntajes de todas las empresas
-        $puntajes = puntaje::select(
-            'documento_empresa',
-            'info_general',
-            'info_financiera',
-            'info_mercado',
-            'info_trl',
-            'info_tecnica'
-        )
-            ->get();
+        $puntajes = DB::table('puntaje')
+            ->where('puntaje.documento_empresa', $id_empresa)
+            ->select(
+                'info_general',
+                'info_financiera',
+                'info_mercado',
+                'info_trl',
+                'info_tecnica'
+            )
+            ->first(); // Cambia a get() para obtener una colección
 
-        return response()->json($puntajes);
+            if (!$puntajes) {
+                return response()->json(['message' => 'No se encontró puntaje para esta empresa'], 404);
+            }
+        
+            // Convertimos el objeto stdClass a un array asociativo
+            $puntajeArray = (array) $puntajes;
+        
+            return response()->json($puntajeArray, 200);
     }
 }
