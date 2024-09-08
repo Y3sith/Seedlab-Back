@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Contenido_por_LeccionController;
@@ -15,9 +14,7 @@ use App\Http\Controllers\Api\ActividadController;
 use App\Http\Controllers\Api\LeccionController;
 use App\Http\Controllers\Api\NivelesController;
 use App\Http\Controllers\Api\AsesorApiController;
-use App\Http\Controllers\Api\DashboardAliadoController;
 use App\Http\Controllers\Api\DashboardsController;
-use App\Http\Controllers\Api\DashboardSuperAdminController;
 use App\Http\Controllers\Api\FormResponsesController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
@@ -25,7 +22,6 @@ use App\Http\Controllers\Api\OrientadorApiController;
 use App\Http\Controllers\Api\PuntajeController;
 use App\Http\Controllers\Api\ReportesController;
 use App\Http\Controllers\Api\RespuestasApiController;
-use App\Models\Asesoria;
 
 
 
