@@ -156,7 +156,8 @@ Route::group(
 route::get('/exportar-formExcel/{idEmprendedor}', [ReportesController::class, 'procesarRespuestas']);
 Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
-
+Route::get('/obtener_datos_asesoria_aliado', [ReportesController::class, 'mostrarReporteAsesoriaAliado']);
+Route::post('/exportar_reporte_asesoria_aliado', [ReportesController::class, 'exportarAsesoriasAliados']);
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');

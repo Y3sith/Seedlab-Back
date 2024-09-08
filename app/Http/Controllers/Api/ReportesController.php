@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\AliadosExport;
+use App\Exports\AsesoriasAliadosExport;
 use App\Exports\AsesoriasExport;
 use App\Exports\AsesoriasOrientadorExport;
 use App\Exports\EmpresasExport;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
@@ -33,12 +35,13 @@ class ReportesController extends Controller
         return Excel::download(new EmpresasExport($tipo_reporte, $fechaInicio, $fechaFin), 'empresas_registradas.xlsx');
     }
 
-    public function exportarAsesorias(Request $request)
+    public function exportarAsesoriasAliados(Request $request)
     {
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
-        return Excel::download(new AsesoriasExport($tipo_reporte, $fechaInicio, $fechaFin), 'asesorias_solicitadas.xlsx');
+        $id_aliado = $request->input('id_aliado');
+        return Excel::download(new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin), 'asesoras_aliados.xlsx');
     }
 
     public function exportarReporte(Request $request)
@@ -46,6 +49,7 @@ class ReportesController extends Controller
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
+
 
         switch ($tipo_reporte) {
             case 'aliado':
@@ -65,7 +69,7 @@ class ReportesController extends Controller
         }
     }
 
-    
+
 
 
     public function obtenerDatosReporte(Request $request)
@@ -73,6 +77,7 @@ class ReportesController extends Controller
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
+        $id_aliado = $request->input('id_aliado');
 
         $data = [];
 
@@ -154,10 +159,50 @@ class ReportesController extends Controller
                     ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
                     ->select('asesoria.Nombre_sol', 'asesoria.notas', 'asesoria.fecha', 'emprendedor.nombre as nombre_emprendedor', 'emprendedor.documento')
                     ->where('isorientador', 1)
-                    ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin]);
+                    ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin])
+                    ->get();
+                break;
+            case 'asesorias_aliados':
+
+                break;
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
+
+        return response()->json($data);
+    }
+
+    public function mostrarReporteAsesoriaAliado(Request $request)
+    {
+        $fechaInicio = $request->input('fecha_inicio');
+        $fechaFin = $request->input('fecha_fin');
+        $id_aliado = $request->input('id_aliado');
+
+        // Validación de inputs
+        $validator = Validator::make($request->all(), [
+            'fecha_inicio' => 'required|date',
+            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
+            'id_aliado' => 'required|integer'
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['error' => $validator->errors()], 400);
+        }
+
+        $data = DB::table('asesoria')
+            ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
+            ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
+            ->select(
+                'asesoria.Nombre_sol',
+                'asesoria.notas',
+                'asesoria.fecha',
+                'emprendedor.nombre as nombre_emprendedor',
+                'emprendedor.documento',
+                'aliado.nombre as nombre_aliado'
+            )
+            ->where('asesoria.id_aliado', $id_aliado)
+            ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin])
+            ->get();
 
         return response()->json($data);
     }
