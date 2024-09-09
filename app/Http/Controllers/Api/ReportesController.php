@@ -12,10 +12,10 @@ use App\Exports\FormularioExport;
 use App\Exports\RolesExport;
 use App\Exports\SeccionExport;
 use App\Http\Controllers\Controller;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Validator;
 use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
@@ -42,14 +42,36 @@ class ReportesController extends Controller
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $id_aliado = $request->input('id_aliado');
+        $formato = $request->input('formato', 'excel');
 
         switch ($tipo_reporte) {
             case 'asesoria':
-                return Excel::download(new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin), 'asesoras_aliados.xlsx');
+                $export = new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'asesorias_aliados';
+                $plantilla = 'reporte_asesorias_aliado_template';
+                break;
             case 'asesor':
-                return Excel::download(new AsesoresAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin), 'asesor_aliados.xlsx');
+                $export = new AsesoresAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'asesores_aliados';
+                $plantilla = 'reporte_asesores_aliado_template';
+                break;
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
+        }
+
+        if ($formato === 'excel') {
+            return Excel::download($export, "{$nombreArchivo}.xlsx");
+        }
+        try {
+            $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
+            //dd($datos);
+            $pdf = Pdf::loadView($plantilla, compact('datos'));
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->download("{$nombreArchivo}.pdf");
+        } catch (\Exception $e) {
+            // Maneja el error, por ejemplo, registrando el error en los logs
+            Log::error('Error al generar el PDF: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
         }
     }
 
@@ -58,26 +80,63 @@ class ReportesController extends Controller
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
+        $formato = $request->input('formato', 'excel');
 
 
         switch ($tipo_reporte) {
             case 'aliado':
-                return Excel::download(new AliadosExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_roles.xlsx');
+                $export = new AliadosExport($tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'reporte_roles';
+                $plantilla = 'reporte_aliados_template';
+                break;
             case 'emprendedor':
-                return Excel::download(new RolesExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_emprendedor.xlsx');
+                $export = new RolesExport($tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'reporte_emprendedor';
+                $plantilla = 'reporte_pdf_template';
+                break;
             case 'orientador':
-                return Excel::download(new RolesExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_orientadores.xlsx');
+                $export = new RolesExport($tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'reporte_orientadores';
+                $plantilla = 'reporte_pdf_template';
+                break;
             case 'empresa':
-                return Excel::download(new EmpresasExport($tipo_reporte, $fechaInicio, $fechaFin), 'empresas_registradas.xlsx');
+                $export = new EmpresasExport($tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'empresas_registradas';
+                $plantilla = 'reporte_empresas_template';
+                break;
             case 'asesoria':
-                return Excel::download(new AsesoriasExport($tipo_reporte, $fechaInicio, $fechaFin), 'asesorias_solicitadas.xlsx');
+                $export = new AsesoriasExport($tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'asesorias_solicitadas';
+                $plantilla = 'reporte_asesorias_template';
+                break;
             case 'asesorias_orientador':
-                return Excel::download(new AsesoriasOrientadorExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte_asesorias_orientador.xlsx');
+                $export = new AsesoriasOrientadorExport($tipo_reporte, $fechaInicio, $fechaFin);
+                $nombreArchivo = 'reporte_asesorias_orientador';
+                break;
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
-    }
 
+        // Si el formato es Excel
+        if ($formato === 'excel') {
+            return Excel::download($export, "{$nombreArchivo}.xlsx");
+        }
+
+        // Si el formato es PDF
+        try {
+            $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
+            //dd($datos);
+            $pdf = Pdf::loadView($plantilla, compact('datos'));
+            $pdf->setPaper('A4', 'landscape');
+            return $pdf->download("{$nombreArchivo}.pdf");
+        } catch (\Exception $e) {
+            // Maneja el error, por ejemplo, registrando el error en los logs
+            Log::error('Error al generar el PDF: ' . $e->getMessage());
+            return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
+        }
+
+        //return response()->json(['error' => 'Formato no válido'], 400);
+    }
 
 
 
@@ -86,7 +145,7 @@ class ReportesController extends Controller
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
-        
+
 
         $data = [];
 
