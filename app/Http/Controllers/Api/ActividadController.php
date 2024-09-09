@@ -270,10 +270,10 @@ class ActividadController extends Controller
             $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
                 ->where('id', $id)
                 ->first();
-            $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-            unset($actividad->asesor);
-            $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-            unset($actividad->aliado);
+            // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+            // unset($actividad->asesor);
+            // $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+            // unset($actividad->aliado);
 
             if (!$actividad) {
                 return response()->json(['message' => 'Actividad no encontrada'], 404);
