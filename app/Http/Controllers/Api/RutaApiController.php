@@ -4,12 +4,15 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
+use App\Models\ContenidoLeccion;
 use App\Models\Ruta;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class RutaApiController extends Controller
 {
@@ -218,9 +221,10 @@ class RutaApiController extends Controller
     public function actnivleccontXruta($id)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
+
             $ruta = Ruta::where('id', $id)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
 
             foreach ($ruta as $r) {
@@ -228,18 +232,75 @@ class RutaApiController extends Controller
                     if (is_null($actividad->id_asesor)) {
                         $actividad->id_asesor = 'Ninguno';
                     }
+
+                    if ($actividad->aliado) {
+                        $actividad->nombre_aliado = $actividad->aliado->nombre;
+                    } else {
+                        $actividad->nombre_aliado = 'sin aliado';
+                    }
                 }
             }
 
-            if ($actividad->aliado) {
-                $actividad->nombre_aliado = $actividad->aliado->nombre;
-            } else {
-                $actividad->nombre_aliado = 'sin aliado';
-            }
-            
             return response()->json($ruta);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function descargarArchivoContenido($contenidoId)
+{
+    try {
+        $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
+        $fileName = $this->cleanFileName($contenidoLeccion->fuente_contenido);
+        $filePath = 'documentos/' . $fileName;
+
+        if (Storage::disk('public')->exists($filePath)) {
+            $file = Storage::disk('public')->get($filePath);
+            $type = Storage::disk('public')->mimeType($filePath);
+
+            return response($file, 200)
+                ->header('Content-Type', $type)
+                ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
+        } else {
+            return response()->json(['error' => 'Archivo no encontrado'], 404);
+        }
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Error al intentar descargar el archivo: ' . $e->getMessage()], 500);
+    }
+}
+    private function cleanFileName($fileName)
+{
+    // Elimina "/storage/documentos/" del principio del nombre del archivo
+    return Str::replaceFirst('/storage/documentos/', '', $fileName);
+}
+
+    public function debugFilePath($contenidoId)
+    {
+        $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
+        $fileName = $contenidoLeccion->fuente_contenido;
+        
+        echo "Nombre del archivo en la base de datos: " . $fileName . "\n";
+        
+        $publicPath = public_path('storage/documentos/' . $fileName);
+        $storagePath = storage_path('app/public/documentos/' . $fileName);
+        
+        echo "Ruta pública: " . $publicPath . "\n";
+        echo "¿Existe en ruta pública? " . (file_exists($publicPath) ? 'Sí' : 'No') . "\n";
+        
+        echo "Ruta de almacenamiento: " . $storagePath . "\n";
+        echo "¿Existe en ruta de almacenamiento? " . (file_exists($storagePath) ? 'Sí' : 'No') . "\n";
+        
+        echo "¿Existe usando Storage::disk('public')? " . (Storage::disk('public')->exists('documentos/' . $fileName) ? 'Sí' : 'No') . "\n";
+        
+        // Listar archivos en ambos directorios
+        echo "Archivos en el directorio público:\n";
+        foreach(glob(public_path('storage/documentos/*')) as $file) {
+            echo "- " . basename($file) . "\n";
+        }
+        
+        echo "Archivos en el directorio de almacenamiento:\n";
+        foreach(glob(storage_path('app/public/documentos/*')) as $file) {
+            echo "- " . basename($file) . "\n";
         }
     }
 }
