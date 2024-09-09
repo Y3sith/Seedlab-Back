@@ -140,7 +140,8 @@ return [
 
     'redis' => [
 
-        'client' => env('REDIS_CLIENT', 'phpredis'),
+        'client' => env('REDIS_CLIENT', 'p
+        redis'),
 
         'options' => [
             'cluster' => env('REDIS_CLUSTER', 'redis'),
