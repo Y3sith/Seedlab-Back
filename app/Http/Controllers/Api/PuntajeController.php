@@ -11,6 +11,7 @@ class PuntajeController extends Controller
 {
     public function store(Request $request, $documentoEmpresa)
     {
+        // Validar los datos del request
         $data = $request->validate([
             'info_general' => 'nullable|numeric',
             'info_financiera' => 'nullable|numeric',
@@ -21,27 +22,52 @@ class PuntajeController extends Controller
             'ver_form' => 'nullable|numeric',
         ]);
 
-        // Obtener el registro de puntaje de la empresa
-        $puntaje = DB::table('puntaje')
-            ->where('documento_empresa', $documentoEmpresa)
+        // Verificar si ya existe un registro con ver_form_pr = 1 (primera vez)
+        $primerPuntaje = Puntaje::where('documento_empresa', $documentoEmpresa)
+            ->where('verform_pr', 1)
             ->first();
 
-        $ver_form = $puntaje ? $puntaje->ver_form : 0;
+        if (!$primerPuntaje) {
+            // No existe un puntaje para la primera vez, entonces lo creamos
+            $nuevoPuntaje = new Puntaje();
+            $nuevoPuntaje->documento_empresa = $data['documento_empresa'];
+            $nuevoPuntaje->info_general = $data['info_general'];
+            $nuevoPuntaje->info_financiera = $data['info_financiera'];
+            $nuevoPuntaje->info_mercado = $data['info_mercado'];
+            $nuevoPuntaje->info_trl = $data['info_trl'];
+            $nuevoPuntaje->info_tecnica = $data['info_tecnica'];
+            $nuevoPuntaje->verform_pr = 1;  // Indica que es la primera vez
+            $nuevoPuntaje->verform_se = 0;  // Aún no se llena la segunda vez
+            $nuevoPuntaje->save();
 
-        $puntaje = Puntaje::updateOrCreate(
-            ['documento_empresa' => $data['documento_empresa']],
-            [
-                'info_general' => $data['info_general'],
-                'info_financiera' => $data['info_financiera'],
-                'info_mercado' => $data['info_mercado'],
-                'info_trl' => $data['info_trl'],
-                'info_tecnica' => $data['info_tecnica'],
-                'ver_form' => $ver_form + 1,
-            ]
-        );
+            return response()->json(['message' => 'Puntaje guardado correctamente (primera vez)', 'puntaje' => $nuevoPuntaje]);
+        } else {
+            // Ya existe un puntaje para la primera vez, revisamos si existe para la segunda vez
+            $segundoPuntaje = Puntaje::where('documento_empresa', $documentoEmpresa)
+                ->where('verform_se', 1)
+                ->first();
 
-        return response()->json(['message' => 'Puntajes guardados correctamente', 'puntaje' => $puntaje]);
+            if ($segundoPuntaje) {
+                // Si ya existe el puntaje de la segunda vez, no permitimos otro registro
+                return response()->json(['message' => 'El formulario ya fue llenado dos veces'], 400);
+            }
+
+            // Crear un nuevo puntaje para la segunda vez
+            $nuevoPuntaje = new Puntaje();
+            $nuevoPuntaje->documento_empresa = $data['documento_empresa'];
+            $nuevoPuntaje->info_general = $data['info_general'];
+            $nuevoPuntaje->info_financiera = $data['info_financiera'];
+            $nuevoPuntaje->info_mercado = $data['info_mercado'];
+            $nuevoPuntaje->info_trl = $data['info_trl'];
+            $nuevoPuntaje->info_tecnica = $data['info_tecnica'];
+            $nuevoPuntaje->verform_pr = 0;  // No es la primera vez
+            $nuevoPuntaje->verform_se = 1;  // Indica que es la segunda vez
+            $nuevoPuntaje->save();
+
+            return response()->json(['message' => 'Puntaje guardado correctamente (segunda vez)', 'puntaje' => $nuevoPuntaje]);
+        }
     }
+
 
 
     public function getPuntajeXEmpresa($documento_empresa)
