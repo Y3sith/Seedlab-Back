@@ -55,13 +55,17 @@ class SuperAdminController extends Controller
         // Manejo de archivos
         if ($request->hasFile('logo_footer') && $request->file('logo_footer')->isValid()) {
             $logoFooterPath = $request->file('logo_footer')->store('public/logos');
-            $personalizacion->logo_footer = Storage::url($logoFooterPath);
+            // Genera la URL completa correctamente
+            $personalizacion->logo_footer = asset('storage/logos/' . basename($logoFooterPath));
         }
 
         if ($request->hasFile('imagen_logo') && $request->file('imagen_logo')->isValid()) {
             $imagenLogoPath = $request->file('imagen_logo')->store('public/logos');
-            $personalizacion->imagen_logo = Storage::url($imagenLogoPath);
+            // Genera la URL completa correctamente
+            $personalizacion->imagen_logo = asset('storage/logos/' . basename($imagenLogoPath));
         }
+
+
 
         $personalizacion->save();
 
@@ -118,7 +122,7 @@ class SuperAdminController extends Controller
 
         return response()->json($respuesta, 200);
     }
-    
+
     private function correctImageUrl($path)
     {
         // Elimina cualquier '/storage' inicial
@@ -362,6 +366,8 @@ class SuperAdminController extends Controller
                     'message' => 'No tienes permiso para acceder a esta ruta'
                 ], 401);
             }
+            $personalizacionKey = 'personalizacion:' . $id;
+
             // Buscar la personalización por su ID
             $personalizacion = PersonalizacionSistema::find($id);
 
@@ -381,10 +387,13 @@ class SuperAdminController extends Controller
             $personalizacion->telefono = '(55) 5555-5555';
             $personalizacion->direccion = 'Calle 48 # 28 - 40';
             $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
-            $personalizacion->imagen_logo = '/storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+            $personalizacion->imagen_logo = asset('storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg');
+
 
             // Guardar los cambios
             $personalizacion->save();
+            Redis::set($personalizacionKey, json_encode($personalizacion));
+            Redis::expire($personalizacionKey, 432000);
 
             return response()->json([
                 'message' => 'Personalización restaurada correctamente',

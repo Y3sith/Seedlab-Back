@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Exports\AliadosExport;
+use App\Exports\AsesoresAliadosExport;
 use App\Exports\AsesoriasAliadosExport;
 use App\Exports\AsesoriasExport;
 use App\Exports\AsesoriasOrientadorExport;
@@ -35,13 +36,21 @@ class ReportesController extends Controller
         return Excel::download(new EmpresasExport($tipo_reporte, $fechaInicio, $fechaFin), 'empresas_registradas.xlsx');
     }
 
-    public function exportarAsesoriasAliados(Request $request)
+    public function exportarReportesAliados(Request $request)
     {
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $id_aliado = $request->input('id_aliado');
-        return Excel::download(new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin), 'asesoras_aliados.xlsx');
+
+        switch ($tipo_reporte) {
+            case 'asesoria':
+                return Excel::download(new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin), 'asesoras_aliados.xlsx');
+            case 'asesor':
+                return Excel::download(new AsesoresAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin), 'asesor_aliados.xlsx');
+            default:
+                return response()->json(['error' => 'Tipo de reporte no válido'], 400);
+        }
     }
 
     public function exportarReporte(Request $request)
@@ -172,37 +181,53 @@ class ReportesController extends Controller
         return response()->json($data);
     }
 
-    public function mostrarReporteAsesoriaAliado(Request $request)
+    public function mostrarReportesAliados(Request $request)
     {
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $id_aliado = $request->input('id_aliado');
+        $tipo_reporte = $request->input('tipo_reporte');
 
-        // Validación de inputs
-        $validator = Validator::make($request->all(), [
-            'fecha_inicio' => 'required|date',
-            'fecha_fin' => 'required|date|after_or_equal:fecha_inicio',
-            'id_aliado' => 'required|integer'
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(['error' => $validator->errors()], 400);
+        switch ($tipo_reporte) {
+            case 'asesoria':
+                $data = DB::table('asesoria')
+                    ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
+                    ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
+                    ->select(
+                        'asesoria.Nombre_sol',
+                        'asesoria.notas',
+                        'asesoria.fecha',
+                        'emprendedor.nombre as nombre_emprendedor',
+                        'emprendedor.documento',
+                        'aliado.nombre as nombre_aliado'
+                    )
+                    ->where('asesoria.id_aliado', $id_aliado)
+                    ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin])
+                    ->get();
+                break;
+            case 'asesor':
+                $data = DB::table('asesor')
+                    ->join('aliado', 'asesor.id_aliado', '=', 'aliado.id')
+                    ->join('users', 'asesor.id_autentication', '=', 'users.id')
+                    ->select(
+                        'asesor.nombre',
+                        'asesor.apellido',
+                        'asesor.documento',
+                        'asesor.celular',
+                        'asesor.fecha_nac',
+                        'asesor.direccion',
+                        'users.email',
+                        'users.fecha_registro',
+                        DB::raw('(CASE WHEN users.estado = 1 THEN "Activo" ELSE "Inactivo" END) as estado')
+                    )
+                    ->where('asesor.id_aliado', $id_aliado)
+                    ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
+                    ->get();
+                break;
+            default:
+                return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
-        $data = DB::table('asesoria')
-            ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
-            ->join('emprendedor', 'asesoria.doc_emprendedor', '=', 'emprendedor.documento')
-            ->select(
-                'asesoria.Nombre_sol',
-                'asesoria.notas',
-                'asesoria.fecha',
-                'emprendedor.nombre as nombre_emprendedor',
-                'emprendedor.documento',
-                'aliado.nombre as nombre_aliado'
-            )
-            ->where('asesoria.id_aliado', $id_aliado)
-            ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin])
-            ->get();
 
         return response()->json($data);
     }

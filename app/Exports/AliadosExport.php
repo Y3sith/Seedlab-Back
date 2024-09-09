@@ -22,6 +22,10 @@ class AliadosExport implements FromCollection, WithHeadings, WithMapping
 
     public function collection()
     {
+        if (!$this->fecha_inicio || !$this->fecha_fin) {
+            throw new \Exception("Fechas de inicio y fin son requeridas.");
+        }
+        
         $query = DB::table('users')
         ->join($this->tipo_reporte, 'users.id', '=', $this->tipo_reporte.'.id_autentication')
         ->select('users.id', 'users.email', 'users.fecha_registro', DB::raw('(CASE WHEN users.estado = 1 THEN "Activo" ELSE "Inactivo" END) as estado'), 
