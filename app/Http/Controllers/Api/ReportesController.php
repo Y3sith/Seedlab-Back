@@ -86,7 +86,7 @@ class ReportesController extends Controller
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
-        $id_aliado = $request->input('id_aliado');
+        
 
         $data = [];
 
