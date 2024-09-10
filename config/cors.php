@@ -15,17 +15,17 @@ return [
     |
     */
 
-    'paths' => ['api/*', 'descargar-archivo/*'],
+    'paths' => ['api/*'],
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['*'],
+    'allowed_origins' => ['http://localhost:4200'],
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => false,
+    'exposed_headers' => ['Content-Disposition', 'Content-Type'],
 
     'max_age' => 0,
 

@@ -248,58 +248,64 @@ class RutaApiController extends Controller
     }
 
     public function descargarArchivoContenido($contenidoId)
-{
-    try {
-        $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
-        $fileName = $this->cleanFileName($contenidoLeccion->fuente_contenido);
-        $filePath = 'documentos/' . $fileName;
+    {
+        try {
+            $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
+            $fileName = $this->cleanFileName($contenidoLeccion->fuente_contenido);
+            $filePath = 'documentos/' . $fileName;
 
-        if (Storage::disk('public')->exists($filePath)) {
-            $file = Storage::disk('public')->get($filePath);
-            $type = Storage::disk('public')->mimeType($filePath);
-
-            return response($file, 200)
-                ->header('Content-Type', $type)
-                ->header('Content-Disposition', 'attachment; filename="' . $fileName . '"');
-        } else {
-            return response()->json(['error' => 'Archivo no encontrado'], 404);
+            if (Storage::disk('public')->exists($filePath)) {
+                $file = Storage::disk('public')->get($filePath);
+                $type = Storage::disk('public')->mimeType($filePath);
+                return response($file, 200)
+                ->withHeaders([
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                    'Access-Control-Expose-Headers' => 'Content-Disposition',
+                    'Access-Control-Allow-Origin' => '*', // O especifica el origen permitido
+                    'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers' => 'Content-Type, Content-Disposition',
+                ]);
+            } else {
+                return response()->json(['error' => 'Archivo no encontrado'], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Error al intentar descargar el archivo: ' . $e->getMessage()], 500);
         }
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Error al intentar descargar el archivo: ' . $e->getMessage()], 500);
     }
-}
+    
     private function cleanFileName($fileName)
-{
-    // Elimina "/storage/documentos/" del principio del nombre del archivo
-    return Str::replaceFirst('/storage/documentos/', '', $fileName);
-}
+    {
+        // Elimina "/storage/documentos/" del principio del nombre del archivo
+        return Str::replaceFirst('/storage/documentos/', '', $fileName);
+    }
 
     public function debugFilePath($contenidoId)
     {
         $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
         $fileName = $contenidoLeccion->fuente_contenido;
-        
+
         echo "Nombre del archivo en la base de datos: " . $fileName . "\n";
-        
+
         $publicPath = public_path('storage/documentos/' . $fileName);
         $storagePath = storage_path('app/public/documentos/' . $fileName);
-        
+
         echo "Ruta pública: " . $publicPath . "\n";
         echo "¿Existe en ruta pública? " . (file_exists($publicPath) ? 'Sí' : 'No') . "\n";
-        
+
         echo "Ruta de almacenamiento: " . $storagePath . "\n";
         echo "¿Existe en ruta de almacenamiento? " . (file_exists($storagePath) ? 'Sí' : 'No') . "\n";
-        
+
         echo "¿Existe usando Storage::disk('public')? " . (Storage::disk('public')->exists('documentos/' . $fileName) ? 'Sí' : 'No') . "\n";
-        
+
         // Listar archivos en ambos directorios
         echo "Archivos en el directorio público:\n";
-        foreach(glob(public_path('storage/documentos/*')) as $file) {
+        foreach (glob(public_path('storage/documentos/*')) as $file) {
             echo "- " . basename($file) . "\n";
         }
-        
+
         echo "Archivos en el directorio de almacenamiento:\n";
-        foreach(glob(storage_path('app/public/documentos/*')) as $file) {
+        foreach (glob(storage_path('app/public/documentos/*')) as $file) {
             echo "- " . basename($file) . "\n";
         }
     }
