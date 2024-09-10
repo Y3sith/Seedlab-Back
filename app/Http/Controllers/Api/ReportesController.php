@@ -8,7 +8,6 @@ use App\Exports\AsesoriasAliadosExport;
 use App\Exports\AsesoriasExport;
 use App\Exports\AsesoriasOrientadorExport;
 use App\Exports\EmpresasExport;
-use App\Exports\FormularioExport;
 use App\Exports\RolesExport;
 use App\Exports\SeccionExport;
 use App\Http\Controllers\Controller;
@@ -293,10 +292,21 @@ class ReportesController extends Controller
 
     public function procesarRespuestas($idEmprendedor)
     {
+        // Obtener las respuestas con un join a la tabla 'puntaje'
         $respuestas = DB::table('respuesta')
             ->join('empresa', 'respuesta.id_empresa', '=', 'empresa.documento')
+            ->join('puntaje', 'empresa.documento', '=', 'puntaje.documento_empresa') // Join con la tabla 'puntaje'
             ->where('empresa.id_emprendedor', $idEmprendedor)
-            ->select('respuesta.respuestas_json')
+            ->select(
+                'respuesta.respuestas_json',
+                'puntaje.info_general',
+                'puntaje.info_financiera',
+                'puntaje.info_mercado',
+                'puntaje.info_trl',
+                'puntaje.info_tecnica',
+                'puntaje.verForm_pr',
+                'puntaje.verForm_se'
+            ) // Selecciona los campos de 'puntaje'
             ->get();
 
         // Obtener todos los id_pregunta y id_subpregunta únicos del JSON
@@ -324,7 +334,7 @@ class ReportesController extends Controller
         $secciones = DB::table('pregunta')
             ->join('seccion', 'pregunta.id_seccion', '=', 'seccion.id')
             ->whereIn('pregunta.id', $idsPreguntas)
-            ->pluck('seccion.nombre', 'pregunta.id_seccion');  // Obtenemos las secciones
+            ->pluck('seccion.nombre', 'pregunta.id_seccion'); // Obtenemos las secciones
 
         $subpreguntas = DB::table('subpregunta')
             ->whereIn('id', $idsSubpreguntas)
@@ -350,13 +360,21 @@ class ReportesController extends Controller
                         'pregunta' => $preguntas[$idPregunta] ?? 'Pregunta desconocida',
                         'subpregunta' => $subpreguntas[$idSubpregunta] ?? 'Subpregunta desconocida',
                         'respuesta_texto' => $respuesta_json['texto_res'] ?? null, // Añadir el texto_res
+                        // Añadir los puntajes
+                        'info_general' => $respuesta->info_general,
+                        'info_financiera' => $respuesta->info_financiera,
+                        'info_mercado' => $respuesta->info_mercado,
+                        'info_trl' => $respuesta->info_trl,
+                        'info_tecnica' => $respuesta->info_tecnica,
+                        'verForm_pr' => $respuesta->verForm_pr,
+                        'verForm_se' => $respuesta->verForm_se
                     ];
                 }
             } else {
                 Log::error('JSON inválido o no decodificable: ' . $respuesta->respuestas_json);
             }
         }
-        //dd($resultados);
+
         // Crear la exportación
         $export = new SeccionExport($resultados);
 
