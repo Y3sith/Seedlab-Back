@@ -193,7 +193,7 @@ Route::group([
 ], function () {
     Route::apiResource('/actividad', ActividadController::class);
     Route::post('/crearActividad', [ActividadController::class, 'store']);
-    Route::put('/editar_actividad/{id}', [ActividadController::class, 'editarActividad']);
+    Route::post('/editar_actividad/{id}', [ActividadController::class, 'editarActividad']);
     Route::get('/tipo_dato', [ActividadController::class, 'tipoDato']);
     Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
 });
