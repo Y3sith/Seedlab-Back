@@ -158,6 +158,7 @@ Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte'])
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
 Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);
 Route::post('/exportar_reporte_aliado', [ReportesController::class, 'exportarReportesAliados']);
+Route::get('/obtener_datos_formEmprendedor', [ReportesController::class, 'mostrarReporteFormEmprendedor']);
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');

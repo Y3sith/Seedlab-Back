@@ -381,4 +381,31 @@ class ReportesController extends Controller
         // Devolver el archivo Excel
         return Excel::download($export, 'Reporte_Formulario.xlsx');
     }
+
+
+    public function mostrarReporteFormEmprendedor(Request $request)
+    {
+        $docEmprendedor = $request->input('doc_emprendedor');
+        $tipo_reporte = $request->input('tipo_reporte');
+
+        $datos = [];
+
+        $datos = DB::table('respuesta AS r')
+            ->select(
+                'r.fecha_registro',
+                'e.nombre',
+                'i.documento',
+                'p.*',
+                DB::raw("(SELECT GROUP_CONCAT(s.nombre SEPARATOR ', ') FROM seccion AS s) AS secciones")
+            )
+            ->join('empresa AS e', 'e.documento', '=', 'r.id_empresa')
+            ->join('emprendedor AS i', 'i.documento', '=', 'e.id_emprendedor')
+            ->join('puntaje AS p', 'p.documento_empresa', '=', 'e.documento')
+            ->where('r.verform_pr', $tipo_reporte)
+            ->where('i.documento', $docEmprendedor)
+            ->get();
+
+
+        return response()->json($datos);
+    }
 }
