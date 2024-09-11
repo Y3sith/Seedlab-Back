@@ -386,26 +386,24 @@ class ReportesController extends Controller
     public function mostrarReporteFormEmprendedor(Request $request)
     {
         $docEmprendedor = $request->input('doc_emprendedor');
-        $tipo_reporte = $request->input('tipo_reporte');
+        $tipo_reporte = $request->input('tipo_reporte'); // 1 = Primera vez, 2 = Segunda vez
+        $empresa = $request->input('empresa');
 
-        $datos = [];
-
-        $datos = DB::table('respuesta AS r')
-            ->select(
-                'r.fecha_registro',
-                'e.nombre',
-                'i.documento',
-                'p.*',
-                DB::raw("(SELECT GROUP_CONCAT(s.nombre SEPARATOR ', ') FROM seccion AS s) AS secciones")
-            )
-            ->join('empresa AS e', 'e.documento', '=', 'r.id_empresa')
-            ->join('emprendedor AS i', 'i.documento', '=', 'e.id_emprendedor')
-            ->join('puntaje AS p', 'p.documento_empresa', '=', 'e.documento')
-            ->where('r.verform_pr', $tipo_reporte)
-            ->where('i.documento', $docEmprendedor)
+        // Consulta para Primera vez
+        $query = DB::table('respuesta AS r')
+            ->distinct()
+            ->join('empresa AS e', 'r.id_empresa', '=', 'e.documento')
+            ->where('e.nombre', $empresa)
+            ->where(function ($query) use ($tipo_reporte) {
+                if ($tipo_reporte == 1) {
+                    $query->where('r.verform_pr', 1)
+                        ->where('r.verform_se', 0);
+                } elseif ($tipo_reporte == 2) {
+                    $query->where('r.verform_pr', 0)
+                        ->where('r.verform_se', 1);
+                }
+            })
             ->get();
-
-
-        return response()->json($datos);
+        return response()->json($query);
     }
 }

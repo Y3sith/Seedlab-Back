@@ -19,8 +19,8 @@ return new class extends Migration
             $table->double('info_trl');
             $table->double('info_tecnica');
             $table->string('documento_empresa');
-            $table->unsignedTinyInteger('verForm_pr');
-            $table->unsignedTinyInteger('verForm_se');
+            $table->unsignedTinyInteger('primera_vez');
+            $table->unsignedTinyInteger('segunda_vez');
             $table->foreign('documento_empresa')->references('documento')->on('empresa');
         });
     }
