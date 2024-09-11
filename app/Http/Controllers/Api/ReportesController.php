@@ -389,21 +389,33 @@ class ReportesController extends Controller
         $tipo_reporte = $request->input('tipo_reporte'); // 1 = Primera vez, 2 = Segunda vez
         $empresa = $request->input('empresa');
 
-        // Consulta para Primera vez
+        // Configuración inicial de la consulta
         $query = DB::table('respuesta AS r')
-            ->distinct()
             ->join('empresa AS e', 'r.id_empresa', '=', 'e.documento')
+            ->join('puntaje AS p', 'p.documento_empresa', '=', 'e.documento')
+            ->select('r.verform_pr', 'r.verform_se', 'e.nombre AS nombre_empresa', 'p.*')
             ->where('e.nombre', $empresa)
-            ->where(function ($query) use ($tipo_reporte) {
-                if ($tipo_reporte == 1) {
-                    $query->where('r.verform_pr', 1)
-                        ->where('r.verform_se', 0);
-                } elseif ($tipo_reporte == 2) {
-                    $query->where('r.verform_pr', 0)
-                        ->where('r.verform_se', 1);
-                }
-            })
-            ->get();
-        return response()->json($query);
+            ->where('e.id_emprendedor', $docEmprendedor); // Asumiendo que 'id_emprendedor' es un campo en 'empresa'
+
+        // Filtrar por tipo de reporte
+        if ($tipo_reporte == '1') { // Primera vez
+            $query->where('r.verform_pr', 1)
+                ->where('r.verform_se', 0)
+                ->where('p.primera_vez', 1)
+                ->where('p.segunda_vez', 0);
+        } elseif ($tipo_reporte == '2') { // Segunda vez
+            $query->where('r.verform_pr', 0)
+                ->where('r.verform_se', 1)
+                ->where('p.primera_vez', 0)
+                ->where('p.segunda_vez', 1);
+        } else {
+            return response()->json(['error' => 'Tipo de reporte no válido'], 400);
+        }
+
+        // Ejecutar consulta y obtener los resultados
+        $resultados = $query->get();
+
+        // Devolver los resultados como JSON
+        return response()->json($resultados);
     }
 }
