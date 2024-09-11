@@ -162,7 +162,7 @@ Route::post('/reporte_empresas', [ReportesController::class, 'exportarEmpresasRe
 Route::post('/reporte_asesorias', [ReportesController::class, 'exportarAsesorias']);
 Route::get('/reportes_disponibles', [ReportesController::class,'obtenerReportesDisponibles']);
 Route::get('/descargar-archivo/{contenidoId}', [RutaApiController::class, 'descargarArchivoContenido']);
-Route::get('/descargar/{contenidoId}', [RutaApiController::class, 'debugFilePath']);
+Route::get('/ultimaruta/{rutaId}', [RutaApiController::class, 'getRutaInfo']);
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');

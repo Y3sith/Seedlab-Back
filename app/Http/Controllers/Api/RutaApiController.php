@@ -280,33 +280,74 @@ class RutaApiController extends Controller
         return Str::replaceFirst('/storage/documentos/', '', $fileName);
     }
 
-    public function debugFilePath($contenidoId)
+    public function getRutaInfo($id)
+    //ACUERDESE DE AREEGLAR QUE CUANDO ESTE ALGO VACIO NO HAYA ERRORES AL MOSTRAR EL ULTIMO CONTENIDO
     {
-        $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
-        $fileName = $contenidoLeccion->fuente_contenido;
+        try {
 
-        echo "Nombre del archivo en la base de datos: " . $fileName . "\n";
+            $ruta = Ruta::where('id', $id)->with([
+                'actividades' => function ($query) {
+                    $query->select('id', 'id_ruta', 'nombre', 'id_asesor', 'id_aliado');
+                },
+                'actividades.nivel' => function ($query) {
+                    $query->select('id', 'id_actividad', 'nombre');
+                },
+                'actividades.nivel.lecciones' => function ($query) {
+                    $query->select('id', 'id_nivel', 'nombre');
+                },
+                'actividades.nivel.lecciones.contenidoLecciones' => function ($query) {
+                    $query->select('id', 'id_leccion', 'titulo');
+                },
+                'actividades.aliado' => function ($query) {
+                    $query->select('id', 'nombre');
+                }
+            ])->first();
 
-        $publicPath = public_path('storage/documentos/' . $fileName);
-        $storagePath = storage_path('app/public/documentos/' . $fileName);
+            if (!$ruta) {
+                return response()->json(['error' => 'Ruta no encontrada'], 404);
+            }
 
-        echo "Ruta pública: " . $publicPath . "\n";
-        echo "¿Existe en ruta pública? " . (file_exists($publicPath) ? 'Sí' : 'No') . "\n";
+            $actividadesOptimizadas = $ruta->actividades->map(function ($actividad) {
+                return [
+                    'id' => $actividad->id,
+                    'nombre' => $actividad->nombre,
+                    'id_asesor' => $actividad->id_asesor ?? 'Ninguno',
+                    'nombre_aliado' => $actividad->aliado->nombre ?? 'sin aliado',
+                    'niveles' => $actividad->nivel->map(function ($nivel) {
+                        return [
+                            'id' => $nivel->id,
+                            'nombre' => $nivel->nombre,
+                            'lecciones' => $nivel->lecciones->map(function ($leccion) {
+                                return [
+                                    'id' => $leccion->id,
+                                    'nombre' => $leccion->nombre,
+                                    'contenidos' => $leccion->contenidoLecciones->map(function ($contenido) {
+                                        return [
+                                            'id' => $contenido->id,
+                                            'nombre' => $contenido->nombre
+                                        ];
+                                    })
+                                ];
+                            })
+                        ];
+                    })
+                ];
+            });
 
-        echo "Ruta de almacenamiento: " . $storagePath . "\n";
-        echo "¿Existe en ruta de almacenamiento? " . (file_exists($storagePath) ? 'Sí' : 'No') . "\n";
+            $ultimaActividad = $actividadesOptimizadas->last();
+            $ultimoNivel = $ultimaActividad['niveles']->last();
+            $ultimaLeccion = $ultimoNivel['lecciones']->last();
+            $ultimoContenido = $ultimaLeccion['contenidos']->last();
 
-        echo "¿Existe usando Storage::disk('public')? " . (Storage::disk('public')->exists('documentos/' . $fileName) ? 'Sí' : 'No') . "\n";
+            return response()->json([
+                // 'actividades' => $actividadesOptimizadas,
+                'ultimo_elemento' => [
+                    'contenido_id' => $ultimoContenido['id']
+                ]
+            ]);
 
-        // Listar archivos en ambos directorios
-        echo "Archivos en el directorio público:\n";
-        foreach (glob(public_path('storage/documentos/*')) as $file) {
-            echo "- " . basename($file) . "\n";
-        }
-
-        echo "Archivos en el directorio de almacenamiento:\n";
-        foreach (glob(storage_path('app/public/documentos/*')) as $file) {
-            echo "- " . basename($file) . "\n";
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 }
