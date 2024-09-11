@@ -1,6 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 use App\Http\Controllers\Api\Contenido_por_LeccionController;
@@ -15,9 +14,7 @@ use App\Http\Controllers\Api\ActividadController;
 use App\Http\Controllers\Api\LeccionController;
 use App\Http\Controllers\Api\NivelesController;
 use App\Http\Controllers\Api\AsesorApiController;
-use App\Http\Controllers\Api\DashboardAliadoController;
 use App\Http\Controllers\Api\DashboardsController;
-use App\Http\Controllers\Api\DashboardSuperAdminController;
 use App\Http\Controllers\Api\FormResponsesController;
 use App\Http\Controllers\Api\RutaApiController;
 use App\Http\Controllers\Api\SuperAdminController;
@@ -25,14 +22,12 @@ use App\Http\Controllers\Api\OrientadorApiController;
 use App\Http\Controllers\Api\PuntajeController;
 use App\Http\Controllers\Api\ReportesController;
 use App\Http\Controllers\Api\RespuestasApiController;
-use App\Models\Asesoria;
 
 
 
 
 
-
-//Rutas de login y registro
+Route::get('/procesar-respuestas/{idEmprendedor}', [RespuestasApiController::class, 'procesarRespuestas']);//Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
 ], function () {
@@ -59,6 +54,7 @@ Route::group([
     Route::get('/getApoyo/{id_empresa}', [Apoyo_por_EmpresaController::class, 'getApoyosxEmpresa']);
     Route::get('/getApoyoxdocumento/{documento}', [Apoyo_por_EmpresaController::class, 'getApoyoxDocumento']);
     Route::put('/updateApoyo/{documento}', [Apoyo_por_EmpresaController::class, 'editarApoyo']);
+    Route::get('/getAllEmpresa', [EmpresaApiController::class,'index']);
 });
 
 
@@ -151,18 +147,17 @@ Route::group(
         Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
         Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
         Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
-        Route::get('/graficaFormulario', [DashboardsController::class, 'getRadarChartData']);
+        Route::get('/graficaFormulario/{id_empresa}', [DashboardsController::class, 'getRadarChartData']);
     }
 );
 
 //Reportes
 
-Route::post('/reporte_roles', [ReportesController::class, 'exportarExcelRoles']);
-Route::post('/reporte_empresas', [ReportesController::class, 'exportarEmpresasRegistradas']);
-Route::post('/reporte_asesorias', [ReportesController::class, 'exportarAsesorias']);
+route::get('/exportar-formExcel/{idEmprendedor}', [ReportesController::class, 'procesarRespuestas']);
 Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
-
+Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);
+Route::post('/exportar_reporte_aliado', [ReportesController::class, 'exportarReportesAliados']);
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
@@ -279,8 +274,8 @@ Route::group([
 ], function () {
     Route::post('/guardar-respuestas', [RespuestasApiController::class, 'guardarRespuestas']);
     Route::apiResource('/respuestas', RespuestasApiController::class);
-    Route::post('/form/section/{sectionId}', [FormResponsesController::class, 'storeSection']);
+    Route::post('/form/section/{id_empresa}/{sectionId}', [FormResponsesController::class, 'storeSection']);
     Route::get('/form/section/{sectionId}', [FormResponsesController::class, 'getSection']);
+    Route::get('/getRespuestasRedis/{empresaId}', [FormResponsesController::class, 'getAllRespuestasFromRedis']);
 });
 
-Route::get('/respuestas_empresa/{id_empresa}', [RespuestasApiController::class, 'getAnswers']);
