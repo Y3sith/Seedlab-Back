@@ -135,4 +135,14 @@ class Contenido_por_LeccionController extends Controller
         $dato = TipoDato::get(['id', 'nombre']);
         return response()->json($dato);
     }
+
+    public function verContenidoPorLeccion($id){
+        if (Auth::user()->id_rol!= 1 && Auth::user()->id_rol!= 3 && Auth::user()->id_rol!= 4) {
+            return response()->json([
+               'messaje' => 'No tienes permisos para acceder a esta ruta'
+            ], 401);
+        }
+        $datos = ContenidoLeccion::where('id_leccion', $id)->get();
+        return response()->json($datos);
+    }
 }
