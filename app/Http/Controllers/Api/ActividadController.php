@@ -36,7 +36,7 @@ class ActividadController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request)///toca cambiarlo para dejar solo imagen
     {
         try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
@@ -166,34 +166,19 @@ class ActividadController extends Controller
                 return response()->json(['error' => 'Actividad no encontrada'], 404);
             }
             // Actualizar fuente si se ha proporcionado un archivo o una URL
-            $fuente = $actividad->fuente;
-            if ($request->hasFile('fuente')) {
-                $file = $request->file('fuente');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $mimeType = $file->getMimeType();
+            if ($request->hasFile(('fuente'))) {
+                Storage::delete(str_replace('storage', 'public', $actividad->fuente));
 
-                if (strpos($mimeType, 'image') !== false) {
-                    $folder = 'imagenes';
-                } elseif ($mimeType === 'application/pdf') {
-                    $folder = 'documentos';
-                } else {
-                    return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
-                }
-
-                // Guardar archivo y actualizar URL de fuente
-                $path = $file->storeAs("public/$folder", $fileName);
-                $fuente = Storage::url($path);
-            } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
-                $fuente = $request->input('fuente');
-            } elseif ($request->input('fuente')) {
-                $fuente = $request->input('fuente');
+                $paths = $request->file('fuente')->store('public/imagenes');
+                $actividad->fuente = str_replace('public', 'storage', $paths);
             }
+            
 
             // Actualizar la actividad
             $actividad->update([
                 'nombre' => $validatedData['nombre'],
                 'descripcion' => $validatedData['descripcion'],
-                'fuente' => $fuente,
+                //'fuente' => $validatedData['fuente'],
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
                 'id_asesor' => $validatedData['id_asesor'] ?? null,
                 'id_aliado' => $validatedData['id_aliado'],

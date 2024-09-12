@@ -104,14 +104,62 @@ class Contenido_por_LeccionController extends Controller
             $contenidoxleccion = ContenidoLeccion::find($id);
             if (!$contenidoxleccion) {
                 return response()->json(['error' => 'contenido no encontrado'], 404);
-            } else {
-                $contenidoxleccion->titulo = $request->titulo;
-                $contenidoxleccion->descripcion = $request->descripcion;
-                $contenidoxleccion->fuente_contenido = $request->fuente_contenido;
-                $contenidoxleccion->id_tipo_dato = $request->id_tipo_dato;
-                $contenidoxleccion->update();
-                return response(["message" => "Contenido actualizado correctamente"], 201);
+            } 
+
+            if ($request->hasFile('fuente_contenido')) {
+                // Si se está subiendo un nuevo archivo
+                $file = $request->file('fuente_contenido');
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                
+                // Determinar el tipo de archivo
+                $mimeType = $file->getMimeType();
+                
+                if (strpos($mimeType, 'image') !== false) {
+                    $folder = 'imagenes';
+                } elseif ($mimeType === 'application/pdf') {
+                    $folder = 'documentos';
+                } else {
+                    return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
+                }
+                
+                // Eliminar el archivo anterior si existe
+                if ($contenidoxleccion->fuente_contenido && Storage::exists(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido))) {
+                    Storage::delete(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido));
+                }
+                
+                // Guardar el nuevo archivo
+                $path = $file->storeAs("public/$folder", $fileName);
+                $contenidoxleccion->fuente_contenido = str_replace('public', 'storage', $path);
+            } elseif ($request->filled('fuente_contenido')) {
+                $newFuenteContenido = $request->input('fuente_contenido');
+                
+                // Si es una URL (asumiendo que es de YouTube)
+                if (filter_var($newFuenteContenido, FILTER_VALIDATE_URL)) {
+                    // Tu código existente para manejar URLs
+                    if ($contenidoxleccion->fuente_contenido && Storage::exists(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido))) {
+                        Storage::delete(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido));
+                    }
+                    $contenidoxleccion->fuente_contenido = $newFuenteContenido;
+                } else {
+                    // Si es texto, simplemente guardarlo
+                    // Eliminar el archivo anterior si existe
+                    if ($contenidoxleccion->fuente_contenido && Storage::exists(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido))) {
+                        Storage::delete(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido));
+                    }
+                    $contenidoxleccion->fuente_contenido = $newFuenteContenido;
+                }
             }
+
+            $contenidoxleccion->update([
+                'titulo' => $request->input('titulo'),
+                'descripcion' => $request->input('descripcion'),
+                //'fuente_contenido' => $contenidoxleccion->contenido_fuente,
+                'id_leccion' => $request->input('id_leccion'),
+                'id_tipo_dato' => $request->input('id_tipo_dato')
+            ]);
+
+            return response()->json(["message" => "Contenido actualizado correctamente", "data" => $contenidoxleccion], 200);
+
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
