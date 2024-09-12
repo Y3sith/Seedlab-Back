@@ -224,23 +224,17 @@ class RutaApiController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-
-            $ruta = Ruta::where('id', $id)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
-
-            foreach ($ruta as $r) {
-                foreach ($r->actividades as $actividad) {
-                    if (is_null($actividad->id_asesor)) {
-                        $actividad->id_asesor = 'Ninguno';
-                    }
-
-                    if ($actividad->aliado) {
-                        $actividad->nombre_aliado = $actividad->aliado->nombre;
-                    } else {
-                        $actividad->nombre_aliado = 'sin aliado';
-                    }
-                }
-            }
-
+            $ruta = Ruta::where('id', $id)->with('actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado')->get();
+            $ruta = $ruta->map(function ($r) {
+                $r->actividades = $r->actividades->map(function ($actividad) {
+                    $actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
+                    $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
+                    $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                    unset($actividad->aliado);
+                    return $actividad;
+                });
+                return $r;
+            });
             return response()->json($ruta);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

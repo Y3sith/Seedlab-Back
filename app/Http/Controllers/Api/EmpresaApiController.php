@@ -8,8 +8,6 @@ use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-use Exception;
 
 class EmpresaApiController extends Controller
 {
@@ -18,13 +16,12 @@ class EmpresaApiController extends Controller
      */
     public function index()
     {
-        //
         /*muestras las empresas*/
         if (Auth::user()->id_rol != 1) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
-        $empresa = Empresa::paginate(5);
-        return new JsonResponse($empresa->items());
+        $empresa = Empresa::all();
+        return response()->json($empresa);
     }
 
     public function getOnlyempresa($id_emprendedor, $documento)

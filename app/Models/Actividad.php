@@ -18,7 +18,8 @@ class Actividad extends Model
         'id_tipo_dato',
         'id_asesor',
         'id_ruta',
-        'id_aliado'
+        'id_aliado',
+        'estado',
     ];
 
     public function tiposDatos(){
