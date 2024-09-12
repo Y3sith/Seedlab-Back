@@ -336,6 +336,8 @@ class RutaApiController extends Controller
             return response()->json([
                 // 'actividades' => $actividadesOptimizadas,
                 'ultimo_elemento' => [
+                    'nivel_id' => $ultimoNivel['id'],
+                    'leccion_id' => $ultimaLeccion['id'],
                     'contenido_id' => $ultimoContenido['id']
                 ]
             ]);

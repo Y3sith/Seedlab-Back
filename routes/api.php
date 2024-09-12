@@ -164,7 +164,9 @@ Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos
 Route::get('/traerPersonalizacion/{id}', [SuperAdminController::class, 'obtenerPersonalizacion']);
 Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
 
-
+//descargas y buscar ruta
+Route::get('/descargar-archivo/{contenidoId}', [RutaApiController::class, 'descargarArchivoContenido']);
+Route::get('/ultimaruta/{rutaId}', [RutaApiController::class, 'getRutaInfo']);
 //Puntaje
 Route::group([], function () {
     Route::post('/puntajes/{documento}', [PuntajeController::class, 'store']);
