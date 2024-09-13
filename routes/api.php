@@ -196,6 +196,9 @@ Route::group([
     Route::post('/editar_actividad/{id}', [ActividadController::class, 'editarActividad']);
     Route::get('/tipo_dato', [ActividadController::class, 'tipoDato']);
     Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
+    Route::put('/activar_desactivar_actividad/{id}', [ActividadController::class, 'Activar_Desactivar_Actividad']);
+    Route::get('/ActiNivelLeccionContenido/{id}', [ActividadController::class, 'ActiNivelLeccionContenido']);
+
 });
 
 //Nivel
@@ -230,8 +233,9 @@ Route::group([
 ],function(){
     Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class);
     Route::post('/crearContenidoPorLeccion',[Contenido_por_LeccionController::class,'store']);
-    Route::put('/editarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'editarContenidoLeccion']);
+    Route::post('/editarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'editarContenidoLeccion']);
     Route::get('/tipo_dato',[Contenido_por_LeccionController::class,'tipoDatoContenido']);
+    Route::get('/mostrarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'verContenidoPorLeccion']);
 });
 //Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
 
