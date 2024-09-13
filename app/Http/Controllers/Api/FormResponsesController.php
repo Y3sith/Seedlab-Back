@@ -8,28 +8,34 @@ use Illuminate\Support\Facades\Redis;
 
 class FormResponsesController extends Controller
 {
-    public function storeSection(Request $request, $sectionId)
+    public function storeSection(Request $request, $sectionId, $id_empresa)
     {
-        $userId = auth()->id(); // Obtiene el ID del usuario autenticado
-        $key = "form:{$userId}:section:{$sectionId}"; // Crea una clave única para cada sección del formulario
-        
+
+        $key = "form:{$id_empresa}:section:{$sectionId}"; // Crea una clave única para cada sección del formulario
+
         // Guardar los datos de la sección en Redis con una caducidad de 5 días (432000 segundos)
         Redis::setex($key, 432000, $request->getContent());
 
         return response()->json(['message' => 'Sección guardada correctamente'], 200);
     }
 
-    public function getSection($sectionId)
+    public function getAllRespuestasFromRedis($id_empresa)
     {
-        $userId = auth()->id(); // Obtiene el ID del usuario autenticado
-        $key = "form:{$userId}:section:{$sectionId}"; // Crea una clave única para cada sección del formulario
+        $seccion1 = Redis::get("form:{$id_empresa}:section:1");
+        $seccion2 = Redis::get("form:{$id_empresa}:section:2");
+        $seccion3 = Redis::get("form:{$id_empresa}:section:3");
+        $seccion4 = Redis::get("form:{$id_empresa}:section:4");
+        $seccion5 = Redis::get("form:{$id_empresa}:section:5");
 
-        $sectionData = Redis::get($key); // Recupera los datos desde Redis
+        // Decodificar el JSON almacenado, si existe
+        return response()->json([
+            'seccion1' => $seccion1 ? json_decode($seccion1, true) : [],
+            'seccion2' => $seccion2 ? json_decode($seccion2, true) : [],
+            'seccion3' => $seccion3 ? json_decode($seccion3, true) : [],
+            'seccion4' => $seccion4 ? json_decode($seccion4, true) : [],
+            'seccion5' => $seccion5 ? json_decode($seccion5, true) : [],
+        ]);
 
-        if ($sectionData) {
-            return response()->json(['data' => json_decode($sectionData)], 200);
-        }
-
-        return response()->json(['message' => 'No se encontraron datos para esta sección'], 404);
+        return response()->json($respuestas);
     }
 }

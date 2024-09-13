@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\Respuesta;
 use App\Models\Seccion;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;  // Agregar esta línea
+
 
 class RespuestasApiController extends Controller
 {
@@ -24,18 +28,18 @@ class RespuestasApiController extends Controller
     {
         //
     }
-    
+
 
     /**
      * Display the specified resource.
      */
     public function show(string $id)
     {
-        $seccion = Seccion::with(['preguntas.subpreguntas.respuestas', 'preguntas.respuestas' ])
-        ->where('id',$id)
-        ->first();
+        $seccion = Seccion::with(['preguntas.subpreguntas.respuestas', 'preguntas.respuestas'])
+            ->where('id', $id)
+            ->first();
 
-        if(!$seccion){
+        if (!$seccion) {
             return response()->json(['message' => 'Seccion no encontrada'], 404);
         }
 
@@ -45,30 +49,47 @@ class RespuestasApiController extends Controller
 
     public function guardarRespuestas(Request $request)
     {
-        $respuestas = $request->input('respuestas');
+        $idEmpresa = $request->input('id_empresa');
 
-        $jsonRespuestas = json_encode($respuestas);
-        $respuestas = new Respuesta();
+        // Verificar si ya existe un registro de respuestas para la primera vez
+        $primeraRespuesta = Respuesta::where('id_empresa', $idEmpresa)
+            ->where('verform_pr', 1)
+            ->first();
+
+        if (!$primeraRespuesta) {
+            // Si no hay respuestas previas, se está llenando por primera vez
+            $respuestas = new Respuesta();
+            $respuestas->verform_pr = 1;  // Indicar que es la primera vez
+            $respuestas->verform_se = 0;  // Aún no se llena la segunda vez
+        } else {
+            // Si ya existe un registro para la primera vez, se crea uno nuevo para la segunda vez
+            $segundaRespuesta = Respuesta::where('id_empresa', $idEmpresa)
+                ->where('verform_se', 1)
+                ->first();
+
+            if ($segundaRespuesta) {
+                return response()->json(['message' => 'El formulario ya fue llenado dos veces'], 400);
+            }
+
+            // Crear un nuevo registro para la segunda vez
+            $respuestas = new Respuesta();
+            $respuestas->verform_pr = 0;  // No es la primera vez
+            $respuestas->verform_se = 1;  // Indicar que es la segunda vez
+        }
+
+        // Guardar las nuevas respuestas
+        $jsonRespuestas = json_encode($request->input('respuestas'));
         $respuestas->respuestas_json = $jsonRespuestas;
-        $respuestas->id_empresa = $request->input('id_empresa');
+        $respuestas->id_empresa = $idEmpresa;
         $respuestas->save();
-
-        /*foreach ($respuestas as $respuestaData) {
-            Respuesta::create([
-                'opcion' => $respuestaData['opcion'] ?? null,
-                'texto_res' => $respuestaData['texto_res'] ?? null,
-                'valor' => $respuestaData['valor'] ?? null,
-                'id_pregunta' => $respuestaData['id_pregunta'] ?? null,
-                'id_empresa' => $respuestaData['id_empresa'] ?? null,
-                'id_subpregunta' => $respuestaData['id_subpregunta'] ?? null,
-            ]);
-        }*/
 
         return response()->json(['message' => 'Respuestas guardadas correctamente'], 200);
     }
 
 
-        public function getAnswers($id_empresa)
+
+
+    public function getAnswers($id_empresa)
     {
         $respuestas = Respuesta::where('id_empresa', $id_empresa)->first();
 
