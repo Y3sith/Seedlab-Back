@@ -185,6 +185,7 @@ Route::group([
     Route::get('/rutas', [RutaApiController::class, 'rutas']);
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
+    Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
 
 });
 

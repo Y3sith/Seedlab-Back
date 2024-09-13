@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
 use App\Models\ContenidoLeccion;
+use App\Models\Respuesta;
 use App\Models\Ruta;
 use Carbon\Carbon;
 use Exception;
@@ -345,5 +346,20 @@ class RutaApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function idRespuestas(){
+        try {
+            if (Auth::user()->id_rol != 5) {
+            return response()->json(['error' => 'Ocurrió un error al procesar']);
+        }
+
+        $respuestas = Respuesta::get('id');
+
+        return response()->json( $respuestas);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 }
