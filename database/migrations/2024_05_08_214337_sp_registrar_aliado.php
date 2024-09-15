@@ -17,7 +17,7 @@ return new class extends Migration
             IN p_nombre VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             -- IN p_logo BLOB ,
             IN p_logo TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
-            IN p_descripcion VARCHAR(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
+            IN p_descripcion VARCHAR(312) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_id_tipo_dato VARCHAR(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_ruta_multi TEXT CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
             IN p_correo VARCHAR(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci,
