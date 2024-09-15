@@ -55,6 +55,7 @@ Route::group([
     Route::get('/getApoyoxdocumento/{documento}', [Apoyo_por_EmpresaController::class, 'getApoyoxDocumento']);
     Route::put('/updateApoyo/{documento}', [Apoyo_por_EmpresaController::class, 'editarApoyo']);
     Route::get('/getAllEmpresa', [EmpresaApiController::class,'index']);
+    Route::get('/getEmpresaByEmprendedor', [EmpresaApiController::class, 'obtenerEmpresasPorEmprendedor']);
 });
 
 
@@ -147,17 +148,18 @@ Route::group(
         Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
         Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
         Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
-        Route::get('/graficaFormulario/{id_empresa}', [DashboardsController::class, 'getRadarChartData']);
+        Route::get('/graficaFormulario/{id_empresa}/{tipo}', [DashboardsController::class, 'getRadarChartData']);
     }
 );
 
 //Reportes
 
-route::get('/exportar-formExcel/{idEmprendedor}', [ReportesController::class, 'procesarRespuestas']);
+route::get('/exportar-formExcel/{idEmprendedor}/{documentoEmpresa?}', [ReportesController::class, 'procesarRespuestas']);
 Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
 Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);
 Route::post('/exportar_reporte_aliado', [ReportesController::class, 'exportarReportesAliados']);
+Route::get('/obtener_datos_formEmprendedor', [ReportesController::class, 'mostrarReporteFormEmprendedor']);
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
