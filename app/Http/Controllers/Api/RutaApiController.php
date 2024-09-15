@@ -276,10 +276,8 @@ class RutaApiController extends Controller
     }
 
     public function getRutaInfo($id)
-    //ACUERDESE DE AREEGLAR QUE CUANDO ESTE ALGO VACIO NO HAYA ERRORES AL MOSTRAR EL ULTIMO CONTENIDO
     {
         try {
-
             $ruta = Ruta::where('id', $id)->with([
                 'actividades' => function ($query) {
                     $query->select('id', 'id_ruta', 'nombre', 'id_asesor', 'id_aliado');
@@ -297,11 +295,11 @@ class RutaApiController extends Controller
                     $query->select('id', 'nombre');
                 }
             ])->first();
-
+    
             if (!$ruta) {
                 return response()->json(['error' => 'Ruta no encontrada'], 404);
             }
-
+    
             $actividadesOptimizadas = $ruta->actividades->map(function ($actividad) {
                 return [
                     'id' => $actividad->id,
@@ -319,7 +317,7 @@ class RutaApiController extends Controller
                                     'contenidos' => $leccion->contenidoLecciones->map(function ($contenido) {
                                         return [
                                             'id' => $contenido->id,
-                                            'nombre' => $contenido->nombre
+                                            'nombre' => $contenido->titulo
                                         ];
                                     })
                                 ];
@@ -328,25 +326,34 @@ class RutaApiController extends Controller
                     })
                 ];
             });
-
-            $ultimaActividad = $actividadesOptimizadas->last();
-            $ultimoNivel = $ultimaActividad['niveles']->last();
-            $ultimaLeccion = $ultimoNivel['lecciones']->last();
-            $ultimoContenido = $ultimaLeccion['contenidos']->last();
-
+    
+            $ultimoElemento = [
+                'nivel_id' => null,
+                'leccion_id' => null,
+                'contenido_id' => null
+            ];
+    
+            foreach ($actividadesOptimizadas as $actividad) {
+                foreach ($actividad['niveles'] as $nivel) {
+                    $ultimoElemento['nivel_id'] = $nivel['id'];
+                    foreach ($nivel['lecciones'] as $leccion) {
+                        $ultimoElemento['leccion_id'] = $leccion['id'];
+                        foreach ($leccion['contenidos'] as $contenido) {
+                            $ultimoElemento['contenido_id'] = $contenido['id'];
+                        }
+                    }
+                }
+            }
+    
             return response()->json([
-                // 'actividades' => $actividadesOptimizadas,
-                'ultimo_elemento' => [
-                    'nivel_id' => $ultimoNivel['id'],
-                    'leccion_id' => $ultimaLeccion['id'],
-                    'contenido_id' => $ultimoContenido['id']
-                ]
+                'ultimo_elemento' => $ultimoElemento
             ]);
-
+    
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
 
     public function idRespuestas(){
         try {
