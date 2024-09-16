@@ -29,7 +29,38 @@ class AliadoSeeder extends Seeder
             File::makeDirectory($documentosPath, 0755, true);
         }
 
+        $multimediaPath = storage_path('app/public/imagenes');
+                if (!File::exists($multimediaPath)) {
+                    File::makeDirectory($multimediaPath, 0755, true);
+                }
         
+                // Ruta de la imagen de origen y destino
+                $sourceImagePath = base_path('resources/imagen/Inpulsa_home.png');
+                $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNUL.jpg';
+                $destinationImagePath = $multimediaPath . '/' . $destinationImageName;
+        
+                $sourceImagePaths = base_path('resources/imagen/home_Tecnoparque.jpg');
+                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1k.jpg';
+                $destinationImagePaths = $multimediaPath . '/' . $destinationImageNames;
+        
+                // Copiar la imagen a la carpeta 'banners'
+                if (File::exists($sourceImagePath)) {
+                    File::copy($sourceImagePath, $destinationImagePath);
+                    $this->command->info('The image has been copied to the banners folder successfully!');
+                } else {
+                    $this->command->error('The source image does not exist.');
+                }
+        
+                if (File::exists($sourceImagePaths)) {
+                    File::copy($sourceImagePaths, $destinationImagePaths);
+                    $this->command->info('The image has been copied to the banners folder successfully!');
+                } else {
+                    $this->command->error('The source image does not exist.');
+                }
+        
+                // URL de la imagen para guardar en la base de datos
+                $inpulsaimagen = 'storage/imagenes/' . $destinationImageName;
+                $tecnoparqueimagen = 'storage/imagenes/' . $destinationImageNames;
 
 
         $aliados = [
@@ -55,7 +86,7 @@ class AliadoSeeder extends Seeder
                 "nombre" => "Ecopetrol",
                 "descripcion" => "Ecopetrol S.A. es una Compañía organizada bajo la forma de sociedad anónima, del orden nacional, vinculada al Ministerio de Minas y Energía. Tiene operaciones ubicadas en el centro, sur, oriente y norte de Colombia, al igual que en el exterior.",
                 "logo" => "ecopetrol.jpg",
-                "ruta_multi" => "https://www.youtube.com/watch?v=xzuEw3eBqbQ&pp=ygUJZWNvcGV0cm9s",
+                "ruta_multi" => "https://youtu.be/1HGqT3SR8gc?si=PMXpBZ7WbmIbaHWQ",
                 "id_autentication" => 6,
                 "id_tipo_dato" => 1,
                 "urlpagina" => "https://www.ecopetrol.com.co/wps/portal"
@@ -100,7 +131,7 @@ class AliadoSeeder extends Seeder
                 "nombre" => "Tecnoparque",
                 "descripcion" => "Es un programa de innovación tecnológica del Servicio Nacional de Aprendizaje dirigida a todos los Colombianos, que actúa como acelerador para el desarrollo de proyectos materializados en prototipos funcionales en cuatro líneas tecnológicas: Electrónica y Telecomunicaciones, Tecnologías Virtuales, Ingeniería y diseño y Biotecnología nanotecnología.",
                 "logo" => "tecnoparque.jpg",
-                "ruta_multi" => "C://Images/tecnoparque",
+                "ruta_multi" => $tecnoparqueimagen,
                 "id_autentication" => 13,
                 "id_tipo_dato" => 3,
                 "urlpagina" => "https://www.sena.edu.co/es-co/formacion/Paginas/tecnoparques.aspx"
@@ -110,6 +141,7 @@ class AliadoSeeder extends Seeder
                 "nombre" => "Innpulsa colombia",
                 "descripcion" => "Iniciativa que promueve mejores prácticas empresariales y el desarrollo de las personas para el fortalecimiento y la sostenibilidad de micro y pequeños negocios y unidades productivas de la economía popular.",
                 "logo" => "innpulsa.jpg",
+                "ruta_multi" => $inpulsaimagen,
                 "id_autentication" => 14,
                 "id_tipo_dato" => 3,
                 "urlpagina" => "https://www.innpulsacolombia.com/"
