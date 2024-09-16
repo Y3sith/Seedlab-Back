@@ -46,7 +46,6 @@ class UserSeeder extends Seeder
             'password' => bcrypt('12345678'),
             'estado' => 1,
             'id_rol' => 5,
-            'id_rol' => 5,
         ]);
 
         //aliados auth

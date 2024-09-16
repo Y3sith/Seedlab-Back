@@ -13,7 +13,7 @@ class Seccion extends Model
 
     protected $fillable = [
        'nombre',
-       'puntaje'
+    //    'puntaje'
     ];
 
     public function preguntas(){

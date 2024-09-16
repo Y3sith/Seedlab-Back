@@ -29,7 +29,7 @@ class AliadoApiController extends Controller
 
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', 'id_autentication')
+            ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi','urlpagina', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
@@ -41,6 +41,7 @@ class AliadoApiController extends Controller
                 //'logo' => $aliado->logo,
                 'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
                 'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
+                'urlpagina' => $aliado->urlpagina,
                 'tipo_dato' => $aliado->tipoDato,
                 'email' => $aliado->auth->email,
                 'estado' => $aliado->auth->estado
@@ -53,13 +54,10 @@ class AliadoApiController extends Controller
     public function traerAliadoxId($id)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
-            }
 
             $aliado = Aliado::where('id', $id)
                 //->with('auth:id,email,estado')
-                ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'id_tipo_dato', "id_autentication")
+                ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
             return [
                 'id' => $aliado->id,
@@ -68,6 +66,31 @@ class AliadoApiController extends Controller
                 'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
                 'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
                 'id_tipo_dato' => $aliado->id_tipo_dato,
+                'urlpagina' => $aliado->urlpagina,
+                'email' => $aliado->auth->email,
+                'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
+            ];
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function traerAliadosiau($id)
+    {
+        try {
+
+            $aliado = Aliado::where('id', $id)
+                //->with('auth:id,email,estado')
+                ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
+                ->first();
+            return [
+                'id' => $aliado->id,
+                'nombre' => $aliado->nombre,
+                'descripcion' => $aliado->descripcion,
+                'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
+                'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
+                'id_tipo_dato' => $aliado->id_tipo_dato,
+                'urlpagina' => $aliado->urlpagina,
                 'email' => $aliado->auth->email,
                 'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
             ];
@@ -198,7 +221,7 @@ class AliadoApiController extends Controller
                 if (!$data->hasFile('ruta_multi') || !$data->file('ruta_multi')->isValid()) {
                     return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
                 }
-            } elseif ($data->input('id_tipo_dato') == 1 || $data->input('id_tipo_dato') == 5) {
+            } elseif ($data->input('id_tipo_dato') == 1 || $data->input('id_tipo_dato') == 4) {
                 if (trim($data->input('ruta_multi')) == null) {
                     return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
                 }
@@ -246,12 +269,13 @@ class AliadoApiController extends Controller
                     $rutaMulti = $data->input('ruta_multi');
                 }
 
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?)', [
+                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $logoUrl,
                     $data['descripcion'],
                     $data['id_tipo_dato'],
                     $rutaMulti,
+                    $data['urlpagina'],
                     $data['email'],
                     Hash::make($data['password']),
                     $data['estado'] === 'true' ? 1 : 0,
@@ -474,7 +498,8 @@ class AliadoApiController extends Controller
                 'nombre' => $request->input('nombre'),
                 'descripcion' => $request->input('descripcion'),
                 'id_tipo_dato' => $request->input('id_tipo_dato'),
-                'ruta_multi' => $aliado->ruta_multi
+                'ruta_multi' => $aliado->ruta_multi,
+                'urlpagina' => $request->input('urlpagina'),
             ]);
 
             // Actualizar la contraseña del usuario si se proporciona una nueva
@@ -596,7 +621,7 @@ class AliadoApiController extends Controller
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol !=4){
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
             $estado = $request->input('estado', 'Activo');

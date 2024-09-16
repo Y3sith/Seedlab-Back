@@ -24,7 +24,7 @@ class PuntajeController extends Controller
 
         // Verificar si ya existe un registro con ver_form_pr = 1 (primera vez)
         $primerPuntaje = Puntaje::where('documento_empresa', $documentoEmpresa)
-            ->where('verform_pr', 1)
+            ->where('primera_vez', 1)
             ->first();
 
         if (!$primerPuntaje) {
@@ -36,15 +36,15 @@ class PuntajeController extends Controller
             $nuevoPuntaje->info_mercado = $data['info_mercado'];
             $nuevoPuntaje->info_trl = $data['info_trl'];
             $nuevoPuntaje->info_tecnica = $data['info_tecnica'];
-            $nuevoPuntaje->verform_pr = 1;  // Indica que es la primera vez
-            $nuevoPuntaje->verform_se = 0;  // Aún no se llena la segunda vez
+            $nuevoPuntaje->primera_vez = 1;  // Indica que es la primera vez
+            $nuevoPuntaje->segunda_vez = 0;  // Aún no se llena la segunda vez
             $nuevoPuntaje->save();
 
             return response()->json(['message' => 'Puntaje guardado correctamente (primera vez)', 'puntaje' => $nuevoPuntaje]);
         } else {
             // Ya existe un puntaje para la primera vez, revisamos si existe para la segunda vez
             $segundoPuntaje = Puntaje::where('documento_empresa', $documentoEmpresa)
-                ->where('verform_se', 1)
+                ->where('segunda_vez', 1)
                 ->first();
 
             if ($segundoPuntaje) {
@@ -60,8 +60,8 @@ class PuntajeController extends Controller
             $nuevoPuntaje->info_mercado = $data['info_mercado'];
             $nuevoPuntaje->info_trl = $data['info_trl'];
             $nuevoPuntaje->info_tecnica = $data['info_tecnica'];
-            $nuevoPuntaje->verform_pr = 0;  // No es la primera vez
-            $nuevoPuntaje->verform_se = 1;  // Indica que es la segunda vez
+            $nuevoPuntaje->primera_vez = 0;  // No es la primera vez
+            $nuevoPuntaje->segunda_vez = 1;  // Indica que es la segunda vez
             $nuevoPuntaje->save();
 
             return response()->json(['message' => 'Puntaje guardado correctamente (segunda vez)', 'puntaje' => $nuevoPuntaje]);

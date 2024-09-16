@@ -36,12 +36,19 @@ class ActividadController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(Request $request)///toca cambiarlo para dejar solo imagen
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
+                    // Verificar si algún campo requerido está vacío
+        $requiredFields = ['nombre', 'descripcion', 'id_tipo_dato', 'id_ruta', 'id_aliado'];
+        foreach ($requiredFields as $field) {
+            if (empty($request->input($field))) {
+                return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
+            }
+        }
             $validatedData = $request->validate([
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
@@ -145,7 +152,7 @@ class ActividadController extends Controller
     {
         try {
             // Verificar permisos del usuario
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para editar esta actividad"], 401);
             }
 
@@ -166,34 +173,19 @@ class ActividadController extends Controller
                 return response()->json(['error' => 'Actividad no encontrada'], 404);
             }
             // Actualizar fuente si se ha proporcionado un archivo o una URL
-            $fuente = $actividad->fuente;
-            if ($request->hasFile('fuente')) {
-                $file = $request->file('fuente');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-                $mimeType = $file->getMimeType();
+            if ($request->hasFile(('fuente'))) {
+                Storage::delete(str_replace('storage', 'public', $actividad->fuente));
 
-                if (strpos($mimeType, 'image') !== false) {
-                    $folder = 'imagenes';
-                } elseif ($mimeType === 'application/pdf') {
-                    $folder = 'documentos';
-                } else {
-                    return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
-                }
-
-                // Guardar archivo y actualizar URL de fuente
-                $path = $file->storeAs("public/$folder", $fileName);
-                $fuente = Storage::url($path);
-            } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
-                $fuente = $request->input('fuente');
-            } elseif ($request->input('fuente')) {
-                $fuente = $request->input('fuente');
+                $paths = $request->file('fuente')->store('public/imagenes');
+                $actividad->fuente = str_replace('public', 'storage', $paths);
             }
+            
 
             // Actualizar la actividad
             $actividad->update([
                 'nombre' => $validatedData['nombre'],
                 'descripcion' => $validatedData['descripcion'],
-                'fuente' => $fuente,
+                //'fuente' => $validatedData['fuente'],
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
                 'id_asesor' => $validatedData['id_asesor'] ?? null,
                 'id_aliado' => $validatedData['id_aliado'],
@@ -207,6 +199,24 @@ class ActividadController extends Controller
         }
     }
 
+    public function Activar_Desactivar_Actividad($id)
+    {
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json('no tienes permiso para desactivar la actividad', 400);
+            }
+
+            $actividad = Actividad::find($id);
+            if (!$actividad) {
+                return response()->json('Actividad no encontradas', 400);
+            }
+            $nuevoEstado = !$actividad->estado;
+            $actividad->update(['estado' => $nuevoEstado]);
+            return response()->json(['message' => 'Estado de la Actividad actualizado correctamente']);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
 
 
     /**
@@ -239,5 +249,31 @@ class ActividadController extends Controller
             ->select('id', 'nombre', 'descripcion', 'fuente', 'id_tipo_dato', 'id_asesor', 'id_ruta', )
             ->get();
         return response()->json($actividades);
+    }
+
+    public function ActiNivelLeccionContenido($id)
+    { //traer actividad,nivel,leccion y contenido por leccion a base de la actividad
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+                return response()->json([
+                    'messaje' => 'No tienes permisos para acceder a esta ruta'
+                ], 401);
+            }
+            $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
+                ->where('id', $id)
+                ->first();
+            // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+            // unset($actividad->asesor);
+            // $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+            // unset($actividad->aliado);
+
+            if (!$actividad) {
+                return response()->json(['message' => 'Actividad no encontrada'], 404);
+            }
+            return response()->json($actividad);
+
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
     }
 }

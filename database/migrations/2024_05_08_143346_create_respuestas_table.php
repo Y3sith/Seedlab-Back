@@ -19,7 +19,7 @@ return new class extends Migration
             //$table->double('valor');
             $table->boolean('verform_pr')->nullable();
             $table->boolean('verform_se')->nullable();
-            //$table->timestamp('fecha_reg');
+            $table->timestamp('fecha_registro')->useCurrent();
             //$table->unsignedBigInteger('id_pregunta');
            // $table->foreign('id_pregunta')->references('id')->on('pregunta');
             $table->string('id_empresa');

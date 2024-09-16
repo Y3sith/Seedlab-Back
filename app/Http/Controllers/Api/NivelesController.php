@@ -62,7 +62,7 @@ class NivelesController extends Controller
     {
         //proximamente mostrar niveles asociados a actividades o viseversa
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tiened permisos '], 401);
             }
             $nivel = Nivel::all()->select('id', 'nombre');
@@ -76,7 +76,7 @@ class NivelesController extends Controller
     {
         //mostrar niveles asociados a una actividad
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permisos '], 401);
             }
             $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre')->get();
@@ -101,7 +101,7 @@ class NivelesController extends Controller
     {
         //Edita solo el asesor
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol !=3) {
                 return response()->json(["error" => "no estas autorizado para editar"], 401);
             }
             $niveles = Nivel::find($id);

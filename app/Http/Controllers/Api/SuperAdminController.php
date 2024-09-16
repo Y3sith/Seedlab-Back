@@ -411,7 +411,7 @@ class SuperAdminController extends Controller
     {
 
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=3   && Auth::user()->id_rol !=4){
                 return response()->json(['message' => 'No tienes permiso para esta funcion'], 400);
             }
             $aliados = Aliado::whereHas('auth', function ($query) {

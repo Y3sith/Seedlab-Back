@@ -18,6 +18,7 @@ return new class extends Migration
             $table->text('logo'); //este campo llamado longbinary se creo y esta en el appserviceprovider (NO BORRAR NADA ALLI)
             //$table->text('banner')->nullable();
             $table->text('ruta_multi')->nullable();
+            $table->text('urlpagina', 312)->nullable(); //QUITAR EL NULL
             $table->unsignedBigInteger('id_autentication');
             $table->foreign('id_autentication')->references('id')->on('users');
             $table->unsignedBigInteger('id_tipo_dato')->nullable();

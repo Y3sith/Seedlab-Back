@@ -16,6 +16,5 @@ class TipodatoSeeder extends Seeder
         TipoDato::create(['nombre' => 'Video']);
         TipoDato::create(['nombre' => 'Imagen']);
         TipoDato::create(['nombre' => 'Pdf']);
-        TipoDato::create(['nombre' => 'Texto']);
     }
 }
