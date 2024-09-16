@@ -54,9 +54,30 @@ class AliadoApiController extends Controller
     public function traerAliadoxId($id)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-                return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
-            }
+
+            $aliado = Aliado::where('id', $id)
+                //->with('auth:id,email,estado')
+                ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
+                ->first();
+            return [
+                'id' => $aliado->id,
+                'nombre' => $aliado->nombre,
+                'descripcion' => $aliado->descripcion,
+                'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
+                'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
+                'id_tipo_dato' => $aliado->id_tipo_dato,
+                'urlpagina' => $aliado->urlpagina,
+                'email' => $aliado->auth->email,
+                'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
+            ];
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function traerAliadosiau($id)
+    {
+        try {
 
             $aliado = Aliado::where('id', $id)
                 //->with('auth:id,email,estado')
