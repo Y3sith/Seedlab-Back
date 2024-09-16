@@ -195,7 +195,7 @@ class ActividadController extends Controller
     public function Activar_Desactivar_Actividad($id)
     {
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json('no tienes permiso para desactivar la actividad', 400);
             }
 
