@@ -37,25 +37,28 @@ class AliadoSeeder extends Seeder
                 "nombre" => "Camara de comercio",
                 "descripcion" => "La Cámara de Comercio de Bucaramanga trabaja por el desarrollo socioeconómico de la región mediante el fortalecimiento de la competitividad empresarial, regional y la prestación eficiente de los servicios delegados por el estado.",
                 "logo" => "camara_de_comercio.jpg",
-                "ruta_multi" => "camara_de_comercio.jpg",
+                "ruta_multi" => "https://www.youtube.com/watch?v=bS48a8OypPw&pp=ygUiY2FtYXJhIGRlIGNvbWVyY2lvIGRlIGJ1Y2FyYW1hbmdhIA%3D%3D",
                 "id_autentication" => 8,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://www.camaradirecta.com/"
             ],
             [
                 "nombre" => "Ucc",
                 "descripcion" => "Somos una Institución multicampus de propiedad social, educamos personas con las competencias para responder a las dinámicas del mundo, contribuimos a la construcción y difusión del conocimiento, apoyamos el desarrollo competitivo del país a través de sus organizaciones y buscamos el mejoramiento de la calidad de vida de las comunidades.",
                 "logo" => "ucc.jpg",
-                "ruta_multi" => "ucc.jpg",
+                "ruta_multi" => "https://www.youtube.com/watch?v=tXoIVjVuYDQ&pp=ygUTdWNjIGRlIGJ1Y2FyYW1hbmdhIA%3D%3D",
                 "id_autentication" => 11,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://www.ucc.edu.co/"
             ],
             [
                 "nombre" => "Ecopetrol",
                 "descripcion" => "Ecopetrol S.A. es una Compañía organizada bajo la forma de sociedad anónima, del orden nacional, vinculada al Ministerio de Minas y Energía. Tiene operaciones ubicadas en el centro, sur, oriente y norte de Colombia, al igual que en el exterior.",
                 "logo" => "ecopetrol.jpg",
-                "ruta_multi" => "ecopetrol.jpg",
+                "ruta_multi" => "https://www.youtube.com/watch?v=xzuEw3eBqbQ&pp=ygUJZWNvcGV0cm9s",
                 "id_autentication" => 6,
-                "id_tipo_dato" => 1
+                "id_tipo_dato" => 1,
+                "urlpagina" => "https://www.ecopetrol.com.co/wps/portal"
             ],
             [
                 "nombre" => "Imebu",
@@ -63,31 +66,35 @@ class AliadoSeeder extends Seeder
                 "logo" => "imebu.jpg",
                 "ruta_multi" => "https://www.youtube.com/watch?v=qy2RG_rrGtQ",
                 "id_autentication" => 7,
-                "id_tipo_dato" => 1
+                "id_tipo_dato" => 1,
+                "urlpagina" => "https://imebu.gov.co/web5/"
             ],
             [
                 "nombre" => "Otri",
                 "descripcion" => "La Oficina de Transferencia de Resultados de Investigación Estratégica de Oriente está orientada a fortalecer las capacidades institucionales de manera sostenible para impulsar efectivamente la transferencia tecnológica hacia las empresas y la sociedad desde generadores y creadores de conocimiento y tecnología.",
                 "logo" => "otri.jpg",
-                "ruta_multi" => "otri.png",
+                "ruta_multi" => "https://www.youtube.com/watch?v=Ru-DzxPcBPc&pp=ygUQb3RyaSBidWNhcmFtYW5nYQ%3D%3D",
                 "id_autentication" => 9,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://www.otrieo.com/conocenos/otri/index.php"
             ],
             [
                 "nombre" => "Unab",
                 "descripcion" => "La Universidad Autónoma de Bucaramanga se encuentra ubicada en la ciudad de Bucaramanga capital del Departamento de Santander Colombia. Tiene un área construida total de 32.83 Ha, distribuidas en hermosos campus, espacios de práctica y servicio social.",
                 "logo" => "unab.jpg",
-                "ruta_multi" => "C://Images/unab",
+                "ruta_multi" => "https://www.youtube.com/watch?v=czUlii8WWDQ&pp=ygUQdWJhbiBidWNhcmFtYW5nYQ%3D%3D",
                 "id_autentication" => 10,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://unab.edu.co/"
             ],
             [
                 "nombre" => "C-emprende",
                 "descripcion" => "La estrategia regional CEmprende es el eje articulador y potenciador en los territorios de la política de reindustrialización, bajo los lineamientos del Ministerio de Comercio, Industria y Turismo.",
                 "logo" => "c-emprende.jpg",
-                "ruta_multi" => "C://Images/c-emprende",
+                "ruta_multi" => "https://www.youtube.com/watch?v=_ltfgiv4RVw&pp=ygUKYyBlbXByZW5kZQ%3D%3D",
                 "id_autentication" => 12,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://www.innpulsacolombia.com/nuestros-programas/cemprende/"
             ],
             [
                 "nombre" => "Tecnoparque",
@@ -95,7 +102,8 @@ class AliadoSeeder extends Seeder
                 "logo" => "tecnoparque.jpg",
                 "ruta_multi" => "C://Images/tecnoparque",
                 "id_autentication" => 13,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://www.sena.edu.co/es-co/formacion/Paginas/tecnoparques.aspx"
 
             ],
             [
@@ -103,7 +111,8 @@ class AliadoSeeder extends Seeder
                 "descripcion" => "Iniciativa que promueve mejores prácticas empresariales y el desarrollo de las personas para el fortalecimiento y la sostenibilidad de micro y pequeños negocios y unidades productivas de la economía popular.",
                 "logo" => "innpulsa.jpg",
                 "id_autentication" => 14,
-                "id_tipo_dato" => 3
+                "id_tipo_dato" => 3,
+                "urlpagina" => "https://www.innpulsacolombia.com/"
             ],
 
         ];
