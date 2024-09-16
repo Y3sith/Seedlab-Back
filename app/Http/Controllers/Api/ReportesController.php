@@ -145,6 +145,9 @@ class ReportesController extends Controller
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
 
+        // Agrega el tiempo a la fecha de inicio y fin
+        $fechaInicio .= ' 00:00:00';
+        $fechaFin .= ' 23:59:59';
 
         $data = [];
 
@@ -162,14 +165,10 @@ class ReportesController extends Controller
                     ->select(
                         'users.id',
                         'users.email',
-                        'users.fecha_registro',
-                        'users.estado',
                         'emprendedor.documento',
                         'emprendedor.nombre',
                         'emprendedor.apellido',
                         'emprendedor.celular',
-                        'emprendedor.genero',
-                        'emprendedor.fecha_nac',
                         'emprendedor.direccion',
                     )
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
@@ -228,9 +227,6 @@ class ReportesController extends Controller
                     ->where('isorientador', 1)
                     ->whereBetween('asesoria.fecha', [$fechaInicio, $fechaFin])
                     ->get();
-                break;
-            case 'asesorias_aliados':
-
                 break;
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);

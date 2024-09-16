@@ -521,7 +521,7 @@ class DashboardsController extends Controller
 
     public function getRadarChartData($id_empresa, $tipo)
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2 && Auth::user()->id_rol != 5) {
             return response()->json(['message' => 'No tienes permisos para acceder a esta función.'], 403);
         }
 
@@ -536,9 +536,10 @@ class DashboardsController extends Controller
         // Determinar el campo a consultar basado en el tipo
         $campo = ($tipo == 1) ? 'primera_vez' : 'segunda_vez';
 
-        // Consulta para obtener los puntajes de la empresa para el tipo seleccionado
+        
         $puntajes = DB::table('puntaje')
             ->where('puntaje.documento_empresa', $id_empresa)
+            ->where($campo, 1)
             ->select(
                 'info_general',
                 'info_financiera',
@@ -546,13 +547,13 @@ class DashboardsController extends Controller
                 'info_trl',
                 'info_tecnica'
             )
-            ->first(); // Cambiado a first() para obtener un único resultado
+            ->first(); 
 
         if (!$puntajes) {
             return response()->json(['message' => 'No se encontró puntaje para esta empresa'], 404);
         }
 
-        // Convertimos el objeto stdClass a un array asociativo
+        // array asociativo
         $puntajeArray = [
             'info_general' => $puntajes->info_general,
             'info_financiera' => $puntajes->info_financiera,
