@@ -244,6 +244,37 @@ class RutaApiController extends Controller
         }
     }
 
+    public function actnividadxAliado($id, $id_aliado)
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $ruta = Ruta::where('id', $id)->with(['actividades' => function($query) use ($id_aliado) {
+            if ($id_aliado) {
+                $query->where('id_aliado', $id_aliado);
+            }
+        }, 'actividades.aliado', 'actividades.asesor'])->get();
+
+        $ruta = $ruta->map(function ($r) {
+            $r->actividades = $r->actividades->map(function ($actividad) {
+                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+                unset($actividad->asesor);
+                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
+                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                unset($actividad->aliado);
+                return $actividad;
+            });
+            return $r;
+        });
+
+        return response()->json($ruta);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+}
+
     public function actividadCompletaxruta($id)
     {
         try {

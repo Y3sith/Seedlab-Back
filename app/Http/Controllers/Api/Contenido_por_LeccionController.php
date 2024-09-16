@@ -98,7 +98,7 @@ class Contenido_por_LeccionController extends Controller
     {
         //editar solo el asesor
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol !=3) {
                 return response()->json(["message" => "No tienes permisos para editar contenido"], 401);
             }
             $contenidoxleccion = ContenidoLeccion::find($id);

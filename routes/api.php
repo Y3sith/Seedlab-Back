@@ -188,6 +188,7 @@ Route::group([
     Route::get('/rutas', [RutaApiController::class, 'rutas']);
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
+    Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
     Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
     Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
 
