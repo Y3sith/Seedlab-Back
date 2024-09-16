@@ -62,6 +62,14 @@ class Contenido_por_LeccionController extends Controller
                 // Si se envió un texto en 'fuente', se guarda como texto
                 $fuente = $request->input('fuente_contenido');
             }
+
+            $requiredFields = ['titulo', 'descripcion', 'id_tipo_dato', 'id_leccion','fuente_contenido'];
+        foreach ($requiredFields as $field) {
+            if (empty($request->input($field))) {
+                return response()->json(['message' => "Debes completar todos los campos requeridos deL contenido"], 400);
+            }
+        }
+
             $contenidoxleccion = ContenidoLeccion::create([
                 'titulo' => $request->titulo,
                 'descripcion' => $request->descripcion,
@@ -69,7 +77,7 @@ class Contenido_por_LeccionController extends Controller
                 'id_tipo_dato' => $request->id_tipo_dato,
                 'id_leccion' => $request->id_leccion,
             ]);
-            return response()->json(['message' => 'Contenido de Lección creada con éxito: ', $contenidoxleccion], 201);
+            return response()->json(['message' => 'Contenido de Lección creada con éxito ', $contenidoxleccion], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

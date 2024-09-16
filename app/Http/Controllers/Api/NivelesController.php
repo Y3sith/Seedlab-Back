@@ -49,7 +49,7 @@ class NivelesController extends Controller
                 'nombre' => $request->nombre,
                 'id_actividad' => $request->id_actividad,
             ]);
-            return response()->json(['message' => 'Nivel creado con éxito: ', $niveles], 201);
+            return response()->json(['message' => 'Nivel creado con éxito ', $niveles], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

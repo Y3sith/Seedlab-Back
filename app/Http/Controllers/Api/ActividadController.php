@@ -43,12 +43,12 @@ class ActividadController extends Controller
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
                     // Verificar si algún campo requerido está vacío
-        $requiredFields = ['nombre', 'descripcion', 'id_tipo_dato', 'id_ruta', 'id_aliado'];
-        foreach ($requiredFields as $field) {
-            if (empty($request->input($field))) {
-                return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
-            }
-        }
+        // $requiredFields = ['nombre', 'descripcion', 'id_tipo_dato', 'id_ruta', 'id_aliado', 'fuente'];
+        // foreach ($requiredFields as $field) {
+        //     if (empty($request->input($field))) {
+        //         return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad" ], 400);
+        //     }
+        // }
             $validatedData = $request->validate([
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
@@ -114,7 +114,7 @@ class ActividadController extends Controller
                 'id_aliado' => $validatedData['id_aliado'],
                 'estado' => 1
             ]);
-            return response()->json(['message' => 'Actividad creada con éxito: ', $actividad], 201);
+            return response()->json(['message' => 'Actividad creada con éxito ', $actividad], 201);
 
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

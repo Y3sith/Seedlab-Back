@@ -48,7 +48,7 @@ class LeccionController extends Controller
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,
             ]);
-            return response()->json(['message' => 'Lección creada con éxito: ', $leccion], 201);
+            return response()->json(['message' => 'Lección creada con éxito ', $leccion], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
