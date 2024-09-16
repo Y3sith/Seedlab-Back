@@ -202,7 +202,7 @@ class ActividadController extends Controller
     public function Activar_Desactivar_Actividad($id)
     {
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json('no tienes permiso para desactivar la actividad', 400);
             }
 
@@ -254,7 +254,7 @@ class ActividadController extends Controller
     public function ActiNivelLeccionContenido($id)
     { //traer actividad,nivel,leccion y contenido por leccion a base de la actividad
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json([
                     'messaje' => 'No tienes permisos para acceder a esta ruta'
                 ], 401);

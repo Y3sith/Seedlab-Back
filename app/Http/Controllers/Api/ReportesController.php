@@ -8,7 +8,6 @@ use App\Exports\AsesoriasAliadosExport;
 use App\Exports\AsesoriasExport;
 use App\Exports\AsesoriasOrientadorExport;
 use App\Exports\EmpresasExport;
-use App\Exports\FormularioExport;
 use App\Exports\RolesExport;
 use App\Exports\SeccionExport;
 use App\Http\Controllers\Controller;
@@ -291,30 +290,60 @@ class ReportesController extends Controller
         return response()->json($data);
     }
 
-    public function procesarRespuestas($idEmprendedor)
+  
+
+    public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null)
     {
-        $respuestas = DB::table('respuesta')
+        Log::info('Iniciando procesamiento de respuestas...', ['idEmprendedor' => $idEmprendedor, 'documentoEmpresa' => $documentoEmpresa]);
+
+        // Obtener las respuestas con un join a la tabla 'puntaje'
+        $query = DB::table('respuesta')
             ->join('empresa', 'respuesta.id_empresa', '=', 'empresa.documento')
+            ->join('puntaje', 'empresa.documento', '=', 'puntaje.documento_empresa') // Join con la tabla 'puntaje'
             ->where('empresa.id_emprendedor', $idEmprendedor)
-            ->select('respuesta.respuestas_json')
-            ->get();
+            ->select(
+                'respuesta.respuestas_json',
+                'puntaje.info_general',
+                'puntaje.info_financiera',
+                'puntaje.info_mercado',
+                'puntaje.info_trl',
+                'puntaje.info_tecnica',
+                'puntaje.primera_vez',
+                'puntaje.segunda_vez'
+            );
+
+        if (!is_null($documentoEmpresa)) {
+            $query->where('empresa.documento', $documentoEmpresa);
+        }
+
+        // Finaliza la consulta
+        $respuestas = $query->select('respuesta.respuestas_json', 'puntaje.*')->get();
+
+        Log::info('Respuestas obtenidas', ['respuestas' => $respuestas]);
 
         // Obtener todos los id_pregunta y id_subpregunta únicos del JSON
         $idsPreguntas = [];
         $idsSubpreguntas = [];
         foreach ($respuestas as $respuesta) {
             $respuestas_array = json_decode($respuesta->respuestas_json, true);
-            foreach ($respuestas_array as $respuesta_json) {
-                if (isset($respuesta_json['id_pregunta'])) {
-                    $idsPreguntas[] = $respuesta_json['id_pregunta'];
+            if (is_array($respuestas_array)) {
+                foreach ($respuestas_array as $respuesta_json) {
+                    if (isset($respuesta_json['id_pregunta'])) {
+                        $idsPreguntas[] = $respuesta_json['id_pregunta'];
+                    }
+                    if (isset($respuesta_json['id_subpregunta'])) {
+                        $idsSubpreguntas[] = $respuesta_json['id_subpregunta'];
+                    }
                 }
-                if (isset($respuesta_json['id_subpregunta'])) {
-                    $idsSubpreguntas[] = $respuesta_json['id_subpregunta'];
-                }
+            } else {
+                Log::error('JSON inválido o no decodificable: ' . $respuesta->respuestas_json);
             }
         }
+
         $idsPreguntas = array_unique($idsPreguntas);
         $idsSubpreguntas = array_unique($idsSubpreguntas);
+
+        Log::info('IDs de preguntas y subpreguntas', ['preguntas' => $idsPreguntas, 'subpreguntas' => $idsSubpreguntas]);
 
         // Obtener los nombres de las preguntas, secciones y subpreguntas para los ids únicos
         $preguntas = DB::table('pregunta')
@@ -324,7 +353,7 @@ class ReportesController extends Controller
         $secciones = DB::table('pregunta')
             ->join('seccion', 'pregunta.id_seccion', '=', 'seccion.id')
             ->whereIn('pregunta.id', $idsPreguntas)
-            ->pluck('seccion.nombre', 'pregunta.id_seccion');  // Obtenemos las secciones
+            ->pluck('seccion.nombre', 'pregunta.id_seccion'); // Obtenemos las secciones
 
         $subpreguntas = DB::table('subpregunta')
             ->whereIn('id', $idsSubpreguntas)
@@ -350,17 +379,67 @@ class ReportesController extends Controller
                         'pregunta' => $preguntas[$idPregunta] ?? 'Pregunta desconocida',
                         'subpregunta' => $subpreguntas[$idSubpregunta] ?? 'Subpregunta desconocida',
                         'respuesta_texto' => $respuesta_json['texto_res'] ?? null, // Añadir el texto_res
+                        // Añadir los puntajes
+                        'info_general' => $respuesta->info_general,
+                        'info_financiera' => $respuesta->info_financiera,
+                        'info_mercado' => $respuesta->info_mercado,
+                        'info_trl' => $respuesta->info_trl,
+                        'info_tecnica' => $respuesta->info_tecnica,
+                        'primera_vez' => $respuesta->primera_vez,
+                        'segunda_vez' => $respuesta->segunda_vez,
                     ];
                 }
             } else {
                 Log::error('JSON inválido o no decodificable: ' . $respuesta->respuestas_json);
             }
         }
-        //dd($resultados);
+
+        Log::info('Datos procesados para la exportación', ['resultados' => $resultados]);
+
         // Crear la exportación
         $export = new SeccionExport($resultados);
 
+        Log::info('Exportación creada, enviando archivo...');
+
         // Devolver el archivo Excel
         return Excel::download($export, 'Reporte_Formulario.xlsx');
+    }
+
+
+
+    public function mostrarReporteFormEmprendedor(Request $request)
+    {
+        $docEmprendedor = $request->input('doc_emprendedor');
+        $tipo_reporte = $request->input('tipo_reporte'); // 1 = Primera vez, 2 = Segunda vez
+        $empresa = $request->input('empresa');
+
+
+        $query = DB::table('respuesta AS r')
+            ->join('empresa AS e', 'r.id_empresa', '=', 'e.documento')
+            ->join('puntaje AS p', 'p.documento_empresa', '=', 'e.documento')
+            ->select('r.verform_pr', 'r.verform_se', 'e.nombre AS nombre_empresa', 'p.*')
+            ->where('e.documento', $empresa)
+            ->where('e.id_emprendedor', $docEmprendedor);
+
+        // Filtrar por tipo de reporte
+        if ($tipo_reporte == '1') { // Primera vez
+            $query->where('r.verform_pr', 1)
+                ->where('r.verform_se', 0)
+                ->where('p.primera_vez', 1)
+                ->where('p.segunda_vez', 0);
+        } elseif ($tipo_reporte == '2') { // Segunda vez
+            $query->where('r.verform_pr', 0)
+                ->where('r.verform_se', 1)
+                ->where('p.primera_vez', 0)
+                ->where('p.segunda_vez', 1);
+        } else {
+            return response()->json(['error' => 'Tipo de reporte no válido'], 400);
+        }
+
+
+        $resultados = $query->get();
+
+
+        return response()->json($resultados);
     }
 }

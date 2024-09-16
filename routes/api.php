@@ -55,6 +55,7 @@ Route::group([
     Route::get('/getApoyoxdocumento/{documento}', [Apoyo_por_EmpresaController::class, 'getApoyoxDocumento']);
     Route::put('/updateApoyo/{documento}', [Apoyo_por_EmpresaController::class, 'editarApoyo']);
     Route::get('/getAllEmpresa', [EmpresaApiController::class,'index']);
+    Route::get('/getEmpresaByEmprendedor', [EmpresaApiController::class, 'obtenerEmpresasPorEmprendedor']);
 });
 
 
@@ -147,24 +148,28 @@ Route::group(
         Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
         Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
         Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
-        Route::get('/graficaFormulario/{id_empresa}', [DashboardsController::class, 'getRadarChartData']);
+        Route::get('/graficaFormulario/{id_empresa}/{tipo}', [DashboardsController::class, 'getRadarChartData']);
     }
 );
 
 //Reportes
 
-route::get('/exportar-formExcel/{idEmprendedor}', [ReportesController::class, 'procesarRespuestas']);
+route::get('/exportar-formExcel/{idEmprendedor}/{documentoEmpresa?}', [ReportesController::class, 'procesarRespuestas']);
 Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
 Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);
 Route::post('/exportar_reporte_aliado', [ReportesController::class, 'exportarReportesAliados']);
+Route::get('/obtener_datos_formEmprendedor', [ReportesController::class, 'mostrarReporteFormEmprendedor']);
 
 //FanPage
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
 Route::get('/traerPersonalizacion/{id}', [SuperAdminController::class, 'obtenerPersonalizacion']);
 Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
+Route::get('/traerAliadosiau/{id}', [AliadoApiController::class, 'traerAliadosiau'])->name('traerAliadosiau');
 
-
+//descargas y buscar ruta
+Route::get('/descargar-archivo/{contenidoId}', [RutaApiController::class, 'descargarArchivoContenido']);
+Route::get('/ultimaruta/{rutaId}', [RutaApiController::class, 'getRutaInfo']);
 //Puntaje
 Route::group([], function () {
     Route::post('/puntajes/{documento}', [PuntajeController::class, 'store']);
@@ -180,8 +185,13 @@ Route::group([
     Route::apiResource('/ruta', RutaApiController::class);
     Route::get('/mostrarRutaContenido/{id}', [RutaApiController::class, 'mostrarRutaConContenido'])->name('mostrarRutaContenido');
     Route::get('/rutasActivas', [RutaApiController::class, 'rutasActivas']);
+    Route::get('/rutas', [RutaApiController::class, 'rutas']);
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
+    Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
+    Route::get('/actnividadxAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxAsesor']);
+    Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
+    Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
 
 });
 

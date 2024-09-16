@@ -519,12 +519,13 @@ class DashboardsController extends Controller
         }
     }
 
-    public function getRadarChartData($id_empresa)
+    public function getRadarChartData($id_empresa, $tipo)
     {
         if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
             return response()->json(['message' => 'No tienes permisos para acceder a esta función.'], 403);
         }
-        $cacheKey = 'dashboard:getRadarChartData:' . $id_empresa;
+
+        $cacheKey = 'dashboard:getRadarChartData:' . $id_empresa . ':tipo:' . $tipo;
 
         $cachedData = Redis::get($cacheKey);
 
@@ -532,7 +533,10 @@ class DashboardsController extends Controller
             return response()->json(json_decode($cachedData), 200);
         }
 
-        // Consulta para obtener los puntajes de todas las empresas
+        // Determinar el campo a consultar basado en el tipo
+        $campo = ($tipo == 1) ? 'primera_vez' : 'segunda_vez';
+
+        // Consulta para obtener los puntajes de la empresa para el tipo seleccionado
         $puntajes = DB::table('puntaje')
             ->where('puntaje.documento_empresa', $id_empresa)
             ->select(
@@ -542,20 +546,25 @@ class DashboardsController extends Controller
                 'info_trl',
                 'info_tecnica'
             )
-            ->first(); // Cambia a get() para obtener una colección
+            ->first(); // Cambiado a first() para obtener un único resultado
 
         if (!$puntajes) {
             return response()->json(['message' => 'No se encontró puntaje para esta empresa'], 404);
         }
 
         // Convertimos el objeto stdClass a un array asociativo
-        $puntajeArray = (array) $puntajes;
+        $puntajeArray = [
+            'info_general' => $puntajes->info_general,
+            'info_financiera' => $puntajes->info_financiera,
+            'info_mercado' => $puntajes->info_mercado,
+            'info_trl' => $puntajes->info_trl,
+            'info_tecnica' => $puntajes->info_tecnica
+        ];
 
         if (!$cachedData) {
             Redis::set($cacheKey, json_encode($puntajeArray));
             Redis::expire($cacheKey, 3600);
         }
-
 
         return response()->json($puntajeArray, 200);
     }

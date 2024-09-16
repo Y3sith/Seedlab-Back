@@ -66,7 +66,7 @@ class LeccionController extends Controller
     public function LeccionxNivel($id){
         //mostrar niveles asociados a una actividad
         try {
-            if (Auth::user()->id_rol != 1) {
+            if (Auth::user()->id_rol != 1  && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message'=> 'No tienes permisos '],401);
             }
             $leccion = Leccion::where('id_nivel', $id)->select('id','nombre')->get();
@@ -92,7 +92,7 @@ class LeccionController extends Controller
     {
         //editar solo el asesor
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol !=3) {
                 return response()->json(['error' => 'No tienes permisos para editar lecciones'], 401);
             }
             $leccion = Leccion::find($id);

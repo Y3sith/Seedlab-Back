@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
+use App\Models\ContenidoLeccion;
+use App\Models\Respuesta;
 use App\Models\Ruta;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Str;
+
 
 class RutaApiController extends Controller
 {
@@ -19,7 +23,7 @@ class RutaApiController extends Controller
     public function index(Request $request)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol !=4) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
@@ -107,7 +111,15 @@ class RutaApiController extends Controller
     }
 
 
+    public function rutas()
+    {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
+            return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
+        }
+        $rutasActivas = Ruta::where('estado', 1)->get();
 
+        return response()->json($rutasActivas);
+    }
 
 
     public function rutasActivas()
@@ -210,7 +222,7 @@ class RutaApiController extends Controller
     public function actnivleccontXruta($id)
     {
         try {
-            if (Auth::user()->id_rol != 1) { //cambiarlo para los aliados o asesores que tambien necesiten esta funcion
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
             $ruta = Ruta::where('id', $id)->with('actividades', 'actividades.aliado')->get();
@@ -230,5 +242,225 @@ class RutaApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
+    }
+
+    public function actnividadxAliado($id, $id_aliado)
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $ruta = Ruta::where('id', $id)->with(['actividades' => function($query) use ($id_aliado) {
+            if ($id_aliado) {
+                $query->where('id_aliado', $id_aliado);
+            }
+        }, 'actividades.aliado', 'actividades.asesor'])->get();
+
+        $ruta = $ruta->map(function ($r) {
+            $r->actividades = $r->actividades->map(function ($actividad) {
+                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+                unset($actividad->asesor);
+                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
+                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                unset($actividad->aliado);
+                return $actividad;
+            });
+            return $r;
+        });
+
+        return response()->json($ruta);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+}
+
+public function actnividadxAsesor($id, $id_asesor)
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+
+        $ruta = Ruta::where('id', $id)->with(['actividades' => function($query) use ($id_asesor) {
+            if ($id_asesor) {
+                $query->where('id_asesor', $id_asesor);
+            }
+        }, 'actividades.aliado', 'actividades.asesor'])->get();
+
+        $ruta = $ruta->map(function ($r) {
+            $r->actividades = $r->actividades->map(function ($actividad) {
+                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+                unset($actividad->asesor);
+                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
+                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                unset($actividad->aliado);
+                return $actividad;
+            });
+            return $r;
+        });
+
+        return response()->json($ruta);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+}
+
+public function actividadCompletaxruta($id)
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        
+        $ruta = Ruta::where('id', $id)
+            ->with(['actividades' => function ($query) {
+                $query->where('estado', 1);
+            }, 'actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado'])
+            ->get();
+
+        $ruta = $ruta->map(function ($r) {
+            $r->actividades = $r->actividades->map(function ($actividad) {
+                $actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
+                $actividad->estado = 'Activo';
+                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                unset($actividad->aliado);
+                return $actividad;
+            });
+            return $r;
+        });
+
+        return response()->json($ruta);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    }
+}
+
+    public function descargarArchivoContenido($contenidoId)
+    {
+        try {
+            $contenidoLeccion = ContenidoLeccion::findOrFail($contenidoId);
+            $fileName = $this->cleanFileName($contenidoLeccion->fuente_contenido);
+            $filePath = 'documentos/' . $fileName;
+
+            if (Storage::disk('public')->exists($filePath)) {
+                $file = Storage::disk('public')->get($filePath);
+                $type = Storage::disk('public')->mimeType($filePath);
+                return response($file, 200)
+                ->withHeaders([
+                    'Content-Type' => 'application/pdf',
+                    'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                    'Access-Control-Expose-Headers' => 'Content-Disposition',
+                    'Access-Control-Allow-Origin' => '*', // O especifica el origen permitido
+                    'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+                    'Access-Control-Allow-Headers' => 'Content-Type, Content-Disposition',
+                ]);
+            } else {
+                return response()->json(['error' => 'Archivo no encontrado'], 404);
+            }
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Error al intentar descargar el archivo: ' . $e->getMessage()], 500);
+        }
+    }
+    
+    private function cleanFileName($fileName)
+    {
+        // Elimina "/storage/documentos/" del principio del nombre del archivo
+        return Str::replaceFirst('/storage/documentos/', '', $fileName);
+    }
+
+    public function getRutaInfo($id)
+    {
+        try {
+            $ruta = Ruta::where('id', $id)->with([
+                'actividades' => function ($query) {
+                    $query->select('id', 'id_ruta', 'nombre', 'id_asesor', 'id_aliado');
+                },
+                'actividades.nivel' => function ($query) {
+                    $query->select('id', 'id_actividad', 'nombre');
+                },
+                'actividades.nivel.lecciones' => function ($query) {
+                    $query->select('id', 'id_nivel', 'nombre');
+                },
+                'actividades.nivel.lecciones.contenidoLecciones' => function ($query) {
+                    $query->select('id', 'id_leccion', 'titulo');
+                },
+                'actividades.aliado' => function ($query) {
+                    $query->select('id', 'nombre');
+                }
+            ])->first();
+    
+            if (!$ruta) {
+                return response()->json(['error' => 'Ruta no encontrada'], 404);
+            }
+    
+            $actividadesOptimizadas = $ruta->actividades->map(function ($actividad) {
+                return [
+                    'id' => $actividad->id,
+                    'nombre' => $actividad->nombre,
+                    'id_asesor' => $actividad->id_asesor ?? 'Ninguno',
+                    'nombre_aliado' => $actividad->aliado->nombre ?? 'sin aliado',
+                    'niveles' => $actividad->nivel->map(function ($nivel) {
+                        return [
+                            'id' => $nivel->id,
+                            'nombre' => $nivel->nombre,
+                            'lecciones' => $nivel->lecciones->map(function ($leccion) {
+                                return [
+                                    'id' => $leccion->id,
+                                    'nombre' => $leccion->nombre,
+                                    'contenidos' => $leccion->contenidoLecciones->map(function ($contenido) {
+                                        return [
+                                            'id' => $contenido->id,
+                                            'nombre' => $contenido->titulo
+                                        ];
+                                    })
+                                ];
+                            })
+                        ];
+                    })
+                ];
+            });
+    
+            $ultimoElemento = [
+                'nivel_id' => null,
+                'leccion_id' => null,
+                'contenido_id' => null
+            ];
+    
+            foreach ($actividadesOptimizadas as $actividad) {
+                foreach ($actividad['niveles'] as $nivel) {
+                    $ultimoElemento['nivel_id'] = $nivel['id'];
+                    foreach ($nivel['lecciones'] as $leccion) {
+                        $ultimoElemento['leccion_id'] = $leccion['id'];
+                        foreach ($leccion['contenidos'] as $contenido) {
+                            $ultimoElemento['contenido_id'] = $contenido['id'];
+                        }
+                    }
+                }
+            }
+    
+            return response()->json([
+                'ultimo_elemento' => $ultimoElemento
+            ]);
+    
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+
+    public function idRespuestas(){
+        try {
+            if (Auth::user()->id_rol != 5) {
+            return response()->json(['error' => 'Ocurrió un error al procesar']);
+        }
+
+        $respuestas = Respuesta::get('id');
+
+        return response()->json( $respuestas);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+        
     }
 }
