@@ -39,7 +39,7 @@ class ActividadController extends Controller
     public function store(Request $request)///toca cambiarlo para dejar solo imagen
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
             $validatedData = $request->validate([
@@ -145,7 +145,7 @@ class ActividadController extends Controller
     {
         try {
             // Verificar permisos del usuario
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para editar esta actividad"], 401);
             }
 
