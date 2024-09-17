@@ -66,7 +66,7 @@ class Contenido_por_LeccionController extends Controller
             $requiredFields = ['titulo', 'descripcion', 'id_tipo_dato', 'id_leccion','fuente_contenido'];
         foreach ($requiredFields as $field) {
             if (empty($request->input($field))) {
-                return response()->json(['message' => "Debes completar todos los campos requeridos deL contenido"], 400);
+                return response()->json(['message' => "Debes completar todos los campos requeridos del contenido"], 400);
             }
         }
 
