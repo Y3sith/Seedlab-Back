@@ -17,6 +17,7 @@ class Aliado extends Model
         'logo',
         'banner',
         'ruta_multi',
+        'urlpagina',
         'id_autentication',
         'id_tipo_dato'
     ];

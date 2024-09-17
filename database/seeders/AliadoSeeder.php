@@ -35,7 +35,7 @@ class AliadoSeeder extends Seeder
                 }
         
                 // Ruta de la imagen de origen y destino
-                $sourceImagePath = base_path('resources/imagen/Home_Innpulsa.jpg');
+                $sourceImagePath = base_path('resources/imagen/Inpulsa_home.png');
                 $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNUL.jpg';
                 $destinationImagePath = $multimediaPath . '/' . $destinationImageName;
         
