@@ -139,7 +139,6 @@ class SuperAdminController extends Controller
     public function crearSuperAdmin(Request $data)
     {
 
-
         try {
             $response = null;
             $statusCode = 200;
@@ -157,12 +156,18 @@ class SuperAdminController extends Controller
             $direccion = $data->input('direccion', 'Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
 
-            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac) {
+            $imagen_perfil = null;
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
+                $imagen_perfil = Storage::url($imagenPath);
+            }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
                 $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $data['imagen_perfil'],
+                    $imagen_perfil,
                     $data['celular'],
                     $data['genero'],
                     $direccion,
@@ -349,7 +354,7 @@ class SuperAdminController extends Controller
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
-                return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
+                return response()->json(['message' => 'Superadministrador actualizado correctamente',$admin], 200);
             } else {
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
