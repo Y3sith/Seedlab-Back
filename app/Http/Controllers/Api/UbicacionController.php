@@ -17,20 +17,24 @@ class UbicacionController extends Controller
 
     public function listar_munxdep(Request $request)
     {
-        $idDepartamento = $request->input('dep_id');
+        // Obtener el ID del departamento del request y convertirlo a entero
+        $idDepartamento = intval($request->input('dep_id'));
 
+        // Buscar el departamento por su ID
         $departamento = Departamento::where("id", $idDepartamento)->first();
 
         if (!$departamento) {
             return response()->json(['error' => 'Departamento no encontrado'], 404);
         }
 
+        // Obtener los municipios asociados con el ID del departamento
         $municipios = Municipio::where('id_departamento', $departamento->id)
             ->select('id', 'nombre')
             ->get();
 
-        return response()->json($municipios, 200, [], JSON_NUMERIC_CHECK);
+        return response()->json($municipios);
     }
+
 
 
 }
