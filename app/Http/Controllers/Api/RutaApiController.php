@@ -219,18 +219,26 @@ class RutaApiController extends Controller
     }
 
 
-    public function actnivleccontXruta($id)
+    public function actnivleccontXruta($id, Request $request)
     {
         try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-            $ruta = Ruta::where('id', $id)->with('actividades', 'actividades.aliado')->get();
+    
+            $estado = $request->input('estado', 'Activo');
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
+    
+            $ruta = Ruta::where('id', $id)
+                ->with(['actividades' => function ($query) use ($estadoBool) {
+                    $query->where('estado', $estadoBool);
+                }, 'actividades.aliado'])
+                ->get();
+    
             $ruta = $ruta->map(function ($r) {
                 $r->actividades = $r->actividades->map(function ($actividad) {
                     $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
                     unset($actividad->asesor);
-                    //$actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
                     $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
                     $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
                     unset($actividad->aliado);
@@ -238,6 +246,7 @@ class RutaApiController extends Controller
                 });
                 return $r;
             });
+    
             return response()->json($ruta);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
