@@ -302,6 +302,14 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
 
+            $requiredFields = ['nombre', 'apellido', 'documento', 'celular', 'genero', 'direccion', 'id_tipo_documento',
+            'id_departamento','id_municipio','fecha_nac','celular','email'];
+            foreach ($requiredFields as $field) {
+                if (empty($request->input($field))) {
+                    return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
+                }
+            }
+
             $admin = SuperAdmin::find($id);
             if ($admin) {
                 $admin->nombre = $request->input('nombre');
