@@ -4,7 +4,7 @@ namespace Database\Seeders;
 
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
-use App\Models\Seccion;
+use App\Models\seccion;
 
 class SeccionSeeder extends Seeder
 {
@@ -22,7 +22,7 @@ class SeccionSeeder extends Seeder
         ];
 
         foreach ($seccionPorPregunta as $seccion) {
-            Seccion::create([
+            seccion::create([
                 'nombre' => $seccion['nombre'],
                 // 'puntaje' => $seccion['puntaje'],
             ]);

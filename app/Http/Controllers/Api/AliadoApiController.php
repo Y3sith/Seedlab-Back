@@ -693,16 +693,7 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
             }
 
-            /*$horario = HorarioAsesoria::where('id_asesoria', $asesoriaId)->first();
-    if (!$horario) {
-        return response()->json(['message' => 'No se encontró un horario para esta asesoría'], 404);
-    }*/
-
-            /*if ($accion === 'aceptar') {
-        $horario->estado = 'aceptada';
-        $mensaje = 'Asesoría aceptada correctamente';
-    } 
-    */ elseif ($accion === 'rechazar') {
+         elseif ($accion === 'rechazar') {
                 //$horario->estado = 'rechazada';
                 $asesoria->id_aliado = null;  // Establecer id_aliado a null
                 $asesoria->isorientador = true;
@@ -719,40 +710,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    //Se hizo un solo update en  Asesor
-    // public function editarAsesorXaliado(Request $request, $id)
-    // {
-    //     try {
-    //         if (Auth::user()->id_rol != 3) {
-    //             return response()->json(["error" => "No tienes permisos para realizar esta acción"], 401);
-    //         }
-
-    //         $asesor = Asesor::find($id);
-
-    //         if ($asesor) {
-    //             $asesor->nombre = $request->input('nombre');
-    //             $asesor->apellido = $request->input('apellido');
-    //             $asesor->celular = $request->input('celular');
-    //             $asesor->save();
-
-    //             if ($asesor->auth) {
-    //                 $user = $asesor->auth;
-    //                 $password = $request->input('password');
-    //                 if ($password) {
-    //                     $user->password =  Hash::make($request->input('password'));
-    //                 }
-    //                 $user->email = $request->input('email');
-    //                 $user->estado = $request->input('estado');
-    //                 $user->save();
-    //             }
-    //             return response()->json(['message' => 'Asesor actualizado correctamente']);
-    //         } else {
-    //             return response()->json(['message' => 'Asesor no encontrado'], 404);
-    //         }
-    //     } catch (Exception $e) {
-    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    //     }
-    // }
+    
     public function verEmprendedoresxEmpresa()
     {
         if (Auth::user()->id_rol != 3) {

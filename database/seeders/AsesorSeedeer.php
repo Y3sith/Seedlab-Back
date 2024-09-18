@@ -20,7 +20,7 @@ class AsesorSeedeer extends Seeder
             "nombre" => "Juan",
             "apellido" => "Perez",
             "documento" => "N/A",
-            "fecha_nac" => "2024-05-21",
+            "fecha_nac" => "2000-05-21",
             "id_aliado" => "1",
             "id_tipo_documento" => "1",
             "id_departamento" => "27",
