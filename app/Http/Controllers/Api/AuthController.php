@@ -119,7 +119,7 @@ class AuthController extends Controller
 
     public function userProfileEmprendedor($documento)
     {
-        if (Auth::user()->id_rol !== 5) {
+        if (Auth::user()->id_rol !== '5') {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $emprendedor = Emprendedor::where('documento', $documento)
