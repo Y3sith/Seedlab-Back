@@ -285,7 +285,11 @@ class SuperAdminController extends Controller
                 ];
             });
 
-            return response()->json($adminsConEstado, 200, [], JSON_NUMERIC_CHECK);
+            return response()->json($adminsConEstado, 200, [
+                'Access-Control-Allow-Origin' => '*',
+                'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+                'Access-Control-Allow-Headers' => 'X-Requested-With, Content-Type, X-Token-Auth, Authorization',
+            ], JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -302,8 +306,20 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
 
-            $requiredFields = ['nombre', 'apellido', 'documento', 'celular', 'genero', 'direccion', 'id_tipo_documento',
-            'id_departamento','id_municipio','fecha_nac','celular','email'];
+            $requiredFields = [
+                'nombre',
+                'apellido',
+                'documento',
+                'celular',
+                'genero',
+                'direccion',
+                'id_tipo_documento',
+                'id_departamento',
+                'id_municipio',
+                'fecha_nac',
+                'celular',
+                'email'
+            ];
             foreach ($requiredFields as $field) {
                 if (empty($request->input($field))) {
                     return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
@@ -347,7 +363,7 @@ class SuperAdminController extends Controller
 
                     $password = $request->input('password');
                     if ($password) {
-                        $user->password =  Hash::make($request->input('password'));
+                        $user->password = Hash::make($request->input('password'));
                     }
 
                     $newEmail = $request->input('email');
@@ -362,7 +378,7 @@ class SuperAdminController extends Controller
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
-                return response()->json(['message' => 'Superadministrador actualizado correctamente',$admin], 200);
+                return response()->json(['message' => 'Superadministrador actualizado correctamente', $admin], 200);
             } else {
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
@@ -424,7 +440,7 @@ class SuperAdminController extends Controller
     {
 
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=3   && Auth::user()->id_rol !=4){
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permiso para esta funcion'], 400);
             }
             $aliados = Aliado::whereHas('auth', function ($query) {
