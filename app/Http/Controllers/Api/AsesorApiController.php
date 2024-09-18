@@ -45,12 +45,18 @@ class AsesorApiController extends Controller
 
             $direccion = $data->input('direccion', 'Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
-            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac) {
+
+            $imagen_perfil = null;
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
+                $imagen_perfil = Storage::url($imagenPath);
+            }
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $data['imagen_perfil'],
+                    $imagen_perfil,
                     $data['celular'],
                     $data['genero'],
                     $direccion,
@@ -93,6 +99,14 @@ class AsesorApiController extends Controller
             //dd($request->estado);
             if (Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
+            }
+
+            $requiredFields = ['nombre', 'apellido', 'documento', 'celular', 'genero', 'direccion', 'id_tipo_documento',
+            'id_departamento','id_municipio','fecha_nac','celular'];
+            foreach ($requiredFields as $field) {
+                if (empty($request->input($field))) {
+                    return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
+                }
             }
 
                 $asesor = Asesor::find($id);

@@ -19,13 +19,13 @@ class OrientadorSeeder extends Seeder
             "nombre"=> "David",
             "apellido"=> "Hernandez",
             "documento"=> "213456",
-            "fecha_nac"=>"2024-05-21",
+            "fecha_nac"=>"2000-05-21",
             "id_tipo_documento"=>"1",
             "id_departamento"=>"27",
             "id_municipio"=>"866",
             "direccion"=>"N/A",
-            "genero"=>"N/A",
-            "celular"=> "N/A",
+            "genero"=>"Masculino",
+            "celular"=> "333333333",
             "id_autentication"=> "2",
         ]); 
     }
