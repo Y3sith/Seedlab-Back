@@ -10,14 +10,10 @@ use Illuminate\Http\Request;
 class UbicacionController extends Controller
 {
     public function listar_dep()
-{
-    $departamentos = Departamento::select('id', 'name')->get();
-    return response()->json($departamentos, 200, [
-        'Access-Control-Allow-Origin' => 'https://ruta.adsocidm.com',
-        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers' => 'X-Requested-With, Content-Type, X-Token-Auth, Authorization',
-    ], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
-}
+    {
+        $departamentos = Departamento::select('id', 'name')->get();
+        return response()->json($departamentos, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+    }
 
     public function listar_munxdep(Request $request)
     {
