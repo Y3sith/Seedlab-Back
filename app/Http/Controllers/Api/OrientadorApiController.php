@@ -45,14 +45,20 @@ class OrientadorApiController extends Controller
 
             $direccion = $data->input('direccion','Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
-            
-            DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac) {
-                Log::info($data->all());
+
+            $imagen_perfil = null;
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
+                $imagen_perfil = Storage::url($imagenPath);
+            }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac,$imagen_perfil) {
+                //Log::info($data->all());
                 $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $data['imagen_perfil'],
+                    $imagen_perfil,
                     $data['celular'],
                     $data['genero'],
                     $direccion,
