@@ -285,7 +285,7 @@ class SuperAdminController extends Controller
                 ];
             });
 
-            return response()->json($adminsConEstado, 200, [], JSON_NUMERIC_CHECK);
+            return response()->json($adminsConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
