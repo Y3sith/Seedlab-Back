@@ -28,12 +28,12 @@ class BannerSeeder extends Seeder
                 }
         
                 // Ruta de la imagen de origen y destino
-                $sourceImagePath = base_path('resources/imagen/1_1@300x-100 (1).jpg');
-                $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+                $sourceImagePath = base_path('resources/imagen/1_1@300x-100 (1).webp');
+                $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.webp';
                 $destinationImagePath = $bannersPath . '/' . $destinationImageName;
         
-                $sourceImagePaths = base_path('resources/imagen/2_1@300x-100.jpg');
-                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+                $sourceImagePaths = base_path('resources/imagen/2_1@300x-100.webp');
+                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.webp';
                 $destinationImagePaths = $bannersPath . '/' . $destinationImageNames;
         
                 // Copiar la imagen a la carpeta 'banners'

@@ -39,7 +39,7 @@ class AliadoSeeder extends Seeder
                 $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNUL.webp';
                 $destinationImagePath = $multimediaPath . '/' . $destinationImageName;
         
-                $sourceImagePaths = base_path('resources/imagen/home_Tecnoparque.webp');
+                $sourceImagePaths = base_path('resources/imagen/tecnoparque.webp');
                 $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1k.webp';
                 $destinationImagePaths = $multimediaPath . '/' . $destinationImageNames;
         
@@ -70,7 +70,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "camara_de_comercio.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=bS48a8OypPw&pp=ygUiY2FtYXJhIGRlIGNvbWVyY2lvIGRlIGJ1Y2FyYW1hbmdhIA%3D%3D",
                 "id_autentication" => 8,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 1,
                 "urlpagina" => "https://www.camaradirecta.com/"
             ],
             [
@@ -79,7 +79,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "ucc.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=tXoIVjVuYDQ&pp=ygUTdWNjIGRlIGJ1Y2FyYW1hbmdhIA%3D%3D",
                 "id_autentication" => 11,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 1,
                 "urlpagina" => "https://www.ucc.edu.co/"
             ],
             [
@@ -106,7 +106,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "otri.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=Ru-DzxPcBPc&pp=ygUQb3RyaSBidWNhcmFtYW5nYQ%3D%3D",
                 "id_autentication" => 9,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 1,
                 "urlpagina" => "https://www.otrieo.com/conocenos/otri/index.php"
             ],
             [
@@ -115,7 +115,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "unab.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=czUlii8WWDQ&pp=ygUQdWJhbiBidWNhcmFtYW5nYQ%3D%3D",
                 "id_autentication" => 10,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 1,
                 "urlpagina" => "https://unab.edu.co/"
             ],
             [
@@ -124,7 +124,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "c-emprende.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=_ltfgiv4RVw&pp=ygUKYyBlbXByZW5kZQ%3D%3D",
                 "id_autentication" => 12,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 1,
                 "urlpagina" => "https://www.innpulsacolombia.com/nuestros-programas/cemprende/"
             ],
             [
@@ -133,7 +133,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "tecnoparque.webp",
                 "ruta_multi" => $tecnoparqueimagen,
                 "id_autentication" => 13,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 2,
                 "urlpagina" => "https://www.sena.edu.co/es-co/formacion/Paginas/tecnoparques.aspx"
 
             ],
@@ -143,7 +143,7 @@ class AliadoSeeder extends Seeder
                 "logo" => "innpulsa.webp",
                 "ruta_multi" => $inpulsaimagen,
                 "id_autentication" => 14,
-                "id_tipo_dato" => 3,
+                "id_tipo_dato" => 2,
                 "urlpagina" => "https://www.innpulsacolombia.com/"
             ],
 
