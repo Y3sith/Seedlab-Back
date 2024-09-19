@@ -9,10 +9,13 @@ use App\Models\Asesoria;
 use App\Models\AsesoriaxAsesor;
 use App\Models\Emprendedor;
 use App\Models\HorarioAsesoria;
+use App\Models\Orientador;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\NotificacionAsesoria;
 
 class AsesoriasController extends Controller
 {
@@ -23,38 +26,62 @@ class AsesoriasController extends Controller
             if (Auth::user()->id_rol != 5) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
+    
             $emprendedor = Emprendedor::find($request->input('doc_emprendedor'));
             if (!$emprendedor) {
                 return response()->json(['message' => 'Emprendedor no encontrado'], 404);
             }
-
-            // Verificación del aliado, si se proporciona
-            $aliado = null;
-            if ($request->filled('nom_aliado')) {
-                $aliado = Aliado::where('nombre', $request->input('nom_aliado'))->first();
-                if (!$aliado) {
-                    return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
+    
+            $isOrientador = $request->input('isorientador') == 1;
+            $destinatario = null;
+    
+            if ($isOrientador) {
+                // Lógica para orientador
+                $orientador = Orientador::find($request->input('id_orientador'));
+                if (!$orientador) {
+                    return response()->json(['error' => 'No se encontró el orientador especificado.'], 404);
+                }
+                $destinatario = $orientador;
+            } else {
+                // Lógica para aliado
+                if ($request->filled('nom_aliado')) {
+                    $aliado = Aliado::where('nombre', $request->input('nom_aliado'))->first();
+                    if (!$aliado) {
+                        return response()->json(['error' => 'No se encontró ningún aliado con el nombre proporcionado.'], 404);
+                    }
+                    $destinatario = $aliado;
                 }
             }
-            if (is_null($aliado)&& $request->input('isorientador')==0) {
+    
+            if (!$destinatario) {
                 return response()->json(['message' => 'Necesitas asignar ya sea un aliado u orientador'], 400);
             }
+    
             $asesoria = Asesoria::create([
                 'Nombre_sol' => $request->input('nombre'),
                 'notas' => $request->input('notas'),
-                'isorientador' => $request->input('isorientador'),
+                'isorientador' => $isOrientador,
                 'asignacion' => $request->input('asignacion'),
                 'fecha' => $request->input('fecha'),
-                'id_aliado' => $aliado ? $aliado->id : null,
+                'id_aliado' => $isOrientador ? null : $destinatario->id,
+                'id_orientador' => $isOrientador ? $destinatario->id : null,
                 'doc_emprendedor' => $request->input('doc_emprendedor'),
             ]);
-            
+    
+            // Enviar correo al destinatario (aliado u orientador)
+            $destinatario->load('auth');
+            if ($destinatario->auth && $destinatario->auth->email) {
+                Mail::to($destinatario->auth->email)->send(new NotificacionAsesoria($asesoria, $destinatario, $emprendedor));
+            } else {
+                $tipo = $isOrientador ? 'orientador' : 'aliado';
+                \Log::warning("No se pudo enviar el correo. El {$tipo} no tiene un usuario o email asociado.", ['id' => $destinatario->id]);
+            }
+    
             return response()->json(['message' => 'La asesoría se ha solicitado con éxito'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
 
 
     public function asignarAsesoria(Request $request)
