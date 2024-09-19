@@ -285,11 +285,7 @@ class SuperAdminController extends Controller
                 ];
             });
 
-            return response()->json($adminsConEstado, 200, [
-                'Access-Control-Allow-Origin' => '*',
-                'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-                'Access-Control-Allow-Headers' => 'X-Requested-With, Content-Type, X-Token-Auth, Authorization',
-            ], JSON_NUMERIC_CHECK);
+            return response()->json($adminsConEstado, 200, [], JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
