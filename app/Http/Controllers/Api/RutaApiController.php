@@ -275,13 +275,13 @@ class RutaApiController extends Controller
                 if ($id_aliado) {
                     $query->where('id_aliado', $id_aliado);
                 }
-            }, 'actividades.aliado', 'actividades.asesor'])
+            }, 'actividades.aliado'])
             ->get();
 
         $ruta = $ruta->map(function ($r) {
             $r->actividades = $r->actividades->map(function ($actividad) {
-                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                unset($actividad->asesor);
+                // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+                // unset($actividad->asesor);
                 $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
                 $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
                 unset($actividad->aliado);
