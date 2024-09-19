@@ -39,20 +39,26 @@ class OrientadorApiController extends Controller
                 $response = 'La contraseña debe tener al menos 8 caracteres';
                 return response()->json(['message' => $response], $statusCode);
             }
-            if (Auth::user()->id_rol !== 1) {
+            if (Auth::user()->id_rol !== '1') {
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
 
             $direccion = $data->input('direccion','Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac','2000-01-01');
-            
-            DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac) {
-                Log::info($data->all());
+
+            $imagen_perfil = null;
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
+                $imagen_perfil = Storage::url($imagenPath);
+            }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac,$imagen_perfil) {
+                //Log::info($data->all());
                 $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $data['imagen_perfil'],
+                    $imagen_perfil,
                     $data['celular'],
                     $data['genero'],
                     $direccion,
@@ -165,7 +171,7 @@ class OrientadorApiController extends Controller
     public function mostrarOrientadores($status)
     {
 
-        if (Auth::user()->id_rol !== 1 && Auth::user()->id_rol !== 2) {
+        if (Auth::user()->id_rol !== '1' && Auth::user()->id_rol !== '2') {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 

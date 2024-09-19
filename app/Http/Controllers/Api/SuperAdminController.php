@@ -139,7 +139,6 @@ class SuperAdminController extends Controller
     public function crearSuperAdmin(Request $data)
     {
 
-
         try {
             $response = null;
             $statusCode = 200;
@@ -157,12 +156,18 @@ class SuperAdminController extends Controller
             $direccion = $data->input('direccion', 'Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
 
-            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac) {
+            $imagen_perfil = null;
+            if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
+                $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
+                $imagen_perfil = Storage::url($imagenPath);
+            }
+
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
                 $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
                     $data['documento'],
-                    $data['imagen_perfil'],
+                    $imagen_perfil,
                     $data['celular'],
                     $data['genero'],
                     $direccion,
@@ -280,7 +285,7 @@ class SuperAdminController extends Controller
                 ];
             });
 
-            return response()->json($adminsConEstado);
+            return response()->json($adminsConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -295,6 +300,26 @@ class SuperAdminController extends Controller
         try {
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
+            }
+
+            $requiredFields = [
+                'nombre',
+                'apellido',
+                'documento',
+                'celular',
+                'genero',
+                'direccion',
+                'id_tipo_documento',
+                'id_departamento',
+                'id_municipio',
+                'fecha_nac',
+                'celular',
+                'email'
+            ];
+            foreach ($requiredFields as $field) {
+                if (empty($request->input($field))) {
+                    return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
+                }
             }
 
             $admin = SuperAdmin::find($id);
@@ -334,7 +359,7 @@ class SuperAdminController extends Controller
 
                     $password = $request->input('password');
                     if ($password) {
-                        $user->password =  Hash::make($request->input('password'));
+                        $user->password = Hash::make($request->input('password'));
                     }
 
                     $newEmail = $request->input('email');
@@ -349,7 +374,7 @@ class SuperAdminController extends Controller
                     $user->estado = $request->input('estado');
                     $user->save();
                 }
-                return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
+                return response()->json(['message' => 'Superadministrador actualizado correctamente', $admin], 200);
             } else {
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
@@ -411,7 +436,7 @@ class SuperAdminController extends Controller
     {
 
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=3   && Auth::user()->id_rol !=4){
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permiso para esta funcion'], 400);
             }
             $aliados = Aliado::whereHas('auth', function ($query) {

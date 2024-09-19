@@ -12,28 +12,30 @@ class UbicacionController extends Controller
     public function listar_dep()
     {
         $departamentos = Departamento::select('id', 'name')->get();
-        return response()->json($departamentos, 200, [], JSON_UNESCAPED_UNICODE);
+        return response()->json($departamentos, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
     }
 
-    public function listar_munxdep(Request $request)        
-{
-    // Obtener el ID del departamento del request
-    $idDepartamento = $request->input('dep_id');
+    public function listar_munxdep(Request $request)
+    {
+        // Obtener el ID del departamento del request y convertirlo a entero
+        $idDepartamento = intval($request->input('dep_id'));
 
-    // Buscar el departamento por su ID
-    $departamento = Departamento::where("id", $idDepartamento)->first();
+        // Buscar el departamento por su ID
+        $departamento = Departamento::where("id", $idDepartamento)->first();
 
-    if (!$departamento) {
-        return response()->json(['error' => 'Departamento no encontrado'], 404);
+        if (!$departamento) {
+            return response()->json(['error' => 'Departamento no encontrado'], 404);
+        }
+
+        // Obtener los municipios asociados con el ID del departamento
+        $municipios = Municipio::where('id_departamento', $departamento->id)
+            ->select('id', 'nombre')
+            ->get();
+
+        return response()->json($municipios);
     }
 
-    // Obtener los municipios asociados con el ID del departamento
-    $municipios = Municipio::where('id_departamento', $departamento->id)
-        ->select('id', 'nombre')
-        ->get();
 
-    return response()->json($municipios);
-}   
 
 }
 
