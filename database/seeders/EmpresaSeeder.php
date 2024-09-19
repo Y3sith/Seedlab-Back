@@ -14,7 +14,7 @@ class EmpresaSeeder extends Seeder
     public function run(): void
     {
         Empresa::create([
-            "documento"=> "1",
+            "documento"=> "12345678",
             "nombre"=> "Lenovo",
             "cargo"=> "jefe",
             "razonSocial"=> "varias cosas",
@@ -32,7 +32,7 @@ class EmpresaSeeder extends Seeder
             "id_emprendedor"=> "1098476011"
         ]);
         Empresa::create([
-            "documento"=> "2",
+            "documento"=> "223456789",
             "nombre"=> "Dell",
             "cargo"=> "jefe",
             "razonSocial"=> "varias cosas",
@@ -52,7 +52,7 @@ class EmpresaSeeder extends Seeder
 
 
         Empresa::create([
-            "documento"=> "3",
+            "documento"=> "34567891",
             "nombre"=> "Homecenter",
             "cargo"=> "jefe",
             "razonSocial"=> "muchas cosas",
@@ -71,7 +71,7 @@ class EmpresaSeeder extends Seeder
         ]);
 
         Empresa::create([
-            "documento"=> "4",
+            "documento"=> "456789123",
             "nombre"=> "FritoLay",
             "cargo"=> "jefe",
             "razonSocial"=> "muchas cosas",
@@ -91,7 +91,7 @@ class EmpresaSeeder extends Seeder
 
 
         Empresa::create([
-            "documento"=> "5",
+            "documento"=> "567891234",
             "nombre"=> "Sony",
             "cargo"=> "jefe",
             "razonSocial"=> " cosas",
@@ -110,7 +110,7 @@ class EmpresaSeeder extends Seeder
         ]);
 
         Empresa::create([
-            "documento"=> "6",
+            "documento"=> "678912345",
             "nombre"=> "Xiaomi",
             "cargo"=> "jefe",
             "razonSocial"=> " cosas",

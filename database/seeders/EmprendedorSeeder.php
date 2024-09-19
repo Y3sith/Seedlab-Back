@@ -22,21 +22,6 @@ class EmprendedorSeeder extends Seeder
             File::makeDirectory($fotoPerfilPath, 0755, true);
         }
 
-        $sourceImagePaths = base_path('resources/imagen/usuario.jpg');
-                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
-                $destinationImagePaths = $fotoPerfilPath . '/' . $destinationImageNames;
-       
-                // Copiar la imagen a la carpeta 'banners
-                if (File::exists($sourceImagePaths)) {
-                    File::copy($sourceImagePaths, $destinationImagePaths);
-                    $this->command->info('The image has been copied to the banners folder successfully!');
-                } else {
-                    $this->command->error('The source image does not exist.');
-                }
-       
-                // URL de la imagen para guardar en la base de datos
-                $bannerUrl2 = 'storage/fotoPerfil/' . $destinationImageNames;
-
         Emprendedor::create([
             "documento"=> "1098476011",
             "nombre"=> "marly",

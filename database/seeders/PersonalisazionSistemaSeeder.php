@@ -17,12 +17,12 @@ class PersonalisazionSistemaSeeder extends Seeder
     {
         $logosPath = storage_path('app/public/logos');
 
-        $sourceImagePath = base_path('resources/imagen/logoSeed.png');
-                $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg';
+        $sourceImagePath = base_path('resources/imagen/logoSeed.webp');
+                $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.webp';
                 $destinationImagePath = $logosPath . '/' . $destinationImageName;
         
-                $sourceImagePaths = base_path('resources/imagen/logoSeed blanco.png');
-                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.jpg';
+                $sourceImagePaths = base_path('resources/imagen/logoSeed blanco.webp');
+                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1kNW5OzNULndSD.webp';
                 $destinationImagePaths = $logosPath . '/' . $destinationImageNames;
         
                 // Copiar la imagen a la carpeta 'banners'
