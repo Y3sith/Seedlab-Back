@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Mail\NotificacionAsesoriaAsesor;
+use App\Mail\NotificacionAsesoriaEmprendedor;
 use App\Models\Aliado;
 use App\Models\Asesor;
 use App\Models\Asesoria;
@@ -186,7 +187,7 @@ class AsesoriasController extends Controller
                     'message' => 'No tienes permisos para realizar esta acción'
                 ], 403);
             }
-
+            $destinatario = null;
             $idAsesoria = $request->input('id_asesoria');
             $fecha = $request->input('fecha');
 
@@ -195,11 +196,27 @@ class AsesoriasController extends Controller
                 return response()->json(['message' => 'La asesoría no existe'], 404);
             }
 
+            $docEmprendedor = $asesoria->doc_emprendedor;
+            $emprendedor = Emprendedor::where('documento', $docEmprendedor)->first();
+            if (!$emprendedor) {
+                return response()->json(['message' => 'El emprendedor no existe'], 404);
+            }
+            $destinatario = $emprendedor;
+
+            $asesorxasesor = AsesoriaxAsesor::find($idAsesoria);
+            if (!$asesorxasesor) {
+                return response()->json(['message' => 'la asesoria no fue encontrada en asesoria por asesor'], 404);
+            }
+            
+            $id_asesorAsignado = $asesorxasesor->id_asesor;
+
+            $asesor = Asesor::find($id_asesorAsignado);
+            $nombreAsesor = $asesor ? $asesor->nombre : 'Asesor desconocido';
+
             $existingHorario = HorarioAsesoria::where('id_asesoria', $idAsesoria)->first();
             if ($existingHorario) {
                 return response()->json(['message' => 'La asesoría ya tiene una fecha asignada'], 400);
             }
-
      
             $horarioAsesoria = HorarioAsesoria::create([
                 'observaciones' => $request->input('observaciones') ?  $request->input('observaciones') :"Ninguna observación",
@@ -207,6 +224,11 @@ class AsesoriasController extends Controller
                 'estado' => "Pendiente",
                 'id_asesoria' => $request->input('id_asesoria'),
             ]);
+
+            $destinatario->load('auth');
+         if ($destinatario->auth && $destinatario->auth->email) {
+            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaEmprendedor( $destinatario, $asesoria,  $nombreAsesor, $emprendedor, $horarioAsesoria));
+        }
 
             return response()->json(['message' => 'Se le a asignado un horario a su Asesoria'], 201);
         } catch (Exception $e) {

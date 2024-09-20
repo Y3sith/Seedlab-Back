@@ -9,35 +9,40 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class NotificacionAsesoria extends Mailable
+class NotificacionAsesoriaEmprendedor extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $asesoria;
+    
     public $destinatario;
+    public $asesoria;
+    public $nombreAsesor;
     public $emprendedor;
-    public $isOrientador;
+    public $horarioAsesoria;
 
-    public function __construct($asesoria, $destinatario, $emprendedor, $isOrientador)
+    public function __construct($destinatario, $asesoria, $nombreAsesor, $emprendedor, $horarioAsesoria)
     {
-        $this->asesoria = $asesoria;
         $this->destinatario = $destinatario;
+        $this->asesoria = $asesoria;
+        $this->nombreAsesor = $nombreAsesor;
         $this->emprendedor = $emprendedor;
-        $this->isOrientador = $isOrientador;
+        $this->horarioAsesoria = $horarioAsesoria;
     }
 
     public function build()
     {
-        $tipoDestinatario = $this->isOrientador ? 'Orientador' : 'Aliado';
 
     return $this
-        ->subject("Nueva Asesoría Asignada para {$tipoDestinatario}")
-        ->view('notificacion-asesoria')
+        ->subject("Asesoria Asignada Correctamente")
+        ->view('notificacion-asesoria-emprendedor')
         ->with([
-            'tipoDestinatario' => $tipoDestinatario,
             'destinatario' => $this->destinatario,
             'asesoria' => $this->asesoria,
+            'nombreAsesor' => $this->nombreAsesor,
             'emprendedor' => $this->emprendedor,
+            'horarioAsesoria' => $this->horarioAsesoria,
         ]);
 }
+
+    
 }
