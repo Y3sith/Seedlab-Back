@@ -99,22 +99,22 @@ class Contenido_por_LeccionController extends Controller
     {
         //editar solo el asesor
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol !=3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
                 return response()->json(["message" => "No tienes permisos para editar contenido"], 401);
             }
             $contenidoxleccion = ContenidoLeccion::find($id);
             if (!$contenidoxleccion) {
                 return response()->json(['error' => 'contenido no encontrado'], 404);
-            } 
+            }
 
             if ($request->hasFile('fuente_contenido')) {
                 // Si se está subiendo un nuevo archivo
                 $file = $request->file('fuente_contenido');
                 $fileName = time() . '_' . $file->getClientOriginalName();
-                
+
                 // Determinar el tipo de archivo
                 $mimeType = $file->getMimeType();
-                
+
                 if (strpos($mimeType, 'image') !== false) {
                     $folder = 'imagenes';
                 } elseif ($mimeType === 'application/pdf') {
@@ -122,18 +122,18 @@ class Contenido_por_LeccionController extends Controller
                 } else {
                     return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
                 }
-                
+
                 // Eliminar el archivo anterior si existe
                 if ($contenidoxleccion->fuente_contenido && Storage::exists(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido))) {
                     Storage::delete(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido));
                 }
-                
+
                 // Guardar el nuevo archivo
                 $path = $file->storeAs("public/$folder", $fileName);
                 $contenidoxleccion->fuente_contenido = str_replace('public', 'storage', $path);
             } elseif ($request->filled('fuente_contenido')) {
                 $newFuenteContenido = $request->input('fuente_contenido');
-                
+
                 // Si es una URL (asumiendo que es de YouTube)
                 if (filter_var($newFuenteContenido, FILTER_VALIDATE_URL)) {
                     // Tu código existente para manejar URLs
@@ -185,10 +185,11 @@ class Contenido_por_LeccionController extends Controller
         return response()->json($dato);
     }
 
-    public function verContenidoPorLeccion($id){
-        if (Auth::user()->id_rol!= 1 && Auth::user()->id_rol!= 3 && Auth::user()->id_rol!= 4) {
+    public function verContenidoPorLeccion($id)
+    {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
             return response()->json([
-               'messaje' => 'No tienes permisos para acceder a esta ruta'
+                'messaje' => 'No tienes permisos para acceder a esta ruta'
             ], 401);
         }
         $datos = ContenidoLeccion::where('id_leccion', $id)->get();

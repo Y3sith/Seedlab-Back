@@ -39,7 +39,7 @@ class OrientadorApiController extends Controller
                 $response = 'La contraseña debe tener al menos 8 caracteres';
                 return response()->json(['message' => $response], $statusCode);
             }
-            if (Auth::user()->id_rol !== 1) {
+            if (Auth::user()->id_rol !== '1') {
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
 
@@ -171,7 +171,7 @@ class OrientadorApiController extends Controller
     public function mostrarOrientadores($status)
     {
 
-        if (Auth::user()->id_rol !== 1 && Auth::user()->id_rol !== 2) {
+        if (Auth::user()->id_rol !== '1' && Auth::user()->id_rol !== '2') {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
