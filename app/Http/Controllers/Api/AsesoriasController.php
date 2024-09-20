@@ -66,7 +66,7 @@ class AsesoriasController extends Controller
                 'id_orientador' => $isOrientador ? $destinatario->id : null,
                 'doc_emprendedor' => $request->input('doc_emprendedor'),
             ]);
-    
+            
             // Enviar correo al destinatario (aliado u orientador)
             $destinatario->load('auth');
         if ($destinatario->auth && $destinatario->auth->email) {
