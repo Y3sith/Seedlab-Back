@@ -211,7 +211,6 @@ class AsesoriasController extends Controller
             $id_asesorAsignado = $asesorxasesor->id_asesor;
 
             $asesor = Asesor::find($id_asesorAsignado);
-            $nombreAsesor = $asesor ? $asesor->nombre : 'Asesor desconocido';
 
             $existingHorario = HorarioAsesoria::where('id_asesoria', $idAsesoria)->first();
             if ($existingHorario) {
@@ -227,7 +226,7 @@ class AsesoriasController extends Controller
 
             $destinatario->load('auth');
          if ($destinatario->auth && $destinatario->auth->email) {
-            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaEmprendedor( $destinatario, $asesoria,  $nombreAsesor, $emprendedor, $horarioAsesoria));
+            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaEmprendedor( $destinatario, $asesoria,  $asesor, $emprendedor, $horarioAsesoria));
         }
 
             return response()->json(['message' => 'Se le a asignado un horario a su Asesoria'], 201);

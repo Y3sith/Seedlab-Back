@@ -74,16 +74,19 @@
 <body>
     <div class="container">
         <h1>Asesoría Asignada</h1>
-        <h3>Hola, {{$emprendedor->nombre}}</h3>
-        <h3>Tu asesoria ya fue  con los siguientes detalles:</h3>
+        <h3>Hola, {{$emprendedor->nombre}} {{$emprendedor->apellido}}</h3>
+        <h3>Tu asesoria ya fue asignada con los siguientes detalles:</h3>
 
         <ul>
             <li>Nombre de la solicitud: {{ $asesoria->Nombre_sol }}</li>
-            <li>Fecha: {{ $asesoria->fecha }}</li>
-            <li>Emprendedor: {{ $nombreEmprendedor }}</li>
+            <li>Fecha de solicitud: {{ $asesoria->fecha }}</li>
+            <li>Fecha y hora de encuentro: {{ $horarioAsesoria->fecha }}</li>
+            <li>Nombre del asesor: {{ $asesor->nombre }} {{ $asesor->apellido }}</li>
+            <li>Detalles de la asesoria: {{ $horarioAsesoria->observaciones }}</li>
+
         </ul>
 
-        <h3 >Te invitamos a ingresar al sistema para asignar una fecha para esta asesoria.</h3>
+        <h3 >¡Prepárate para tu asesoría! Asegúrate de tener todas tus preguntas listas para aprovechar al máximo la sesión y resolver cualquier duda que tengas. Estamos aquí para ayudarte a alcanzar tus objetivos.</h3>
 
         <div class="contenedor-boton">
             <button class="boton-personalizado">

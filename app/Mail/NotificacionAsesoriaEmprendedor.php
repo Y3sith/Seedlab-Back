@@ -16,15 +16,15 @@ class NotificacionAsesoriaEmprendedor extends Mailable
     
     public $destinatario;
     public $asesoria;
-    public $nombreAsesor;
+    public $asesor;
     public $emprendedor;
     public $horarioAsesoria;
 
-    public function __construct($destinatario, $asesoria, $nombreAsesor, $emprendedor, $horarioAsesoria)
+    public function __construct($destinatario, $asesoria, $asesor, $emprendedor, $horarioAsesoria)
     {
         $this->destinatario = $destinatario;
         $this->asesoria = $asesoria;
-        $this->nombreAsesor = $nombreAsesor;
+        $this->asesor = $asesor;
         $this->emprendedor = $emprendedor;
         $this->horarioAsesoria = $horarioAsesoria;
     }
@@ -34,11 +34,11 @@ class NotificacionAsesoriaEmprendedor extends Mailable
 
     return $this
         ->subject("Asesoria Asignada Correctamente")
-        ->view('notificacion-asesoria-emprendedor')
+        ->view('notificacion-asesorias-emprendedor')
         ->with([
             'destinatario' => $this->destinatario,
             'asesoria' => $this->asesoria,
-            'nombreAsesor' => $this->nombreAsesor,
+            'asesor' => $this->asesor,
             'emprendedor' => $this->emprendedor,
             'horarioAsesoria' => $this->horarioAsesoria,
         ]);
