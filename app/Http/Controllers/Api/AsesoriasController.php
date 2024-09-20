@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Mail\NotificacionAsesoriaAsesor;
 use App\Mail\NotificacionAsesoriaEmprendedor;
+use App\Mail\NotificacionesAsesoriaAliado;
 use App\Models\Aliado;
 use App\Models\Asesor;
 use App\Models\Asesoria;
@@ -349,14 +350,28 @@ class AsesoriasController extends Controller
         if (!$asesoria) {
             return response()->json(['message' => 'Asesoría no encontrada'], 404);
         }
+        $destinatario = null;
+        $doc_emprendedor = $asesoria->doc_emprendedor;
 
+        $emprendedor = Emprendedor::find($doc_emprendedor);
+            if (!$emprendedor) {
+                return response()->json(['message' => 'Emprendedor no encontrado'], 404);
+            }
+        
         $aliado = Aliado::where('nombre', $nombreAliado)->first();
         if (!$aliado) {
             return response()->json(['message' => 'Aliado no encontrado'], 404);
         }
-
+        
         $asesoria->id_aliado = $aliado->id;
         $asesoria->save();
+        
+        $destinatario = $aliado;
+
+        $destinatario->load('auth');
+         if ($destinatario->auth && $destinatario->auth->email) {
+            Mail::to($destinatario->auth->email)->send(new NotificacionesAsesoriaAliado( $destinatario, $asesoria, $emprendedor));
+        }
 
         return response()->json(['message' => 'Aliado asignado correctamente'], 200);
     }
