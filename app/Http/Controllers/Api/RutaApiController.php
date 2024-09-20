@@ -269,35 +269,13 @@ class RutaApiController extends Controller
         $estado = $request->input('estado', 'Activo');
         $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-        // $ruta = Ruta::where('id', $id)
-        //     ->with(['actividades' => function ($query) use ($estadoBool, $id_aliado) {
-        //         $query->where('estado', $estadoBool);
-        //         if ($id_aliado) {
-        //             $query->where('id_aliado', $id_aliado);
-        //         }
-        //     }, 'actividades.aliado'])
-        //     ->get();
-
-        // $ruta = $ruta->map(function ($r) {
-        //     $r->actividades = $r->actividades->map(function ($actividad) {
-        //         // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-        //         // unset($actividad->asesor);
-        //         $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-        //         $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-        //         unset($actividad->aliado);
-        //         return $actividad;
-        //     });
-        //     return $r;
-        // });
-
-        // return response()->json($ruta);
-
         $ruta = Ruta::where('id', $id)->first();
         if (!$ruta) {
             return response()->json(['error' => 'Ruta no encontrada'], 404);
         }
         $actividades = $ruta->actividades()
         ->where('estado', $estadoBool)
+        ->where('id_aliado', $id_aliado)
         ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
         ->with([
             'aliado:id,nombre',
@@ -306,16 +284,16 @@ class RutaApiController extends Controller
             ])
         ->get()
         ->map(function ($actividad) {
-            $nombresAsesores = $actividad->nivel->map(function ($nivel) {
+            $primerAsesor = $actividad->nivel->map(function ($nivel) {
                 return $nivel->asesor ? $nivel->asesor->nombre : 'Ninguno';
-            });
+            })->first() ?? 'Ninguno';
             return [
                 'id' => $actividad->id,
                 'nombre' => $actividad->nombre,
                 'id_ruta' => $actividad->id_ruta,
                 'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado',
-                'id_asesor' => $nombresAsesores, // Mostrar IDs de asesores
+                'id_asesor' => $primerAsesor
             ];
         });
 
