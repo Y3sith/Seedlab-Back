@@ -86,6 +86,23 @@ class NivelesController extends Controller
         }
     }
 
+
+
+
+    public function NivelxActividadxAsesor($id)
+    {
+        //mostrar niveles asociados a una actividad por el id del asesor
+        try {
+            if (Auth::user()->id_rol != 4) {
+                return response()->json(['message' => 'No tienes permisos '], 401);
+            }
+            $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre','id_asesor')->get();
+            return response()->json($nivel);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      */
