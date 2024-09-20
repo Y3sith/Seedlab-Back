@@ -136,7 +136,7 @@ class AsesoriasController extends Controller
                 return response()->json(['error' => 'No se encontró ningún asesor con el nombre proporcionado.'], 404);
             }
             $destinatario = $asesorexiste;
-
+        
         if (!$asesorexiste) {
             return response()->json(['message' => 'Este asesor no existe en el sistema'], 404);
         }
@@ -156,9 +156,12 @@ class AsesoriasController extends Controller
          $asesor = Asesor::find($request->input('id_asesor'));
          $nombreAsesor = $asesor ? $asesor->nombre : 'Asesor desconocido';
 
+         $emprendedor = Emprendedor::find($asesoria->doc_emprendedor);
+         $nombreEmprendedor = $emprendedor ? $emprendedor->nombre : 'Emprendedor desconocido';
+
          $destinatario->load('auth');
          if ($destinatario->auth && $destinatario->auth->email) {
-            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaAsesor($newasesoria, $destinatario, $asesoria,  $nombreAsesor));
+            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaAsesor( $destinatario, $asesoria,  $nombreAsesor, $nombreEmprendedor));
         } 
 
             return response()->json(['message' => 'Se ha asignado correctamente el asesor para esta asesoria'], 201);
