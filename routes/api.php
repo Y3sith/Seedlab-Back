@@ -221,7 +221,7 @@ Route::group([
     Route::put('/editar_nivel/{id}', [NivelesController::class, 'editarNivel']);
     Route::get('/listar_Nivel', [NivelesController::class, 'listarNiveles']);
     Route::get('/nivelXactividad/{id}', [NivelesController::class, 'NivelxActividad']);
-    Route::get('/NivelxActividadxAsesor/{id}', [NivelesController::class, 'NivelxActividad']);
+    Route::get('/NivelxActividadxAsesor/{id_activida}/{id_asesor}', [NivelesController::class, 'NivelxActividad']);
 });
 
 //Leccion
