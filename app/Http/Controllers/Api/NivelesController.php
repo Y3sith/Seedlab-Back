@@ -79,7 +79,7 @@ class NivelesController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permisos '], 401);
             }
-            $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre')->get();
+            $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre','id_asesor')->get();
             return response()->json($nivel);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);

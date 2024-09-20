@@ -189,7 +189,7 @@ Route::group([
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
     Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
-    Route::get('/actnividadxAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxAsesor']);
+    Route::get('/actnividadxNivelAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxNivelAsesor']);
     Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
     Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
 

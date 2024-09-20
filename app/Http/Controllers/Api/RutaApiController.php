@@ -306,7 +306,7 @@ class RutaApiController extends Controller
     }
 }
 
-public function actnividadxAsesor($id, $id_asesor, Request $request)
+public function actnividadxNivelAsesor($id, $id_asesor, Request $request)
 {
     try {
         if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
@@ -317,27 +317,40 @@ public function actnividadxAsesor($id, $id_asesor, Request $request)
         $estadoBool = $estado === 'Activo' ? 1 : 0;
 
         $ruta = Ruta::where('id', $id)
-        ->with(['actividades' => function ($query) use ($estadoBool, $id_asesor) {
-            $query->where('estado', $estadoBool);
-            if ($id_asesor) {
-                $query->where('id_asesor', $id_asesor);
-            }
-        }, 'actividades.aliado', 'actividades.asesor'])
-        ->get();
+            ->with(['actividades' => function ($query) use ($estadoBool, $id_asesor) {
+                $query->where('estado', $estadoBool)
+                    ->whereHas('nivel', function ($nivelQuery) use ($id_asesor) {
+                        $nivelQuery->where('id_asesor', $id_asesor);
+                    })
+                    ->with(['aliado:id,nombre', 'nivel.asesor:id,nombre']);
+            }])
+            ->first();
 
-        $ruta = $ruta->map(function ($r) {
-            $r->actividades = $r->actividades->map(function ($actividad) {
-                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                unset($actividad->asesor);
-                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                unset($actividad->aliado);
-                return $actividad;
-            });
-            return $r;
-        });
+        // Verificar si se encontró la ruta
+        if (!$ruta) {
+            return response()->json(['error' => 'Ruta no encontrada'], 404);
+        }
 
-        return response()->json($ruta);
+        // Formatear la respuesta
+        $respuesta = [
+            'id' => $ruta->id,
+            'actividades' => $ruta->actividades->map(function ($actividad) use ($id_asesor) {
+                // Filtrar el nivel exacto que tenga el id_asesor buscado
+                $asesorNombre = $actividad->nivel->firstWhere('id_asesor', $id_asesor)?->asesor->nombre ?? 'Ninguno';
+
+                return [
+                    'id' => $actividad->id,
+                    'nombre' => $actividad->nombre,
+                    'estado' => $actividad->estado ? 'Activo' : 'Inactivo',
+                    'id_aliado' => $actividad->aliado->nombre ?? 'Sin aliado',
+                    'id_asesor' => $asesorNombre,
+                ];
+            }),
+        ];
+
+        // Retornar la respuesta en formato JSON
+        return response()->json($respuesta);
+
     } catch (Exception $e) {
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
