@@ -45,7 +45,8 @@
             <h3>Estimado usuario,recibes este correo electrónico porque hemos recibido una solicitud de restablecimiento de contraseña para tu cuenta.</h3>
             <h3>Tu nueva contraseña temporal es:</h3>
             <div class="password">{{$temporaryPassword}}
-            <h5>Una vez dentro puedes cambiarla en la opcion de "Mi perfil"</h5>
+                <h5>Este código expirará en 20 minutos.</h5>
+                <h5>Una vez dentro debes cambiarla en la opción de "Mi perfil".</h5>
             </div>
         </div>
     </div>
