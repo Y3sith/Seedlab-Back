@@ -36,12 +36,10 @@ class AsesoriasController extends Controller
             $destinatario = null;
     
             if ($isOrientador) {
-                // Lógica para orientador
-                $orientador = Orientador::find($request->input('id_orientador'));
-                if (!$orientador) {
-                    return response()->json(['error' => 'No se encontró el orientador especificado.'], 404);
+                $destinatario = $this->siguientOrientador();
+                if (!$destinatario) {
+                    return response()->json(['error' => 'No hay orientadores activos disponibles.'], 400);
                 }
-                $destinatario = $orientador;
             } else {
                 // Lógica para aliado
                 if ($request->filled('nom_aliado')) {
@@ -70,18 +68,55 @@ class AsesoriasController extends Controller
     
             // Enviar correo al destinatario (aliado u orientador)
             $destinatario->load('auth');
-            if ($destinatario->auth && $destinatario->auth->email) {
-                Mail::to($destinatario->auth->email)->send(new NotificacionAsesoria($asesoria, $destinatario, $emprendedor));
-            } else {
-                $tipo = $isOrientador ? 'orientador' : 'aliado';
-                \Log::warning("No se pudo enviar el correo. El {$tipo} no tiene un usuario o email asociado.", ['id' => $destinatario->id]);
-            }
+        if ($destinatario->auth && $destinatario->auth->email) {
+            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoria($asesoria, $destinatario, $emprendedor, $isOrientador));
+        } else {
+            $tipo = $isOrientador ? 'orientador' : 'aliado';
+            //\Log::warning("No se pudo enviar el correo. El {$tipo} no tiene un usuario o email asociado.", ['id' => $destinatario->id]);
+        }
     
             return response()->json(['message' => 'La asesoría se ha solicitado con éxito'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    private function siguientOrientador()
+{
+    // Obtener todos los orientadores activos
+    $orientadoresActivos = Orientador::whereHas('auth', function ($query) {
+        $query->where('estado', 1);
+    })->get();
+
+    if ($orientadoresActivos->isEmpty()) {
+        return null;
+    }
+
+    // Obtener la última asesoría asignada a un orientador
+    $ultimaAsesoria = Asesoria::where('isorientador', true)
+        ->orderBy('id', 'desc')
+        ->first();
+
+    if (!$ultimaAsesoria) {
+        // Si no hay asesorías previas, devolver el primer orientador
+        return $orientadoresActivos->first();
+    }
+
+    // Encontrar el índice del último orientador asignado
+    $ultimoIndex = $orientadoresActivos->search(function ($orientador) use ($ultimaAsesoria) {
+        return $orientador->id == $ultimaAsesoria->id_orientador;
+    });
+
+    // Si no se encuentra (puede pasar si el orientador ya no está activo), comenzar desde el principio
+    if ($ultimoIndex === false) {
+        return $orientadoresActivos->first();
+    }
+
+    // Calcular el índice del próximo orientador
+    $proximoIndex = ($ultimoIndex + 1) % $orientadoresActivos->count();
+
+    return $orientadoresActivos[$proximoIndex];
+}
 
 
     public function asignarAsesoria(Request $request)

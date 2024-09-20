@@ -14,21 +14,24 @@ class NotificacionAsesoria extends Mailable
     use Queueable, SerializesModels;
 
     public $asesoria;
-    public $aliado;
+    public $destinatario;
     public $emprendedor;
+    public $isOrientador;
 
-    public function __construct($asesoria, $aliado, $emprendedor)
+    public function __construct($asesoria, $destinatario, $emprendedor, $isOrientador)
     {
         $this->asesoria = $asesoria;
-        $this->aliado = $aliado;
+        $this->destinatario = $destinatario;
         $this->emprendedor = $emprendedor;
+        $this->isOrientador = $isOrientador;
     }
 
     public function build()
     {
-        $greeting = '<html><body><h1>Nueva Asesoría Asignada</h1>';
+        $tipoDestinatario = $this->isOrientador ? 'Orientador' : 'Aliado';
+        $greeting = "<html><body><h1>Nueva Asesoría Asignada para {$tipoDestinatario}</h1>";
 
-        $content = "$greeting<p>Hola {$this->aliado->nombre},</p>";
+        $content = "$greeting<p>Hola {$this->destinatario->auth->name},</p>";
         $content .= "<p>Se te ha asignado una nueva asesoría con los siguientes detalles:</p>";
         $content .= "<ul>";
         $content .= "<li>Nombre de la solicitud: {$this->asesoria->Nombre_sol}</li>";
@@ -41,8 +44,8 @@ class NotificacionAsesoria extends Mailable
 
         return $this
         //->to($this->aliado->user->email)
-        ->view('temporary-password')
-        ->subject('Nueva Asesoría Asignada')
+        //->view('temporary-password')
+        ->subject("Nueva Asesoría Asignada para {$tipoDestinatario}")
         ->html($content);
 }
 
