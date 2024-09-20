@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NotificacionAsesoriaAsesor;
 use App\Models\Aliado;
 use App\Models\Asesor;
 use App\Models\Asesoria;
@@ -127,11 +128,14 @@ class AsesoriasController extends Controller
                     'message' => 'No tienes permisos para realizar esta acción'
                 ], 403);
             }
+            $destinatario = null;
             $asesoriaexiste = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
 
             $asesorexiste = Asesor::where('id', $request->input('id_asesor'))->first();
-
-            
+            if(!$asesorexiste){
+                return response()->json(['error' => 'No se encontró ningún asesor con el nombre proporcionado.'], 404);
+            }
+            $destinatario = $asesorexiste;
 
         if (!$asesorexiste) {
             return response()->json(['message' => 'Este asesor no existe en el sistema'], 404);
@@ -148,6 +152,14 @@ class AsesoriasController extends Controller
          $asesoria = Asesoria::find($request->input('id_asesoria'));
          $asesoria->asignacion = 1; // Cambia este valor según el estado deseado
          $asesoria->save();
+
+         $asesor = Asesor::find($request->input('id_asesor'));
+         $nombreAsesor = $asesor ? $asesor->nombre : 'Asesor desconocido';
+
+         $destinatario->load('auth');
+         if ($destinatario->auth && $destinatario->auth->email) {
+            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaAsesor($newasesoria, $destinatario, $asesoria,  $nombreAsesor));
+        } 
 
             return response()->json(['message' => 'Se ha asignado correctamente el asesor para esta asesoria'], 201);
         } catch (Exception $e) {
