@@ -82,7 +82,7 @@
             <li>Emprendedor: {{ $emprendedor->nombre }}</li>
         </ul>
 
-        <h3 >Te invitamos a ingresar al sistema para asignar un aliado para esa asesoria.</h3>
+        <h3 >Te invitamos a ingresar al sistema para direccionar la asesoria</h3>
 
         <div class="contenedor-boton">
             <button class="boton-personalizado">
