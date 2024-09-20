@@ -31,7 +31,6 @@ class NivelesController extends Controller
      */
     public function store(Request $request)
     {
-        //crear nivel solo asesor
         try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
@@ -47,6 +46,7 @@ class NivelesController extends Controller
 
             $niveles = Nivel::create([
                 'nombre' => $request->nombre,
+                'id_asesor' => $request->id_asesor,
                 'id_actividad' => $request->id_actividad,
             ]);
             return response()->json(['message' => 'Nivel creado con éxito ', $niveles], 201);
@@ -109,6 +109,7 @@ class NivelesController extends Controller
                 return response()->json(["error" => "Nivel no encontrado"], 404);
             } else {
                 $niveles->nombre = $request->nombre;
+                $niveles->id_asesor = $request->id_asesor;
                 $niveles->update();
                 return response(["messsaje" => "Nivel actualizado correctamente"], 200);
             }

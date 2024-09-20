@@ -222,32 +222,38 @@ class RutaApiController extends Controller
     public function actnivleccontXruta($id, Request $request)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
+            if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
     
             $estado = $request->input('estado', 'Activo');
-            $estadoBool = $estado === 'Activo' ? 1 : 0;
-    
-            $ruta = Ruta::where('id', $id)
-                ->with(['actividades' => function ($query) use ($estadoBool) {
-                    $query->where('estado', $estadoBool);
-                }, 'actividades.aliado'])
-                ->get();
-    
-            $ruta = $ruta->map(function ($r) {
-                $r->actividades = $r->actividades->map(function ($actividad) {
-                    $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                    unset($actividad->asesor);
-                    $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-                    $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                    unset($actividad->aliado);
-                    return $actividad;
-                });
-                return $r;
+        $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+        $ruta = Ruta::where('id', $id)->first();
+
+        if (!$ruta) {
+            return response()->json(['error' => 'Ruta no encontrada'], 404);
+        }
+
+        $actividades = $ruta->actividades()
+            ->where('estado', $estadoBool)
+            ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
+            ->with(['aliado:id,nombre'])
+            ->get()
+            ->map(function ($actividad) {
+                return [
+                    'id' => $actividad->id,
+                    'nombre' => $actividad->nombre,
+                    'id_ruta' => $actividad->id_ruta,
+                    'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
+                    'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado'
+                ];
             });
-    
-            return response()->json($ruta);
+
+        return response()->json([
+            'id' => $ruta->id,
+            'actividades' => $actividades
+        ]);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -263,28 +269,38 @@ class RutaApiController extends Controller
         $estado = $request->input('estado', 'Activo');
         $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-        $ruta = Ruta::where('id', $id)
-            ->with(['actividades' => function ($query) use ($estadoBool, $id_aliado) {
-                $query->where('estado', $estadoBool);
-                if ($id_aliado) {
-                    $query->where('id_aliado', $id_aliado);
-                }
-            }, 'actividades.aliado', 'actividades.asesor'])
-            ->get();
-
-        $ruta = $ruta->map(function ($r) {
-            $r->actividades = $r->actividades->map(function ($actividad) {
-                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                unset($actividad->asesor);
-                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                unset($actividad->aliado);
-                return $actividad;
-            });
-            return $r;
+        $ruta = Ruta::where('id', $id)->first();
+        if (!$ruta) {
+            return response()->json(['error' => 'Ruta no encontrada'], 404);
+        }
+        $actividades = $ruta->actividades()
+        ->where('estado', $estadoBool)
+        ->where('id_aliado', $id_aliado)
+        ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
+        ->with([
+            'aliado:id,nombre',
+            'nivel:id,id_asesor,id_actividad',
+            'nivel.asesor:id,nombre'
+            ])
+        ->get()
+        ->map(function ($actividad) {
+            $primerAsesor = $actividad->nivel->map(function ($nivel) {
+                return $nivel->asesor ? $nivel->asesor->nombre : 'Ninguno';
+            })->first() ?? 'Ninguno';
+            return [
+                'id' => $actividad->id,
+                'nombre' => $actividad->nombre,
+                'id_ruta' => $actividad->id_ruta,
+                'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
+                'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado',
+                'id_asesor' => $primerAsesor
+            ];
         });
 
-        return response()->json($ruta);
+    return response()->json([
+        'id' => $ruta->id,
+        'actividades' => $actividades
+    ]);
     } catch (Exception $e) {
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }

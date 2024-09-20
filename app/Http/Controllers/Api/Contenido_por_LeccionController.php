@@ -63,13 +63,6 @@ class Contenido_por_LeccionController extends Controller
                 $fuente = $request->input('fuente_contenido');
             }
 
-            // $requiredFields = ['titulo', 'descripcion', 'id_tipo_dato', 'id_leccion', 'fuente_contenido'];
-            // foreach ($requiredFields as $field) {
-            //     if (empty($request->input($field))) {
-            //         return response()->json(['message' => "Debes completar todos los campos requeridos del contenido"], 400);
-            //     }
-            // }
-
             $contenidoxleccion = ContenidoLeccion::create([
                 'titulo' => $request->titulo,
                 'descripcion' => $request->descripcion,

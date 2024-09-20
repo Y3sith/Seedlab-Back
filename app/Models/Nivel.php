@@ -13,6 +13,7 @@ class Nivel extends Model
 
     protected $fillable = [
         'nombre',
+        'id_asesor',
         'id_actividad'
     ];
     public $timestamps = false;
@@ -22,5 +23,9 @@ class Nivel extends Model
     
     public function lecciones(){
         return $this->hasMany(Leccion::class, 'id_nivel');
+    }
+
+    public function asesor(){
+        return $this->belongsTo(Asesor::class, 'id_asesor');
     }
 }
