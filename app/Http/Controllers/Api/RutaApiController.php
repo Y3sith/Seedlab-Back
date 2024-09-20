@@ -269,28 +269,60 @@ class RutaApiController extends Controller
         $estado = $request->input('estado', 'Activo');
         $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-        $ruta = Ruta::where('id', $id)
-            ->with(['actividades' => function ($query) use ($estadoBool, $id_aliado) {
-                $query->where('estado', $estadoBool);
-                if ($id_aliado) {
-                    $query->where('id_aliado', $id_aliado);
-                }
-            }, 'actividades.aliado'])
-            ->get();
+        // $ruta = Ruta::where('id', $id)
+        //     ->with(['actividades' => function ($query) use ($estadoBool, $id_aliado) {
+        //         $query->where('estado', $estadoBool);
+        //         if ($id_aliado) {
+        //             $query->where('id_aliado', $id_aliado);
+        //         }
+        //     }, 'actividades.aliado'])
+        //     ->get();
 
-        $ruta = $ruta->map(function ($r) {
-            $r->actividades = $r->actividades->map(function ($actividad) {
-                // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                // unset($actividad->asesor);
-                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                unset($actividad->aliado);
-                return $actividad;
+        // $ruta = $ruta->map(function ($r) {
+        //     $r->actividades = $r->actividades->map(function ($actividad) {
+        //         // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+        //         // unset($actividad->asesor);
+        //         $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
+        //         $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+        //         unset($actividad->aliado);
+        //         return $actividad;
+        //     });
+        //     return $r;
+        // });
+
+        // return response()->json($ruta);
+
+        $ruta = Ruta::where('id', $id)->first();
+        if (!$ruta) {
+            return response()->json(['error' => 'Ruta no encontrada'], 404);
+        }
+        $actividades = $ruta->actividades()
+        ->where('estado', $estadoBool)
+        ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
+        ->with([
+            'aliado:id,nombre',
+            'nivel:id,id_asesor,id_actividad',
+            'nivel.asesor:id,nombre'
+            ])
+        ->get()
+        ->map(function ($actividad) {
+            $nombresAsesores = $actividad->nivel->map(function ($nivel) {
+                return $nivel->asesor ? $nivel->asesor->nombre : 'Ninguno';
             });
-            return $r;
+            return [
+                'id' => $actividad->id,
+                'nombre' => $actividad->nombre,
+                'id_ruta' => $actividad->id_ruta,
+                'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
+                'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado',
+                'id_asesor' => $nombresAsesores, // Mostrar IDs de asesores
+            ];
         });
 
-        return response()->json($ruta);
+    return response()->json([
+        'id' => $ruta->id,
+        'actividades' => $actividades
+    ]);
     } catch (Exception $e) {
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
