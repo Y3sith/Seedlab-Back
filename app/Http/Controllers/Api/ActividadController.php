@@ -252,8 +252,7 @@ class ActividadController extends Controller
                     'messaje' => 'No tienes permisos para acceder a esta ruta'
                 ], 401);
             }
-            $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
-                ->where('id', $id)
+            $actividad = Actividad::where('id', $id)
                 ->first();
             // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
             // unset($actividad->asesor);

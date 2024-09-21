@@ -96,7 +96,29 @@ class NivelesController extends Controller
             if (Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permisos '], 401);
             }
+             // Filtrar los niveles por id_actividad y id_asesor
+        $niveles = Nivel::where('id_actividad', $id_actividad)
+        ->where('id_asesor', $id_asesor)
+        ->with('asesor:id,nombre') // Incluimos el nombre del asesor en la respuesta
+        ->get();
 
+    // Verificar si se encontraron niveles
+    if ($niveles->isEmpty()) {
+        return response()->json(['error' => 'No se encontraron niveles para esta actividad y asesor'], 404);
+    }
+
+    // Formatear la respuesta
+    $respuesta = $niveles->map(function ($nivel) {
+        return [
+            'id' => $nivel->id,
+            'nombre' => $nivel->nombre,
+            'id_asesor'=> $nivel->id_asesor,
+            'asesor' => $nivel->asesor->nombre ?? 'Sin asesor',
+        ];
+    });
+
+    // Retornar la respuesta en formato JSON
+    return response()->json($respuesta);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
