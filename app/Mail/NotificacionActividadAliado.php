@@ -13,41 +13,21 @@ class NotificacionActividadAliado extends Mailable
 {
     use Queueable, SerializesModels;
 
-    /**
-     * Create a new message instance.
-     */
-    public function __construct()
+    // public $actividad;
+    public $destinatario;
+    
+    public function __construct($destinatario)
     {
-        //
+        // $this->actividad = $actividad;
+        $this->destinatario = $destinatario;
     }
 
-    /**
-     * Get the message envelope.
-     */
-    public function envelope(): Envelope
+    public function build()
     {
-        return new Envelope(
-            subject: 'Notificacion Actividad Aliado',
-        );
-    }
 
-    /**
-     * Get the message content definition.
-     */
-    public function content(): Content
-    {
-        return new Content(
-            view: 'view.name',
-        );
-    }
+    return $this
+        ->subject("Nueva Actividad Asignada")
+        ->view('notificacion-actividad-aliado');
 
-    /**
-     * Get the attachments for the message.
-     *
-     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
-     */
-    public function attachments(): array
-    {
-        return [];
-    }
+}
 }
