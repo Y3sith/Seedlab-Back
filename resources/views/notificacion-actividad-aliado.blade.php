@@ -77,9 +77,9 @@
 
 
 
-        <!-- <h3>Se te ha asignado una nueva actividad con el nombre {{ actividad->nombre}}</h3> -->
+        <h3>Se te ha asignado una nueva actividad con el nombre: {{ $nombreActividad }}</h3>
 
-        <h3 >Te invitamos a ingresar al sistema y provecha la oportunidad para completar el 
+        <h3 >Te invitamos a ingresar al sistema y aprovecha la oportunidad para completar el 
             contenido de la ruta, que incluye niveles, lecciones y el material de cada lección.
             Si lo prefieres, también puedes invitar a un asesor para que te ayude a finalizar
             estos detalles.

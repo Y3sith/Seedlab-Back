@@ -13,12 +13,12 @@ class NotificacionActividadAliado extends Mailable
 {
     use Queueable, SerializesModels;
 
-    // public $actividad;
+    public $nombreActividad;
     public $destinatario;
     
-    public function __construct($destinatario)
+    public function __construct($nombreActividad, $destinatario)
     {
-        // $this->actividad = $actividad;
+         $this->nombreActividad = $nombreActividad;
         $this->destinatario = $destinatario;
     }
 
@@ -27,7 +27,10 @@ class NotificacionActividadAliado extends Mailable
 
     return $this
         ->subject("Nueva Actividad Asignada")
-        ->view('notificacion-actividad-aliado');
-
+        ->view('notificacion-actividad-aliado')
+        ->with([
+            'nombreActividad' => $this->nombreActividad,
+            'destinatario' => $this->destinatario,
+        ]);
 }
 }
