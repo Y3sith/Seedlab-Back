@@ -5,7 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nueva Actividad Asignada</title>
+    <title>Nuevo Nivel Asignado</title>
     <style>
         body {
             font-family: 'Courier New', monospace ;
@@ -73,16 +73,16 @@
 
 <body>
     <div class="container">
-        <h1>Nueva Actividad Asignada</h1>
+        <h1>Nuevo Nivel Asignado</h1>
 
-        <h3>Se te ha asignado una nueva actividad con el nombre: {{ $nombreActividad }}</h3>
-
+        <h3>Se te ha asignado un nuevo nivel con los siguientes datos:</h3>
+        <ul>
+            <li>Nombre de la actividad: {{ $nombreActividad}}</li>
+            <li>Nombre del nivel: {{ $nombreniveles }}</li>
+        </ul>
         <h3 >Te invitamos a ingresar al sistema y aprovecha la oportunidad para completar el 
-            contenido de la ruta, que incluye niveles, lecciones y el material de cada lección.
-            Si lo prefieres, también puedes invitar a un asesor para que te ayude a finalizar
-            estos detalles.
-
-</h3>
+            contenido de la ruta que te asigno tu aliado, que incluye lecciones y el material de cada lección.
+        </h3>
 
         <div class="contenedor-boton">
             <button class="boton-personalizado">
