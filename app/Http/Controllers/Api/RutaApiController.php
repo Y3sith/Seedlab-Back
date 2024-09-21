@@ -424,10 +424,10 @@ public function actividadCompletaxruta($id)
         try {
             $ruta = Ruta::where('id', $id)->with([
                 'actividades' => function ($query) {
-                    $query->select('id', 'id_ruta', 'nombre', 'id_asesor', 'id_aliado');
+                    $query->select('id', 'id_ruta', 'nombre', 'id_aliado');
                 },
                 'actividades.nivel' => function ($query) {
-                    $query->select('id', 'id_actividad', 'nombre');
+                    $query->select('id', 'id_actividad', 'nombre', 'id_asesor');
                 },
                 'actividades.nivel.lecciones' => function ($query) {
                     $query->select('id', 'id_nivel', 'nombre');
