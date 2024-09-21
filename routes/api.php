@@ -208,6 +208,7 @@ Route::group([
     Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
     Route::put('/activar_desactivar_actividad/{id}', [ActividadController::class, 'Activar_Desactivar_Actividad']);
     Route::get('/ActiNivelLeccionContenido/{id}', [ActividadController::class, 'ActiNivelLeccionContenido']);
+    Route::get('/ActividadAsesor/{id}', [ActividadController::class, 'actividadAsesor']);
 
 });
 
