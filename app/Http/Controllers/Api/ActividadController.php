@@ -10,6 +10,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\NotificacionActividadAliado;
+use Illuminate\Support\Facades\Mail;
 
 class ActividadController extends Controller
 {
@@ -42,6 +44,8 @@ class ActividadController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
+            $destinatario = null;
+
             $validatedData = $request->validate([
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
@@ -107,7 +111,21 @@ class ActividadController extends Controller
                 'id_aliado' => $validatedData['id_aliado'],
                 'estado' => 1
             ]);
-            return response()->json(['message' => 'Actividad creada con éxito ', $actividad], 201);
+
+            $aliado = Aliado::find($request['id_aliado']);
+            if (!$aliado) {
+                return response()->json(['message' => 'Aliado no encontrado'], 404);
+            }
+            $destinatario = $aliado;
+
+            $destinatario->load('auth');
+        if ($destinatario->auth && $destinatario->auth->email) {
+            //dd($actividad, $destinatario);
+            Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($destinatario));
+        }
+
+        return response()->json(['message' => 'Actividad creada con éxito ', $destinatario], 201);
+
 
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
