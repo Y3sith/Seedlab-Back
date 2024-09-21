@@ -46,6 +46,12 @@ class ActividadController extends Controller
             }
             $destinatario = null;
 
+            $aliado = Aliado::find($request['id_aliado']);
+            if (!$aliado) {
+                return response()->json(['message' => 'Aliado no encontrado'], 404);
+            }
+            $destinatario = $aliado;
+
             $validatedData = $request->validate([
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
@@ -112,17 +118,11 @@ class ActividadController extends Controller
                 'estado' => 1
             ]);
 
-            $aliado = Aliado::find($request['id_aliado']);
-            if (!$aliado) {
-                return response()->json(['message' => 'Aliado no encontrado'], 404);
-            }
-            $destinatario = $aliado;
-
             $destinatario->load('auth');
-        if ($destinatario->auth && $destinatario->auth->email) {
-            //dd($actividad, $destinatario);
-            Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($destinatario));
-        }
+            if ($destinatario->auth && $destinatario->auth->email) {
+                $nombreActividad = $actividad->nombre;
+                Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $destinatario->nombre));
+            }
 
         return response()->json(['message' => 'Actividad creada con éxito ', $destinatario], 201);
 

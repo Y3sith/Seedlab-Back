@@ -113,7 +113,7 @@ class RutaApiController extends Controller
 
     public function rutas()
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 2) {
             return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
         }
         $rutasActivas = Ruta::where('estado', 1)->get();
@@ -124,7 +124,7 @@ class RutaApiController extends Controller
 
     public function rutasActivas()
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5 &&Auth::user()->id_rol != 2) {
             return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
         }
         $rutasActivas = Ruta::where('estado', 1)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
@@ -359,7 +359,7 @@ public function actnividadxNivelAsesor($id, $id_asesor, Request $request)
 public function actividadCompletaxruta($id)
 {
     try {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 2) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         
@@ -424,10 +424,10 @@ public function actividadCompletaxruta($id)
         try {
             $ruta = Ruta::where('id', $id)->with([
                 'actividades' => function ($query) {
-                    $query->select('id', 'id_ruta', 'nombre', 'id_asesor', 'id_aliado');
+                    $query->select('id', 'id_ruta', 'nombre', 'id_aliado');
                 },
                 'actividades.nivel' => function ($query) {
-                    $query->select('id', 'id_actividad', 'nombre');
+                    $query->select('id', 'id_actividad', 'nombre', 'id_asesor');
                 },
                 'actividades.nivel.lecciones' => function ($query) {
                     $query->select('id', 'id_nivel', 'nombre');
