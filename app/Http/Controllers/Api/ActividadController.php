@@ -10,6 +10,8 @@ use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use App\Mail\NotificacionActividadAliado;
+use Illuminate\Support\Facades\Mail;
 
 class ActividadController extends Controller
 {
@@ -42,6 +44,14 @@ class ActividadController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
+            $destinatario = null;
+
+            $aliado = Aliado::find($request['id_aliado']);
+            if (!$aliado) {
+                return response()->json(['message' => 'Aliado no encontrado'], 404);
+            }
+            $destinatario = $aliado;
+
             $validatedData = $request->validate([
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
@@ -104,7 +114,16 @@ class ActividadController extends Controller
                 'id_aliado' => $validatedData['id_aliado'],
                 'estado' => 1
             ]);
-            return response()->json(['message' => 'Actividad creada con éxito ', $actividad], 201);
+
+            $destinatario->load('auth');
+            if ($destinatario->auth && $destinatario->auth->email) {
+                $nombreActividad = $actividad->nombre;
+                Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $destinatario->nombre));
+            }
+
+        return response()->json(['message' => 'Actividad creada con éxito ', $destinatario], 201);
+
+
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -244,12 +263,33 @@ class ActividadController extends Controller
                 ], 401);
             }
             $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
-                ->where('id', $id)
-                ->first();
+            ->where('id', $id)
+            ->first();
             if (!$actividad) {
                 return response()->json(['message' => 'Actividad no encontrada'], 404);
             }
             return response()->json($actividad);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function actividadAsesor($id)
+    { //traer actividad,nivel,leccion y contenido por leccion a base de la actividad
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+                return response()->json([
+                    'messaje' => 'No tienes permisos para acceder a esta ruta'
+                ], 401);
+            }
+            $actividad = Actividad::where('id', $id)
+                ->first();
+
+            if (!$actividad) {
+                return response()->json(['message' => 'Actividad no encontrada'], 404);
+            }
+            return response()->json($actividad);
+
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

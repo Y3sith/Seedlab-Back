@@ -54,8 +54,6 @@ class RutaApiController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-            // 'estado' => $ruta->estado == 1 ? 'Activo' : 'Inactivo';
-            //$ruta = Ruta::find($id);
             $ruta = Ruta::where('id', $id)
                 ->select('id', 'nombre', 'fecha_creacion', 'estado')
                 ->first();
@@ -105,7 +103,7 @@ class RutaApiController extends Controller
 
     public function rutas()
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 2) {
             return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
         }
         $rutasActivas = Ruta::where('estado', 1)->get();
@@ -116,7 +114,7 @@ class RutaApiController extends Controller
 
     public function rutasActivas()
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5) {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 5 &&Auth::user()->id_rol != 2) {
             return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
         }
         $rutasActivas = Ruta::where('estado', 1)->with('actividades.nivel.lecciones.contenidoLecciones')->get();
@@ -130,15 +128,8 @@ class RutaApiController extends Controller
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
         // Obtener la ruta por su ID con las actividades y sus niveles, lecciones y contenido por lección
-        // $ruta = Ruta::where('id',$id)-> with('actividades.nivel.lecciones.contenidoLecciones')->get();
 
         $ruta = Ruta::with('actividades.nivel.lecciones.contenidoLecciones')->get();
-
-        // if ($ruta) {
-        //     $ruta->imagen_ruta = base64_decode($ruta->imagen_ruta);
-        // } // Decodificar la imagen
-
-
         // Retornar la ruta con todas las relaciones cargadas
         return response()->json($ruta);
     }
@@ -176,7 +167,6 @@ class RutaApiController extends Controller
                 ], 404);
             }
             $ruta->update([
-                //'nombre' => $request->nombre,
                 'nombre' => $newNombre,
                 'estado' => $request->estado,
             ]);
@@ -298,55 +288,68 @@ class RutaApiController extends Controller
         }
     }
 
-    public function actnividadxAsesor($id, $id_asesor, Request $request)
-    {
-        try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
-                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-            }
+public function actnividadxNivelAsesor($id, $id_asesor, Request $request)
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
 
             $estado = $request->input('estado', 'Activo');
             $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-            $ruta = Ruta::where('id', $id)
-                ->with(['actividades' => function ($query) use ($estadoBool, $id_asesor) {
-                    $query->where('estado', $estadoBool);
-                    if ($id_asesor) {
-                        $query->where('id_asesor', $id_asesor);
-                    }
-                }, 'actividades.aliado', 'actividades.asesor'])
-                ->get();
+        $ruta = Ruta::where('id', $id)
+            ->with(['actividades' => function ($query) use ($estadoBool, $id_asesor) {
+                $query->where('estado', $estadoBool)
+                    ->whereHas('nivel', function ($nivelQuery) use ($id_asesor) {
+                        $nivelQuery->where('id_asesor', $id_asesor);
+                    })
+                    ->with(['aliado:id,nombre', 'nivel.asesor:id,nombre']);
+            }])
+            ->first();
 
-            $ruta = $ruta->map(function ($r) {
-                $r->actividades = $r->actividades->map(function ($actividad) {
-                    $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                    unset($actividad->asesor);
-                    $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-                    $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                    unset($actividad->aliado);
-                    return $actividad;
-                });
-                return $r;
-            });
-
-            return response()->json($ruta);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        // Verificar si se encontró la ruta
+        if (!$ruta) {
+            return response()->json(['error' => 'Ruta no encontrada'], 404);
         }
+
+        // Formatear la respuesta
+        $respuesta = [
+            'id' => $ruta->id,
+            'actividades' => $ruta->actividades->map(function ($actividad) use ($id_asesor) {
+                // Filtrar el nivel exacto que tenga el id_asesor buscado
+                $asesorNombre = $actividad->nivel->firstWhere('id_asesor', $id_asesor)?->asesor->nombre ?? 'Ninguno';
+
+                return [
+                    'id' => $actividad->id,
+                    'nombre' => $actividad->nombre,
+                    'estado' => $actividad->estado ? 'Activo' : 'Inactivo',
+                    'id_aliado' => $actividad->aliado->nombre ?? 'Sin aliado',
+                    'id_asesor' => $asesorNombre,
+                ];
+            }),
+        ];
+
+        // Retornar la respuesta en formato JSON
+        return response()->json($respuesta);
+
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
 
-    public function actividadCompletaxruta($id)
-    {
-        try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
-                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-            }
-
-            $ruta = Ruta::where('id', $id)
-                ->with(['actividades' => function ($query) {
-                    $query->where('estado', 1);
-                }, 'actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado'])
-                ->get();
+public function actividadCompletaxruta($id)
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 2) {
+            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+        }
+        
+        $ruta = Ruta::where('id', $id)
+            ->with(['actividades' => function ($query) {
+                $query->where('estado', 1);
+            }, 'actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado'])
+            ->get();
 
             $ruta = $ruta->map(function ($r) {
                 $r->actividades = $r->actividades->map(function ($actividad) {
@@ -403,10 +406,10 @@ class RutaApiController extends Controller
         try {
             $ruta = Ruta::where('id', $id)->with([
                 'actividades' => function ($query) {
-                    $query->select('id', 'id_ruta', 'nombre', 'id_asesor', 'id_aliado');
+                    $query->select('id', 'id_ruta', 'nombre', 'id_aliado');
                 },
                 'actividades.nivel' => function ($query) {
-                    $query->select('id', 'id_actividad', 'nombre');
+                    $query->select('id', 'id_actividad', 'nombre', 'id_asesor');
                 },
                 'actividades.nivel.lecciones' => function ($query) {
                     $query->select('id', 'id_nivel', 'nombre');
