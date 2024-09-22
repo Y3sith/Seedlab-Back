@@ -24,7 +24,6 @@ return new class extends Migration
             $table->timestamp('token_created_at')->nullable(); // Añadido para reset de contraseña
             $table->timestamp('temporary_password_created_at')->nullable();
             $table->boolean('is_temporary_password')->default(false);
-            //$table->timestamps();
         });
 
         Schema::create('password_reset_tokens', function (Blueprint $table) {

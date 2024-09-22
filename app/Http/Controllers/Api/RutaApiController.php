@@ -23,7 +23,7 @@ class RutaApiController extends Controller
     public function index(Request $request)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol !=4) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
@@ -46,14 +46,6 @@ class RutaApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-
-        //$ruta = Ruta::with('actividades')->get();
-        //$ruta = Actividad::where('id_ruta')->with('id_actividad')->get();
-        //$rutas = Ruta::all(); ------
-        // foreach ($rutas as $ruta) {
-        //     $ruta->imagen_ruta = base64_decode($ruta->imagen_ruta);
-        // }
-        //return response()->json($rutas); ------
     }
 
     public function rutaxId($id)
@@ -225,153 +217,153 @@ class RutaApiController extends Controller
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-    
+
             $estado = $request->input('estado', 'Activo');
-        $estadoBool = $estado === 'Activo' ? 1 : 0;
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-        $ruta = Ruta::where('id', $id)->first();
+            $ruta = Ruta::where('id', $id)->first();
 
-        if (!$ruta) {
-            return response()->json(['error' => 'Ruta no encontrada'], 404);
-        }
+            if (!$ruta) {
+                return response()->json(['error' => 'Ruta no encontrada'], 404);
+            }
 
-        $actividades = $ruta->actividades()
-            ->where('estado', $estadoBool)
-            ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
-            ->with(['aliado:id,nombre'])
-            ->get()
-            ->map(function ($actividad) {
-                return [
-                    'id' => $actividad->id,
-                    'nombre' => $actividad->nombre,
-                    'id_ruta' => $actividad->id_ruta,
-                    'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
-                    'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado'
-                ];
-            });
+            $actividades = $ruta->actividades()
+                ->where('estado', $estadoBool)
+                ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
+                ->with(['aliado:id,nombre'])
+                ->get()
+                ->map(function ($actividad) {
+                    return [
+                        'id' => $actividad->id,
+                        'nombre' => $actividad->nombre,
+                        'id_ruta' => $actividad->id_ruta,
+                        'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
+                        'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado'
+                    ];
+                });
 
-        return response()->json([
-            'id' => $ruta->id,
-            'actividades' => $actividades
-        ]);
+            return response()->json([
+                'id' => $ruta->id,
+                'actividades' => $actividades
+            ]);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
     public function actnividadxAliado($id, $id_aliado, Request $request)
-{
-    try {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-
-        $estado = $request->input('estado', 'Activo');
-        $estadoBool = $estado === 'Activo' ? 1 : 0;
-
-        $ruta = Ruta::where('id', $id)->first();
-        if (!$ruta) {
-            return response()->json(['error' => 'Ruta no encontrada'], 404);
-        }
-        $actividades = $ruta->actividades()
-        ->where('estado', $estadoBool)
-        ->where('id_aliado', $id_aliado)
-        ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
-        ->with([
-            'aliado:id,nombre',
-            'nivel:id,id_asesor,id_actividad',
-            'nivel.asesor:id,nombre'
-            ])
-        ->get()
-        ->map(function ($actividad) {
-            $primerAsesor = $actividad->nivel->map(function ($nivel) {
-                return $nivel->asesor ? $nivel->asesor->nombre : 'Ninguno';
-            })->first() ?? 'Ninguno';
-            return [
-                'id' => $actividad->id,
-                'nombre' => $actividad->nombre,
-                'id_ruta' => $actividad->id_ruta,
-                'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
-                'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado',
-                'id_asesor' => $primerAsesor
-            ];
-        });
-
-    return response()->json([
-        'id' => $ruta->id,
-        'actividades' => $actividades
-    ]);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    }
-}
-
-public function actnividadxAsesor($id, $id_asesor, Request $request)
-{
-    try {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
-        }
-
-        $estado = $request->input('estado', 'Activo');
-        $estadoBool = $estado === 'Activo' ? 1 : 0;
-
-        $ruta = Ruta::where('id', $id)
-        ->with(['actividades' => function ($query) use ($estadoBool, $id_asesor) {
-            $query->where('estado', $estadoBool);
-            if ($id_asesor) {
-                $query->where('id_asesor', $id_asesor);
+    {
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
-        }, 'actividades.aliado', 'actividades.asesor'])
-        ->get();
 
-        $ruta = $ruta->map(function ($r) {
-            $r->actividades = $r->actividades->map(function ($actividad) {
-                $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-                unset($actividad->asesor);
-                $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
-                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                unset($actividad->aliado);
-                return $actividad;
-            });
-            return $r;
-        });
+            $estado = $request->input('estado', 'Activo');
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-        return response()->json($ruta);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    }
-}
+            $ruta = Ruta::where('id', $id)->first();
+            if (!$ruta) {
+                return response()->json(['error' => 'Ruta no encontrada'], 404);
+            }
+            $actividades = $ruta->actividades()
+                ->where('estado', $estadoBool)
+                ->where('id_aliado', $id_aliado)
+                ->select('id', 'nombre', 'id_ruta', 'estado', 'id_aliado')
+                ->with([
+                    'aliado:id,nombre',
+                    'nivel:id,id_asesor,id_actividad',
+                    'nivel.asesor:id,nombre'
+                ])
+                ->get()
+                ->map(function ($actividad) {
+                    $primerAsesor = $actividad->nivel->map(function ($nivel) {
+                        return $nivel->asesor ? $nivel->asesor->nombre : 'Ninguno';
+                    })->first() ?? 'Ninguno';
+                    return [
+                        'id' => $actividad->id,
+                        'nombre' => $actividad->nombre,
+                        'id_ruta' => $actividad->id_ruta,
+                        'estado' => $actividad->estado == 1 ? 'Activo' : 'Inactivo',
+                        'id_aliado' => $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado',
+                        'id_asesor' => $primerAsesor
+                    ];
+                });
 
-public function actividadCompletaxruta($id)
-{
-    try {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
-            return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            return response()->json([
+                'id' => $ruta->id,
+                'actividades' => $actividades
+            ]);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
-        $ruta = Ruta::where('id', $id)
-            ->with(['actividades' => function ($query) {
-                $query->where('estado', 1);
-            }, 'actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado'])
-            ->get();
-
-        $ruta = $ruta->map(function ($r) {
-            $r->actividades = $r->actividades->map(function ($actividad) {
-                $actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
-                $actividad->estado = 'Activo';
-                $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-                unset($actividad->aliado);
-                return $actividad;
-            });
-            return $r;
-        });
-
-        return response()->json($ruta);
-    } catch (Exception $e) {
-        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
-}
+
+    public function actnividadxAsesor($id, $id_asesor, Request $request)
+    {
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+
+            $estado = $request->input('estado', 'Activo');
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+            $ruta = Ruta::where('id', $id)
+                ->with(['actividades' => function ($query) use ($estadoBool, $id_asesor) {
+                    $query->where('estado', $estadoBool);
+                    if ($id_asesor) {
+                        $query->where('id_asesor', $id_asesor);
+                    }
+                }, 'actividades.aliado', 'actividades.asesor'])
+                ->get();
+
+            $ruta = $ruta->map(function ($r) {
+                $r->actividades = $r->actividades->map(function ($actividad) {
+                    $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
+                    unset($actividad->asesor);
+                    $actividad->estado = $actividad->estado == 1 ? 'Activo' : 'Inactivo';
+                    $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                    unset($actividad->aliado);
+                    return $actividad;
+                });
+                return $r;
+            });
+
+            return response()->json($ruta);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
+    public function actividadCompletaxruta($id)
+    {
+        try {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5) {
+                return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
+            }
+
+            $ruta = Ruta::where('id', $id)
+                ->with(['actividades' => function ($query) {
+                    $query->where('estado', 1);
+                }, 'actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado'])
+                ->get();
+
+            $ruta = $ruta->map(function ($r) {
+                $r->actividades = $r->actividades->map(function ($actividad) {
+                    $actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';
+                    $actividad->estado = 'Activo';
+                    $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
+                    unset($actividad->aliado);
+                    return $actividad;
+                });
+                return $r;
+            });
+
+            return response()->json($ruta);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
 
     public function descargarArchivoContenido($contenidoId)
     {
@@ -384,14 +376,14 @@ public function actividadCompletaxruta($id)
                 $file = Storage::disk('public')->get($filePath);
                 $type = Storage::disk('public')->mimeType($filePath);
                 return response($file, 200)
-                ->withHeaders([
-                    'Content-Type' => 'application/pdf',
-                    'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
-                    'Access-Control-Expose-Headers' => 'Content-Disposition',
-                    'Access-Control-Allow-Origin' => '*', // O especifica el origen permitido
-                    'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
-                    'Access-Control-Allow-Headers' => 'Content-Type, Content-Disposition',
-                ]);
+                    ->withHeaders([
+                        'Content-Type' => 'application/pdf',
+                        'Content-Disposition' => 'attachment; filename="' . $fileName . '"',
+                        'Access-Control-Expose-Headers' => 'Content-Disposition',
+                        'Access-Control-Allow-Origin' => '*', // O especifica el origen permitido
+                        'Access-Control-Allow-Methods' => 'GET, POST, PUT, DELETE, OPTIONS',
+                        'Access-Control-Allow-Headers' => 'Content-Type, Content-Disposition',
+                    ]);
             } else {
                 return response()->json(['error' => 'Archivo no encontrado'], 404);
             }
@@ -399,7 +391,7 @@ public function actividadCompletaxruta($id)
             return response()->json(['error' => 'Error al intentar descargar el archivo: ' . $e->getMessage()], 500);
         }
     }
-    
+
     private function cleanFileName($fileName)
     {
         // Elimina "/storage/documentos/" del principio del nombre del archivo
@@ -426,11 +418,11 @@ public function actividadCompletaxruta($id)
                     $query->select('id', 'nombre');
                 }
             ])->first();
-    
+
             if (!$ruta) {
                 return response()->json(['error' => 'Ruta no encontrada'], 404);
             }
-    
+
             $actividadesOptimizadas = $ruta->actividades->map(function ($actividad) {
                 return [
                     'id' => $actividad->id,
@@ -457,13 +449,13 @@ public function actividadCompletaxruta($id)
                     })
                 ];
             });
-    
+
             $ultimoElemento = [
                 'nivel_id' => null,
                 'leccion_id' => null,
                 'contenido_id' => null
             ];
-    
+
             foreach ($actividadesOptimizadas as $actividad) {
                 foreach ($actividad['niveles'] as $nivel) {
                     $ultimoElemento['nivel_id'] = $nivel['id'];
@@ -475,29 +467,28 @@ public function actividadCompletaxruta($id)
                     }
                 }
             }
-    
+
             return response()->json([
                 'ultimo_elemento' => $ultimoElemento
             ]);
-    
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
 
-    public function idRespuestas(){
+    public function idRespuestas()
+    {
         try {
             if (Auth::user()->id_rol != 5) {
-            return response()->json(['error' => 'Ocurrió un error al procesar']);
-        }
+                return response()->json(['error' => 'Ocurrió un error al procesar']);
+            }
 
-        $respuestas = Respuesta::get('id');
+            $respuestas = Respuesta::get('id');
 
-        return response()->json( $respuestas);
+            return response()->json($respuestas);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-        
     }
 }

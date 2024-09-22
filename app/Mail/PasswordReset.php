@@ -31,8 +31,5 @@ class PasswordReset extends Mailable
         return $this
                     ->view('temporary-password')
                    ->with(['temporaryPassword'=> $this->temporaryPassword]);
-        
-                    //->subject('Restablecer contraseña')
-                   //  ->html($content);
     }
 }

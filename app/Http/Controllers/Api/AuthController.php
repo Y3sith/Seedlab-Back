@@ -176,8 +176,6 @@ class AuthController extends Controller
             'email' => $emprendedor->auth->email,
             'estado' => $emprendedor->auth->estado == 1 ? 'Activo' : 'Inactivo',
         ];
-
-        //return response()->json($emprendedor);
     }
 
     public function logout(Request $request)
@@ -232,7 +230,6 @@ class AuthController extends Controller
                 $data['nombre'],
                 $data['apellido'],
                 $data['imagen_perfil'],
-                //$perfilUrl,
                 $data['celular'],
                 $data['genero'],
                 $data['fecha_nacimiento'],

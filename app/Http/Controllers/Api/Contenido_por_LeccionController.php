@@ -154,7 +154,6 @@ class Contenido_por_LeccionController extends Controller
             $contenidoxleccion->update([
                 'titulo' => $request->input('titulo'),
                 'descripcion' => $request->input('descripcion'),
-                //'fuente_contenido' => $contenidoxleccion->contenido_fuente,
                 'id_leccion' => $request->input('id_leccion'),
                 'id_tipo_dato' => $request->input('id_tipo_dato')
             ]);

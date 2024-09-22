@@ -33,7 +33,6 @@ return new class extends Migration
             $table->foreign('id_municipio')->references('id')->on('municipios');
             $table->string('id_emprendedor', 50);
             $table->foreign('id_emprendedor')->references('documento')->on('emprendedor');
-            //$table->timestamps();
         });
     }
 

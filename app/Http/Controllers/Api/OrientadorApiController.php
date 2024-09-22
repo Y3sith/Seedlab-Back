@@ -53,7 +53,6 @@ class OrientadorApiController extends Controller
             }
 
             DB::transaction(function () use ($data, &$response, &$statusCode,$direccion,$fecha_nac,$imagen_perfil) {
-                //Log::info($data->all());
                 $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
@@ -80,7 +79,6 @@ class OrientadorApiController extends Controller
                 }
             });
             return response()->json(['message' => $response], $statusCode);
-            //return response()->json($data);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -138,12 +136,6 @@ class OrientadorApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    /*
-    EJ de Json para "asignarAliado"
-    {
-    "nombreAliado": "Ecopetrol"
-    }
-     */
 
     public function listarAliados()
     {
@@ -216,7 +208,6 @@ class OrientadorApiController extends Controller
                 $orientador->direccion = $request->input('direccion');
                 $orientador->genero = $request->input('genero');
                 $orientador->id_tipo_documento = $request->input('id_tipo_documento');
-                //$orientador->departamento = $request->input('id_departamento');
                 $orientador->id_departamento = $request->input('id_departamento');
                 $orientador->id_municipio = $request->input('id_municipio');
                 $orientador->fecha_nac = $request->input('fecha_nac');
