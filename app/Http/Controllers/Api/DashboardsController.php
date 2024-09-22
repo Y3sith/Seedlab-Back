@@ -525,13 +525,7 @@ class DashboardsController extends Controller
             return response()->json(['message' => 'No tienes permisos para acceder a esta función.'], 403);
         }
 
-        $cacheKey = 'dashboard:getRadarChartData:' . $id_empresa . ':tipo:' . $tipo;
-
-        $cachedData = Redis::get($cacheKey);
-
-        if ($cachedData) {
-            return response()->json(json_decode($cachedData), 200);
-        }
+        
 
         // Determinar el campo a consultar basado en el tipo
         $campo = ($tipo == 1) ? 'primera_vez' : 'segunda_vez';
@@ -562,11 +556,7 @@ class DashboardsController extends Controller
             'info_tecnica' => $puntajes->info_tecnica
         ];
 
-        if (!$cachedData) {
-            Redis::set($cacheKey, json_encode($puntajeArray));
-            Redis::expire($cacheKey, 3600);
-        }
-
+        
         return response()->json($puntajeArray, 200);
     }
 }

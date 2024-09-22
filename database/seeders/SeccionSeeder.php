@@ -14,7 +14,7 @@ class SeccionSeeder extends Seeder
     public function run(): void
     {
         $seccionPorPregunta=[
-            ['nombre'=>'DATOS DE LOS EMPRENDEDORES E INFORMACIÓN GENERAL'],
+            ['nombre'=>'INFORMACIÓN GENERAL'],
             ['nombre'=>'INFORMACIÓN FINANCIERA'],
             ['nombre'=> 'INFORMACIÓN DEL MERCADO'],
             ['nombre'=> 'TRL'],

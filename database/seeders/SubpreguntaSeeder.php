@@ -25,11 +25,9 @@ class SubpreguntaSeeder extends Seeder
                         'puntaje' => '5.0'],
                 '5' => ['texto' => 'Comercialización',
                         'puntaje' => '5.0'],
-                '6' => ['texto' => 'Otro, cuál / cuántos?',
-                'puntaje' => '0'],
             ],
             '12'=>[
-                '7'=>['texto' => 'Meta 1', //no tienen importancia
+                '7'=>['texto' => 'Meta 1', 
                     'puntaje' => '0'],
                 '8'=>['texto' => 'Meta 2',
                     'puntaje' => '0'],
@@ -39,7 +37,7 @@ class SubpreguntaSeeder extends Seeder
                     'puntaje' => '0'],
             ],
             '17'=>[
-                '11'=>['texto' => 'Gastos fijos', //por definir porque tiene si no y medio
+                '11'=>['texto' => 'Gastos fijos', 
                     'puntaje' => '0'],
                 '12'=>['texto' => 'Gastos variables', 
                     'puntaje' => '0'],
@@ -53,11 +51,11 @@ class SubpreguntaSeeder extends Seeder
                     'puntaje' => '0'],
                 '17'=>['texto' => 'Costos directos', 
                     'puntaje' => '0'],
-                '18'=>['texto' => 'Costos indirectos', //por definir porque tiene si no y medio
+                '18'=>['texto' => 'Costos indirectos', 
                 'puntaje' => '0'],
             ],
             '19'=>[
-                '19'=>['texto' => 'Balance general',//por definir porque tiene si no y medio
+                '19'=>['texto' => 'Balance general',
                     'puntaje' => '0'],
                 '20'=>['texto' => 'Estado de flujo',
                     'puntaje' => '0'],
@@ -65,12 +63,12 @@ class SubpreguntaSeeder extends Seeder
                     'puntaje' => '0'],
                 '22'=>['texto' => 'Registro de ventas',
                     'puntaje' => '0'],
-                '23'=>['texto' => 'Otro ¿Cual?',//por definir porque tiene si no y medio
+                '23'=>['texto' => 'Otro ¿Cual?',
                     'puntaje' => '0'],
               
             ],
             '21'=>[
-                '24'=>['texto' => 'Ingreso', //por definir porque tiene si no y medio
+                '24'=>['texto' => 'Ingreso', 
                     'puntaje' => '0'],
                 '25'=>['texto' => 'Egreso',
                     'puntaje' => '0'],
