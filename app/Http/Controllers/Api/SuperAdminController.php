@@ -246,7 +246,6 @@ class SuperAdminController extends Controller
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_auth' => $admin->id_autentication
             ];
-            //return response()->json($admin);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -334,7 +333,6 @@ class SuperAdminController extends Controller
                 $admin->id_departamento = $request->input('id_departamento');
                 $admin->id_municipio = $request->input('id_municipio');
                 $admin->fecha_nac = $request->input('fecha_nac');
-                //$admin->celular = $request->input('celular');
                 if ($newCelular && $newCelular !== $admin->celular) {
                     // Verificar si el nuevo email ya está en uso
                     $existing = SuperAdmin::where('celular', $newCelular)->first();
@@ -447,31 +445,4 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
     }
-
-
-
-
-
-
-
-
-
-
-    // public function emprendedoresPorMunicipioPDF (){
-    //     $emprendedoresPorMunicipio = Emprendedor::with('municipios')
-    //     ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
-    //     ->groupBy('id_municipio')
-    //     ->get()
-    //     ->map(function($emprendedor) {
-    //         return [
-    //             'municipio' => $emprendedor->municipios->nombre, 
-    //             'total_emprendedores' => $emprendedor->total_emprendedores,
-    //         ];
-    //     });
-
-    //     $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
-    //     return $pdf->download('reporte_emprendedores_municipio.pdf');
-    // }
-
-
 }

@@ -38,6 +38,13 @@ class Contenido_por_LeccionController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["message" => "No tienes permisos para crear contenido"], 401);
             }
+            $existingContenido = ContenidoLeccion::where('titulo', $request->titulo)
+                ->where('id_leccion', $request->id_leccion)
+                ->first();
+
+            if ($existingContenido) {
+                return response()->json(['message' => 'El título para esta lección ya existe'], 409);
+            }
             $fuente = null;
             if ($request->hasFile('fuente_contenido')) {
                 $file = $request->file('fuente_contenido');
@@ -154,13 +161,11 @@ class Contenido_por_LeccionController extends Controller
             $contenidoxleccion->update([
                 'titulo' => $request->input('titulo'),
                 'descripcion' => $request->input('descripcion'),
-                //'fuente_contenido' => $contenidoxleccion->contenido_fuente,
                 'id_leccion' => $request->input('id_leccion'),
                 'id_tipo_dato' => $request->input('id_tipo_dato')
             ]);
 
             return response()->json(["message" => "Contenido actualizado correctamente", "data" => $contenidoxleccion], 200);
-
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

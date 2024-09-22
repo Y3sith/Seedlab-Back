@@ -18,7 +18,6 @@ return new class extends Migration
             $table->foreign('id_actividad')->references('id')->on('actividad');
             $table->unsignedBigInteger('id_asesor')->nullable();
             $table->foreign('id_asesor')->references('id')->on('asesor');
-            //$table->timestamps();
         });
     }
 

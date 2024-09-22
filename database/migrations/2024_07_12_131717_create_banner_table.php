@@ -17,7 +17,6 @@ return new class extends Migration
             $table->boolean('estadobanner');
             $table->unsignedBigInteger('id_aliado');
             $table->foreign('id_aliado')->references('id')->on('aliado')->onDelete('cascade');
-            //$table->timestamps();
         });
     }
 

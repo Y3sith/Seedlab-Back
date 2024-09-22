@@ -184,24 +184,6 @@ class DashboardsController extends Controller
 
     public function conteoRegistrosAnioYMes()
     {
-
-        // $averageMonthly = DB::table('users')
-        //     ->select(DB::raw('YEAR(fecha_registro) as year, MONTH(fecha_registro) as month, COUNT(*) as total'))
-        //     ->groupBy(DB::raw('YEAR(fecha_registro), MONTH(fecha_registro)'))
-        //     ->get();
-
-        // $monthlyAverage = $averageMonthly->avg('total');
-
-        // $averageYearly = DB::table('users')
-        //     ->select(DB::raw('YEAR(fecha_registro) as year, COUNT(*) as total'))
-        //     ->groupBy(DB::raw('YEAR(fecha_registro)'))
-        //     ->get();
-
-        // $yearlyAverage = $averageYearly->avg('total');
-
-        // $roleIdEmprendedor = 5; // Rol emprendedor
-        // $roleIdAliado = 3; // Rol aliado
-
         // Promedio mensual para emprendedores
         $cacheKey = 'dashboard:conteoRegistroAnioMes';
         $cachedData = Redis::get($cacheKey);
@@ -220,25 +202,12 @@ class DashboardsController extends Controller
             ->orderBy('mes', 'ASC')
             ->get();
 
-
-        // // Promedio mensual para aliados
-        // $averageMonthlyAliado = DB::table('users')
-        //     ->select(DB::raw('YEAR(fecha_registro) as year, MONTH(fecha_registro) as month, COUNT(*) as total'))
-        //     ->where('id_rol', $roleIdAliado)
-        //     ->groupBy(DB::raw('YEAR(fecha_registro), MONTH(fecha_registro)'))
-        //     ->get();
-
-        // $monthlyAverageAliado = $averageMonthlyAliado->avg('total');
-
         Redis::set($cacheKey, json_encode($averageMonthlyEmprendedor));
         Redis::expire($cacheKey, 3600);
 
 
         return response()->json([
-            // 'monthly_average' => $monthlyAverage,
-            // 'yearly_average' => $yearlyAverage,
             'promedios' => $averageMonthlyEmprendedor,
-            // 'aliado' => $monthlyAverageAliado,
         ]);
     }
 
@@ -278,33 +247,6 @@ class DashboardsController extends Controller
                 'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
                 'detalles' => $empresasPorMes
             ], 200);
-
-
-            // // Obtener el total de empresas registradas por cada mes del año
-
-            // $anio = $request->input('anio', date('Y'));
-            // $empresasPorMes = Empresa::whereYear('fecha_registro', $anio)
-            //     ->select(DB::raw('MONTH(fecha_registro) as mes, COUNT(*) as total_empresas'))
-            //     ->groupBy('mes')
-            //     ->get()
-            //     ->keyBy('mes');
-            // // Asegurarse de que se consideren todos los meses, incluso si no hubo registros
-            // $meses = range(1, 12);
-            // $empresasPorMesCompleto = collect($meses)->map(function ($mes) use ($empresasPorMes) {
-            //     return [
-            //         'mes' => $mes,
-            //         'total_empresas' => $empresasPorMes->has($mes) ? $empresasPorMes[$mes]->total_empresas : 0
-            //     ];
-            // });
-            // // Calcular el promedio de empresas registradas por mes
-            // $totalEmpresas = $empresasPorMesCompleto->sum('total_empresas');
-            // $promedioEmpresasPorMes = $totalEmpresas / 12;  // Considerando todos los meses del año
-            // return response()->json([
-            //     'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
-            //     'detalles' => $empresasPorMesCompleto
-            // ], 200);
-
-
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
@@ -376,7 +318,6 @@ class DashboardsController extends Controller
 
         $totalAsesorias = $finalizadas + $pendientes;
 
-        // Calcular los porcentajes
         // Calcular los porcentajes
         $porcentajeFinalizadas = $totalAsesorias > 0 ? round(($finalizadas / $totalAsesorias) * 100, 2) . '%' : 0;
         $porcentajePendientes = $totalAsesorias > 0 ? round(($pendientes / $totalAsesorias) * 100, 2) . '%' : 0;
@@ -530,7 +471,7 @@ class DashboardsController extends Controller
         // Determinar el campo a consultar basado en el tipo
         $campo = ($tipo == 1) ? 'primera_vez' : 'segunda_vez';
 
-        
+
         $puntajes = DB::table('puntaje')
             ->where('puntaje.documento_empresa', $id_empresa)
             ->where($campo, 1)
@@ -541,7 +482,7 @@ class DashboardsController extends Controller
                 'info_trl',
                 'info_tecnica'
             )
-            ->first(); 
+            ->first();
 
         if (!$puntajes) {
             return response()->json(['message' => 'No se encontró puntaje para esta empresa'], 404);

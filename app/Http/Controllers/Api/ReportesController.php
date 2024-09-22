@@ -50,7 +50,6 @@ class ReportesController extends Controller
         }
         try {
             $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
-            //dd($datos);
             $pdf = Pdf::loadView($plantilla, compact('datos'));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->download("{$nombreArchivo}.pdf");
@@ -111,7 +110,6 @@ class ReportesController extends Controller
         // Si el formato es PDF
         try {
             $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
-            //dd($datos);
             $pdf = Pdf::loadView($plantilla, compact('datos'));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->download("{$nombreArchivo}.pdf");
@@ -120,8 +118,6 @@ class ReportesController extends Controller
             Log::error('Error al generar el PDF: ' . $e->getMessage());
             return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
         }
-
-        //return response()->json(['error' => 'Formato no válido'], 400);
     }
 
 

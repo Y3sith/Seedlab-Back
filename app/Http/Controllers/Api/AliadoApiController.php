@@ -29,7 +29,7 @@ class AliadoApiController extends Controller
 
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi','urlpagina', 'id_tipo_dato', 'id_autentication')
+            ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
@@ -38,7 +38,6 @@ class AliadoApiController extends Controller
                 'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
-                //'logo' => $aliado->logo,
                 'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
                 'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
                 'urlpagina' => $aliado->urlpagina,
@@ -56,7 +55,6 @@ class AliadoApiController extends Controller
         try {
 
             $aliado = Aliado::where('id', $id)
-                //->with('auth:id,email,estado')
                 ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
             return [
@@ -80,7 +78,6 @@ class AliadoApiController extends Controller
         try {
 
             $aliado = Aliado::where('id', $id)
-                //->with('auth:id,email,estado')
                 ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
             return [
@@ -172,9 +169,6 @@ class AliadoApiController extends Controller
                 'estadobanner' => $banners->estadobanner == 1 ? 'Activo' : 'Inactivo',
                 'id_aliado' => $banners->id_aliado,
             ];
-
-            //return response()->json($bannersTransformados);
-
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -621,7 +615,7 @@ class AliadoApiController extends Controller
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol !=4){
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
             $estado = $request->input('estado', 'Activo');
@@ -691,9 +685,7 @@ class AliadoApiController extends Controller
 
             if (!$asesoria || $asesoria->id_aliado != Auth::user()->aliado->id) {
                 return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
-            }
-
-         elseif ($accion === 'rechazar') {
+            } elseif ($accion === 'rechazar') {
                 //$horario->estado = 'rechazada';
                 $asesoria->id_aliado = null;  // Establecer id_aliado a null
                 $asesoria->isorientador = true;
@@ -710,7 +702,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    
+
     public function verEmprendedoresxEmpresa()
     {
         if (Auth::user()->id_rol != 3) {

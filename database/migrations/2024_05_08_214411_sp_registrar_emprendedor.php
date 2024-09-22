@@ -32,9 +32,7 @@ return new class extends Migration
     IN p_cod_ver VARCHAR(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 )
 BEGIN
-    -- DECLARE v_idtipodoc INT;
-    -- DECLARE v_iddepartamento INT;
-    -- DECLARE v_idmunicipio INT;
+
     DECLARE v_fecha_nac DATE;
     
     DECLARE CONTINUE HANDLER FOR SQLEXCEPTION

@@ -29,15 +29,15 @@ class AsesoriasController extends Controller
             if (Auth::user()->id_rol != 5) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
-    
+
             $emprendedor = Emprendedor::find($request->input('doc_emprendedor'));
             if (!$emprendedor) {
                 return response()->json(['message' => 'Emprendedor no encontrado'], 404);
             }
-    
+
             $isOrientador = $request->input('isorientador') == 1;
             $destinatario = null;
-    
+
             if ($isOrientador) {
                 $destinatario = $this->siguientOrientador();
                 if (!$destinatario) {
@@ -53,11 +53,11 @@ class AsesoriasController extends Controller
                     $destinatario = $aliado;
                 }
             }
-    
+
             if (!$destinatario) {
                 return response()->json(['message' => 'Necesitas asignar ya sea un aliado u orientador'], 400);
             }
-    
+
             $asesoria = Asesoria::create([
                 'Nombre_sol' => $request->input('nombre'),
                 'notas' => $request->input('notas'),
@@ -68,16 +68,15 @@ class AsesoriasController extends Controller
                 'id_orientador' => $isOrientador ? $destinatario->id : null,
                 'doc_emprendedor' => $request->input('doc_emprendedor'),
             ]);
-            
+
             // Enviar correo al destinatario (aliado u orientador)
             $destinatario->load('auth');
-        if ($destinatario->auth && $destinatario->auth->email) {
-            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoria($asesoria, $destinatario, $emprendedor, $isOrientador));
-        } else {
-            $tipo = $isOrientador ? 'orientador' : 'aliado';
-            //\Log::warning("No se pudo enviar el correo. El {$tipo} no tiene un usuario o email asociado.", ['id' => $destinatario->id]);
-        }
-    
+            if ($destinatario->auth && $destinatario->auth->email) {
+                Mail::to($destinatario->auth->email)->send(new NotificacionAsesoria($asesoria, $destinatario, $emprendedor, $isOrientador));
+            } else {
+                $tipo = $isOrientador ? 'orientador' : 'aliado';
+            }
+
             return response()->json(['message' => 'La asesoría se ha solicitado con éxito'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -85,41 +84,41 @@ class AsesoriasController extends Controller
     }
 
     private function siguientOrientador()
-{
-    // Obtener todos los orientadores activos
-    $orientadoresActivos = Orientador::whereHas('auth', function ($query) {
-        $query->where('estado', 1);
-    })->get();
+    {
+        // Obtener todos los orientadores activos
+        $orientadoresActivos = Orientador::whereHas('auth', function ($query) {
+            $query->where('estado', 1);
+        })->get();
 
-    if ($orientadoresActivos->isEmpty()) {
-        return null;
+        if ($orientadoresActivos->isEmpty()) {
+            return null;
+        }
+
+        // Obtener la última asesoría asignada a un orientador
+        $ultimaAsesoria = Asesoria::where('isorientador', true)
+            ->orderBy('id', 'desc')
+            ->first();
+
+        if (!$ultimaAsesoria) {
+            // Si no hay asesorías previas, devolver el primer orientador
+            return $orientadoresActivos->first();
+        }
+
+        // Encontrar el índice del último orientador asignado
+        $ultimoIndex = $orientadoresActivos->search(function ($orientador) use ($ultimaAsesoria) {
+            return $orientador->id == $ultimaAsesoria->id_orientador;
+        });
+
+        // Si no se encuentra (puede pasar si el orientador ya no está activo), comenzar desde el principio
+        if ($ultimoIndex === false) {
+            return $orientadoresActivos->first();
+        }
+
+        // Calcular el índice del próximo orientador
+        $proximoIndex = ($ultimoIndex + 1) % $orientadoresActivos->count();
+
+        return $orientadoresActivos[$proximoIndex];
     }
-
-    // Obtener la última asesoría asignada a un orientador
-    $ultimaAsesoria = Asesoria::where('isorientador', true)
-        ->orderBy('id', 'desc')
-        ->first();
-
-    if (!$ultimaAsesoria) {
-        // Si no hay asesorías previas, devolver el primer orientador
-        return $orientadoresActivos->first();
-    }
-
-    // Encontrar el índice del último orientador asignado
-    $ultimoIndex = $orientadoresActivos->search(function ($orientador) use ($ultimaAsesoria) {
-        return $orientador->id == $ultimaAsesoria->id_orientador;
-    });
-
-    // Si no se encuentra (puede pasar si el orientador ya no está activo), comenzar desde el principio
-    if ($ultimoIndex === false) {
-        return $orientadoresActivos->first();
-    }
-
-    // Calcular el índice del próximo orientador
-    $proximoIndex = ($ultimoIndex + 1) % $orientadoresActivos->count();
-
-    return $orientadoresActivos[$proximoIndex];
-}
 
 
     public function asignarAsesoria(Request $request)
@@ -134,51 +133,43 @@ class AsesoriasController extends Controller
             $asesoriaexiste = Asesoriaxasesor::where('id_asesoria', $request->input('id_asesoria'))->first();
 
             $asesorexiste = Asesor::where('id', $request->input('id_asesor'))->first();
-            if(!$asesorexiste){
+            if (!$asesorexiste) {
                 return response()->json(['error' => 'No se encontró ningún asesor con el nombre proporcionado.'], 404);
             }
             $destinatario = $asesorexiste;
-        
-        if (!$asesorexiste) {
-            return response()->json(['message' => 'Este asesor no existe en el sistema'], 404);
-        }
-        if ($asesoriaexiste) {
-            return response()->json(['message' => 'Esta asesoria ya se ha asignado, edita la asignación'], 201);
-        }
-        $newasesoria = Asesoriaxasesor::create([
-            'id_asesoria' => $request->input('id_asesoria'),
-            'id_asesor' => $request->input('id_asesor'),
-        ]);
 
-         // Actualizar el estado de la asesoría
-         $asesoria = Asesoria::find($request->input('id_asesoria'));
-         $asesoria->asignacion = 1; // Cambia este valor según el estado deseado
-         $asesoria->save();
+            if (!$asesorexiste) {
+                return response()->json(['message' => 'Este asesor no existe en el sistema'], 404);
+            }
+            if ($asesoriaexiste) {
+                return response()->json(['message' => 'Esta asesoria ya se ha asignado, edita la asignación'], 201);
+            }
+            $newasesoria = Asesoriaxasesor::create([
+                'id_asesoria' => $request->input('id_asesoria'),
+                'id_asesor' => $request->input('id_asesor'),
+            ]);
 
-         $asesor = Asesor::find($request->input('id_asesor'));
-         $nombreAsesor = $asesor ? $asesor->nombre : 'Asesor desconocido';
+            // Actualizar el estado de la asesoría
+            $asesoria = Asesoria::find($request->input('id_asesoria'));
+            $asesoria->asignacion = 1; // Cambia este valor según el estado deseado
+            $asesoria->save();
 
-         $emprendedor = Emprendedor::find($asesoria->doc_emprendedor);
-         $nombreEmprendedor = $emprendedor ? $emprendedor->nombre : 'Emprendedor desconocido';
+            $asesor = Asesor::find($request->input('id_asesor'));
+            $nombreAsesor = $asesor ? $asesor->nombre : 'Asesor desconocido';
 
-         $destinatario->load('auth');
-         if ($destinatario->auth && $destinatario->auth->email) {
-            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaAsesor( $destinatario, $asesoria,  $nombreAsesor, $nombreEmprendedor));
-        } 
+            $emprendedor = Emprendedor::find($asesoria->doc_emprendedor);
+            $nombreEmprendedor = $emprendedor ? $emprendedor->nombre : 'Emprendedor desconocido';
+
+            $destinatario->load('auth');
+            if ($destinatario->auth && $destinatario->auth->email) {
+                Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaAsesor($destinatario, $asesoria,  $nombreAsesor, $nombreEmprendedor));
+            }
 
             return response()->json(['message' => 'Se ha asignado correctamente el asesor para esta asesoria'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
-
-
-
-
-
-
-
 
     public function definirHorarioAsesoria(Request $request)
     {
@@ -208,7 +199,7 @@ class AsesoriasController extends Controller
             if (!$asesorxasesor) {
                 return response()->json(['message' => 'la asesoria no fue encontrada en asesoria por asesor'], 404);
             }
-            
+
             $id_asesorAsignado = $asesorxasesor->id_asesor;
 
             $asesor = Asesor::find($id_asesorAsignado);
@@ -217,18 +208,18 @@ class AsesoriasController extends Controller
             if ($existingHorario) {
                 return response()->json(['message' => 'La asesoría ya tiene una fecha asignada'], 400);
             }
-     
+
             $horarioAsesoria = HorarioAsesoria::create([
-                'observaciones' => $request->input('observaciones') ?  $request->input('observaciones') :"Ninguna observación",
+                'observaciones' => $request->input('observaciones') ?  $request->input('observaciones') : "Ninguna observación",
                 'fecha' => $request->input('fecha'),
                 'estado' => "Pendiente",
                 'id_asesoria' => $request->input('id_asesoria'),
             ]);
 
             $destinatario->load('auth');
-         if ($destinatario->auth && $destinatario->auth->email) {
-            Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaEmprendedor( $destinatario, $asesoria,  $asesor, $emprendedor, $horarioAsesoria));
-        }
+            if ($destinatario->auth && $destinatario->auth->email) {
+                Mail::to($destinatario->auth->email)->send(new NotificacionAsesoriaEmprendedor($destinatario, $asesoria,  $asesor, $emprendedor, $horarioAsesoria));
+            }
 
             return response()->json(['message' => 'Se le a asignado un horario a su Asesoria'], 201);
         } catch (Exception $e) {
@@ -354,33 +345,28 @@ class AsesoriasController extends Controller
         $doc_emprendedor = $asesoria->doc_emprendedor;
 
         $emprendedor = Emprendedor::find($doc_emprendedor);
-            if (!$emprendedor) {
-                return response()->json(['message' => 'Emprendedor no encontrado'], 404);
-            }
-        
+        if (!$emprendedor) {
+            return response()->json(['message' => 'Emprendedor no encontrado'], 404);
+        }
+
         $aliado = Aliado::where('nombre', $nombreAliado)->first();
         if (!$aliado) {
             return response()->json(['message' => 'Aliado no encontrado'], 404);
         }
-        
+
         $asesoria->id_aliado = $aliado->id;
         $asesoria->save();
-        
+
         $destinatario = $aliado;
 
         $destinatario->load('auth');
-         if ($destinatario->auth && $destinatario->auth->email) {
-            Mail::to($destinatario->auth->email)->send(new NotificacionesAsesoriaAliado( $destinatario, $asesoria, $emprendedor));
+        if ($destinatario->auth && $destinatario->auth->email) {
+            Mail::to($destinatario->auth->email)->send(new NotificacionesAsesoriaAliado($destinatario, $asesoria, $emprendedor));
         }
 
         return response()->json(['message' => 'Aliado asignado correctamente'], 200);
     }
-    /*
-    EJ de Json para "asignarAliado"
-    {
-    "nombreAliado": "Ecopetrol"
-    }
-     */
+   
     public function MostrarAsesorias($aliadoId, $asignacion)
     {
         if (Auth::user()->id_rol != 3) {
@@ -427,8 +413,6 @@ class AsesoriasController extends Controller
         return response()->json($asesorias);
     }
 
-
-
     //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
     public function traerAsesoriasParaAliado(Request $request)
@@ -453,7 +437,8 @@ class AsesoriasController extends Controller
     {
         if (Auth::user()->id_rol != 3) {
             return response()->json([
-                'message' => 'No tienes permisos para realizar esta acción'], 403);
+                'message' => 'No tienes permisos para realizar esta acción'
+            ], 403);
         }
         $asesores = Asesor::selectRaw(
             'asesor.id as id_asesor,
@@ -464,27 +449,14 @@ class AsesoriasController extends Controller
                 TIMESTAMPDIFF(HOUR, MAX(horarioasesoria.fecha), NOW()) % 24, " horas"
             ) as tiempo_desde_ultima_asesoria'
         )
-        ->leftJoin('users', 'asesor.id_autentication', '=', 'users.id')
-        ->leftJoin('asesoriaxasesor', 'asesoriaxasesor.id_asesor', '=', 'asesor.id')
-        ->leftJoin('horarioasesoria', 'asesoriaxasesor.id_asesoria', '=', 'horarioasesoria.id_asesoria')
-        ->where('asesor.id_aliado', $idaliado)
-        ->whereRaw('users.estado = true')
-        ->groupBy('asesor.id','nombre_completo')
-        ->get();
-    
+            ->leftJoin('users', 'asesor.id_autentication', '=', 'users.id')
+            ->leftJoin('asesoriaxasesor', 'asesoriaxasesor.id_asesor', '=', 'asesor.id')
+            ->leftJoin('horarioasesoria', 'asesoriaxasesor.id_asesoria', '=', 'horarioasesoria.id_asesoria')
+            ->where('asesor.id_aliado', $idaliado)
+            ->whereRaw('users.estado = true')
+            ->groupBy('asesor.id', 'nombre_completo')
+            ->get();
+
         return $asesores;
-    
     }
-
-    // http://127.0.0.1:8000/api/asesorias/asesores_disponibles/2
-    // respuesta de ejemplo
-    // [
-    //     {
-    //         "id_asesor": 1,
-    //         "nombres": " ",
-    //         "ultima_fecha_asesoria": "2024-04-23 14:30:00",
-    //         "tiempo_desde_ultima_asesoria": "34 días con 20 horas"
-    //     }
-    // ]
-
 }

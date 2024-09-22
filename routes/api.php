@@ -189,7 +189,7 @@ Route::group([
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
     Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
-    Route::get('/actnividadxAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxAsesor']);
+    Route::get('/actnividadxNivelAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxNivelAsesor']);
     Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
     Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
 
@@ -208,6 +208,7 @@ Route::group([
     Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
     Route::put('/activar_desactivar_actividad/{id}', [ActividadController::class, 'Activar_Desactivar_Actividad']);
     Route::get('/ActiNivelLeccionContenido/{id}', [ActividadController::class, 'ActiNivelLeccionContenido']);
+    Route::get('/ActividadAsesor/{id}', [ActividadController::class, 'actividadAsesor']);
 
 });
 
@@ -221,6 +222,7 @@ Route::group([
     Route::put('/editar_nivel/{id}', [NivelesController::class, 'editarNivel']);
     Route::get('/listar_Nivel', [NivelesController::class, 'listarNiveles']);
     Route::get('/nivelXactividad/{id}', [NivelesController::class, 'NivelxActividad']);
+    Route::get('/NivelxActividadxAsesor/{id_actividad}/{id_asesor}', [NivelesController::class, 'NivelxActividadxAsesor']);
 });
 
 //Leccion
