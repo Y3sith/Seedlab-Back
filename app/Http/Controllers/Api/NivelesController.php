@@ -34,50 +34,52 @@ class NivelesController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
-                return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
-            }
-            $destinatario = null;
-
-            $existingNivel = Nivel::where('nombre', $request->nombre)
-                ->where('id_actividad', $request->id_actividad)
-                ->first();
-
-            if ($existingNivel) {
-                return response()->json(['message' => 'Ya existe un nivel con este nombre para esta actividad'], 422);
-            }
-
-            $asesor = Asesor::find($request['id_asesor']);
-            if (!$asesor) {
-                return response()->json(['message' => 'asesor no encontrado'], 404);
-            }
-            $destinatario = $asesor;
-
-            $actividad = Actividad::find($request['id_actividad']);
-            if (!$actividad) {
-                return response()->json(['message' => 'actividad no encontrada'], 404);
-            }
-
-            $niveles = Nivel::create([
-                'nombre' => $request->nombre,
-                'id_asesor' => $request->id_asesor,
-                'id_actividad' => $request->id_actividad,
-            ]);
-
-            $destinatario->load('auth');
-            if ($destinatario->auth && $destinatario->auth->email) {
-                $nombreActividad = $actividad->nombre;
-                $nombreniveles = $niveles->nombre;
-                Mail::to($destinatario->auth->email)->send(new NotificacionesActividadAsesor($nombreActividad, $nombreniveles, $destinatario->nombre));
-            }
-
-            return response()->json(['message' => 'Nivel creado con éxito ', $niveles], 201);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+{
+    try {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+            return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
         }
+
+        $existingNivel = Nivel::where('nombre', $request->nombre)
+            ->where('id_actividad', $request->id_actividad)
+            ->first();
+
+        if ($existingNivel) {
+            return response()->json(['message' => 'Ya existe un nivel con este nombre para esta actividad'], 422);
+        }
+
+        $asesor = null;
+        $actividad = null;
+
+        if ($request->id_asesor) {
+            $asesor = Asesor::find($request->id_asesor);
+        }
+
+        if ($request->id_actividad) {
+            $actividad = Actividad::find($request->id_actividad);
+        }
+
+        if (!$actividad) {
+            return response()->json(['message' => 'No se pudo crear el nivel debido a que la actividad no fue encontrada'], 422);
+        }
+
+        $niveles = Nivel::create([
+            'nombre' => $request->nombre,
+            'id_asesor' => $request->id_asesor,
+            'id_actividad' => $request->id_actividad,
+        ]);
+
+        if ($asesor && $asesor->auth && $asesor->auth->email) {
+            $nombreActividad = $actividad->nombre;
+            $nombreniveles = $niveles->nombre;
+            Mail::to($asesor->auth->email)->send(new NotificacionesActividadAsesor($nombreActividad, $nombreniveles, $asesor->nombre));
+        }
+
+        return response()->json(['message' => 'Nivel creado con éxito', 'nivel' => $niveles], 201);
+    } catch (Exception $e) {
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
 
     /**
      * Display the specified resource.
