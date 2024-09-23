@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('pregunta', function (Blueprint $table) {
             $table->id();
             $table->text('nombre');
-            $table->double('puntaje');
             $table->unsignedBigInteger('id_seccion',);
             $table->foreign('id_seccion')->references('id')->on('seccion');
         });

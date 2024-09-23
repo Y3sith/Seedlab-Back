@@ -23,7 +23,6 @@ return new class extends Migration
             $table->unsignedBigInteger('id_aliado');
             $table->foreign('id_aliado')->references('id')->on('aliado');
             $table->boolean('estado');
-            //$table->timestamps();
         });
     }
 

@@ -42,7 +42,7 @@ class User extends Authenticatable
 
     protected $casts = [
         'email_verified_at' => 'datetime',
-        'temporary_password_created_at' => 'datetime', // Asegúrate de añadir esta línea
+        'temporary_password_created_at' => 'datetime',
         'password' => 'hashed',
     ];
     

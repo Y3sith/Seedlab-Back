@@ -38,7 +38,7 @@ class ActividadController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)///toca cambiarlo para dejar solo imagen
+    public function store(Request $request) ///toca cambiarlo para dejar solo imagen
     {
         try {
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
@@ -56,7 +56,6 @@ class ActividadController extends Controller
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
                 'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
-                // 'id_asesor' => 'nullable|integer|exists:asesor,id',
                 'id_ruta' => 'required|integer|exists:ruta,id',
                 'id_aliado' => 'required|integer|exists:aliado,id'
             ]);
@@ -73,7 +72,6 @@ class ActividadController extends Controller
                 ['nombre', $validatedData['nombre']],
                 ['descripcion', $validatedData['descripcion']],
                 ['id_tipo_dato', $validatedData['id_tipo_dato']],
-                // ['id_asesor', $validatedData['id_asesor']],
                 ['id_ruta', $validatedData['id_ruta']],
                 ['id_aliado', $validatedData['id_aliado']]
             ])->first();
@@ -112,7 +110,6 @@ class ActividadController extends Controller
                 'descripcion' => $descripcion,
                 'fuente' => $fuente,
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
-                // 'id_asesor' => $validatedData['id_asesor'] ?? null,
                 'id_ruta' => $validatedData['id_ruta'],
                 'id_aliado' => $validatedData['id_aliado'],
                 'estado' => 1
@@ -172,8 +169,6 @@ class ActividadController extends Controller
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
                 'id_tipo_dato' => 'required|integer|exists:tipo_dato,id',
-                //'fuentes' => 'nullable',
-                //'id_asesor' => 'nullable|integer|exists:asesor,id',
                 'id_aliado' => 'required|integer|exists:aliado,id',
                 'estado' => 'required'
             ]);
@@ -190,21 +185,18 @@ class ActividadController extends Controller
                 $paths = $request->file('fuente')->store('public/imagenes');
                 $actividad->fuente = str_replace('public', 'storage', $paths);
             }
-            
+
 
             // Actualizar la actividad
             $actividad->update([
                 'nombre' => $validatedData['nombre'],
                 'descripcion' => $validatedData['descripcion'],
-                //'fuente' => $validatedData['fuente'],
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
-                // 'id_asesor' => $validatedData['id_asesor'] ?? null,
                 'id_aliado' => $validatedData['id_aliado'],
                 'estado' => $validatedData['estado']
             ]);
 
             return response()->json(['message' => 'Actividad actualizada con éxito', 'actividad' => $actividad], 200);
-
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -257,7 +249,7 @@ class ActividadController extends Controller
             ], 401);
         }
         $actividades = Actividad::where('id_aliado', $id)
-            ->select('id', 'nombre', 'descripcion', 'fuente', 'id_tipo_dato', 'id_asesor', 'id_ruta', )
+            ->select('id', 'nombre', 'descripcion', 'fuente', 'id_tipo_dato', 'id_asesor', 'id_ruta',)
             ->get();
         return response()->json($actividades);
     }
@@ -273,36 +265,14 @@ class ActividadController extends Controller
             $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
             ->where('id', $id)
             ->first();
-            // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-            // unset($actividad->asesor);
-            // $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-            // unset($actividad->aliado);
-
             if (!$actividad) {
                 return response()->json(['message' => 'Actividad no encontrada'], 404);
             }
             return response()->json($actividad);
-
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
-    // public function actividadAsesor($id){
-    //     try {
-    //         if (Auth::user()->id_rol != 4) {
-
-    //             $actividad = Actividad::with('id', $id)->first();
-
-    //             if (!$actividad) {
-    //                 return response()->json(['message' => 'Actividad no encontrada'], 404);
-    //             }
-    //             return response()->json($actividad);
-    //         }
-    //     } catch (Exception $e) {
-    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    //     }
-    // }
 
     public function actividadAsesor($id)
     { //traer actividad,nivel,leccion y contenido por leccion a base de la actividad
@@ -314,10 +284,6 @@ class ActividadController extends Controller
             }
             $actividad = Actividad::where('id', $id)
                 ->first();
-            // $actividad->id_asesor = $actividad->asesor ? $actividad->asesor->nombre : 'Ninguno';
-            // unset($actividad->asesor);
-            // $actividad->id_aliado = $actividad->aliado ? $actividad->aliado->nombre : 'Sin aliado';
-            // unset($actividad->aliado);
 
             if (!$actividad) {
                 return response()->json(['message' => 'Actividad no encontrada'], 404);
@@ -328,6 +294,4 @@ class ActividadController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
-
 }

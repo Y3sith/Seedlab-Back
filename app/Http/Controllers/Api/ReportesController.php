@@ -19,21 +19,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
 {
-    public function exportarExcelRoles(Request $request)
-    {
-        $tipo_reporte = $request->input('tipo_reporte');
-        $fechaInicio = $request->input('fecha_inicio');
-        $fechaFin = $request->input('fecha_fin');
-        return Excel::download(new RolesExport($tipo_reporte, $fechaInicio, $fechaFin), 'reporte.xlsx');
-    }
-
-    public function exportarEmpresasRegistradas(Request $request)
-    {
-        $tipo_reporte = $request->input('tipo_reporte');
-        $fechaInicio = $request->input('fecha_inicio');
-        $fechaFin = $request->input('fecha_fin');
-        return Excel::download(new EmpresasExport($tipo_reporte, $fechaInicio, $fechaFin), 'empresas_registradas.xlsx');
-    }
+    
+   
 
     public function exportarReportesAliados(Request $request)
     {
@@ -63,7 +50,6 @@ class ReportesController extends Controller
         }
         try {
             $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
-            //dd($datos);
             $pdf = Pdf::loadView($plantilla, compact('datos'));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->download("{$nombreArchivo}.pdf");
@@ -124,7 +110,6 @@ class ReportesController extends Controller
         // Si el formato es PDF
         try {
             $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
-            //dd($datos);
             $pdf = Pdf::loadView($plantilla, compact('datos'));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->download("{$nombreArchivo}.pdf");
@@ -133,8 +118,6 @@ class ReportesController extends Controller
             Log::error('Error al generar el PDF: ' . $e->getMessage());
             return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
         }
-
-        //return response()->json(['error' => 'Formato no válido'], 400);
     }
 
 
@@ -290,7 +273,6 @@ class ReportesController extends Controller
 
     public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null)
     {
-        Log::info('Iniciando procesamiento de respuestas...', ['idEmprendedor' => $idEmprendedor, 'documentoEmpresa' => $documentoEmpresa]);
 
         // Obtener las respuestas con un join a la tabla 'puntaje'
         $query = DB::table('respuesta')
@@ -315,7 +297,6 @@ class ReportesController extends Controller
         // Finaliza la consulta
         $respuestas = $query->select('respuesta.respuestas_json', 'puntaje.*')->get();
 
-        Log::info('Respuestas obtenidas', ['respuestas' => $respuestas]);
 
         // Obtener todos los id_pregunta y id_subpregunta únicos del JSON
         $idsPreguntas = [];
@@ -373,7 +354,7 @@ class ReportesController extends Controller
                         'verform_pr' => $respuesta_json['verform_pr'] ?? null,
                         'fecha_reg' => $respuesta_json['fecha_reg'] ?? null,
                         'pregunta' => $preguntas[$idPregunta] ?? 'Pregunta desconocida',
-                        'subpregunta' => $subpreguntas[$idSubpregunta] ?? 'Subpregunta desconocida',
+                        'subpregunta' => $subpreguntas[$idSubpregunta] ?? 'No contiene Subpregunta',
                         'respuesta_texto' => $respuesta_json['texto_res'] ?? null, // Añadir el texto_res
                         // Añadir los puntajes
                         'info_general' => $respuesta->info_general,
