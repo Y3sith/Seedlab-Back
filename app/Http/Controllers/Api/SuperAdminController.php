@@ -112,8 +112,8 @@ class SuperAdminController extends Controller
             'ubicacion' => $personalizacion->ubicacion,
         ];
 
-        // Almacenar la personalización en localStorage (esto debe hacerse en el front-end)
-        // Aquí solo retornamos los datos, asegúrate de guardar en el front-end.
+        
+        
         return response()->json($personalizacionParaCache, 200);
     }
 

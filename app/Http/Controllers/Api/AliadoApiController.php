@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class AliadoApiController extends Controller
-
 {
     /**
      * Display a listing of the resource.
@@ -98,14 +97,6 @@ class AliadoApiController extends Controller
 
     public function traerBanners($status)
     {
-        $cacheKey = "banners:{$status}";
-        $cachedData = Redis::get($cacheKey);
-
-        if ($cachedData) {
-            // Si los datos están en Redis, devolverlos directamente
-            return response()->json(json_decode($cachedData), 200);
-        }
-
         // Obtener los banners de la base de datos
         $banners = Banner::where('estadobanner', $status)
             ->select('urlImagen', 'estadobanner')
@@ -118,13 +109,10 @@ class AliadoApiController extends Controller
             ];
         });
 
-        // Guardar los datos en Redis
-        Redis::set($cacheKey, json_encode($bannersTransformados));
-        Redis::expire($cacheKey, 3600); // Configurar tiempo de expiración en segundos (ej. 3600 segundos = 1 hora)
-
         // Devolver los datos
         return response()->json($bannersTransformados, 200);
     }
+
 
 
     public function traerBannersxaliado($id_aliado)
@@ -565,7 +553,9 @@ class AliadoApiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+    }
 
     /**
      * Display the specified resource.
