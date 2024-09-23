@@ -124,7 +124,7 @@ class ActividadController extends Controller
                 Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $destinatario->nombre));
             }
 
-        return response()->json(['message' => 'Actividad creada con éxito ', $destinatario], 201);
+        return response()->json(['message' => 'Actividad creada con éxito ',$actividad, $destinatario ], 201);
 
 
         } catch (Exception $e) {
