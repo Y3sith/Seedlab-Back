@@ -8,7 +8,8 @@ use App\Models\Seccion;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Log;  // Agregar esta línea
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Redis;// Agregar esta línea
 
 
 class RespuestasApiController extends Controller
@@ -61,6 +62,7 @@ class RespuestasApiController extends Controller
             $respuestas = new Respuesta();
             $respuestas->verform_pr = 1;  // Indicar que es la primera vez
             $respuestas->verform_se = 0;  // Aún no se llena la segunda vez
+            $contador = 1;
         } else {
             // Si ya existe un registro para la primera vez, se crea uno nuevo para la segunda vez
             $segundaRespuesta = Respuesta::where('id_empresa', $idEmpresa)
@@ -75,6 +77,7 @@ class RespuestasApiController extends Controller
             $respuestas = new Respuesta();
             $respuestas->verform_pr = 0;  // No es la primera vez
             $respuestas->verform_se = 1;  // Indicar que es la segunda vez
+            $contador = 2;
         }
 
         // Guardar las nuevas respuestas
@@ -83,8 +86,47 @@ class RespuestasApiController extends Controller
         $respuestas->id_empresa = $idEmpresa;
         $respuestas->save();
 
-        return response()->json(['message' => 'Respuestas guardadas correctamente'], 200);
+        // Borrar las secciones almacenadas en Redis después de guardar en la BD
+        $keys = [
+            "form:{$idEmpresa}:section:1",
+            "form:{$idEmpresa}:section:2",
+            "form:{$idEmpresa}:section:3",
+            "form:{$idEmpresa}:section:4",
+            "form:{$idEmpresa}:section:5",
+        ];
+
+        // Eliminar todas las claves de Redis para esta empresa y sus secciones
+        Redis::del($keys);
+
+        return response()->json(['message' => 'Respuestas guardadas correctamente', 'contador' => $contador], 200);
     }
+
+
+    public function verificarEstadoFormulario($id_empresa)
+    {
+        // Verificar si ya existe un registro de respuestas para la primera vez
+        $primeraRespuesta = Respuesta::where('id_empresa', $id_empresa)
+            ->where('verform_pr', 1)
+            ->first();
+
+        if (!$primeraRespuesta) {
+            // Si no hay respuestas previas, es la primera vez
+            return response()->json(['contador' => 1], 200);
+        }
+
+        // Verificar si ya fue llenado por segunda vez
+        $segundaRespuesta = Respuesta::where('id_empresa', $id_empresa)
+            ->where('verform_se', 1)
+            ->first();
+
+        if ($segundaRespuesta) {
+            return response()->json(['contador' => 2], 200);
+        }
+
+        // Si ya se llenó la primera vez pero no la segunda
+        return response()->json(['contador' => 2], 200);
+    }
+
 
 
 

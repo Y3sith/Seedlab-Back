@@ -27,7 +27,6 @@ use App\Http\Controllers\Api\RespuestasApiController;
 
 
 
-Route::get('/procesar-respuestas/{idEmprendedor}', [RespuestasApiController::class, 'procesarRespuestas']);//Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
 ], function () {
@@ -37,8 +36,6 @@ Route::group([
     Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
-
-
 
 
 //Empresa
@@ -293,5 +290,6 @@ Route::group([
     Route::post('/form/section/{id_empresa}/{sectionId}', [FormResponsesController::class, 'storeSection']);
     Route::get('/form/section/{sectionId}', [FormResponsesController::class, 'getSection']);
     Route::get('/getRespuestasRedis/{empresaId}', [FormResponsesController::class, 'getAllRespuestasFromRedis']);
+    Route::get('/verificarEstadoForm/{id_empresa}', [RespuestasApiController::class, 'verificarEstadoFormulario']);
 });
 
