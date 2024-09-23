@@ -81,15 +81,15 @@ class SuperAdminController extends Controller
 
     public function obtenerPersonalizacion($id)
     {
-        // Buscar en Redis primero
-        $personalizacionKey = 'personalizacion:' . $id;
-        $personalizacion = Redis::get($personalizacionKey);
+        // Recuperar datos del localStorage en el front-end
+        $personalizacion = json_decode(request()->header('localStorage'), true);
 
-        if ($personalizacion) {
-            // Si está en Redis, devolver la personalización desde el caché
-            return response()->json(json_decode($personalizacion), 200);
+        // Verificar si la personalización ya está almacenada en localStorage
+        if (isset($personalizacion[$id])) {
+            return response()->json($personalizacion[$id], 200);
         }
 
+        // Obtener la personalización desde la base de datos
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
 
         if (!$personalizacion) {
@@ -98,17 +98,9 @@ class SuperAdminController extends Controller
             ], 404);
         }
 
-        // Preparar los datos para guardar en Redis y para la respuesta
-        $personalizacionParaCache = $personalizacion->toArray();
-        $personalizacionParaCache['imagen_logo'] = $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null;
-
-        // Guardar la personalización en Redis para la próxima vez
-        Redis::set($personalizacionKey, json_encode($personalizacionParaCache));
-        Redis::expire($personalizacionKey, 3600); // Opcional: expira en 1 hora
-
         // Preparar la respuesta
-        $respuesta = [
-            'imagen_logo' => $personalizacionParaCache['imagen_logo'],
+        $personalizacionParaCache = [
+            'imagen_logo' => $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null,
             'nombre_sistema' => $personalizacion->nombre_sistema,
             'color_principal' => $personalizacion->color_principal,
             'color_secundario' => $personalizacion->color_secundario,
@@ -120,8 +112,11 @@ class SuperAdminController extends Controller
             'ubicacion' => $personalizacion->ubicacion,
         ];
 
-        return response()->json($respuesta, 200);
+        // Almacenar la personalización en localStorage (esto debe hacerse en el front-end)
+        // Aquí solo retornamos los datos, asegúrate de guardar en el front-end.
+        return response()->json($personalizacionParaCache, 200);
     }
+
 
     private function correctImageUrl($path)
     {
