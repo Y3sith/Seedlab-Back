@@ -30,6 +30,14 @@ class ReportesController extends Controller
         $id_aliado = $request->input('id_aliado');
         $formato = $request->input('formato', 'excel');
 
+        if ($fechaInicio) {
+            $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
+        }
+
+        if ($fechaInicio) {
+            $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
+        }
+
         switch ($tipo_reporte) {
             case 'asesoria':
                 $export = new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin);
@@ -66,6 +74,14 @@ class ReportesController extends Controller
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $formato = $request->input('formato', 'excel');
+
+        if ($fechaFin) {
+            $fechaFin = date('Y-m-d H:i:s', strtotime($fechaFin . ' 23:59:59'));
+        }
+
+        if ($fechaInicio) {
+            $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
+        }
 
 
         switch ($tipo_reporte) {
