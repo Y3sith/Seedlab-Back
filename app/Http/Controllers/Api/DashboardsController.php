@@ -8,7 +8,6 @@ use App\Models\Asesor;
 use App\Models\Asesoria;
 use App\Models\Emprendedor;
 use App\Models\Empresa;
-use App\Models\puntaje;
 use App\Models\Rol;
 use App\Models\User;
 use Exception;
@@ -24,53 +23,47 @@ class DashboardsController extends Controller
     {
         $cacheKey = 'dashboard:enumerarUsuarios';
 
+        // Verifica si los datos ya están en Redis
         $cachedData = Redis::get($cacheKey);
-
         if ($cachedData) {
-            // Si los datos están en Redis, devolverlos directamente
             return response()->json(json_decode($cachedData), 200);
         }
 
-        $roles = Rol::all();
-        $result = [];
+        // Una única consulta para contar usuarios por rol y estado
+        $usersByRoleAndState = User::selectRaw('id_rol, estado, COUNT(*) as total')
+            ->groupBy('id_rol', 'estado')
+            ->get();
 
+        $roles = Rol::all();
         $totalUsers = User::count();
 
+        $result = [];
+
         foreach ($roles as $rol) {
-            $countActive = User::where('id_rol', $rol->id)->where('estado', true)->count();
-            $countInactive = User::where('id_rol', $rol->id)->where('estado', false)->count();
-            $percentageActive = $totalUsers > 0 ? ($countActive / $totalUsers) * 100 : 0;
+            // Filtrar los usuarios por rol y estado
+            $activeUsers = $usersByRoleAndState->where('id_rol', $rol->id)->where('estado', true)->first();
+            $inactiveUsers = $usersByRoleAndState->where('id_rol', $rol->id)->where('estado', false)->first();
+
+            $countActive = $activeUsers ? $activeUsers->total : 0;
+            $countInactive = $inactiveUsers ? $inactiveUsers->total : 0;
 
             $result[$rol->nombre] = [
                 'activos' => $countActive,
                 'inactivos' => $countInactive,
-                'Porcentaje del total' => round($percentageActive, 2) . '%'
             ];
         }
 
-        $activeUsersCount = User::where('estado', true)->count();
-        $inactiveUsersCount = User::where('estado', false)->count();
-
-        $activePercentage = $totalUsers > 0 ? ($activeUsersCount / $totalUsers) * 100 : 0;
-        $inactivePercentage = $totalUsers > 0 ? ($inactiveUsersCount / $totalUsers) * 100 : 0;
-
-        $result['activos'] = round($activePercentage, 2) . '%';
-        $result['inactivos'] = round($inactivePercentage, 2) . '%';
-
-
-        $top = $this->topAliados();
-
-        $result['topAliados'] = $top;
+        // Incluir top aliados y asesorías
+        $result['topAliados'] = $this->topAliados();
         $result['conteoAsesorias'] = $this->asesoriasAsignadasSinAsignar();
 
-        // Guardar los datos en Redis para futuras solicitudes
-        if (!$cachedData) {
-            Redis::set($cacheKey, json_encode($result));
-            Redis::expire($cacheKey, 3600);
-        }
+        // Cachear los datos en Redis para futuras solicitudes
+        Redis::set($cacheKey, json_encode($result));
+        Redis::expire($cacheKey, 3600);
 
         return response()->json($result);
     }
+
 
     public function averageAsesorias2024(Request $request)
     {
@@ -125,34 +118,27 @@ class DashboardsController extends Controller
         $cacheKey = 'dashboard:topAliados';
         $cachedData = Redis::get($cacheKey);
 
+        // Si los datos ya están en caché, devolverlos
         if ($cachedData) {
             return response()->json(json_decode($cachedData), 200);
         }
 
-        $totalAsesorias = Asesoria::count();
-
-        $topAliados = Aliado::withCount('asesoria')
-            ->orderByDesc('asesoria_count')
+        // Consulta optimizada para obtener los top 5 aliados por número de asesorías
+        $topAliados = Aliado::select('nombre')
+            ->selectRaw('COUNT(asesorias.id) as asesorias')
+            ->leftJoin('asesorias', 'aliados.id', '=', 'asesorias.aliado_id')
+            ->groupBy('aliados.id')
+            ->orderByDesc('asesorias')
             ->take(5)
-            ->get(['nombre', 'asesoria_count']);
+            ->get();
 
-        $topAliados->transform(function ($aliado) use ($totalAsesorias) {
-            $porcentaje = ($aliado->asesoria_count / $totalAsesorias) * 100;
-            $aliado->porcentaje = round($porcentaje, 2) . '%';
-            return [
-                'nombre' => $aliado->nombre,
-                'asesorias' => $aliado->asesoria_count,
-                'porcentaje' => $aliado->porcentaje,
-            ];
-        });
+        // Cachear el resultado en Redis por 1 hora
+        Redis::set($cacheKey, json_encode($topAliados));
+        Redis::expire($cacheKey, 3600); // 1 hora
 
-        if (!$cachedData) {
-            Redis::set($cacheKey, json_encode($topAliados));
-            Redis::expire($cacheKey, 3600);
-        }
-
-        return $topAliados;
+        return response()->json($topAliados, 200);
     }
+
 
     public function asesoriasAsignadasSinAsignar()
     {
@@ -466,7 +452,7 @@ class DashboardsController extends Controller
             return response()->json(['message' => 'No tienes permisos para acceder a esta función.'], 403);
         }
 
-        
+
 
         // Determinar el campo a consultar basado en el tipo
         $campo = ($tipo == 1) ? 'primera_vez' : 'segunda_vez';
@@ -497,7 +483,7 @@ class DashboardsController extends Controller
             'info_tecnica' => $puntajes->info_tecnica
         ];
 
-        
+
         return response()->json($puntajeArray, 200);
     }
 }
