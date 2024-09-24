@@ -72,6 +72,44 @@ class AliadoApiController extends Controller
         }
     }
 
+    public function mostrarAliados(Request $request)
+    {
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
+            }
+
+            $estado = $request->input('estado', 'Activo'); // Obtener el estado desde el request, por defecto 'Activo'
+
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+            $aliadoVer = User::where('estado', $estadoBool)
+                ->where('id_rol', 3)
+                ->pluck('id');
+
+            $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
+                ->with('auth:id,email,estado')
+                ->get(['id', 'nombre', 'id_autentication']);
+
+            $aliadosConEstado = $aliados->map(function ($aliado) {
+                $user = User::find($aliado->id_autentication);
+
+                return [
+                    'id' => $aliado->id,
+                    'nombre' => $aliado->nombre,
+                    'id_auth' => $user->id,
+                    'email' => $user->email,
+                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+
+                ];
+            });
+
+            return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function traerAliadosiau($id)
     {
         try {
@@ -207,14 +245,6 @@ class AliadoApiController extends Controller
                 if (trim($data->input('ruta_multi')) == null) {
                     return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
                 }
-            }
-
-            $descripcion = $data->input('descripcion');
-            if (strlen($descripcion) < 206) {
-                return response()->json(['message' => 'La descripción debe tener al menos 206 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 314) {
-                return response()->json(['message' => 'La descripción no puede tener más de 312 caracteres'], 400);
             }
 
             DB::beginTransaction();
@@ -397,14 +427,6 @@ class AliadoApiController extends Controller
 
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            }
-
-            $descripcion = $request->input('descripcion');
-            if (strlen($descripcion) < 206) {
-                return response()->json(['error' => 'La descripción debe tener al menos 206 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 312) {
-                return response()->json(['error' => 'La descripción no puede tener más de 312 caracteres'], 400);
             }
 
             $user = $aliado->auth;

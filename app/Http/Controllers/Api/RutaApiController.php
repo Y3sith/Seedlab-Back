@@ -351,6 +351,10 @@ public function actividadCompletaxruta($id)
             }, 'actividades.nivel.lecciones.contenidoLecciones', 'actividades.aliado'])
             ->get();
 
+            if ($ruta->isEmpty() || $ruta->first()->actividades->isEmpty()) {
+                return response()->json(['mensaje' => 'No hay actividades disponibles para esta ruta'], 404);
+            }
+
             $ruta = $ruta->map(function ($r) {
                 $r->actividades = $r->actividades->map(function ($actividad) {
                     $actividad->id_asesor = $actividad->id_asesor ?? 'Ninguno';

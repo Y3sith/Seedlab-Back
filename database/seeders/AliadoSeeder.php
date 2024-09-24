@@ -39,8 +39,8 @@ class AliadoSeeder extends Seeder
                 $destinationImageName = '5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNUL.webp';
                 $destinationImagePath = $multimediaPath . '/' . $destinationImageName;
         
-                $sourceImagePaths = base_path('resources/imagen/tecnoparque.webp');
-                $destinationImageNames = '5bNMib9x9pD058TepwVBgAdddF1k.webp';
+                $sourceImagePaths = base_path('resources/imagen/home_Tecnoparque.webp');
+                $destinationImageNames = '5bNMib9x9pD058TepwVBgdF1k.webp';
                 $destinationImagePaths = $multimediaPath . '/' . $destinationImageNames;
         
                 // Copiar la imagen a la carpeta 'banners'
@@ -86,7 +86,7 @@ class AliadoSeeder extends Seeder
                 "nombre" => "Ecopetrol",
                 "descripcion" => "Ecopetrol S.A. es una Compañía organizada bajo la forma de sociedad anónima, del orden nacional, vinculada al Ministerio de Minas y Energía. Tiene operaciones ubicadas en el centro, sur, oriente y norte de Colombia, al igual que en el exterior.",
                 "logo" => "ecopetrol.webp",
-                "ruta_multi" => "https://youtu.be/1HGqT3SR8gc?si=PMXpBZ7WbmIbaHWQ",
+                "ruta_multi" => "https://youtu.be/WmpTHRLldeg?si=JZilLZ3RgCSms8XP",
                 "id_autentication" => 6,
                 "id_tipo_dato" => 1,
                 "urlpagina" => "https://www.ecopetrol.com.co/wps/portal"

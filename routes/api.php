@@ -126,6 +126,8 @@ Route::group([
     Route::post('/crearbannerr', [AliadoApiController::class, 'crearBanner']);
     Route::post('/editarbanner/{id}', [AliadoApiController::class, 'editarBanner']);
     Route::delete('/eliminarbanner/{id}', [AliadoApiController::class, 'eliminarBanner']);
+    Route::get('/mostrarAliados', [AliadoApiController::class, 'mostrarAliados']);
+
 });
 
 //Dashboard
