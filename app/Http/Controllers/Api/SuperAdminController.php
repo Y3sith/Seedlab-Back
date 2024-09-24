@@ -405,7 +405,7 @@ class SuperAdminController extends Controller
             $personalizacion->telefono = '(55) 5555-5555';
             $personalizacion->direccion = 'Calle 48 # 28 - 40';
             $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
-            $personalizacion->imagen_logo = asset('storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg');
+            $personalizacion->imagen_logo = asset('storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.webp');
 
 
             // Guardar los cambios
