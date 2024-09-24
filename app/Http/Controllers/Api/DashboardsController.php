@@ -113,16 +113,15 @@ class DashboardsController extends Controller
         $cacheKey = 'dashboard:topAliados';
         $cachedData = Redis::get($cacheKey);
 
-        // Si los datos ya están en caché, devolverlos
         if ($cachedData) {
             return response()->json(json_decode($cachedData), 200);
         }
 
         // Consulta optimizada para obtener los top 5 aliados por número de asesorías
-        $topAliados = Aliado::select('nombre')
+        $topAliados = Aliado::select('aliado.id', 'aliado.nombre') // Asegura que ambos campos están en el GROUP BY
             ->selectRaw('COUNT(asesoria.id) as asesoria')
             ->leftJoin('asesoria', 'aliado.id', '=', 'asesoria.id_aliado')
-            ->groupBy('aliado.id')
+            ->groupBy('aliado.id', 'aliado.nombre')  // Agrupa por ambas columnas
             ->orderByDesc('asesoria')
             ->take(5)
             ->get();
@@ -133,6 +132,7 @@ class DashboardsController extends Controller
 
         return response()->json($topAliados, 200);
     }
+
 
 
     public function asesoriasAsignadasSinAsignar()
