@@ -188,47 +188,6 @@ class DashboardsController extends Controller
     }
 
 
-    // public function promEmpresasXmes(Request $request)
-    // {
-    //     try {
-    //         if (Auth::user()->id_rol != 1) {
-    //             return response()->json(['message' => 'no tienes permiso para esta funcion']);
-    //         }
-
-    //         $cacheKey = 'dashboard:promedioEmpresasXmes';
-    //         $cachedData = Redis::get($cacheKey);
-
-    //         if ($cachedData) {
-    //             return response()->json(json_decode($cachedData), 200);
-    //         }
-
-    //         ///me trae las empresas creadar por mes
-    //         $anio = $request->input('fecha', date('Y'));
-    //         $empresasPorMes = Empresa::whereYear('fecha_registro', $anio)
-    //             ->select(DB::raw('MONTH(fecha_registro) as mes, COUNT(*) as total_empresas'))
-    //             ->groupBy('mes')
-    //             ->get();
-    //         $totalMeses = $empresasPorMes->count();
-    //         $totalEmpresas = $empresasPorMes->sum('total_empresas');
-    //         $promedioEmpresasPorMes = $totalMeses > 0 ? $totalEmpresas / $totalMeses : 0;
-
-    //         if (!$cachedData) {
-    //             Redis::set($cacheKey, json_encode([
-    //                 'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
-    //                 'detalles' => $empresasPorMes
-    //             ]));
-    //             Redis::expire($cacheKey, 3600);
-    //         }
-
-    //         return response()->json([
-    //             'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
-    //             'detalles' => $empresasPorMes
-    //         ], 200);
-    //     } catch (Exception $e) {
-    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
-    //     }
-    // }
-
     public function emprendedorXdepartamento()
     {
         try {
@@ -334,9 +293,6 @@ class DashboardsController extends Controller
                 return response()->json(json_decode($cachedData), 200);
             }
 
-            if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
-                return response()->json(['message', 'No tienes permiso para acceder a esta funcion'], 400);
-            }
             $generos = DB::table('emprendedor')
                 ->select('genero', DB::raw('count(*) as total'))
                 ->whereIn('genero', ['Masculino', 'Femenino', 'Otro'])
@@ -520,6 +476,9 @@ class DashboardsController extends Controller
 
         // 6. Emprendedores por departamento
         $result['emprendedoresPorDepartamento'] = $this->emprendedorXdepartamento();
+
+        //7. Generos Emprendedores
+        $result['generosEmprendedores'] = $this->generos();
 
         // Almacena el resultado en Redis
         Redis::set($cacheKey, json_encode($result));
