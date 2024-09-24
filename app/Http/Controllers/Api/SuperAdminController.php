@@ -75,7 +75,7 @@ class SuperAdminController extends Controller
 
     public function obtenerPersonalizacion($id)
     {
-        
+
         // Obtener la personalización desde la base de datos
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
 
@@ -111,14 +111,21 @@ class SuperAdminController extends Controller
         if (filter_var($path, FILTER_VALIDATE_URL)) {
             return $path;
         }
-    
-        // Asegúrate de que la ruta no tenga un prefijo de 'storage' antes de construir la URL
-        $path = ltrim($path, '/'); // Elimina el primer '/'
-    
+
+        // Asegúrate de que no haya 'storage/' al principio
+        $path = ltrim($path, '/'); // Elimina cualquier '/' inicial
+
+        // Comprueba si 'storage/' ya está presente
+        if (strpos($path, 'storage/') !== false) {
+            // Elimina la parte de 'storage/' si está presente
+            $path = str_replace('storage/', '', $path);
+        }
+
         // Devuelve la URL correcta
         return url('storage/' . $path);
     }
-    
+
+
 
 
     /**
