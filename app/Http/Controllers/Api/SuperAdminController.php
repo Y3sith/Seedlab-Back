@@ -31,6 +31,7 @@ class SuperAdminController extends Controller
                 'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
+
         // Buscar la personalización existente
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
         if (!$personalizacion) {
@@ -43,7 +44,6 @@ class SuperAdminController extends Controller
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
-        //$personalizacion->color_terciario = $request->input('color_terciario');
         $personalizacion->id_superadmin = $request->input('id_superadmin');
         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
         $personalizacion->paginaWeb = $request->input('paginaWeb');
@@ -65,29 +65,16 @@ class SuperAdminController extends Controller
             $personalizacion->imagen_logo = asset('storage/logos/' . basename($imagenLogoPath));
         }
 
-
-
         $personalizacion->save();
-
-        // Almacenar la personalización en Redis para futuras consultas
-        $personalizacionKey = 'personalizacion:' . $id;
-        Redis::set($personalizacionKey, json_encode($personalizacion)); // Guarda como JSON
-        Redis::expire($personalizacionKey, 3600); // Opcional, expira en 1 hora
 
         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
     }
 
 
 
+
     public function obtenerPersonalizacion($id)
     {
-        // Recuperar datos del localStorage en el front-end
-        $personalizacion = json_decode(request()->header('localStorage'), true);
-
-        // Verificar si la personalización ya está almacenada en localStorage
-        if (isset($personalizacion[$id])) {
-            return response()->json($personalizacion[$id], 200);
-        }
 
         // Obtener la personalización desde la base de datos
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
@@ -112,20 +99,33 @@ class SuperAdminController extends Controller
             'ubicacion' => $personalizacion->ubicacion,
         ];
 
-        
-        
+
+
         return response()->json($personalizacionParaCache, 200);
     }
 
 
     private function correctImageUrl($path)
     {
-        // Elimina cualquier '/storage' inicial
-        $path = ltrim($path, '/storage');
+        // Si ya es una URL completa, devuélvela directamente
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
 
-        // Asegúrate de que solo haya un '/storage' al principio
+        // Asegúrate de que no haya 'storage/' al principio
+        $path = ltrim($path, '/'); // Elimina cualquier '/' inicial
+
+        // Comprueba si 'storage/' ya está presente
+        if (strpos($path, 'storage/') !== false) {
+            // Elimina la parte de 'storage/' si está presente
+            $path = str_replace('storage/', '', $path);
+        }
+
+        // Devuelve la URL correcta
         return url('storage/' . $path);
     }
+
+
 
 
     /**
