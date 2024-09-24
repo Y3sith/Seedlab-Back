@@ -16,14 +16,14 @@ class OrientadorSeeder extends Seeder
     {
 
         Orientador::create([
-            "nombre"=> "David",
-            "apellido"=> "Hernandez",
-            "documento"=> "213456",
+            "nombre"=> "Orientador",
+            "apellido"=> "Prueba",
+            "documento"=> "0000000010",
             "fecha_nac"=>"2000-05-21",
             "id_tipo_documento"=>"1",
             "id_departamento"=>"27",
             "id_municipio"=>"866",
-            "direccion"=>"N/A",
+            "direccion"=>"Direccion por defecto",
             "genero"=>"Masculino",
             "celular"=> "333333333",
             "id_autentication"=> "2",

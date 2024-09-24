@@ -75,7 +75,7 @@ class AliadoSeeder extends Seeder
             ],
             [
                 "nombre" => "Ucc",
-                "descripcion" => "Somos una Institución multicampus de propiedad social, educamos personas con las competencias para responder a las dinámicas del mundo, contribuimos a la construcción y difusión del conocimiento, apoyamos el desarrollo competitivo del país a través de sus organizaciones y buscamos el mejoramiento de la calidad de vida de las comunidades.",
+                "descripcion" => "Somos una institución multicampus de propiedad social que forma personas con competencias para enfrentar las dinámicas globales. Contribuimos al conocimiento, apoyamos el desarrollo competitivo del país a través de sus organizaciones y trabajamos por mejorar la calidad de vida de las comunidades.",
                 "logo" => "ucc.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=tXoIVjVuYDQ&pp=ygUTdWNjIGRlIGJ1Y2FyYW1hbmdhIA%3D%3D",
                 "id_autentication" => 11,
@@ -120,7 +120,7 @@ class AliadoSeeder extends Seeder
             ],
             [
                 "nombre" => "C-emprende",
-                "descripcion" => "La estrategia regional CEmprende es el eje articulador y potenciador en los territorios de la política de reindustrialización, bajo los lineamientos del Ministerio de Comercio, Industria y Turismo.",
+                "descripcion" => "La estrategia regional CEmprende es el eje articulador y potenciador en los territorios de la política de reindustrialización, alineada con los lineamientos del Ministerio de Comercio, Industria y Turismo, promoviendo el emprendimiento, la innovación y la competitividad en cada región del país.",
                 "logo" => "c-emprende.webp",
                 "ruta_multi" => "https://www.youtube.com/watch?v=_ltfgiv4RVw&pp=ygUKYyBlbXByZW5kZQ%3D%3D",
                 "id_autentication" => 12,
@@ -129,7 +129,7 @@ class AliadoSeeder extends Seeder
             ],
             [
                 "nombre" => "Tecnoparque",
-                "descripcion" => "Es un programa de innovación tecnológica del Servicio Nacional de Aprendizaje dirigida a todos los Colombianos, que actúa como acelerador para el desarrollo de proyectos materializados en prototipos funcionales en cuatro líneas tecnológicas: Electrónica y Telecomunicaciones, Tecnologías Virtuales, Ingeniería y diseño y Biotecnología nanotecnología.",
+                "descripcion" => "Es un programa de innovación tecnológica del Servicio Nacional de Aprendizaje dirigido a los colombianos, que acelera el desarrollo de proyectos en prototipos funcionales en cuatro áreas: Electrónica y Telecomunicaciones, Tecnologías Virtuales, Ingeniería y Diseño, y Biotecnología/Nanotecnología.",
                 "logo" => "tecnoparque.webp",
                 "ruta_multi" => $tecnoparqueimagen,
                 "id_autentication" => 13,
@@ -139,7 +139,7 @@ class AliadoSeeder extends Seeder
             ],
             [
                 "nombre" => "Innpulsa colombia",
-                "descripcion" => "Iniciativa que promueve mejores prácticas empresariales y el desarrollo de las personas para el fortalecimiento y la sostenibilidad de micro y pequeños negocios y unidades productivas de la economía popular.",
+                "descripcion" => "Esta iniciativa tiene como objetivo principal promover las mejores prácticas empresariales, fomentando el crecimiento y desarrollo integral de las personas. Busca fortalecer y asegurar la sostenibilidad de micro y pequeños negocios, así como de las unidades productivas de la economía popular.",
                 "logo" => "innpulsa.webp",
                 "ruta_multi" => $inpulsaimagen,
                 "id_autentication" => 14,

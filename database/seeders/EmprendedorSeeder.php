@@ -23,14 +23,14 @@ class EmprendedorSeeder extends Seeder
         }
 
         Emprendedor::create([
-            "documento"=> "1098476011",
-            "nombre"=> "marly",
-            "apellido"=> "rangel",
+            "documento"=> "0000000001",
+            "nombre"=> "Emprendedor",
+            "apellido"=> "Prueba",
             "imagen_perfil"=>"",
             "celular"=> "3122231313",
             "genero"=> "Femenino",
             "fecha_nac"=> "1998-06-03",
-            "direccion"=>"manzaka k",
+            "direccion"=>"Dirección por defecto",
             "email_verified_at"=>"2024/05/17",
             "cod_ver"=> "153567",
             "id_autentication"=> 5,
@@ -39,14 +39,14 @@ class EmprendedorSeeder extends Seeder
             "id_municipio"=> 904
         ]);
         Emprendedor::create([
-            "documento"=> "28358568",
-            "nombre"=> "heidy",
-            "apellido"=> "ortega",
+            "documento"=> "0000000002",
+            "nombre"=> "Emprendedor",
+            "apellido"=> "Prueba",
             "imagen_perfil"=>"",
             "celular"=> "312444444",
             "genero"=> "Otro",
             "fecha_nac"=> "1998-06-03",
-            "direccion"=>"manzaka k",
+            "direccion"=>"Dirección por defecto",
             "email_verified_at"=>"2024/05/17",
             "cod_ver"=> "183567",
             "id_autentication"=> 16,
@@ -55,14 +55,14 @@ class EmprendedorSeeder extends Seeder
             "id_municipio"=> 904
         ]);
         Emprendedor::create([
-            "documento"=> "10101010",
-            "nombre"=> "uriel",
-            "apellido"=> "stefano",
+            "documento"=> "0000000003",
+            "nombre"=> "Emprendedor",
+            "apellido"=> "Prueba",
             "imagen_perfil"=>"",
             "celular"=> "3122231313",
             "genero"=> "Masculino",
             "fecha_nac"=> "1998-06-03",
-            "direccion"=>"manzaka k",
+            "direccion"=>"Dirección por defecto",
             "email_verified_at"=>"2024/05/17",
             "cod_ver"=> "113562",
             "id_autentication"=> 15,
