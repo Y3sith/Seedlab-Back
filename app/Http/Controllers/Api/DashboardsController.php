@@ -71,47 +71,42 @@ class DashboardsController extends Controller
         $cachedData = Redis::get($cacheKey);
 
         if ($cachedData) {
-            // Si los datos están en Redis, devolverlos directamente
             return response()->json(json_decode($cachedData), 200);
         }
+
         $year = $request->input('year', 2024); // Por defecto, 2024 si no se proporciona año
 
+        // cálculo mensual
         $averageAsesoriasByMonth = DB::table('asesoria')
             ->select(
                 DB::raw('MONTH(fecha) as mes'),
                 DB::raw('COUNT(*) / COUNT(DISTINCT doc_emprendedor) as promedio_asesorias')
             )
-            ->whereRaw('YEAR(fecha) = ?', [$year])
+            ->whereYear('fecha', $year)
             ->groupBy(DB::raw('MONTH(fecha)'))
             ->orderBy(DB::raw('MONTH(fecha)'))
             ->get();
 
-        $averageTotal = Asesoria::whereRaw('YEAR(fecha) = ?', [$year])
-            ->join(
-                DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = ? GROUP BY doc_emprendedor) as asesoria_counts'),
-                'asesoria_counts.doc_emprendedor',
-                '=',
-                'asesoria.doc_emprendedor'
-            )
-            ->selectRaw('AVG(asesoria_counts.asesoria_count) as average_asesorias')
-            ->setBindings([$year, $year]) // Asignar el año dos veces para la subconsulta
+        //  cálculo anual
+        $averageTotal = DB::table('asesoria')
+            ->selectRaw('AVG(asesoria_count) as average_asesorias')
+            ->from(DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = ? GROUP BY doc_emprendedor) as asesoria_counts'))
+            ->setBindings([$year])
             ->value('average_asesorias');
 
+        // Preparar el resultado final
         $result = [
             'promedio_mensual' => $averageAsesoriasByMonth,
             'promedio_anual' => $averageTotal
         ];
 
-        if (!$cachedData) {
-            Redis::set($cacheKey, json_encode($result));
-            Redis::expire($cacheKey, 3600);
-        }
+        // Guardar el resultado en caché por 1 hora
+        Redis::set($cacheKey, json_encode($result));
+        Redis::expire($cacheKey, 3600); // 1 hora
 
-        return [
-            'promedio_mensual' => $averageAsesoriasByMonth,
-            'promedio_anual' => $averageTotal
-        ];
+        return response()->json($result, 200);
     }
+
 
     public function topAliados()
     {
@@ -149,28 +144,24 @@ class DashboardsController extends Controller
             return response()->json(json_decode($cachedData), 200);
         }
 
-        $asesoriasAsignadas = Asesoria::where('asignacion', 1)->count();
-        $asesoriasSinAsignar = Asesoria::where('asignacion', 0)->count();
+        // Una sola consulta para obtener ambos conteos
+        $result = DB::table('asesoria')
+            ->select(
+                DB::raw('SUM(CASE WHEN asignacion = 1 THEN 1 ELSE 0 END) as asesoriasAsignadas'),
+                DB::raw('SUM(CASE WHEN asignacion = 0 THEN 1 ELSE 0 END) as asesoriasSinAsignar')
+            )
+            ->first();
 
-        $result = [
-            'asesoriasAsignadas' => $asesoriasAsignadas,
-            'asesoriasSinAsignar' => $asesoriasSinAsignar
-        ];
+        // Almacenar el resultado en Redis
+        Redis::set($cacheKey, json_encode($result));
+        Redis::expire($cacheKey, 3600); // 1 hora de caché
 
-        if (!$cachedData) {
-            Redis::set($cacheKey, json_encode($result));
-            Redis::expire($cacheKey, 3600);
-        }
-
-        return [
-            'asesoriasAsignadas' => $asesoriasAsignadas,
-            'asesoriasSinAsignar' => $asesoriasSinAsignar
-        ];
+        return response()->json($result, 200);
     }
+
 
     public function conteoRegistrosAnioYMes()
     {
-        // Promedio mensual para emprendedores
         $cacheKey = 'dashboard:conteoRegistroAnioMes';
         $cachedData = Redis::get($cacheKey);
 
@@ -181,62 +172,62 @@ class DashboardsController extends Controller
         $averageMonthlyEmprendedor = DB::table('users')
             ->select(
                 DB::raw("MONTH(fecha_registro) as mes"),
-                DB::raw("SUM(CASE WHEN id_rol = 5 THEN 1 ELSE 0 END) as emprendedores"),
-                DB::raw("SUM(CASE WHEN id_rol = 3 THEN 1 ELSE 0 END) as aliados")
+                DB::raw("COUNT(CASE WHEN id_rol = 5 THEN 1 END) as emprendedores"),
+                DB::raw("COUNT(CASE WHEN id_rol = 3 THEN 1 END) as aliados")
             )
             ->groupBy('mes')
             ->orderBy('mes', 'ASC')
             ->get();
 
         Redis::set($cacheKey, json_encode($averageMonthlyEmprendedor));
-        Redis::expire($cacheKey, 3600);
-
+        Redis::expire($cacheKey, 3600); // Cache por 1 hora
 
         return response()->json([
             'promedios' => $averageMonthlyEmprendedor,
         ]);
     }
 
-    public function promEmpresasXmes(Request $request)
-    {
-        try {
-            if (Auth::user()->id_rol != 1) {
-                return response()->json(['message' => 'no tienes permiso para esta funcion']);
-            }
 
-            $cacheKey = 'dashboard:promedioEmpresasXmes';
-            $cachedData = Redis::get($cacheKey);
+    // public function promEmpresasXmes(Request $request)
+    // {
+    //     try {
+    //         if (Auth::user()->id_rol != 1) {
+    //             return response()->json(['message' => 'no tienes permiso para esta funcion']);
+    //         }
 
-            if ($cachedData) {
-                return response()->json(json_decode($cachedData), 200);
-            }
+    //         $cacheKey = 'dashboard:promedioEmpresasXmes';
+    //         $cachedData = Redis::get($cacheKey);
 
-            ///me trae las empresas creadar por mes
-            $anio = $request->input('fecha', date('Y'));
-            $empresasPorMes = Empresa::whereYear('fecha_registro', $anio)
-                ->select(DB::raw('MONTH(fecha_registro) as mes, COUNT(*) as total_empresas'))
-                ->groupBy('mes')
-                ->get();
-            $totalMeses = $empresasPorMes->count();
-            $totalEmpresas = $empresasPorMes->sum('total_empresas');
-            $promedioEmpresasPorMes = $totalMeses > 0 ? $totalEmpresas / $totalMeses : 0;
+    //         if ($cachedData) {
+    //             return response()->json(json_decode($cachedData), 200);
+    //         }
 
-            if (!$cachedData) {
-                Redis::set($cacheKey, json_encode([
-                    'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
-                    'detalles' => $empresasPorMes
-                ]));
-                Redis::expire($cacheKey, 3600);
-            }
+    //         ///me trae las empresas creadar por mes
+    //         $anio = $request->input('fecha', date('Y'));
+    //         $empresasPorMes = Empresa::whereYear('fecha_registro', $anio)
+    //             ->select(DB::raw('MONTH(fecha_registro) as mes, COUNT(*) as total_empresas'))
+    //             ->groupBy('mes')
+    //             ->get();
+    //         $totalMeses = $empresasPorMes->count();
+    //         $totalEmpresas = $empresasPorMes->sum('total_empresas');
+    //         $promedioEmpresasPorMes = $totalMeses > 0 ? $totalEmpresas / $totalMeses : 0;
 
-            return response()->json([
-                'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
-                'detalles' => $empresasPorMes
-            ], 200);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
-        }
-    }
+    //         if (!$cachedData) {
+    //             Redis::set($cacheKey, json_encode([
+    //                 'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
+    //                 'detalles' => $empresasPorMes
+    //             ]));
+    //             Redis::expire($cacheKey, 3600);
+    //         }
+
+    //         return response()->json([
+    //             'promedioEmpresasPorMes' => round($promedioEmpresasPorMes, 2),
+    //             'detalles' => $empresasPorMes
+    //         ], 200);
+    //     } catch (Exception $e) {
+    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
+    //     }
+    // }
 
     public function emprendedorXdepartamento()
     {
