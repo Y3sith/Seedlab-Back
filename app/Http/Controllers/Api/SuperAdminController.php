@@ -31,6 +31,7 @@ class SuperAdminController extends Controller
                 'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
+
         // Buscar la personalización existente
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
         if (!$personalizacion) {
@@ -43,7 +44,6 @@ class SuperAdminController extends Controller
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
-        //$personalizacion->color_terciario = $request->input('color_terciario');
         $personalizacion->id_superadmin = $request->input('id_superadmin');
         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
         $personalizacion->paginaWeb = $request->input('paginaWeb');
@@ -65,17 +65,11 @@ class SuperAdminController extends Controller
             $personalizacion->imagen_logo = asset('storage/logos/' . basename($imagenLogoPath));
         }
 
-
-
         $personalizacion->save();
-
-        // Almacenar la personalización en Redis para futuras consultas
-        $personalizacionKey = 'personalizacion:' . $id;
-        Redis::set($personalizacionKey, json_encode($personalizacion)); // Guarda como JSON
-        Redis::expire($personalizacionKey, 3600); // Opcional, expira en 1 hora
 
         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
     }
+
 
 
 
@@ -112,8 +106,8 @@ class SuperAdminController extends Controller
             'ubicacion' => $personalizacion->ubicacion,
         ];
 
-        
-        
+
+
         return response()->json($personalizacionParaCache, 200);
     }
 
