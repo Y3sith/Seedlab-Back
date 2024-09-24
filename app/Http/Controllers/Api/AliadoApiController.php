@@ -247,14 +247,6 @@ class AliadoApiController extends Controller
                 }
             }
 
-            $descripcion = $data->input('descripcion');
-            if (strlen($descripcion) < 206) {
-                return response()->json(['message' => 'La descripción debe tener al menos 206 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 314) {
-                return response()->json(['message' => 'La descripción no puede tener más de 312 caracteres'], 400);
-            }
-
             DB::beginTransaction();
 
             try {
@@ -435,14 +427,6 @@ class AliadoApiController extends Controller
 
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-            }
-
-            $descripcion = $request->input('descripcion');
-            if (strlen($descripcion) < 206) {
-                return response()->json(['error' => 'La descripción debe tener al menos 206 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 312) {
-                return response()->json(['error' => 'La descripción no puede tener más de 312 caracteres'], 400);
             }
 
             $user = $aliado->auth;
