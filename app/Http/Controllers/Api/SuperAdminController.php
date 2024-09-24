@@ -107,12 +107,18 @@ class SuperAdminController extends Controller
 
     private function correctImageUrl($path)
     {
-        // Elimina cualquier '/storage' inicial
-        $path = ltrim($path, '/storage');
-
-        // Asegúrate de que solo haya un '/storage' al principio
+        // Si ya es una URL completa, devuélvela directamente
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
+    
+        // Asegúrate de que la ruta no tenga un prefijo de 'storage' antes de construir la URL
+        $path = ltrim($path, '/'); // Elimina el primer '/'
+    
+        // Devuelve la URL correcta
         return url('storage/' . $path);
     }
+    
 
 
     /**
