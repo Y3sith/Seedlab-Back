@@ -137,7 +137,7 @@ Route::group(
     function () {
         Route::get('/emprendedor_departamento', [DashboardsController::class, 'emprendedorXdepartamento']);
         Route::get('/averageAsesorias2024', [DashboardsController::class, 'averageAsesorias2024']);
-        Route::get('/contar-usuarios', [DashboardsController::class, 'enumerarUsuarios']);
+        Route::get('/contar-usuarios', [DashboardsController::class, 'getDashboardData']);
         Route::get('/conteoAsesorias', [DashboardsController::class, 'asesoriasAsignadasSinAsignar']);
         Route::get('/listRegistrosAnioMes', [DashboardsController::class, 'conteoRegistrosAnioYMes']);
         Route::get('/promEmpresas_Mes', [DashboardsController::class, 'promEmpresasXmes']);

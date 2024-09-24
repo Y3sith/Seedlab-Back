@@ -443,8 +443,6 @@ class DashboardsController extends Controller
             return response()->json(['message' => 'No tienes permisos para acceder a esta función.'], 403);
         }
 
-
-
         // Determinar el campo a consultar basado en el tipo
         $campo = ($tipo == 1) ? 'primera_vez' : 'segunda_vez';
 
@@ -477,4 +475,57 @@ class DashboardsController extends Controller
 
         return response()->json($puntajeArray, 200);
     }
+
+
+    public function getDashboardData(Request $request)
+    {
+        $cacheKey = 'dashboard:allData';
+        $cachedData = Redis::get($cacheKey);
+
+        if ($cachedData) {
+            return response()->json(json_decode($cachedData), 200);
+        }
+
+        // Obtén todos los datos necesarios
+
+        // 1. Contar usuarios por rol y estado
+        $usersByRoleAndState = User::selectRaw('id_rol, estado, COUNT(*) as total')
+            ->groupBy('id_rol', 'estado')
+            ->get();
+
+        $roles = Rol::all();
+        $result = [];
+
+        foreach ($roles as $rol) {
+            $activeUsers = $usersByRoleAndState->where('id_rol', $rol->id)->where('estado', true)->first();
+            $inactiveUsers = $usersByRoleAndState->where('id_rol', $rol->id)->where('estado', false)->first();
+
+            $result['usuarios'][$rol->nombre] = [
+                'activos' => $activeUsers ? $activeUsers->total : 0,
+                'inactivos' => $inactiveUsers ? $inactiveUsers->total : 0,
+            ];
+        }
+
+        // 2. Top aliados
+        $result['topAliados'] = $this->topAliados();
+
+        // 3. Conteo de asesorías
+        $result['conteoAsesorias'] = $this->asesoriasAsignadasSinAsignar();
+
+        // 4. Promedio de asesorías por año
+        $result['averageAsesorias'] = $this->averageAsesorias2024($request);
+
+        // 5. Conteo de registros por año y mes
+        $result['conteoRegistros'] = $this->conteoRegistrosAnioYMes();
+
+        // 6. Emprendedores por departamento
+        $result['emprendedoresPorDepartamento'] = $this->emprendedorXdepartamento();
+
+        // Almacena el resultado en Redis
+        Redis::set($cacheKey, json_encode($result));
+        Redis::expire($cacheKey, 3600); // 1 hora de caché
+
+        return response()->json($result, 200);
+    }
+
 }
