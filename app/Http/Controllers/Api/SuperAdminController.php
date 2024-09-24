@@ -75,14 +75,7 @@ class SuperAdminController extends Controller
 
     public function obtenerPersonalizacion($id)
     {
-        // Recuperar datos del localStorage en el front-end
-        $personalizacion = json_decode(request()->header('localStorage'), true);
-
-        // Verificar si la personalización ya está almacenada en localStorage
-        if (isset($personalizacion[$id])) {
-            return response()->json($personalizacion[$id], 200);
-        }
-
+        
         // Obtener la personalización desde la base de datos
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
 
