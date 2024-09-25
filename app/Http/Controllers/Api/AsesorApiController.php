@@ -115,7 +115,7 @@ class AsesorApiController extends Controller
             ];
             foreach ($requiredFields as $field) {
                 if (empty($request->input($field))) {
-                    return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
+                    return response()->json(['message' => "Debes completar todos los campos requeridos."], 400);
                 }
             }
 
