@@ -17,15 +17,15 @@ return [
 
     'paths' => ['api/*'],
 
-    'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    'allowed_methods' => ['*'],
 
-    'allowed_origins' => ['https://ruta.adsocidm.com'], //https://ruta.adsocidm.com
+    'allowed_origins' => ['http://localhost:4200'], //https://ruta.adsocidm.com
 
     'allowed_origins_patterns' => [],
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => ['Origin','X-Requested-With',  'X-Token-Auth', 'Authorization', 'Content-Disposition', 'Content-Type'],
+    'exposed_headers' => ['X-Requested-With',  'X-Token-Auth', 'Authorization', 'Content-Disposition', 'Content-Type'],
 
     'max_age' => 0,
 
