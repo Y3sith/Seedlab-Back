@@ -417,7 +417,7 @@ class SuperAdminController extends Controller
                 'message' => 'Personalización restaurada correctamente',
                 $personalizacion
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error al restaurar la personalización',
                 'error' => $e->getMessage()

@@ -96,9 +96,6 @@ Route::group([
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class, 'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class, 'listarAliados']);
-
-    ////   reportes
-    Route::get('/reporte-emprendedores', 'SuperAdminController@emprendedoresPorMunicipioPDF');
 });
 
 
