@@ -17,7 +17,7 @@ return [
 
     'paths' => ['api/*'],
 
-    'allowed_methods' => ['*'],
+    'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
     'allowed_origins' => ['https://ruta.adsocidm.com'], //https://ruta.adsocidm.com
 
@@ -25,7 +25,7 @@ return [
 
     'allowed_headers' => ['*'],
 
-    'exposed_headers' => ['X-Requested-With',  'X-Token-Auth', 'Authorization', 'Content-Disposition', 'Content-Type'],
+    'exposed_headers' => ['Origin','X-Requested-With',  'X-Token-Auth', 'Authorization', 'Content-Disposition', 'Content-Type'],
 
     'max_age' => 0,
 
