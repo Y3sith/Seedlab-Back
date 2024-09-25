@@ -31,6 +31,7 @@ class SuperAdminController extends Controller
                 'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
+
         // Buscar la personalización existente
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
         if (!$personalizacion) {
@@ -43,7 +44,6 @@ class SuperAdminController extends Controller
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
-        //$personalizacion->color_terciario = $request->input('color_terciario');
         $personalizacion->id_superadmin = $request->input('id_superadmin');
         $personalizacion->descripcion_footer = $request->input('descripcion_footer');
         $personalizacion->paginaWeb = $request->input('paginaWeb');
@@ -65,31 +65,18 @@ class SuperAdminController extends Controller
             $personalizacion->imagen_logo = asset('storage/logos/' . basename($imagenLogoPath));
         }
 
-
-
         $personalizacion->save();
-
-        // Almacenar la personalización en Redis para futuras consultas
-        $personalizacionKey = 'personalizacion:' . $id;
-        Redis::set($personalizacionKey, json_encode($personalizacion)); // Guarda como JSON
-        Redis::expire($personalizacionKey, 3600); // Opcional, expira en 1 hora
 
         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
     }
 
 
 
+
     public function obtenerPersonalizacion($id)
     {
-        // Buscar en Redis primero
-        $personalizacionKey = 'personalizacion:' . $id;
-        $personalizacion = Redis::get($personalizacionKey);
 
-        if ($personalizacion) {
-            // Si está en Redis, devolver la personalización desde el caché
-            return response()->json(json_decode($personalizacion), 200);
-        }
-
+        // Obtener la personalización desde la base de datos
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
 
         if (!$personalizacion) {
@@ -98,17 +85,9 @@ class SuperAdminController extends Controller
             ], 404);
         }
 
-        // Preparar los datos para guardar en Redis y para la respuesta
-        $personalizacionParaCache = $personalizacion->toArray();
-        $personalizacionParaCache['imagen_logo'] = $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null;
-
-        // Guardar la personalización en Redis para la próxima vez
-        Redis::set($personalizacionKey, json_encode($personalizacionParaCache));
-        Redis::expire($personalizacionKey, 3600); // Opcional: expira en 1 hora
-
         // Preparar la respuesta
-        $respuesta = [
-            'imagen_logo' => $personalizacionParaCache['imagen_logo'],
+        $personalizacionParaCache = [
+            'imagen_logo' => $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null,
             'nombre_sistema' => $personalizacion->nombre_sistema,
             'color_principal' => $personalizacion->color_principal,
             'color_secundario' => $personalizacion->color_secundario,
@@ -120,17 +99,33 @@ class SuperAdminController extends Controller
             'ubicacion' => $personalizacion->ubicacion,
         ];
 
-        return response()->json($respuesta, 200);
+
+
+        return response()->json($personalizacionParaCache, 200);
     }
+
 
     private function correctImageUrl($path)
     {
-        // Elimina cualquier '/storage' inicial
-        $path = ltrim($path, '/storage');
+        // Si ya es una URL completa, devuélvela directamente
+        if (filter_var($path, FILTER_VALIDATE_URL)) {
+            return $path;
+        }
 
-        // Asegúrate de que solo haya un '/storage' al principio
+        // Asegúrate de que no haya 'storage/' al principio
+        $path = ltrim($path, '/'); // Elimina cualquier '/' inicial
+
+        // Comprueba si 'storage/' ya está presente
+        if (strpos($path, 'storage/') !== false) {
+            // Elimina la parte de 'storage/' si está presente
+            $path = str_replace('storage/', '', $path);
+        }
+
+        // Devuelve la URL correcta
         return url('storage/' . $path);
     }
+
+
 
 
     /**
@@ -246,7 +241,6 @@ class SuperAdminController extends Controller
                 'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
                 'id_auth' => $admin->id_autentication
             ];
-            //return response()->json($admin);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -334,7 +328,6 @@ class SuperAdminController extends Controller
                 $admin->id_departamento = $request->input('id_departamento');
                 $admin->id_municipio = $request->input('id_municipio');
                 $admin->fecha_nac = $request->input('fecha_nac');
-                //$admin->celular = $request->input('celular');
                 if ($newCelular && $newCelular !== $admin->celular) {
                     // Verificar si el nuevo email ya está en uso
                     $existing = SuperAdmin::where('celular', $newCelular)->first();
@@ -412,7 +405,7 @@ class SuperAdminController extends Controller
             $personalizacion->telefono = '(55) 5555-5555';
             $personalizacion->direccion = 'Calle 48 # 28 - 40';
             $personalizacion->ubicacion = 'Bucaramanga, Santander, Colombia';
-            $personalizacion->imagen_logo = asset('storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.jpg');
+            $personalizacion->imagen_logo = asset('storage/logos/5bNMib9x9pD058TepwVBgA2JdF1kNW5OzNULndSD.webp');
 
 
             // Guardar los cambios
@@ -424,7 +417,7 @@ class SuperAdminController extends Controller
                 'message' => 'Personalización restaurada correctamente',
                 $personalizacion
             ], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error al restaurar la personalización',
                 'error' => $e->getMessage()
@@ -447,31 +440,4 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
     }
-
-
-
-
-
-
-
-
-
-
-    // public function emprendedoresPorMunicipioPDF (){
-    //     $emprendedoresPorMunicipio = Emprendedor::with('municipios')
-    //     ->select('id_municipio', DB::raw('COUNT(*) as total_emprendedores'))
-    //     ->groupBy('id_municipio')
-    //     ->get()
-    //     ->map(function($emprendedor) {
-    //         return [
-    //             'municipio' => $emprendedor->municipios->nombre, 
-    //             'total_emprendedores' => $emprendedor->total_emprendedores,
-    //         ];
-    //     });
-
-    //     $pdf = PDF::loadView('emprendedores_municipio_pdf', ['emprendedores' => $emprendedoresPorMunicipio]); ///->cambiar la vista que genera el pdf
-    //     return $pdf->download('reporte_emprendedores_municipio.pdf');
-    // }
-
-
 }

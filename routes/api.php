@@ -27,7 +27,6 @@ use App\Http\Controllers\Api\RespuestasApiController;
 
 
 
-Route::get('/procesar-respuestas/{idEmprendedor}', [RespuestasApiController::class, 'procesarRespuestas']);//Rutas de login y registro
 Route::group([
     'prefix' => 'auth'
 ], function () {
@@ -37,8 +36,6 @@ Route::group([
     Route::post('/send-reset-password', [AuthController::class, "enviarRecuperarContrasena"]);
     Route::post('/logout', [AuthController::class, 'logout']);
 });
-
-
 
 
 //Empresa
@@ -99,9 +96,6 @@ Route::group([
     Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
     Route::get('/asesor-aliado', [SuperAdminController::class, 'asesorConAliado']);
     Route::get('/listAliado', [SuperAdminController::class, 'listarAliados']);
-
-    ////   reportes
-    Route::get('/reporte-emprendedores', 'SuperAdminController@emprendedoresPorMunicipioPDF');
 });
 
 
@@ -129,6 +123,8 @@ Route::group([
     Route::post('/crearbannerr', [AliadoApiController::class, 'crearBanner']);
     Route::post('/editarbanner/{id}', [AliadoApiController::class, 'editarBanner']);
     Route::delete('/eliminarbanner/{id}', [AliadoApiController::class, 'eliminarBanner']);
+    Route::get('/mostrarAliados', [AliadoApiController::class, 'mostrarAliados']);
+
 });
 
 //Dashboard
@@ -140,7 +136,7 @@ Route::group(
     function () {
         Route::get('/emprendedor_departamento', [DashboardsController::class, 'emprendedorXdepartamento']);
         Route::get('/averageAsesorias2024', [DashboardsController::class, 'averageAsesorias2024']);
-        Route::get('/contar-usuarios', [DashboardsController::class, 'enumerarUsuarios']);
+        Route::get('/contar-usuarios', [DashboardsController::class, 'getDashboardData']);
         Route::get('/conteoAsesorias', [DashboardsController::class, 'asesoriasAsignadasSinAsignar']);
         Route::get('/listRegistrosAnioMes', [DashboardsController::class, 'conteoRegistrosAnioYMes']);
         Route::get('/promEmpresas_Mes', [DashboardsController::class, 'promEmpresasXmes']);
@@ -189,7 +185,7 @@ Route::group([
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
     Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
-    Route::get('/actnividadxAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxAsesor']);
+    Route::get('/actnividadxNivelAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxNivelAsesor']);
     Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
     Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
 
@@ -208,6 +204,7 @@ Route::group([
     Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
     Route::put('/activar_desactivar_actividad/{id}', [ActividadController::class, 'Activar_Desactivar_Actividad']);
     Route::get('/ActiNivelLeccionContenido/{id}', [ActividadController::class, 'ActiNivelLeccionContenido']);
+    Route::get('/ActividadAsesor/{id}', [ActividadController::class, 'actividadAsesor']);
 
 });
 
@@ -221,6 +218,7 @@ Route::group([
     Route::put('/editar_nivel/{id}', [NivelesController::class, 'editarNivel']);
     Route::get('/listar_Nivel', [NivelesController::class, 'listarNiveles']);
     Route::get('/nivelXactividad/{id}', [NivelesController::class, 'NivelxActividad']);
+    Route::get('/NivelxActividadxAsesor/{id_actividad}/{id_asesor}', [NivelesController::class, 'NivelxActividadxAsesor']);
 });
 
 //Leccion
@@ -291,5 +289,6 @@ Route::group([
     Route::post('/form/section/{id_empresa}/{sectionId}', [FormResponsesController::class, 'storeSection']);
     Route::get('/form/section/{sectionId}', [FormResponsesController::class, 'getSection']);
     Route::get('/getRespuestasRedis/{empresaId}', [FormResponsesController::class, 'getAllRespuestasFromRedis']);
+    Route::get('/verificarEstadoForm/{id_empresa}', [RespuestasApiController::class, 'verificarEstadoFormulario']);
 });
 

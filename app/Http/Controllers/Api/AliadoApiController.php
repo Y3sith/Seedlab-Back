@@ -18,7 +18,6 @@ use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Redis;
 
 class AliadoApiController extends Controller
-
 {
     /**
      * Display a listing of the resource.
@@ -29,7 +28,7 @@ class AliadoApiController extends Controller
 
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
             ->with(['tipoDato:id,nombre', 'auth'])
-            ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi','urlpagina', 'id_tipo_dato', 'id_autentication')
+            ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
             ->get();
 
         $aliadosTransformados = $aliados->map(function ($aliado) {
@@ -38,7 +37,6 @@ class AliadoApiController extends Controller
                 'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
-                //'logo' => $aliado->logo,
                 'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
                 'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
                 'urlpagina' => $aliado->urlpagina,
@@ -56,7 +54,6 @@ class AliadoApiController extends Controller
         try {
 
             $aliado = Aliado::where('id', $id)
-                //->with('auth:id,email,estado')
                 ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
             return [
@@ -75,12 +72,49 @@ class AliadoApiController extends Controller
         }
     }
 
+    public function mostrarAliados(Request $request)
+    {
+        try {
+            if (Auth::user()->id_rol != 1) {
+                return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
+            }
+
+            $estado = $request->input('estado', 'Activo'); // Obtener el estado desde el request, por defecto 'Activo'
+
+            $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+            $aliadoVer = User::where('estado', $estadoBool)
+                ->where('id_rol', 3)
+                ->pluck('id');
+
+            $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
+                ->with('auth:id,email,estado')
+                ->get(['id', 'nombre', 'id_autentication']);
+
+            $aliadosConEstado = $aliados->map(function ($aliado) {
+                $user = User::find($aliado->id_autentication);
+
+                return [
+                    'id' => $aliado->id,
+                    'nombre' => $aliado->nombre,
+                    'id_auth' => $user->id,
+                    'email' => $user->email,
+                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+
+                ];
+            });
+
+            return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        } catch (Exception $e) {
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+        }
+    }
+
     public function traerAliadosiau($id)
     {
         try {
 
             $aliado = Aliado::where('id', $id)
-                //->with('auth:id,email,estado')
                 ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
             return [
@@ -101,14 +135,6 @@ class AliadoApiController extends Controller
 
     public function traerBanners($status)
     {
-        $cacheKey = "banners:{$status}";
-        $cachedData = Redis::get($cacheKey);
-
-        if ($cachedData) {
-            // Si los datos están en Redis, devolverlos directamente
-            return response()->json(json_decode($cachedData), 200);
-        }
-
         // Obtener los banners de la base de datos
         $banners = Banner::where('estadobanner', $status)
             ->select('urlImagen', 'estadobanner')
@@ -121,13 +147,10 @@ class AliadoApiController extends Controller
             ];
         });
 
-        // Guardar los datos en Redis
-        Redis::set($cacheKey, json_encode($bannersTransformados));
-        Redis::expire($cacheKey, 3600); // Configurar tiempo de expiración en segundos (ej. 3600 segundos = 1 hora)
-
         // Devolver los datos
         return response()->json($bannersTransformados, 200);
     }
+
 
 
     public function traerBannersxaliado($id_aliado)
@@ -172,9 +195,6 @@ class AliadoApiController extends Controller
                 'estadobanner' => $banners->estadobanner == 1 ? 'Activo' : 'Inactivo',
                 'id_aliado' => $banners->id_aliado,
             ];
-
-            //return response()->json($bannersTransformados);
-
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -225,14 +245,6 @@ class AliadoApiController extends Controller
                 if (trim($data->input('ruta_multi')) == null) {
                     return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
                 }
-            }
-
-            $descripcion = $data->input('descripcion');
-            if (strlen($descripcion) < 206) {
-                return response()->json(['message' => 'La descripción debe tener al menos 206 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 314) {
-                return response()->json(['message' => 'La descripción no puede tener más de 312 caracteres'], 400);
             }
 
             DB::beginTransaction();
@@ -417,14 +429,6 @@ class AliadoApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
             }
 
-            $descripcion = $request->input('descripcion');
-            if (strlen($descripcion) < 206) {
-                return response()->json(['error' => 'La descripción debe tener al menos 206 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 312) {
-                return response()->json(['error' => 'La descripción no puede tener más de 312 caracteres'], 400);
-            }
-
             $user = $aliado->auth;
             Log::info('Usuario antes de guardar:', $user->toArray());
             // Validar nombre igual
@@ -571,7 +575,9 @@ class AliadoApiController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) {}
+    public function store(Request $request)
+    {
+    }
 
     /**
      * Display the specified resource.
@@ -621,7 +627,7 @@ class AliadoApiController extends Controller
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol !=4){
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
             $estado = $request->input('estado', 'Activo');
@@ -691,9 +697,7 @@ class AliadoApiController extends Controller
 
             if (!$asesoria || $asesoria->id_aliado != Auth::user()->aliado->id) {
                 return response()->json(['message' => 'Asesoría no encontrada o no asignada a este aliado'], 404);
-            }
-
-         elseif ($accion === 'rechazar') {
+            } elseif ($accion === 'rechazar') {
                 //$horario->estado = 'rechazada';
                 $asesoria->id_aliado = null;  // Establecer id_aliado a null
                 $asesoria->isorientador = true;
@@ -710,7 +714,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-    
+
     public function verEmprendedoresxEmpresa()
     {
         if (Auth::user()->id_rol != 3) {

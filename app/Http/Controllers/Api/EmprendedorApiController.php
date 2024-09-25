@@ -25,7 +25,8 @@ class EmprendedorApiController extends Controller
 
         if (Auth::user()->id_rol = !5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }$emprendedor = Emprendedor::all();
+        }
+        $emprendedor = Emprendedor::all();
         return response()->json($emprendedor);
     }
 
@@ -62,21 +63,21 @@ class EmprendedorApiController extends Controller
         $emprendedor = Emprendedor::where('documento', $documento)->first();
 
         $newCelular = $request->input('celular');
-                if ($newCelular && $newCelular !== $emprendedor->celular) {
-                    // Verificar si el nuevo email ya está en uso
-                    $existing = Emprendedor::where('celular', $newCelular)->first();
-                    if ($existing) {
-                        return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
-                    }
-                    $emprendedor->celular = $newCelular;
-                }
+        if ($newCelular && $newCelular !== $emprendedor->celular) {
+            // Verificar si el nuevo email ya está en uso
+            $existing = Emprendedor::where('celular', $newCelular)->first();
+            if ($existing) {
+                return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 400);
+            }
+            $emprendedor->celular = $newCelular;
+        }
 
         // Validar si se encontró el emprendedor
         if (!$emprendedor) {
             return response()->json(["error" => "El emprendedor no fue encontrado"], 404);
         }
 
-        
+
         $validator = Validator::make($request->all(), [
             'nombre' => 'required|string|max:255',
             'apellido' => 'required|string|max:255',
@@ -85,36 +86,26 @@ class EmprendedorApiController extends Controller
             'fecha_nac' => 'required|date',
             'direccion' => 'required|string|max:255',
             'id_departamento' => 'required|max:255',
-            'id_municipio' => 'required|max:255', // Validar el nombre del municipio
+            'id_municipio' => 'required|max:255',
             'id_tipo_documento' => 'required|integer',
             'password' => 'nullable|string|min:8',
             'imagen_perfil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
-            
+
         ]);
-        
+
         if ($validator->fails()) {
             return response()->json(['errors' => $validator->errors()], 400);
         }
-        
-        // $municipio = Municipio::where('id', $request->id_municipio)->first();
-        // if (!$municipio) {
-        //     return response()->json(["error" => "El municipio no fue encontrado"], 404);
-        // }
 
-        // $departamento = Departamento::where('id', $request->id_departamento)->first();
-        // if (!$departamento) {
-        //     return response()->json(["error" => "El departamento no fue encontrado"], 404);
-        // }
-        
         if ($request->hasFile('imagen_perfil')) {
             //Eliminar el logo anterior
             Storage::delete(str_replace('storage', 'public', $emprendedor->imagen_perfil));
-            
+
             // Guardar el nuevo logo
             $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
             $emprendedor->imagen_perfil = str_replace('public', 'storage', $path);
         }
-        
+
         // Actualizar los datos del emprendedor con los valores proporcionados en la solicitud
         $emprendedor->nombre = $request->nombre;
         $emprendedor->apellido = $request->apellido;
@@ -124,8 +115,6 @@ class EmprendedorApiController extends Controller
         $emprendedor->direccion = $request->direccion;
         $emprendedor->id_departamento = $request->id_departamento;
         $emprendedor->id_municipio = $request->id_municipio;
-        // $emprendedor->id_tipo_documento = $request->id_tipo_documento;
-        
 
         // Verificar si se proporcionó una contraseña para actualizar
         if ($request->has('password')) {
@@ -147,18 +136,9 @@ class EmprendedorApiController extends Controller
                 return response()->json(["error" => "No se encontró un usuario asociado al emprendedor"], 404);
             }
         }
-            $emprendedor->save();
-            return response()->json(['message' => 'Datos del emprendedor actualizados correctamente'], 200);
+        $emprendedor->save();
+        return response()->json(['message' => 'Datos del emprendedor actualizados correctamente'], 200);
     }
-
-
-
-
-
-   
-
-
-
 
     public function destroy($documento)
     {
@@ -179,15 +159,14 @@ class EmprendedorApiController extends Controller
         //dd($user);
         $user->estado = 0;
         $user->save();
-        
-        
         $emprendedor->email_verified_at = null;
         $emprendedor->save();
-            
+
         return response()->json(['message' => 'Emprendedor desactivado exitosamente. Por favor, inicie sesión de nuevo.'], 200);
     }
 
-    public function tipoDocumento(){
+    public function tipoDocumento()
+    {
         $tipoDocumento = TipoDocumento::all();
         return response()->json($tipoDocumento);
     }

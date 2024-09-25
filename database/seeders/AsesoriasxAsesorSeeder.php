@@ -20,7 +20,7 @@ class AsesoriasxAsesorSeeder extends Seeder
         ]);
         AsesoriaxAsesor::create([
             'id_asesor' => 1,
-            'id_asesoria' => 6,
+            'id_asesoria' => 4,
         ]);
     }
 }

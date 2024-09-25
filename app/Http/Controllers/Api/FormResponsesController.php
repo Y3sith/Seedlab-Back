@@ -21,21 +21,29 @@ class FormResponsesController extends Controller
 
     public function getAllRespuestasFromRedis($id_empresa)
     {
+        // Buscar secciones en Redis
         $seccion1 = Redis::get("form:{$id_empresa}:section:1");
         $seccion2 = Redis::get("form:{$id_empresa}:section:2");
         $seccion3 = Redis::get("form:{$id_empresa}:section:3");
         $seccion4 = Redis::get("form:{$id_empresa}:section:4");
         $seccion5 = Redis::get("form:{$id_empresa}:section:5");
 
-        // Decodificar el JSON almacenado, si existe
-        return response()->json([
-            'seccion1' => $seccion1 ? json_decode($seccion1, true) : [],
-            'seccion2' => $seccion2 ? json_decode($seccion2, true) : [],
-            'seccion3' => $seccion3 ? json_decode($seccion3, true) : [],
-            'seccion4' => $seccion4 ? json_decode($seccion4, true) : [],
-            'seccion5' => $seccion5 ? json_decode($seccion5, true) : [],
-        ]);
-
-        return response()->json($respuestas);
+        // Verificar si al menos una de las secciones tiene datos
+        if ($seccion1 || $seccion2 || $seccion3 || $seccion4 || $seccion5) {
+            // Decodificar el JSON almacenado, si existe
+            return response()->json([
+                'seccion1' => $seccion1 ? json_decode($seccion1, true) : [],
+                'seccion2' => $seccion2 ? json_decode($seccion2, true) : [],
+                'seccion3' => $seccion3 ? json_decode($seccion3, true) : [],
+                'seccion4' => $seccion4 ? json_decode($seccion4, true) : [],
+                'seccion5' => $seccion5 ? json_decode($seccion5, true) : [],
+            ]);
+        } else {
+            // Si no se encontraron datos, devolver un error
+            return response()->json([
+                'error' => 'No se encontraron datos para la empresa especificada.',
+            ], 404); // Código de respuesta HTTP 404 - No encontrado
+        }
     }
+
 }

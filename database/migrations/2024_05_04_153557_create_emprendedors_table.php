@@ -30,7 +30,6 @@ return new class extends Migration
             $table->foreign('id_departamento')->references('id')->on('departamentos')->collation('utf8mb4_unicode_ci');
             $table->unsignedBigInteger('id_municipio')->collation('utf8mb4_unicode_ci');
             $table->foreign('id_municipio')->references('id')->on('municipios')->collation('utf8mb4_unicode_ci');
-            //$table->timestamps();
         });
     }
 

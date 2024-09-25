@@ -28,12 +28,14 @@ class SeccionExport implements WithMultipleSheets
         // Agrupar los resultados por sección
         $secciones = array_unique(array_column($this->resultados, 'seccion'));
 
-        foreach ($secciones as $seccion) {
+        foreach ($secciones as $index => $seccion) {
             $datosSeccion = array_filter($this->resultados, function ($item) use ($seccion) {
                 return $item['seccion'] === $seccion;
             });
-
-            $sheets[] = new SeccionSheet($datosSeccion, $seccion);
+    
+            // Pasar un booleano indicando si es la primera hoja
+            $isFirstSheet = $index === 0;
+            $sheets[] = new SeccionSheet($datosSeccion, $seccion, $isFirstSheet);
         }
 
         return $sheets;

@@ -18,6 +18,7 @@ class Asesoria extends Model
         'asignacion',
         'fecha',
         'id_aliado',
+        'id_orientador',
         'doc_emprendedor',
     ];
 
@@ -31,6 +32,11 @@ class Asesoria extends Model
     public function emprendedor()
     {
         return $this->belongsTo(Emprendedor::class, 'doc_emprendedor', 'documento');
+    }
+
+    public function orientador()
+    {
+        return $this->belongsTo(Orientador::class, 'id_orientador');
     }
 
     public function asesores()

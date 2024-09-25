@@ -17,7 +17,6 @@ return new class extends Migration
             $table->double('puntaje');
             $table->unsignedBigInteger('id_pregunta');
             $table->foreign('id_pregunta')->references('id')->on('pregunta');
-            //$table->timestamps();
         });
     }
 

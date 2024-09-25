@@ -16,7 +16,6 @@ class Actividad extends Model
         'descripcion',
         'fuente',
         'id_tipo_dato',
-        'id_asesor',
         'id_ruta',
         'id_aliado',
         'estado',
@@ -27,9 +26,6 @@ class Actividad extends Model
     }
     public function aliado(){
         return $this->belongsTo(Aliado::class, 'id_aliado');
-    }
-    public function asesor(){
-        return $this->belongsTo(Asesor::class, 'id_asesor');
     }
     
     public function rutas(){

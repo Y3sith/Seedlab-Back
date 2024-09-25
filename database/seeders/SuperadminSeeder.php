@@ -24,16 +24,16 @@ class SuperadminSeeder extends Seeder
         }
                 
         SuperAdmin::create([
-            "nombre"=> "Esneider",
-            "apellido"=> "Jerez",
-            "documento"=> "213456",
-            "direccion"=>"Cra 28 # 39-06",
+            "nombre"=> "SuperAdmin",
+            "apellido"=> "Prueba",
+            "documento"=> "000000001010",
+            "direccion"=>"Direccion por defecto",
             "fecha_nac"=>"2000-05-21",
             "id_tipo_documento"=>"1",
             "id_departamento"=>"27",
             "id_municipio"=>"866",
             "genero"=>"Masculino",
-            "celular"=>"320147941",
+            "celular"=>"3000000000",
             "id_autentication"=> "1",
         ]); 
     }
