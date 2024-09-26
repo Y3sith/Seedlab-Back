@@ -184,21 +184,24 @@ class AuthController extends Controller
         $user = $request->user();
 
         if ($user) {
-            // Obtener y eliminar todos los tokens del usuario
-            $tokens = Token::where('user_id', $user->id)->get();
-            foreach ($tokens as $token) {
-                $token->delete();
+            // Obtener el token desde el encabezado de autorización
+            $token = $request->bearerToken();
+
+            // Buscar y eliminar el token
+            $tokenModel = Token::where('id', $token)->first();
+
+            if ($tokenModel) {
+                $tokenModel->delete();
+                return response()->json(['message' => 'Successfully logged out']);
             }
 
-            return response()->json([
-                'message' => 'Successfully logged out',
-            ]);
+            return response()->json(['message' => 'Token not found'], 404);
         }
 
-        return response()->json([
-            'message' => 'User not found',
-        ], 404);
+        return response()->json(['message' => 'User not found'], 404);
     }
+
+
 
 
     protected function existeusuario($documento)
