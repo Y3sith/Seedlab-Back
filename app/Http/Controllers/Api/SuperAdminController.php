@@ -401,8 +401,7 @@ class SuperAdminController extends Controller
 
             // Guardar los cambios
             $personalizacion->save();
-            Redis::set($personalizacionKey, json_encode($personalizacion));
-            Redis::expire($personalizacionKey, 432000);
+            
 
             return response()->json([
                 'message' => 'Personalización restaurada correctamente',
