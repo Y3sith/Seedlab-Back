@@ -187,15 +187,6 @@ class SuperAdminController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
     public function userProfileAdmin($id)
     {
         try {
@@ -312,7 +303,7 @@ class SuperAdminController extends Controller
             ];
             foreach ($requiredFields as $field) {
                 if (empty($request->input($field))) {
-                    return response()->json(['message' => "Debes completar todos los campos requeridos de la actividad"], 400);
+                    return response()->json(['message' => "Debes completar todos los campos requeridos."], 400);
                 }
             }
 
@@ -410,8 +401,7 @@ class SuperAdminController extends Controller
 
             // Guardar los cambios
             $personalizacion->save();
-            Redis::set($personalizacionKey, json_encode($personalizacion));
-            Redis::expire($personalizacionKey, 432000);
+            
 
             return response()->json([
                 'message' => 'Personalización restaurada correctamente',
