@@ -45,7 +45,9 @@ class EmprendedorApiController extends Controller
         if (Auth::user()->id_rol != 5) {
             return response()->json(["message" => "No tienes permisos para acceder a esta ruta"], 401);
         }
-        $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate();
+        $empresa = Empresa::where('id_emprendedor', $id_emprendedor)
+            ->select('documento', 'nombre', 'correo', 'direccion', 'id_emprendedor')
+            ->paginate();
         if ($empresa->isEmpty()) {
             return response()->json(["message" => "Empresa no encontrada"], 404);
         }
