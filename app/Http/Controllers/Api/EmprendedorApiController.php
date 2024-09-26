@@ -43,11 +43,11 @@ class EmprendedorApiController extends Controller
     {
         /* Muestra las empresas asociadas por el emprendedor */
         if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+            return response()->json(["message" => "No tienes permisos para acceder a esta ruta"], 401);
         }
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->paginate();
         if ($empresa->isEmpty()) {
-            return response()->json(["error" => "Empresa no encontrada"], 404);
+            return response()->json(["message" => "Empresa no encontrada"], 404);
         }
         return response()->json($empresa->items(), 200);
     }
@@ -56,7 +56,7 @@ class EmprendedorApiController extends Controller
     {
         // Verificar si el usuario autenticado tiene el rol adecuado
         if (Auth::user()->id_rol != 5) {
-            return response()->json(["error" => "No tienes permisos para editar el perfil"], 401);
+            return response()->json(["message" => "No tienes permisos para editar el perfil"], 401);
         }
 
         // Obtener el emprendedor actual basado en el documento proporcionado
@@ -127,7 +127,7 @@ class EmprendedorApiController extends Controller
                 $user = $emprendedor->auth;
                 // Verificar si la nueva contraseña es diferente de la contraseña actual
                 if (Hash::check($request->password, $user->password)) {
-                    return response()->json(["error" => "La nueva contraseña no puede ser igual a la contraseña actual"], 400);
+                    return response()->json(["message" => "La nueva contraseña no puede ser igual a la contraseña actual"], 400);
                 }
                 // Actualizar la contraseña en el modelo User asociado al Emprendedor
                 $user->password = Hash::make($request->password);

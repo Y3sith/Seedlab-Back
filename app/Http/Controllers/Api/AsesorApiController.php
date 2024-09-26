@@ -155,7 +155,7 @@ class AsesorApiController extends Controller
                 $asesor->save();
                 return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
             }
-            return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
+            return response()->json(['message' => 'Asesor actualizado correctamente'], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -228,7 +228,7 @@ class AsesorApiController extends Controller
                 }
                 return response()->json(['message' => 'Asesor actualizado', $asesor, 200]);
             }
-            return response()->json(['message' => 'Superadministrador actualizado correctamente'], 200);
+            return response()->json(['message' => 'Asesor actualizado correctamente'], 200);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
