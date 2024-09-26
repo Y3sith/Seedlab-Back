@@ -60,9 +60,30 @@ class SuperAdminController extends Controller
         }
 
         if ($request->hasFile('imagen_logo') && $request->file('imagen_logo')->isValid()) {
-            $imagenLogoPath = $request->file('imagen_logo')->store('public/logos');
+            $file = $request->file('imagen_logo');
+            $fileName = uniqid('logo_') . '.webp';
+            $folder = 'logos';
+            $path = "public/$folder/$fileName";
+        
+            $extension = strtolower($file->getClientOriginalExtension());
+            if ($extension === 'webp') {
+                // Si ya es WebP, simplemente mover el archivo
+                $file->storeAs("public/$folder", $fileName);
+            } else {
+                // Convertir a WebP
+                $sourceImage = $this->createImageFromFile($file->path());
+                if ($sourceImage) {
+                    $fullPath = storage_path('app/' . $path);
+                    // Guardar la imagen como WebP
+                    imagewebp($sourceImage, $fullPath, 80);
+                    // Liberar memoria
+                    imagedestroy($sourceImage);
+                } else {
+                    return response()->json(['error' => 'No se pudo procesar la imagen del logo'], 400);
+                }
+            }
             // Genera la URL completa correctamente
-            $personalizacion->imagen_logo = asset('storage/logos/' . basename($imagenLogoPath));
+            $personalizacion->imagen_logo = asset('storage/' . $folder . '/' . $fileName);
         }
 
         $personalizacion->save();
@@ -70,8 +91,28 @@ class SuperAdminController extends Controller
         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
     }
 
+    private function createImageFromFile($filePath)
+    {
+        $imageInfo = getimagesize($filePath);
+        if ($imageInfo === false) {
+            return false;
+        }
 
+        $mimeType = $imageInfo['mime'];
 
+        switch ($mimeType) {
+            case 'image/jpeg':
+                return imagecreatefromjpeg($filePath);
+            case 'image/png':
+                return imagecreatefrompng($filePath);
+            case 'image/gif':
+                return imagecreatefromgif($filePath);
+            case 'image/bmp':
+                return imagecreatefrombmp($filePath);
+            default:
+                return false;
+        }
+    }
 
     public function obtenerPersonalizacion($id)
     {
