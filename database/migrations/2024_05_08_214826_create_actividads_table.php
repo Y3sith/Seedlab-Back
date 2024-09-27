@@ -18,14 +18,11 @@ return new class extends Migration
             $table->text('fuente');
             $table->unsignedBigInteger('id_tipo_dato');
             $table->foreign('id_tipo_dato')->references('id')->on('tipo_dato');
-            $table->unsignedBigInteger('id_asesor')->nullable();
-            $table->foreign('id_asesor')->references('id')->on('asesor');
             $table->unsignedBigInteger('id_ruta');
             $table->foreign('id_ruta')->references('id')->on('ruta');
             $table->unsignedBigInteger('id_aliado');
             $table->foreign('id_aliado')->references('id')->on('aliado');
             $table->boolean('estado');
-            //$table->timestamps();
         });
     }
 

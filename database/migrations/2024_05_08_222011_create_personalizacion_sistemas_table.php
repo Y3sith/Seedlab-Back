@@ -17,17 +17,14 @@ return new class extends Migration
             $table->string('nombre_sistema',50);
             $table->string('color_principal',10);
             $table->string('color_secundario',10);
-            //$table->string('color_terciario',10);
-            //$table->text('logo_footer');
             $table->text('descripcion_footer');
-            $table->string('paginaWeb', 20);
+            $table->string('paginaWeb', 50);
             $table->string('email', 50);
             $table->string('telefono', 15);
-            $table->string('direccion', 25);
+            $table->string('direccion', 50);
             $table->string('ubicacion', 50);
             $table->unsignedBigInteger('id_superadmin');
             $table->foreign('id_superadmin')->references('id')->on('superadmin');
-            //$table->timestamps();
         });
     }
 

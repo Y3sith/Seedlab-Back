@@ -20,6 +20,8 @@ return new class extends Migration
             $table->dateTime('fecha');
             $table->unsignedBigInteger('id_aliado')->nullable();
             $table->foreign('id_aliado')->references('id')->on('aliado');
+            $table->unsignedBigInteger('id_orientador')->nullable();
+            $table->foreign('id_orientador')->references('id')->on('orientador');
             $table->string('doc_emprendedor', 50)->collation('utf8mb4_unicode_ci');
             $table->foreign('doc_emprendedor')->references('documento')->on('emprendedor');
         });

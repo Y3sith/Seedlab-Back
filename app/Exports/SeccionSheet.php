@@ -14,33 +14,74 @@ class SeccionSheet implements FromArray, WithTitle, WithHeadings, WithStyles
     protected $data;
     protected $title;
 
-    public function __construct(array $data, $title)
+    protected $isFirstSheet;
+
+    public function __construct(array $data, $title, $isFirstSheet)
     {
         $this->data = $data;
         $this->title = $title;
+        $this->isFirstSheet = $isFirstSheet;
     }
 
     public function array(): array
     {
-        return $this->data;
+        $datos = [];
+
+        foreach ($this->data as $dato) {
+            $fila = [
+                $dato['pregunta'] ?? 'Pregunta desconocida',
+                $dato['opcion'] ?? 'Sin respuesta',
+                $dato['subpregunta'] ?? 'No contiene subpregunta',
+                $dato['respuesta_texto'] ?? 'Sin respuesta',
+                $dato['valor'] ?? 'N/A',
+                $dato['fecha_reg'] ?? 'N/A',
+            ];
+
+            // Si es la primera hoja, agregar los puntajes
+            if ($this->isFirstSheet) {
+                $fila[] = $dato['info_general'] ?? 'N/A';
+                $fila[] = $dato['info_financiera'] ?? 'N/A';
+                $fila[] = $dato['info_mercado'] ?? 'N/A';
+                $fila[] = $dato['info_trl'] ?? 'N/A';
+                $fila[] = $dato['info_tecnica'] ?? 'N/A';
+            }
+
+            $datos[] = $fila;
+        }
+
+        return $datos;
     }
+
 
     public function headings(): array
     {
-        return [
-            'Nombre seccion',
+        $headings = [
             'Pregunta',
-            'Respuesta',
+            'Respuesta Pregunta',
+            'Subpregunta',
+            'Respuesta Subpregunta',
             'Valor Respuesta',
             'Fecha realización formulario',
-            'Subpregunta',
-            'Respuesta subpregunta'
         ];
+
+        // Si es la primera hoja, agregar los encabezados de los puntajes
+        if ($this->isFirstSheet) {
+            $headings = array_merge($headings, [
+                'Info General',
+                'Info Financiera',
+                'Info Mercado',
+                'Info TRL',
+                'Info Técnica',
+            ]);
+        }
+
+        return $headings;
     }
+
 
     public function styles(Worksheet $sheet)
     {
-        $sheet->mergeCells('A1:H1');
+        $sheet->mergeCells('A1:L1');
 
         $sheet->setCellValue('A1', $this->title);
         $sheet->getStyle('A1:H1')->getFont()->setBold(true);
@@ -48,11 +89,11 @@ class SeccionSheet implements FromArray, WithTitle, WithHeadings, WithStyles
 
         // Establecer el encabezado en la fila 2
         $sheet->fromArray($this->headings(), NULL, 'A2');
-        $sheet->getStyle('A2:H2')->getFont()->setBold(true);
-        $sheet->getStyle('A2:H2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+        $sheet->getStyle('A2:L2')->getFont()->setBold(true);
+        $sheet->getStyle('A2:L2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Ajustar el ancho de las columnas
-        foreach (range('A', 'H') as $columnID) {
+        foreach (range('A', 'L') as $columnID) {
             $sheet->getColumnDimension($columnID)->setAutoSize(true);
         }
     }

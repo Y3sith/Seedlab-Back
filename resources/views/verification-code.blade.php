@@ -8,7 +8,7 @@
     <title>Código de Verificación</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Courier New', monospace;
             line-height: 1.6;
             color: #000;
             text-align: center;
@@ -18,7 +18,7 @@
             max-width: 600px;
             margin: 0 auto;
             padding: 20px;
-            border: 1px solid #ccc;
+            border: 3px solid #00ccff;
             border-radius: 15px;
             justify-content: center;
         }
@@ -44,9 +44,9 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            margin-top: 20px; /* Añadido para separar los cuadros del texto */
+            margin-top: 20px;
+            /* Añadido para separar los cuadros del texto */
         }
-
     </style>
 </head>
 
@@ -58,7 +58,7 @@
             <h5>Su código de verificación es:</h5>
             <div class="code-container">
                 @foreach (str_split($verificationCode) as $number)
-                <div style="display:inline-block" class="code-box">{{ $number }}</div>
+                    <div style="display:inline-block" class="code-box">{{ $number }}</div>
                 @endforeach
             </div>
         </div>
