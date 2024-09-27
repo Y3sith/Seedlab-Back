@@ -38,20 +38,23 @@ class ActividadController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request) ///toca cambiarlo para dejar solo imagen
+    public function store(Request $request) // Función para almacenar una actividad
     {
         try {
+            // Verifica que el usuario tenga permisos adecuados
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(["error" => "No tienes permisos para crear una actividad"], 401);
             }
             $destinatario = null;
 
+            // Busca el aliado correspondiente
             $aliado = Aliado::find($request['id_aliado']);
             if (!$aliado) {
                 return response()->json(['message' => 'Aliado no encontrado'], 404);
             }
             $destinatario = $aliado;
 
+            // Valida los datos recibidos
             $validatedData = $request->validate([
                 'nombre' => 'required|string',
                 'descripcion' => 'required|string',
@@ -59,6 +62,8 @@ class ActividadController extends Controller
                 'id_ruta' => 'required|integer|exists:ruta,id',
                 'id_aliado' => 'required|integer|exists:aliado,id'
             ]);
+
+            // Obtiene la descripción y valida su longitud
             $descripcion = $request->input('descripcion');
             if (strlen($descripcion) < 300) {
                 return response()->json(['message' => 'La descripción debe tener al menos 300 caracteres'], 400);
@@ -67,7 +72,7 @@ class ActividadController extends Controller
                 return response()->json(['message' => 'La descripción no puede tener más de 470 caracteres'], 400);
             }
 
-            // Verificar si la actividad ya existe
+            // Verifica si la actividad ya existe
             $existingActividad = Actividad::where([
                 ['nombre', $validatedData['nombre']],
                 ['descripcion', $validatedData['descripcion']],
@@ -80,31 +85,34 @@ class ActividadController extends Controller
                 return response()->json(['error' => 'La actividad ya existe'], 409);
             }
 
+            // Maneja la carga de la fuente (archivo o URL)
             $fuente = null;
             if ($request->hasFile('fuente')) {
                 $file = $request->file('fuente');
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $mimeType = $file->getMimeType();
 
+                // Determina el tipo de carpeta según el tipo de archivo
                 if (strpos($mimeType, 'image') !== false) {
                     $folder = 'imagenes';
-                } elseif ($mimeType === 'application/pdf') {
-                    $folder = 'documentos';
                 } elseif ($mimeType === 'application/pdf') {
                     $folder = 'documentos';
                 } else {
                     return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
                 }
 
+                // Almacena el archivo y obtiene su URL
                 $path = $file->storeAs("public/$folder", $fileName);
                 $fuente = Storage::url($path);
             } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
+                // Maneja URL si se proporciona
                 $fuente = $request->input('fuente');
             } elseif ($request->input('fuente')) {
-                // Si se envió un texto en 'fuente', se guarda como texto
+                // Si se envía un texto en 'fuente', se guarda como texto
                 $fuente = $request->input('fuente');
             }
 
+            // Crea la actividad en la base de datos
             $actividad = Actividad::create([
                 'nombre' => $validatedData['nombre'],
                 'descripcion' => $descripcion,
@@ -115,16 +123,17 @@ class ActividadController extends Controller
                 'estado' => 1
             ]);
 
+            // Envía notificación por email al aliado
             $destinatario->load('auth');
             if ($destinatario->auth && $destinatario->auth->email) {
                 $nombreActividad = $actividad->nombre;
                 Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $destinatario->nombre));
             }
 
-        return response()->json(['message' => 'Actividad creada con éxito ',$actividad, $destinatario ], 201);
-
-
+            // Devuelve respuesta de éxito
+            return response()->json(['message' => 'Actividad creada con éxito ', $actividad, $destinatario], 201);
         } catch (Exception $e) {
+            // Manejo de excepciones
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -205,18 +214,25 @@ class ActividadController extends Controller
     public function Activar_Desactivar_Actividad($id)
     {
         try {
+            // Verifica que el usuario tenga permisos para activar/desactivar la actividad
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json('no tienes permiso para desactivar la actividad', 400);
             }
 
+            // Busca la actividad por su ID
             $actividad = Actividad::find($id);
             if (!$actividad) {
                 return response()->json('Actividad no encontradas', 400);
             }
+
+            // Cambia el estado de la actividad
             $nuevoEstado = !$actividad->estado;
             $actividad->update(['estado' => $nuevoEstado]);
+
+            // Responde con un mensaje de éxito
             return response()->json(['message' => 'Estado de la Actividad actualizado correctamente']);
         } catch (Exception $e) {
+            // Manejo de excepciones en caso de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -232,25 +248,35 @@ class ActividadController extends Controller
 
     public function tipoDato()
     {
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) { //esto hay que cambiarlo para que solo lo puedan ver algunos roles
+        // Verifica que el usuario tenga permisos para acceder a esta ruta
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
             return response()->json([
                 'messaje' => 'No tienes permisos para acceder a esta ruta'
             ], 401);
         }
+
+        // Obtiene todos los tipos de dato (id y nombre) de la base de datos
         $dato = TipoDato::get(['id', 'nombre']);
+
+        // Responde con los tipos de dato en formato JSON
         return response()->json($dato);
     }
 
     public function VerActividadAliado($id)
     {
+        // Verifica que el usuario tenga el rol adecuado para acceder a esta ruta
         if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
             return response()->json([
                 'messaje' => 'No tienes permisos para acceder a esta ruta'
             ], 401);
         }
+
+        // Obtiene las actividades asociadas al aliado con el ID proporcionado
         $actividades = Actividad::where('id_aliado', $id)
             ->select('id', 'nombre', 'descripcion', 'fuente', 'id_tipo_dato', 'id_asesor', 'id_ruta',)
             ->get();
+
+        // Responde con las actividades en formato JSON
         return response()->json($actividades);
     }
 
@@ -263,8 +289,8 @@ class ActividadController extends Controller
                 ], 401);
             }
             $actividad = Actividad::with('nivel.lecciones.contenidoLecciones') //toca cambiar para que traiga el nombre del tipo de dato lo mismo en el contenido
-            ->where('id', $id)
-            ->first();
+                ->where('id', $id)
+                ->first();
             if (!$actividad) {
                 return response()->json(['message' => 'Actividad no encontrada'], 404);
             }
@@ -289,7 +315,7 @@ class ActividadController extends Controller
                 return response()->json(['message' => 'Actividad no encontrada'], 404);
             }
             return response()->json($actividad);
-
+            
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }

@@ -19,25 +19,24 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
 {
-    
-   
+
+
 
     public function exportarReportesAliados(Request $request)
     {
+        // Recupera los parámetros del request.
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $id_aliado = $request->input('id_aliado');
         $formato = $request->input('formato', 'excel');
 
+        // Formatea la fecha de inicio si se proporciona.
         if ($fechaInicio) {
             $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
         }
 
-        if ($fechaInicio) {
-            $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
-        }
-
+        // Selecciona el tipo de reporte y crea la instancia de exportación correspondiente.
         switch ($tipo_reporte) {
             case 'asesoria':
                 $export = new AsesoriasAliadosExport($id_aliado, $tipo_reporte, $fechaInicio, $fechaFin);
@@ -50,40 +49,47 @@ class ReportesController extends Controller
                 $plantilla = 'reporte_asesores_aliado_template';
                 break;
             default:
+                // Retorna un error si el tipo de reporte no es válido.
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
+        // Exporta el reporte en formato Excel.
         if ($formato === 'excel') {
             return Excel::download($export, "{$nombreArchivo}.xlsx");
         }
         try {
-            $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
+            // obtenemos los datos a exportar
+            $datos = json_decode(json_encode($export->collection()), true);
             $pdf = Pdf::loadView($plantilla, compact('datos'));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->download("{$nombreArchivo}.pdf");
         } catch (\Exception $e) {
-            // Maneja el error, por ejemplo, registrando el error en los logs
+            // Maneja el error al generar el PDF, registrando el error en los logs.
             Log::error('Error al generar el PDF: ' . $e->getMessage());
             return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
         }
     }
 
+    //Exporta un reporte según el tipo especificado en formato Excel o PDF.
     public function exportarReporte(Request $request)
     {
+        // Recupera los parámetros del request.
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $formato = $request->input('formato', 'excel');
 
+        // Formatea la fecha de fin si se proporciona.
         if ($fechaFin) {
             $fechaFin = date('Y-m-d H:i:s', strtotime($fechaFin . ' 23:59:59'));
         }
 
+        // Formatea la fecha de inicio si se proporciona.
         if ($fechaInicio) {
             $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
         }
 
-
+        // Selecciona el tipo de reporte y crea la instancia de exportación correspondiente.
         switch ($tipo_reporte) {
             case 'aliado':
                 $export = new AliadosExport($tipo_reporte, $fechaInicio, $fechaFin);
@@ -115,46 +121,50 @@ class ReportesController extends Controller
                 $nombreArchivo = 'reporte_asesorias_orientador';
                 break;
             default:
+                // Retorna un error si el tipo de reporte no es válido.
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
-        // Si el formato es Excel
+        // Si el formato es Excel, se descarga el archivo correspondiente.
         if ($formato === 'excel') {
             return Excel::download($export, "{$nombreArchivo}.xlsx");
         }
 
-        // Si el formato es PDF
+        // Si el formato es PDF, se genera y descarga el archivo PDF.
         try {
-            $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
+            // Obtiene los datos a exportar.
+            $datos = json_decode(json_encode($export->collection()), true);
             $pdf = Pdf::loadView($plantilla, compact('datos'));
             $pdf->setPaper('A4', 'landscape');
             return $pdf->download("{$nombreArchivo}.pdf");
         } catch (\Exception $e) {
-            // Maneja el error, por ejemplo, registrando el error en los logs
+            // Maneja el error al generar el PDF, registrando el error en los logs.
             Log::error('Error al generar el PDF: ' . $e->getMessage());
             return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
         }
     }
 
 
-
+    //Obtiene los datos de un reporte según el tipo especificado y el rango de fechas.
     public function obtenerDatosReporte(Request $request)
     {
+        // Recupera los parámetros del request.
         $tipo_reporte = $request->input('tipo_reporte');
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
 
-        // Agrega el tiempo a la fecha de inicio y fin
+        // Agrega el tiempo a la fecha de inicio y fin.
         $fechaInicio .= ' 00:00:00';
         $fechaFin .= ' 23:59:59';
 
         $data = [];
 
+        // Selecciona los datos según el tipo de reporte.
         switch ($tipo_reporte) {
             case 'aliado':
                 $data = DB::table('users')
                     ->join('aliado', 'users.id', '=', 'aliado.id_autentication')
-                    ->select('users.id', 'aliado.nombre', 'users.email', 'users.fecha_registro', 'users.estado',  'aliado.descripcion')
+                    ->select('users.id', 'aliado.nombre', 'users.email', 'users.fecha_registro', 'users.estado', 'aliado.descripcion')
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
@@ -168,7 +178,7 @@ class ReportesController extends Controller
                         'emprendedor.nombre',
                         'emprendedor.apellido',
                         'emprendedor.celular',
-                        'emprendedor.direccion',
+                        'emprendedor.direccion'
                     )
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
@@ -228,19 +238,24 @@ class ReportesController extends Controller
                     ->get();
                 break;
             default:
+                // Retorna un error si el tipo de reporte no es válido.
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
+        // Devuelve los datos obtenidos en formato JSON.
         return response()->json($data);
     }
 
+    //Muestra los reportes de aliados según el tipo de reporte y el rango de fechas especificado.
     public function mostrarReportesAliados(Request $request)
     {
+        // Recupera los parámetros del request.
         $fechaInicio = $request->input('fecha_inicio');
         $fechaFin = $request->input('fecha_fin');
         $id_aliado = $request->input('id_aliado');
         $tipo_reporte = $request->input('tipo_reporte');
 
+        // Selecciona los datos según el tipo de reporte.
         switch ($tipo_reporte) {
             case 'asesoria':
                 $data = DB::table('asesoria')
@@ -278,22 +293,22 @@ class ReportesController extends Controller
                     ->get();
                 break;
             default:
+                // Retorna un error si el tipo de reporte no es válido.
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
-
+        // Devuelve los datos obtenidos en formato JSON.
         return response()->json($data);
     }
 
-  
 
+    //Procesa las respuestas de un emprendedor y genera un reporte en Excel.
     public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null)
     {
-
-        // Obtener las respuestas con un join a la tabla 'puntaje'
+        // Obtener las respuestas uniendo las tablas 'respuesta', 'empresa' y 'puntaje'.
         $query = DB::table('respuesta')
             ->join('empresa', 'respuesta.id_empresa', '=', 'empresa.documento')
-            ->join('puntaje', 'empresa.documento', '=', 'puntaje.documento_empresa') // Join con la tabla 'puntaje'
+            ->join('puntaje', 'empresa.documento', '=', 'puntaje.documento_empresa') // Unir con 'puntaje'
             ->where('empresa.id_emprendedor', $idEmprendedor)
             ->select(
                 'respuesta.respuestas_json',
@@ -306,15 +321,15 @@ class ReportesController extends Controller
                 'puntaje.segunda_vez'
             );
 
+        // Filtrar por documento de empresa si se proporciona.
         if (!is_null($documentoEmpresa)) {
             $query->where('empresa.documento', $documentoEmpresa);
         }
 
-        // Finaliza la consulta
-        $respuestas = $query->select('respuesta.respuestas_json', 'puntaje.*')->get();
+        // Ejecutar la consulta y obtener las respuestas.
+        $respuestas = $query->get();
 
-
-        // Obtener todos los id_pregunta y id_subpregunta únicos del JSON
+        // Obtener todos los id_pregunta y id_subpregunta únicos del JSON.
         $idsPreguntas = [];
         $idsSubpreguntas = [];
         foreach ($respuestas as $respuesta) {
@@ -333,12 +348,13 @@ class ReportesController extends Controller
             }
         }
 
+        // Eliminar duplicados de los IDs de preguntas y subpreguntas.
         $idsPreguntas = array_unique($idsPreguntas);
         $idsSubpreguntas = array_unique($idsSubpreguntas);
 
         Log::info('IDs de preguntas y subpreguntas', ['preguntas' => $idsPreguntas, 'subpreguntas' => $idsSubpreguntas]);
 
-        // Obtener los nombres de las preguntas, secciones y subpreguntas para los ids únicos
+        // Obtener los nombres de las preguntas, secciones y subpreguntas para los IDs únicos.
         $preguntas = DB::table('pregunta')
             ->whereIn('id', $idsPreguntas)
             ->pluck('nombre', 'id');
@@ -346,13 +362,13 @@ class ReportesController extends Controller
         $secciones = DB::table('pregunta')
             ->join('seccion', 'pregunta.id_seccion', '=', 'seccion.id')
             ->whereIn('pregunta.id', $idsPreguntas)
-            ->pluck('seccion.nombre', 'pregunta.id_seccion'); // Obtenemos las secciones
+            ->pluck('seccion.nombre', 'pregunta.id_seccion'); // Obtener secciones
 
         $subpreguntas = DB::table('subpregunta')
             ->whereIn('id', $idsSubpreguntas)
             ->pluck('texto', 'id');
 
-        // Array para almacenar los resultados procesados
+        // Array para almacenar los resultados procesados.
         $resultados = [];
 
         foreach ($respuestas as $respuesta) {
@@ -389,12 +405,12 @@ class ReportesController extends Controller
 
         Log::info('Datos procesados para la exportación', ['resultados' => $resultados]);
 
-        // Crear la exportación
+        // Crear la exportación.
         $export = new SeccionExport($resultados);
 
         Log::info('Exportación creada, enviando archivo...');
 
-        // Devolver el archivo Excel
+        // Devolver el archivo Excel.
         return Excel::download($export, 'Reporte_Formulario.xlsx');
     }
 
@@ -402,19 +418,20 @@ class ReportesController extends Controller
 
     public function mostrarReporteFormEmprendedor(Request $request)
     {
+        // Obtener parámetros de la solicitud.
         $docEmprendedor = $request->input('doc_emprendedor');
         $tipo_reporte = $request->input('tipo_reporte'); // 1 = Primera vez, 2 = Segunda vez
         $empresa = $request->input('empresa');
 
-
+        // Construir la consulta utilizando joins para unir las tablas necesarias.
         $query = DB::table('respuesta AS r')
             ->join('empresa AS e', 'r.id_empresa', '=', 'e.documento')
             ->join('puntaje AS p', 'p.documento_empresa', '=', 'e.documento')
             ->select('r.verform_pr', 'r.verform_se', 'e.nombre AS nombre_empresa', 'p.*')
-            ->where('e.documento', $empresa)
-            ->where('e.id_emprendedor', $docEmprendedor);
+            ->where('e.documento', $empresa) // Filtrar por documento de la empresa
+            ->where('e.id_emprendedor', $docEmprendedor); // Filtrar por ID del emprendedor
 
-        // Filtrar por tipo de reporte
+        // Filtrar según el tipo de reporte solicitado
         if ($tipo_reporte == '1') { // Primera vez
             $query->where('r.verform_pr', 1)
                 ->where('r.verform_se', 0)
@@ -429,10 +446,10 @@ class ReportesController extends Controller
             return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
-
+        // Ejecutar la consulta y obtener los resultados.
         $resultados = $query->get();
 
-
+        // Devolver los resultados en formato JSON.
         return response()->json($resultados);
     }
 }

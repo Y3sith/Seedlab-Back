@@ -13,23 +13,26 @@ class EmpresasExport implements FromCollection, WithHeadings
      * @return \Illuminate\Support\Collection
      */
 
-    protected $tipo_reporte;
-    protected $fecha_inicio;
-    protected $fecha_fin;
+    protected $tipo_reporte; // Tipo de reporte para filtrar los datos
+    protected $fecha_inicio; // Fecha de inicio para filtrar los resultados
+    protected $fecha_fin;    // Fecha de fin para filtrar los resultados
 
+    // Constructor que recibe tipo de reporte y fechas
     public function __construct($tipo_reporte, $fecha_inicio, $fecha_fin)
     {
-        $this->tipo_reporte = $tipo_reporte;
-        $this->fecha_inicio = $fecha_inicio;
-        $this->fecha_fin = $fecha_fin;
+        $this->tipo_reporte = $tipo_reporte; // Asigna el tipo de reporte
+        $this->fecha_inicio = $fecha_inicio; // Asigna la fecha de inicio
+        $this->fecha_fin = $fecha_fin;       // Asigna la fecha de fin
     }
 
+    // Método que obtiene la colección de datos
     public function collection()
     {
+        // Construcción de la consulta para obtener datos de la tabla especificada en $tipo_reporte
         $query = DB::table($this->tipo_reporte)
-            ->join('emprendedor', 'empresa.id_emprendedor', '=', 'emprendedor.documento')
-            ->join('departamentos', 'empresa.id_departamento', 'departamentos.id')
-            ->join('municipios', 'empresa.id_municipio', '=', 'municipios.id')
+            ->join('emprendedor', 'empresa.id_emprendedor', '=', 'emprendedor.documento') // Join con la tabla 'emprendedor'
+            ->join('departamentos', 'empresa.id_departamento', 'departamentos.id')      // Join con la tabla 'departamentos'
+            ->join('municipios', 'empresa.id_municipio', '=', 'municipios.id')        // Join con la tabla 'municipios'
             ->select("$this->tipo_reporte.documento", "$this->tipo_reporte.nombre","$this->tipo_reporte.razonSocial",
             "$this->tipo_reporte.url_pagina","$this->tipo_reporte.celular","$this->tipo_reporte.direccion","$this->tipo_reporte.correo", "$this->tipo_reporte.fecha_registro",
             'departamentos.name','municipios.nombre as municipio',
@@ -46,7 +49,7 @@ class EmpresasExport implements FromCollection, WithHeadings
         return $query->get();
     }
 
-
+    // Método que define los encabezados de la exportación
     public function headings(): array
     {
         return [

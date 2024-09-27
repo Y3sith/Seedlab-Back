@@ -24,10 +24,14 @@ class ContenidoLeccion extends Model
 
     
     public function tipoDato(){
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla TipoDato.
+        // Se establece la conexión utilizando 'id_tipo_dato' como clave foránea.
         return $this->belongsTo(TipoDato::class, 'id_tipo_dato');
     }
 
     public function leccion(){
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla Leccion.
+        // Se establece la conexión utilizando 'id_leccion' como clave foránea.
         return $this->belongsTo(Leccion::class, 'id_leccion');
     }
 }

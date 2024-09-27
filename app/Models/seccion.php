@@ -16,6 +16,9 @@ class seccion extends Model
     ];
 
     public function preguntas(){
+        // Esta relación indica que el modelo actual puede tener múltiples preguntas asociadas.
+        // Se establece una relación de uno a muchos, donde 'Preguntas' es el modelo relacionado
+        // y 'id_seccion' es la clave foránea en el modelo de preguntas que se vincula a este modelo.
         return $this->hasMany(Preguntas::class, 'id_seccion');
     }
 
