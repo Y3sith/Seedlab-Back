@@ -195,10 +195,10 @@ class AsesoriasController extends Controller
             }
             $destinatario = $emprendedor;
 
-            $asesorxasesor = AsesoriaxAsesor::find($idAsesoria);
-            if (!$asesorxasesor) {
-                return response()->json(['message' => 'la asesoria no fue encontrada en asesoria por asesor'], 404);
-            }
+            $asesorxasesor = AsesoriaxAsesor::where('id_asesoria', $idAsesoria)->first();
+            // if (!$asesorxasesor) {
+            //     return response()->json(['message' => 'la asesoria no fue encontrada en asesoria por asesor'], 404);
+            // }
 
             $id_asesorAsignado = $asesorxasesor->id_asesor;
 
