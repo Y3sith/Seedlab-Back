@@ -69,14 +69,18 @@ class PuntajeController extends Controller
     }
 
 
-
+    //Obtiene el puntaje asociado a una empresa específica.
     public function getPuntajeXEmpresa($documento_empresa)
     {
-
+        // Buscar el puntaje en la base de datos para el documento de la empresa proporcionado.
         $puntaje = Puntaje::where('documento_empresa', $documento_empresa)->first();
+
+        // Verificar si se encontró el puntaje.
         if (!$puntaje) {
             return response()->json(['message' => 'No se encontraron puntajes para este emprendedor'], 404);
         }
+
+        // Devolver el puntaje encontrado en formato JSON.
         return response()->json($puntaje);
     }
 }

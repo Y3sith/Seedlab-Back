@@ -25,12 +25,10 @@ class AsesorSeedeer extends Seeder
             "id_tipo_documento" => "1",
             "id_departamento" => "27",
             "id_municipio" => "866",
-            //"email"=>"",
             "direccion" => "Dirección por defecto",
             "genero" => "Masculino",
             "celular" => "0000000000",
             "id_autentication" => "4",
-            //"id_aliado"=> "1",
         ]);
     }
 }
