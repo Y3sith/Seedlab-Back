@@ -116,24 +116,13 @@ class DashboardsController extends Controller
                 return response()->json(['message' => 'No tienes permisos para acceder a esta función'], 404);
             }
 
-            $cacheKey = 'dashboard:emprendedorXdepartamento';
-            $cachedData = Redis::get($cacheKey);
-
-            if ($cachedData) {
-                return response()->json(json_decode($cachedData), 200);
-            }
-
             // Ajusta la consulta utilizando 'documento' en lugar de 'id'
-            $emprendedoresPorDepartamento = Emprendedor::join('municipios', 'emprendedor.id_municipio', '=', 'municipios.id')
-                ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+            $emprendedoresPorDepartamento = Emprendedor::leftJoin('municipios', 'emprendedor.id_municipio', '=', 'municipios.id')
+                ->leftJoin('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
                 ->select('departamentos.name as departamento', DB::raw('COUNT(emprendedor.documento) as total_emprendedores'))
                 ->groupBy('departamentos.id', 'departamentos.name')
                 ->get();
 
-            if (!$cachedData) {
-                Redis::set($cacheKey, json_encode($emprendedoresPorDepartamento));
-                Redis::expire($cacheKey, 3600);
-            }
 
             return response()->json($emprendedoresPorDepartamento);
         } catch (Exception $e) {
@@ -411,5 +400,4 @@ class DashboardsController extends Controller
 
         return response()->json($result, 200);
     }
-    
 }

@@ -72,14 +72,14 @@ class AsesoriasAliadosExport implements FromCollection, WithHeadings, WithEvents
         return [
             AfterSheet::class => function(AfterSheet $event) {
                 $sheet = $event->sheet->getDelegate();
-                $columns = ['A', 'B', 'C', 'D', 'E']; // Asume que tienes cinco columnas
+                $columns = ['A', 'B', 'C', 'D', 'E','F']; 
                 foreach ($columns as $column) {
                     $sheet->getColumnDimension($column)->setAutoSize(true);
                 }
 
                 // Aplicar estilos adicionales si es necesario
-                $sheet->getStyle('A1:E1')->getFont()->setBold(true);
-                $sheet->getStyle('A1:E1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+                $sheet->getStyle('A1:F1')->getFont()->setBold(true);
+                $sheet->getStyle('A1:F1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
             },
         ];
     }
