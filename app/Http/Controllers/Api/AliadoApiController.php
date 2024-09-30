@@ -15,7 +15,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Str;
 
 class AliadoApiController extends Controller
 {
@@ -24,15 +24,17 @@ class AliadoApiController extends Controller
      */
     public function traerAliadosActivos($status)
     {
-        // 
+        // Obtiene los aliados que tienen un estado activo según el parámetro recibido
 
         $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
+            // Carga las relaciones necesarias para optimizar las consultas
             ->with(['tipoDato:id,nombre', 'auth'])
+            // Selecciona los campos relevantes de la tabla Aliado
             ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
             ->get();
 
+        // Transforma la colección de aliados para adaptarla a la respuesta deseada
         $aliadosTransformados = $aliados->map(function ($aliado) {
-            //$banner = Banner::find($aliado->$id_aliado);
             return [
                 'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
@@ -46,16 +48,20 @@ class AliadoApiController extends Controller
             ];
         });
 
+        // Devuelve la colección transformada como respuesta en formato JSON
         return response()->json($aliadosTransformados);
     }
 
     public function traerAliadoxId($id)
     {
         try {
-
+            // Busca un aliado por su ID
             $aliado = Aliado::where('id', $id)
+                // Selecciona los campos relevantes de la tabla Aliado
                 ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
+
+            // Devuelve los detalles del aliado en un formato específico
             return [
                 'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
@@ -68,6 +74,7 @@ class AliadoApiController extends Controller
                 'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
             ];
         } catch (Exception $e) {
+            // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -75,22 +82,28 @@ class AliadoApiController extends Controller
     public function mostrarAliados(Request $request)
     {
         try {
+            // Verifica si el usuario tiene el rol adecuado para realizar la acción
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
             }
 
-            $estado = $request->input('estado', 'Activo'); // Obtener el estado desde el request, por defecto 'Activo'
+            // Obtiene el estado desde la solicitud, por defecto 'Activo'
+            $estado = $request->input('estado', 'Activo');
 
+            // Convierte el estado a un valor booleano
             $estadoBool = $estado === 'Activo' ? 1 : 0;
 
+            // Obtiene los IDs de los usuarios con el estado especificado y rol 3 (aliado)
             $aliadoVer = User::where('estado', $estadoBool)
                 ->where('id_rol', 3)
                 ->pluck('id');
 
+            // Busca los aliados que tienen IDs de autenticación en $aliadoVer
             $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
                 ->with('auth:id,email,estado')
                 ->get(['id', 'nombre', 'id_autentication']);
 
+            // Mapea los aliados para incluir el estado y el email del usuario autenticado
             $aliadosConEstado = $aliados->map(function ($aliado) {
                 $user = User::find($aliado->id_autentication);
 
@@ -100,12 +113,13 @@ class AliadoApiController extends Controller
                     'id_auth' => $user->id,
                     'email' => $user->email,
                     'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-
                 ];
             });
 
+            // Devuelve los aliados en formato JSON
             return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
+            // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -113,10 +127,12 @@ class AliadoApiController extends Controller
     public function traerAliadosiau($id)
     {
         try {
-
+            // Busca un aliado por su ID y selecciona los campos necesarios
             $aliado = Aliado::where('id', $id)
                 ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
                 ->first();
+
+            // Prepara la respuesta con los datos del aliado
             return [
                 'id' => $aliado->id,
                 'nombre' => $aliado->nombre,
@@ -129,6 +145,7 @@ class AliadoApiController extends Controller
                 'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
             ];
         } catch (Exception $e) {
+            // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -155,40 +172,49 @@ class AliadoApiController extends Controller
 
     public function traerBannersxaliado($id_aliado)
     {
-
         try {
+            // Verifica si el usuario tiene los permisos necesarios
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
+            // Obtiene los banners asociados al aliado
             $banners = Banner::where('id_aliado', $id_aliado)
                 ->select('id', 'urlImagen', 'estadobanner', 'id_aliado')
                 ->get();
 
+            // Transforma la colección de banners para añadir URLs corregidas y estados en texto
             $bannersTransformados = $banners->map(function ($banner) {
                 return [
                     'id' => $banner->id,
+                    // Corrige la URL de la imagen si existe
                     'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                    // Convierte el estado del banner a texto
                     'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo'
                 ];
             });
+            // Devuelve los banners transformados en formato JSON
             return response()->json($bannersTransformados);
         } catch (Exception $e) {
+            // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
     public function traerBannersxID($id)
     {
-
         try {
+            // Verifica si el usuario tiene los permisos necesarios
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3) {
                 return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
+            // Busca un banner específico por su ID
             $banners = Banner::where('id', $id)
                 ->select('id', 'urlImagen', 'estadobanner', 'id_aliado')
                 ->first();
+
+            // Devuelve los datos del banner encontrado
             return [
                 'id' => $banners->id,
                 'urlImagen' => $banners->urlImagen ? $this->correctImageUrl($banners->urlImagen) : null,
@@ -196,6 +222,7 @@ class AliadoApiController extends Controller
                 'id_aliado' => $banners->id_aliado,
             ];
         } catch (Exception $e) {
+            // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -251,36 +278,79 @@ class AliadoApiController extends Controller
 
             try {
                 $logoUrl = null;
+
                 if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
-                    $logoPath = $data->file('logo')->store('public/logos');
-                    $logoUrl = Storage::url($logoPath);
+                    $image = $data->file('logo');
+                    $filename = uniqid('logo_') . '.webp';
+                    $path = 'public/logos/' . $filename;
+
+                    // Obtener la extensión del archivo original
+                    $extension = strtolower($image->getClientOriginalExtension());
+
+                    if ($extension === 'webp') {
+                        // Si ya es WebP, simplemente mover el archivo
+                        $image->storeAs('public/logos', $filename);
+                    } else {
+                        // Si no es WebP, convertir la imagen
+                        $sourceImage = $this->createImageFromFile($image->path());
+                        if ($sourceImage) {
+                            $fullPath = storage_path('app/' . $path);
+                            imagewebp($sourceImage, $fullPath, 80);
+                            imagedestroy($sourceImage);
+                        } else {
+                            // Manejar el error si no se puede crear la imagen
+                            return null;
+                        }
+                    }
+
+                    // Obtener la URL del archivo guardado
+                    $logoUrl = Storage::url($path);
                 }
 
                 $rutaMulti = null;
-                if ($data->hasFile('ruta_multi')) {
+                if ($data->hasFile('ruta_multi') && $data->file('ruta_multi')->isValid()) {
                     $file = $data->file('ruta_multi');
-                    $fileName = time() . '_' . $file->getClientOriginalName();
                     $mimeType = $file->getMimeType();
 
                     if (strpos($mimeType, 'image') !== false) {
+                        // Es una imagen
+                        $fileNamerutamulti = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
                         $folder = 'imagenes';
+                        $path = "public/$folder/$fileNamerutamulti";
+
+                        $extensionrutamulti = strtolower($file->getClientOriginalExtension());
+                        if ($extensionrutamulti === 'webp') {
+                            // Si ya es WebP, simplemente mover el archivo
+                            $file->storeAs("public/$folder", $fileNamerutamulti);
+                        } else {
+                            // Convertir a WebP
+                            $sourceImagerutamulti = $this->createImageFromFile($file->path());
+                            if ($sourceImagerutamulti) {
+                                $fullPathrutamulti = storage_path('app/' . $path);
+                                // Guardar la imagen como WebP
+                                imagewebp($sourceImagerutamulti, $fullPathrutamulti, 80);
+                                // Liberar memoria
+                                imagedestroy($sourceImagerutamulti);
+                            } else {
+                                return response()->json(['message' => 'No se pudo procesar la imagen'], 400);
+                            }
+                        }
+
+                        $rutaMulti = Storage::url($path);
                     } elseif ($mimeType === 'application/pdf') {
+                        $fileName = time() . '_' . $file->getClientOriginalName();
                         $folder = 'documentos';
-                    } elseif ($mimeType === 'application/pdf') {
-                        $folder = 'documentos';
+                        $path = $file->storeAs("public/$folder", $fileName);
+                        $rutaMulti = Storage::url($path);
                     } else {
                         return response()->json(['message' => 'Tipo de archivo no soportado para ruta_multi'], 400);
                     }
-
-                    $path = $file->storeAs("public/$folder", $fileName);
-                    $rutaMulti = Storage::url($path);
                 } elseif ($data->input('ruta_multi') && filter_var($data->input('ruta_multi'), FILTER_VALIDATE_URL)) {
                     $rutaMulti = $data->input('ruta_multi');
                 } elseif ($data->input('ruta_multi')) {
                     // Si se envió un texto en 'ruta_multi', se guarda como texto
                     $rutaMulti = $data->input('ruta_multi');
                 }
-
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $logoUrl,
@@ -305,8 +375,33 @@ class AliadoApiController extends Controller
                 }
 
                 // Procesar el banner
-                $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
-                $bannerUrl = Storage::url($bannerPath);
+                $bannerUrl = null;
+
+                if ($data->hasFile('banner_urlImagen') && $data->file('banner_urlImagen')->isValid()) {
+                    $imagebanner = $data->file('banner_urlImagen');
+                    $filenamebanner = uniqid('banner_') . '.webp';
+                    $pathbanner = 'public/banners/' . $filenamebanner;
+
+                    $extensionbanner = strtolower($imagebanner->getClientOriginalExtension());
+                    // Crear una imagen desde el archivo original
+                    if ($extensionbanner === 'webp') {
+                        // Si ya es WebP, simplemente mover el archivo
+                        $imagebanner->storeAs('public/banners', $filenamebanner);
+                    } else {
+                        // Si no es WebP, convertir la imagen
+                        $sourceImage = $this->createImageFromFile($imagebanner->path());
+                        if ($sourceImage) {
+                            $fullPath = storage_path('app/' . $pathbanner);
+                            imagewebp($sourceImage, $fullPath, 80);
+                            imagedestroy($sourceImage);
+                        } else {
+                            // Manejar el error si no se puede crear la imagen
+                            return null;
+                        }
+                    }
+                    $bannerUrl = Storage::url($pathbanner);
+                }
+                // $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
 
                 Banner::create([
                     'urlImagen' => $bannerUrl,
@@ -328,27 +423,84 @@ class AliadoApiController extends Controller
         }
     }
 
+    private function createImageFromFile($filePath)
+    {
+        // Obtiene la información de la imagen
+        $imageInfo = getimagesize($filePath);
+        if ($imageInfo === false) {
+            return false;
+        }
+
+        $mimeType = $imageInfo['mime'];
+
+        // Crea la imagen a partir del tipo MIME
+        switch ($mimeType) {
+            case 'image/jpeg':
+                return imagecreatefromjpeg($filePath);
+            case 'image/png':
+                return imagecreatefrompng($filePath);
+            case 'image/gif':
+                return imagecreatefromgif($filePath);
+            case 'image/bmp':
+                return imagecreatefrombmp($filePath);
+            default:
+                return false;
+        }
+    }
+
     public function crearBanner(Request $request)
     {
+        // Verifica si el usuario tiene permisos
         if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
             return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
+        // Verifica si se ha subido una imagen válida para el banner
         if (!$request->hasFile('urlImagen') || !$request->file('urlImagen')->isValid()) {
             return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
         }
 
+        // Cuenta el número de banners existentes para el aliado
         $bannerCount = Banner::where('id_aliado', $request->id_aliado)->count();
 
+        // Limita la cantidad de banners a 3
         if ($bannerCount >= 3) {
             return response()->json(['message' => 'Ya existen 3 banners para este aliado. Debe eliminar un banner antes de crear uno nuevo.'], 400);
         }
 
+        $bannerUrl = null;
+
+        // Si la imagen ya está en formato WebP, simplemente muévela
         if ($request->hasFile('urlImagen') && $request->file('urlImagen')->isValid()) {
-            $bannerPath = $request->file('urlImagen')->store('public/banners');
-            $bannerUrl = Storage::url($bannerPath);
+            $image = $request->file('urlImagen');
+            $filename = uniqid('banner_') . '.webp';
+            $path = 'public/banners/' . $filename;
+
+            $extension = strtolower($image->getClientOriginalExtension());
+
+
+            if ($extension === 'webp') {
+                // Si ya es WebP, simplemente mover el archivo
+                $image->storeAs('public/banners', $filename);
+            } else {
+                // Crear una imagen desde el archivo original
+                $sourceImage = $this->createImageFromFile($image->path());
+                if ($sourceImage) {
+                    // Guardar la imagen como WebP
+                    $fullPath = storage_path('app/' . $path);
+                    imagewebp($sourceImage, $fullPath, 80);
+                    // Liberar memoria
+                    imagedestroy($sourceImage);
+                    // Obtener la URL del archivo guardado
+                } else {
+                    // Manejar el error si no se puede crear la imagen
+                    return null;
+                }
+            }
+            $bannerUrl = Storage::url($path);
         }
 
+        // Crea el banner en la base de datos
         $banner = Banner::create([
             'urlImagen' => $bannerUrl,
             'estadobanner' => $request->estadobanner,
@@ -375,9 +527,29 @@ class AliadoApiController extends Controller
                 // Eliminar la imagen anterior
                 Storage::delete(str_replace('storage', 'public', $banner->urlImagen));
 
-                // Guardar la nueva imagen
-                $paths = $request->file('urlImagen')->store('public/banners');
-                $banner->urlImagen = str_replace('public', 'storage', $paths);
+                $file = $request->file('urlImagen');
+                $fileName = Str::random(40) . '.webp';
+                $path = 'public/banners/' . $fileName;
+
+                $extension = strtolower($file->getClientOriginalExtension());
+                if ($extension === 'webp') {
+                    // Si ya es WebP, simplemente mover el archivo
+                    $file->storeAs('public/banners', $fileName);
+                } else {
+                    // Crear una imagen desde el archivo original
+                    $sourceImage = $this->createImageFromFile($file->path());
+
+                    if ($sourceImage) {
+                        $fullPath = storage_path('app/' . $path);
+                        // Guardar la imagen como WebP
+                        imagewebp($sourceImage, $fullPath, 80);
+                        // Liberar memoria
+                        imagedestroy($sourceImage);
+                    } else {
+                        return response()->json(['message' => 'No se pudo procesar la imagen'], 400);
+                    }
+                }
+                $banner->urlImagen = str_replace('public', 'storage', $path);
             }
 
             // Actualizar el estado del banner
@@ -397,19 +569,24 @@ class AliadoApiController extends Controller
 
     public function eliminarBanner($id)
     {
-
+        // Verifica si el usuario tiene permisos
         if (Auth::user()->id_rol != 3 && Auth::user()->id_rol != 1) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
+        // Busca el banner por ID
         $banner = Banner::find($id);
         if (!$banner) {
             return response()->json(['error' => 'Banner no encontrado'], 404);
         }
 
+        // Convierte la URL del banner para eliminarlo del almacenamiento
         $url = str_replace('storage', 'public', $banner->urlImagen);
 
+        // Elimina el archivo del almacenamiento
         Storage::delete($url);
+
+        // Elimina el registro del banner en la base de datos
         $banner->delete();
 
         return response()->json(['message' => 'Banner eliminado correctamente'], 200);
@@ -442,16 +619,33 @@ class AliadoApiController extends Controller
             }
 
 
-            if ($request->hasFile('ruta_multi')) {
-                // Si se está subiendo un nuevo archivo
+            if ($request->hasFile('ruta_multi') && $request->file('ruta_multi')->isValid()) {
                 $file = $request->file('ruta_multi');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-
-                // Determinar el tipo de archivo
                 $mimeType = $file->getMimeType();
 
                 if (strpos($mimeType, 'image') !== false) {
+                    // Es una imagen
                     $folder = 'imagenes';
+                    $fileName = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+                    $path = "public/$folder/$fileName";
+
+                    $extension = strtolower($file->getClientOriginalExtension());
+                    if ($extension === 'webp') {
+                        // Si ya es WebP, simplemente mover el archivo
+                        $file->storeAs("public/$folder", $fileName);
+                    } else {
+                        // Convertir a WebP
+                        $sourceImage = $this->createImageFromFile($file->path());
+                        if ($sourceImage) {
+                            $fullPath = storage_path('app/' . $path);
+                            // Guardar la imagen como WebP
+                            imagewebp($sourceImage, $fullPath, 80);
+                            // Liberar memoria
+                            imagedestroy($sourceImage);
+                        } else {
+                            return response()->json(['error' => 'No se pudo procesar la imagen'], 400);
+                        }
+                    }
                 } elseif ($mimeType === 'application/pdf') {
                     $folder = 'documentos';
                 } else {
@@ -490,11 +684,30 @@ class AliadoApiController extends Controller
                 //Eliminar el logo anterior
                 Storage::delete(str_replace('storage', 'public', $aliado->logo));
 
-                // Guardar el nuevo logo
-                $path = $request->file('logo')->store('public/logos');
+                $file = $request->file('logo');
+                $fileName = Str::random(40) . '.webp';
+                $path = 'public/logos/' . $fileName;
+
+                $extension = strtolower($file->getClientOriginalExtension());
+                if ($extension === 'webp') {
+                    // Si ya es WebP, simplemente mover el archivo
+                    $file->storeAs('public/logos', $fileName);
+                } else {
+                    // Crear una imagen desde el archivo original
+                    $sourceImage = $this->createImageFromFile($file->path());
+
+                    if ($sourceImage) {
+                        $fullPath = storage_path('app/' . $path);
+                        // Guardar la imagen como WebP
+                        imagewebp($sourceImage, $fullPath, 80);
+                        // Liberar memoria
+                        imagedestroy($sourceImage);
+                    } else {
+                        return response()->json(['message' => 'No se pudo procesar la imagen'], 400);
+                    }
+                }
                 $aliado->logo = str_replace('public', 'storage', $path);
             }
-
 
             // Actualizar los datos del aliado
             Log::info('Datos recibidos para actualización:', $request->all());
@@ -538,22 +751,23 @@ class AliadoApiController extends Controller
         }
     }
 
-
-
-
-
-
     public function mostrarAliado(Request $request)
     {
+        // Busca el aliado junto con su relación de autenticación y tipo de dato usando el ID proporcionado en la solicitud
         $aliado = Aliado::with(['auth', 'tipoDato'])->find($request->input('id'));
 
+        // Verifica si se encontró el aliado
         if ($aliado) {
+            // Convierte el logo a formato Base64, si existe
             $logoBase64 = $aliado->logo ? 'data:image/png;base64,' . $aliado->logo : null;
 
+            // Obtiene el estado del aliado, si está disponible
             $estado = $aliado->auth ? $aliado->auth->estado : null;
 
+            // Obtiene el nombre del tipo de dato, si está disponible
             $tipoDato = $aliado->tipoDato ? $aliado->tipoDato->nombre : null;
 
+            // Devuelve una respuesta JSON con la información del aliado
             return response()->json([
                 'nombre' => $aliado->nombre,
                 'descripcion' => $aliado->descripcion,
@@ -566,6 +780,7 @@ class AliadoApiController extends Controller
                 200
             ]);
         } else {
+            // Si no se encuentra el aliado, devuelve un mensaje de error 404
             return response()->json(['message' => 'Aliado no encontrado'], 404);
         }
     }
@@ -577,6 +792,7 @@ class AliadoApiController extends Controller
      */
     public function store(Request $request)
     {
+        //
     }
 
     /**
@@ -601,23 +817,28 @@ class AliadoApiController extends Controller
      */
     public function destroy($id)
     {
+        // Verifica si el usuario tiene rol 3 o 1 (permiso para desactivar aliados)
         if (Auth::user()->id_rol == 3 || Auth::user()->id_rol == 1) {
-
+            // Busca el aliado por ID
             $aliado = Aliado::find($id);
             if (!$aliado) {
+                // Si no se encuentra el aliado, devuelve un mensaje de error 404
                 return response()->json([
                     'message' => 'Aliado no encontrado',
                 ], 404);
             }
+            // Desactiva el usuario asociado al aliado
             $user = $aliado->auth;
             $user->estado = 0;
             $user->save();
 
+            // Devuelve una respuesta de éxito
             return response()->json([
                 'message' => 'Aliado desactivado',
             ], 200);
         }
 
+        // Si el usuario no tiene permisos, devuelve un mensaje de error 403
         return response()->json([
             'message' => 'No tienes permisos para realizar esta acción'
         ], 403);
@@ -627,15 +848,23 @@ class AliadoApiController extends Controller
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
+            // Verifica si el usuario tiene permiso para ver asesores
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
+
+            // Obtiene el estado desde la solicitud, por defecto 'Activo'
             $estado = $request->input('estado', 'Activo');
             $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+            // Busca el aliado por ID
             $aliado = Aliado::find($id);
             if (!$aliado) {
+                // Si no se encuentra el aliado, devuelve un mensaje de error 404
                 return response()->json(['message' => 'No se encontró ningún aliado con este ID'], 404);
             }
+
+            // Obtiene los asesores asociados al aliado
             $asesores = Aliado::findOrFail($id)->asesor()
                 ->whereHas('auth', function ($query) use ($estadoBool) {
                     $query->where('estado', $estadoBool);
@@ -656,6 +885,8 @@ class AliadoApiController extends Controller
                     'id_autentication'
                 )
                 ->get();
+
+            // Transforma los datos de los asesores
             $asesoresConEstado = $asesores->map(function ($asesor) {
                 $user = User::find($asesor->id_autentication);
                 return [
@@ -675,8 +906,11 @@ class AliadoApiController extends Controller
                     'email' => $user->email
                 ];
             });
+
+            // Devuelve la lista de asesores con su estado
             return response()->json($asesoresConEstado);
         } catch (Exception $e) {
+            // Manejo de excepciones
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -691,7 +925,7 @@ class AliadoApiController extends Controller
             }
 
             $asesoriaId = $request->input('id_asesoria');
-            $accion = $request->input('accion'); // aceptar o rechazar
+            $accion = $request->input('accion');
 
             $asesoria = Asesoria::find($asesoriaId);
 
@@ -707,7 +941,6 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => 'Acción no válida'], 400);
             }
 
-            //$horario->save();
 
             return response()->json(['message' => $mensaje], 200);
         } catch (Exception $e) {
@@ -717,32 +950,42 @@ class AliadoApiController extends Controller
 
     public function verEmprendedoresxEmpresa()
     {
+        // Verifica si el usuario tiene rol 3 (permiso para ver emprendedores)
         if (Auth::user()->id_rol != 3) {
             return response()->json([
                 'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
 
+        // Obtiene todos los emprendedores con sus empresas asociadas
         $emprendedoresConEmpresas = Emprendedor::with('empresas')->get();
 
+        // Devuelve la lista de emprendedores con sus empresas en formato JSON
         return response()->json($emprendedoresConEmpresas);
     }
 
     public function asesoriasXmes($id)
     {
         try {
+            // Verifica si el usuario tiene rol 3 (permiso para acceder a esta función)
             if (Auth::user()->id_rol != 3) {
-                return response()->json(['message' => 'No tienes permisos para acceder a esta funciona.']);
+                return response()->json(['message' => 'No tienes permisos para acceder a esta función.']);
             }
+
+            // Obtiene el año actual
             $ano = date('Y');
+
+            // Consulta las asesorías del aliado específico para el año actual
             $asesorias = Asesoria::where('id_aliado', $id)
                 ->whereYear('fecha', $ano)
-                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //selecciona el mes y luego cuenta las asesorias
+                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //Selecciona el mes y luego cuenta las asesorias
                 ->groupBy('mes')
                 ->get();
 
+            // Devuelve las asesorías en formato JSON
             return response()->json($asesorias);
         } catch (Exception $e) {
+            // Manejo de excepciones: devuelve un error en caso de que ocurra un problema
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }

@@ -19,47 +19,52 @@ class AsesoresAliadosExport implements FromCollection, WithHeadings, WithEvents
     protected $fecha_inicio;
     protected $fecha_fin;
 
-    public function __construct($id_aliado, $tipo_reporte, $fecha_inicio, $fecha_fin){
+    // Constructor que inicializa las propiedades con los parámetros recibidos
+        public function __construct($id_aliado, $tipo_reporte, $fecha_inicio, $fecha_fin){
         $this->id_aliado = $id_aliado;
         $this->tipo_reporte = $tipo_reporte;
         $this->fecha_inicio = $fecha_inicio;
         $this->fecha_fin = $fecha_fin;
     }
 
-    public function collection()
-    {
+    // Método que obtiene la colección de datos para la exportación
+    public function collection() {
+        // Construcción de la consulta para obtener datos de asesores
         $query=DB::table($this->tipo_reporte)
-        ->join('aliado', 'asesor.id_aliado', '=', 'aliado.id')
-        ->join('users', 'asesor.id_autentication', '=', 'users.id')
-        ->select(
-            'asesor.nombre',
-            'asesor.apellido',
-            'asesor.documento',
-            'asesor.celular',
-            'asesor.fecha_nac',
-            'asesor.direccion',
-            'users.email',
-            'users.fecha_registro',
-            DB::raw('(CASE WHEN users.estado = 1 THEN "Activo" ELSE "Inactivo" END) as estado')
-        )
-        ->where('asesor.id_aliado', $this->id_aliado);
+            ->join('aliado', 'asesor.id_aliado', '=', 'aliado.id') // Join con la tabla 'aliado'
+            ->join('users', 'asesor.id_autentication', '=', 'users.id') // Join con la tabla 'users'
+            ->select(
+                'asesor.nombre',           // Nombre del asesor
+                'asesor.apellido',         // Apellido del asesor
+                'asesor.documento',        // Documento del asesor
+                'asesor.celular',          // Celular del asesor
+                'asesor.fecha_nac',        // Fecha de nacimiento del asesor
+                'asesor.direccion',        // Dirección del asesor
+                'users.email',             // Correo del usuario asociado
+                'users.fecha_registro',    // Fecha de registro del usuario
+                DB::raw('(CASE WHEN users.estado = 1 THEN "Activo" ELSE "Inactivo" END) as estado')
+            )
+            ->where('asesor.id_aliado', $this->id_aliado);
+
+        // Filtrar por rango de fechas solo si están definidas
         if ($this->fecha_inicio && $this->fecha_fin) {
             $query->whereBetween('users.fecha_registro', [$this->fecha_inicio, $this->fecha_fin]);
         }
         return $query->get();
     }
 
-    public function headings(): array{
+    // Método que define los encabezados de la exportación
+    public function headings(): array {
         return [
-            'Nombre',
-            'Apellido',
-            'Documento',
-            'Celular',
-            'Fecha de Nacimiento',
-            'Dirección',
-            'Correo',
-            'Fecha de Registro',
-            'Estado',
+            'Nombre',                   // Nombre del asesor
+            'Apellido',                 // Apellido del asesor
+            'Documento',                // Documento del asesor
+            'Celular',                  // Celular del asesor
+            'Fecha de Nacimiento',      // Fecha de nacimiento del asesor
+            'Dirección',                // Dirección del asesor
+            'Correo',                   // Correo del usuario asociado
+            'Fecha de Registro',        // Fecha de registro del usuario
+            'Estado',                   // Estado del usuario
         ];
     }
 

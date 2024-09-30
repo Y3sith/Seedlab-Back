@@ -12,39 +12,42 @@ use Maatwebsite\Excel\Events\AfterSheet;
 
 class RolesExport implements FromCollection, WithHeadings, WithMapping, WithEvents
 {
-    protected $tipo_reporte;
-    protected $fecha_inicio;
-    protected $fecha_fin;
+    protected $tipo_reporte; // Tipo de reporte que se va a generar
+    protected $fecha_inicio; // Fecha de inicio para filtrar resultados
+    protected $fecha_fin;    // Fecha de fin para filtrar resultados
 
+    // Constructor que recibe tipo de reporte y fechas
     public function __construct($tipo_reporte, $fecha_inicio, $fecha_fin)
     {
-        $this->tipo_reporte = $tipo_reporte;
-        $this->fecha_inicio = $fecha_inicio;
-        $this->fecha_fin = $fecha_fin;
+        $this->tipo_reporte = $tipo_reporte; // Asigna el tipo de reporte
+        $this->fecha_inicio = $fecha_inicio; // Asigna la fecha de inicio
+        $this->fecha_fin = $fecha_fin;       // Asigna la fecha de fin
     }
 
+    // Método que obtiene la colección de datos
     public function collection()
     {
-
         // Validación de tipo_reporte
-        $validTipos = ['emprendedor', 'orientador', 'empresa'];
+        $validTipos = ['emprendedor', 'orientador', 'empresa']; // Tipos de reporte válidos
         if (!in_array($this->tipo_reporte, $validTipos)) {
-            throw new \Exception("Tipo de reporte no válido.");
+            throw new \Exception("Tipo de reporte no válido."); // Lanza excepción si el tipo no es válido
         }
 
         // Validación de fechas
         if (!$this->fecha_inicio || !$this->fecha_fin) {
-            throw new \Exception("Fechas de inicio y fin son requeridas.");
+            throw new \Exception("Fechas de inicio y fin son requeridas."); // Lanza excepción si las fechas son requeridas
         }
 
+        // Construcción de la consulta
         $query = DB::table('users')
-            ->join($this->tipo_reporte, 'users.id', '=', $this->tipo_reporte . '.id_autentication')
-            ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', "{$this->tipo_reporte}.*")
-            ->whereBetween('users.fecha_registro', [$this->fecha_inicio, $this->fecha_fin]);
+            ->join($this->tipo_reporte, 'users.id', '=', $this->tipo_reporte . '.id_autentication') // Realiza un join con la tabla correspondiente
+            ->select('users.id', 'users.email', 'users.fecha_registro', 'users.estado', "{$this->tipo_reporte}.*") // Selecciona los campos deseados
+            ->whereBetween('users.fecha_registro', [$this->fecha_inicio, $this->fecha_fin]); // Filtra por fecha
 
-        return $query->get();
+        return $query->get(); // Retorna los resultados de la consulta
     }
 
+    // Método que define los encabezados de la exportación
     public function headings(): array
     {
         return [
@@ -62,6 +65,7 @@ class RolesExport implements FromCollection, WithHeadings, WithMapping, WithEven
         ];
     }
 
+    // Método que mapea los datos de cada rol a un array
     public function map($rol): array
     {
         return [

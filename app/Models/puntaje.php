@@ -24,6 +24,8 @@ class puntaje extends Model
     ];
 
     public function empresas(){
+        // Esta relación indica que el modelo actual pertenece a una empresa específica.
+        // Se establece una relación de muchos a uno, utilizando 'id_empresa' como clave foránea.
         return $this->belongsTo(Empresa::class, 'id_empresa');
     }
 }

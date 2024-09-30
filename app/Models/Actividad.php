@@ -22,17 +22,26 @@ class Actividad extends Model
     ];
 
     public function tiposDatos(){
+        // Esta relación indica que el modelo actual está asociado a un registro en la tabla TipoDato.
+        // La columna 'id_tipo_dato' en este modelo actúa como clave foránea.
         return $this->belongsTo(TipoDato::class, 'id_tipo_dato');
     }
+    
     public function aliado(){
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla Aliado.
+        // La columna 'id_aliado' en este modelo es la clave foránea que establece esta conexión.
         return $this->belongsTo(Aliado::class, 'id_aliado');
     }
     
     public function rutas(){
+        // Esta relación muestra que el modelo actual está vinculado a un registro en la tabla Ruta.
+        // La clave foránea en este caso es 'id_ruta'.
         return $this->belongsTo(Ruta::class, 'id_ruta');
     }
-
+    
     public function nivel(){
+        // Esta relación establece que el modelo actual puede tener múltiples registros en la tabla Nivel.
+        // La clave foránea utilizada para esta relación es 'id_actividad'.
         return $this->hasMany(Nivel::class, 'id_actividad');
     }
     

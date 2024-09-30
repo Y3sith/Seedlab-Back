@@ -27,29 +27,38 @@ class LeccionController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea una nueva lección en la base de datos.
+     * Esta función permite a los asesores crear una lección asociada a un nivel específico.
+     * Verifica los permisos del usuario y si ya existe una lección con el mismo nombre para el nivel proporcionado.
      */
     public function store(Request $request)
     {
-        //crear leccion (solo el asesor)
+        // Crear lección (solo el asesor)
         try {
-            if (Auth::user()->id_rol != 1  && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
+            // Verifica si el usuario autenticado tiene permiso para crear lecciones.
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['error' => 'No tienes permisos para crear lecciones'], 401);
             }
 
+            // Comprueba si ya existe una lección con el mismo nombre para el nivel dado.
             $existingNivel = Leccion::where('nombre', $request->nombre)
                 ->where('id_nivel', $request->id_nivel)
                 ->first();
 
             if ($existingNivel) {
-                return response()->json(['message' => 'Ya existe una leccion con este nombre para este nivel'], 422);
+                return response()->json(['message' => 'Ya existe una lección con este nombre para este nivel'], 422);
             }
+
+            // Crea una nueva lección con los datos proporcionados.
             $leccion = Leccion::create([
                 'nombre' => $request->nombre,
                 'id_nivel' => $request->id_nivel,
             ]);
+
+            // Devuelve una respuesta indicando que la lección fue creada con éxito.
             return response()->json(['message' => 'Lección creada con éxito ', $leccion], 201);
         } catch (Exception $e) {
+            // Captura cualquier excepción y devuelve un mensaje de error.
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -63,16 +72,17 @@ class LeccionController extends Controller
     }
 
 
-    public function LeccionxNivel($id){
+    public function LeccionxNivel($id)
+    {
         //mostrar niveles asociados a una actividad
         try {
             if (Auth::user()->id_rol != 1  && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
-                return response()->json(['message'=> 'No tienes permisos '],401);
+                return response()->json(['message' => 'No tienes permisos '], 401);
             }
-            $leccion = Leccion::where('id_nivel', $id)->select('id','nombre')->get();
+            $leccion = Leccion::where('id_nivel', $id)->select('id', 'nombre')->get();
             return response()->json($leccion);
         } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: '. $e->getMessage()], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
@@ -86,24 +96,31 @@ class LeccionController extends Controller
     }
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza una lección existente en la base de datos.
      */
     public function editarLeccion(Request $request, string $id)
     {
-        //editar solo el asesor
+        // Editar solo el asesor
         try {
+            // Verifica si el usuario autenticado tiene permiso para editar lecciones.
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol !=3) {
                 return response()->json(['error' => 'No tienes permisos para editar lecciones'], 401);
             }
+
+            // Busca la lección por ID.
             $leccion = Leccion::find($id);
             if (!$leccion) {
-                return response()->json(['error' => 'Leccion no encontrada'], 404);
+                return response()->json(['error' => 'Lección no encontrada'], 404);
             } else {
+                // Actualiza el nombre de la lección con los datos del request.
                 $leccion->nombre = $request->nombre;
                 $leccion->update();
-                return response(["message" => "Leccion actualizada correctamente"], 201);
+
+                // Devuelve una respuesta indicando que la lección fue actualizada con éxito.
+                return response(["message" => "Lección actualizada correctamente"], 201);
             }
         } catch (Exception $e) {
+            // Captura cualquier excepción y devuelve un mensaje de error.
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }

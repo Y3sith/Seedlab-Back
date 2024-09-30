@@ -21,14 +21,20 @@ class Respuesta extends Model
     ];
 
     public function preguntas(){
+        // Esta relación indica que el modelo actual pertenece a una pregunta específica.
+        // Se establece una relación de muchos a uno, utilizando 'id_pregunta' como clave foránea.
         return $this->belongsTo(Preguntas::class, 'id_pregunta');
     }
 
     public function subpreguntas(){
+        // Esta relación indica que el modelo actual pertenece a una subpregunta específica.
+        // Se establece una relación de muchos a uno, utilizando 'id_subpregunta' como clave foránea.
         return $this->belongsTo(Subpreguntas::class, 'id_subpregunta');
     }
     
     public function empresas(){
+        // Esta relación indica que el modelo actual pertenece a una empresa específica.
+        // Se establece una relación de muchos a uno, utilizando 'id_empresa' como clave foránea.
         return $this->belongsTo(Empresa::class, 'id_empresa');
     }
 
