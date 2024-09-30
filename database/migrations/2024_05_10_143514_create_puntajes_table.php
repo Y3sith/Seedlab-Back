@@ -18,7 +18,7 @@ return new class extends Migration
             $table->double('info_mercado');
             $table->double('info_trl');
             $table->double('info_tecnica');
-            $table->string('documento_empresa');
+            $table->integer('documento_empresa');
             $table->unsignedTinyInteger('primera_vez');
             $table->unsignedTinyInteger('segunda_vez');
             $table->foreign('documento_empresa')->references('documento')->on('empresa');

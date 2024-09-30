@@ -93,7 +93,7 @@ class EmpresaApiController extends Controller
             // Validar la estructura del request
             $request->validate([
                 'empresa.nombre' => 'required|string|max:255',
-                'empresa.documento' => 'required|string|max:255',
+                'empresa.documento' => 'required|integer',
                 'empresa.cargo' => 'required|string|max:255',
                 'empresa.razonSocial' => 'required|string|max:255',
                 'empresa.url_pagina' => 'nullable|string',
@@ -107,7 +107,7 @@ class EmpresaApiController extends Controller
                 'empresa.id_tipo_documento' => 'required|integer',
                 'empresa.id_departamento' => 'required|integer',
                 'empresa.id_municipio' => 'required|integer',
-                'empresa.id_emprendedor' => 'required|integer',
+                'empresa.id_emprendedor' => 'required|numeric',
             ]);
 
             $empresaexiste = Empresa::where('documento', $request['empresa']['documento'])->first();

@@ -23,7 +23,7 @@ class EmprendedorSeeder extends Seeder
         }
 
         Emprendedor::create([
-            "documento"=> "0000000001",
+            "documento"=> 12345678,
             "nombre"=> "Emprendedor",
             "apellido"=> "Prueba",
             "imagen_perfil"=>"",
@@ -39,7 +39,7 @@ class EmprendedorSeeder extends Seeder
             "id_municipio"=> 904
         ]);
         Emprendedor::create([
-            "documento"=> "0000000002",
+            "documento"=> 23456789,
             "nombre"=> "Emprendedor",
             "apellido"=> "Prueba",
             "imagen_perfil"=>"",
@@ -55,7 +55,7 @@ class EmprendedorSeeder extends Seeder
             "id_municipio"=> 904
         ]);
         Emprendedor::create([
-            "documento"=> "0000000003",
+            "documento"=> 34567891,
             "nombre"=> "Emprendedor",
             "apellido"=> "Prueba",
             "imagen_perfil"=>"",
