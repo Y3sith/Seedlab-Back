@@ -19,8 +19,8 @@ use Maatwebsite\Excel\Facades\Excel;
 
 class ReportesController extends Controller
 {
-    
-   
+
+
 
     public function exportarReportesAliados(Request $request)
     {
@@ -83,7 +83,6 @@ class ReportesController extends Controller
             $fechaInicio = date('Y-m-d H:i:s', strtotime($fechaInicio . ' 00:00:00'));
         }
 
-
         switch ($tipo_reporte) {
             case 'aliado':
                 $export = new AliadosExport($tipo_reporte, $fechaInicio, $fechaFin);
@@ -112,29 +111,35 @@ class ReportesController extends Controller
                 break;
             case 'asesorias_orientador':
                 $export = new AsesoriasOrientadorExport($tipo_reporte, $fechaInicio, $fechaFin);
-                $nombreArchivo = 'reporte_asesorias_orientador';
+                $nombreArchivo = 'asesorias_orientador';
+                $plantilla = 'reporte_asesorias_orientador_template';
                 break;
             default:
                 return response()->json(['error' => 'Tipo de reporte no válido'], 400);
         }
 
-        // Si el formato es Excel
-        if ($formato === 'excel') {
-            return Excel::download($export, "{$nombreArchivo}.xlsx");
+        // Recuperar los datos antes de decidir descargar
+        $datos = $export->collection();
+
+        if ($datos->isEmpty()) {
+            return response()->json(['message' => 'No hay datos disponibles para el reporte especificado.'], 204);
         }
 
-        // Si el formato es PDF
-        try {
-            $datos = json_decode(json_encode($export->collection()), true); // obtenemos los datos a exportar
-            $pdf = Pdf::loadView($plantilla, compact('datos'));
-            $pdf->setPaper('A4', 'landscape');
-            return $pdf->download("{$nombreArchivo}.pdf");
-        } catch (\Exception $e) {
-            // Maneja el error, por ejemplo, registrando el error en los logs
-            Log::error('Error al generar el PDF: ' . $e->getMessage());
-            return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
+        // Proceder según el formato deseado
+        if ($formato === 'excel') {
+            return Excel::download($export, "{$nombreArchivo}.xlsx");
+        } else {  // asumimos PDF
+            try {
+                $pdf = Pdf::loadView($plantilla, ['datos' => $datos]);
+                $pdf->setPaper('A4', 'landscape');
+                return $pdf->download("{$nombreArchivo}.pdf");
+            } catch (\Exception $e) {
+                Log::error('Error al generar el PDF: ' . $e->getMessage());
+                return response()->json(['error' => 'Error al generar el reporte PDF'], 500);
+            }
         }
     }
+
 
 
 
@@ -154,7 +159,7 @@ class ReportesController extends Controller
             case 'aliado':
                 $data = DB::table('users')
                     ->join('aliado', 'users.id', '=', 'aliado.id_autentication')
-                    ->select('users.id', 'aliado.nombre', 'users.email', 'users.fecha_registro', 'users.estado',  'aliado.descripcion')
+                    ->select('users.id', 'aliado.nombre', 'users.email', 'users.fecha_registro', 'users.estado', 'aliado.descripcion')
                     ->whereBetween('users.fecha_registro', [$fechaInicio, $fechaFin])
                     ->get();
                 break;
@@ -285,7 +290,7 @@ class ReportesController extends Controller
         return response()->json($data);
     }
 
-  
+
 
     public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null)
     {
@@ -431,6 +436,10 @@ class ReportesController extends Controller
 
 
         $resultados = $query->get();
+
+        if($resultados->isEmpty()){
+            return response()->json(['error' => 'No se encontraron resultados'], 404);
+        }
 
 
         return response()->json($resultados);

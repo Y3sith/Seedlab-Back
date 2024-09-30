@@ -35,9 +35,8 @@
                 <th style="padding: 10px; text-align: left;">Celular</th>
                 <th style="padding: 10px; text-align: left;">Dirección</th>
                 <th style="padding: 10px; text-align: left;">Correo</th>
-                <th style="padding: 10px; text-align: left;">Fecha Registro</th>
+                <th style="padding: 10px; text-align: left;">Departamento</th>
                 <th style="padding: 10px; text-align: left;">Documento Emprendedor</th>
-                <th style="padding: 10px; text-align: left;">Nombre Emprendedor</th>
                
             </tr>
         </thead>
@@ -51,10 +50,8 @@
                     <td style="padding: 10px;">{{ $dato['celular'] }}</td>
                     <td style="padding: 10px;">{{ $dato['direccion'] }}</td>
                     <td style="padding: 10px;">{{ $dato['correo'] }}</td>
-                    <td style="padding: 10px;">{{ $dato['fecha_registro'] }}</td>
                     <td style="padding: 10px;">{{ $dato['name'] }}</td>
                     <td style="padding: 10px;">{{ $dato['documento_emprendedor'] }}</td>
-                    <td style="padding: 10px;">{{ $dato['nombre_emprendedor'] }}</td>
                 </tr>
             @endforeach
         </tbody>

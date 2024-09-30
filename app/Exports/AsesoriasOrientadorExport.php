@@ -5,9 +5,11 @@ namespace App\Exports;
 use App\Models\Asesoria;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use Maatwebsite\Excel\Events\AfterSheet;
 
-class AsesoriasOrientadorExport implements FromCollection, WithHeadings
+class AsesoriasOrientadorExport implements FromCollection, WithHeadings, WithEvents
 {
     /**
      * @return \Illuminate\Support\Collection
@@ -40,12 +42,29 @@ class AsesoriasOrientadorExport implements FromCollection, WithHeadings
     public function headings(): array
     {
         return [
-            'ID',
             'Nombre Asesoria',
             'Descripción',
             'Fecha',
             'Emprendedor Solcitante',
             'Documento Emprendedor'
+        ];
+    }
+
+
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function(AfterSheet $event) {
+                $sheet = $event->sheet->getDelegate();
+                $columns = ['A', 'B', 'C', 'D', 'E']; // Asume que tienes cinco columnas
+                foreach ($columns as $column) {
+                    $sheet->getColumnDimension($column)->setAutoSize(true);
+                }
+
+                // Aplicar estilos adicionales si es necesario
+                $sheet->getStyle('A1:E1')->getFont()->setBold(true);
+                $sheet->getStyle('A1:E1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
+            },
         ];
     }
 }
