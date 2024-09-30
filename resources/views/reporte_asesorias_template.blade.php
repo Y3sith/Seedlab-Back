@@ -28,7 +28,6 @@
     <table style="width: 100%; border-collapse: collapse;">
         <thead>
             <tr style="background-color: #f2f2f2;">
-                <th style="padding: 10px; text-align: left;">ID</th>
                 <th style="padding: 10px; text-align: left;">Nombre Emprendedor</th>
                 <th style="padding: 10px; text-align: left;">Documento Emprendedor</th>
                 <th style="padding: 10px; text-align: left;">Nombre Asesoria</th>
@@ -40,7 +39,6 @@
         <tbody>
             @foreach ($datos as $dato)
                 <tr style="border-bottom: 1px solid #ddd;">
-                    <td style="padding: 10px;">{{ $dato['id'] }}</td>
                     <td style="padding: 10px;">{{ $dato['nombre_emprendedor'] }}</td>
                     <td style="padding: 10px;">{{ $dato['documento'] }}</td>
                     <td style="padding: 10px;">{{ $dato['Nombre_sol'] }}</td>

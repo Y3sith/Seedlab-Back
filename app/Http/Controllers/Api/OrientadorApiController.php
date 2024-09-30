@@ -169,7 +169,7 @@ class OrientadorApiController extends Controller
     public function mostrarOrientadores($status)
     {
         // Verificar permisos del usuario autenticado.
-        if (Auth::user()->id_rol !== '1' && Auth::user()->id_rol !== '2') {
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
             return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
         }
 
@@ -195,7 +195,7 @@ class OrientadorApiController extends Controller
         });
 
         // Devolver la lista de orientadores en formato JSON.
-        return response()->json($orientadoresConEstado);
+        return response()->json($orientadoresConEstado, 200);
     }
 
 
