@@ -122,12 +122,14 @@ class RespuestasApiController extends Controller
             ->first();
 
         if ($segundaRespuesta) {
-            return response()->json(['contador' => 2], 200);
+            // Ya se ha llenado dos veces
+            return response()->json(['contador' => 3, 'message' => 'Formulario completado dos veces'], 403);
         }
 
         // Si ya se llenó la primera vez pero no la segunda
         return response()->json(['contador' => 2], 200);
     }
+
 
 
 
