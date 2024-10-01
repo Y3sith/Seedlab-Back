@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
+use Log;
 
 class Apoyo_por_EmpresaController extends Controller
 {
@@ -58,8 +59,15 @@ class Apoyo_por_EmpresaController extends Controller
 
             // Devuelve un mensaje de éxito con un código de estado 201
             return response()->json(['message' => 'Apoyo creado con exito'], 201);
+            
         } catch (Exception $e) {
             // Manejo de excepciones en caso de error
+            Log::error('Error al crear el apoyo: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_data' => $request->all(), // Log del contenido del request para depuración
+                'user_id' => Auth::id(), // Para saber qué usuario realizó la acción
+            ]);
+
             return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -76,7 +84,7 @@ class Apoyo_por_EmpresaController extends Controller
             }
 
             // Obtiene todos los apoyos relacionados con la empresa especificada
-            $apoyos = ApoyoEmpresa::all()->where('id_empresa', $id_empresa);
+            $apoyos = ApoyoEmpresa::where('id_empresa', $id_empresa)->get(); // Cambiar all() por get()
             return response()->json($apoyos, 200);
         } catch (Exception $e) {
             // Manejo de excepciones en caso de error
