@@ -88,20 +88,12 @@ class SeccionSheet implements FromArray, WithTitle, WithHeadings, WithStyles
 
     public function styles(Worksheet $sheet)
     {
-        // Combina las celdas A1 a L1 para el título
-        $sheet->mergeCells('A1:L1');
+       
+        // Establecer el encabezado en la fila 1
+        $sheet->fromArray($this->headings(), NULL, 'A1');
+        $sheet->getStyle('A1:L1')->getFont()->setBold(true);
+        $sheet->getStyle('A1:L1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
-        // Establece el valor de la celda A1 como el título de la hoja
-        $sheet->setCellValue('A1', $this->title);
-
-        // Aplica negrita al texto del título y centra la alineación
-        $sheet->getStyle('A1:H1')->getFont()->setBold(true);
-        $sheet->getStyle('A1')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
-
-        // Establecer el encabezado en la fila 2
-        $sheet->fromArray($this->headings(), NULL, 'A2');
-        $sheet->getStyle('A2:L2')->getFont()->setBold(true);
-        $sheet->getStyle('A2:L2')->getAlignment()->setHorizontal(\PhpOffice\PhpSpreadsheet\Style\Alignment::HORIZONTAL_CENTER);
 
         // Ajustar el ancho de las columnas
         foreach (range('A', 'L') as $columnID) {

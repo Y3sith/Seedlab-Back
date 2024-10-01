@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
-    'allowed_origins' => ['https://ruta.adsocidm.com'], //https://ruta.adsocidm.com
+    'allowed_origins' => ['*'], //https://ruta.adsocidm.com
 
     'allowed_origins_patterns' => [],
 
