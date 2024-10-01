@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;// Agregar esta línea
+use Illuminate\Support\Facades\Redis; // Agregar esta línea
 
 
 class RespuestasApiController extends Controller
@@ -120,12 +120,14 @@ class RespuestasApiController extends Controller
             ->first();
 
         if ($segundaRespuesta) {
-            return response()->json(['contador' => 2], 200);
+            // Ya se ha llenado dos veces
+            return response()->json(['contador' => 3, 'message' => 'Formulario completado dos veces'], 403);
         }
 
         // Si ya se llenó la primera vez pero no la segunda
         return response()->json(['contador' => 2], 200);
     }
+
 
 
 
