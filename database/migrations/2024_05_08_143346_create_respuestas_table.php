@@ -17,7 +17,7 @@ return new class extends Migration
             $table->boolean('verform_pr')->nullable();
             $table->boolean('verform_se')->nullable();
             $table->timestamp('fecha_registro')->useCurrent();
-            $table->integer('id_empresa');
+            $table->string('id_empresa');
             $table->foreign('id_empresa')->references('documento')->on('empresa');
         });
     }

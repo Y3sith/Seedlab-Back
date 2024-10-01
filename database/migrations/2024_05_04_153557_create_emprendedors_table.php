@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('emprendedor', function (Blueprint $table) {
-            $table->integer('documento', 50)->primary()->collation('utf8mb4_unicode_ci');
+            $table->string('documento', 50)->primary()->collation('utf8mb4_unicode_ci');
             $table->string('nombre', 50)->collation('utf8mb4_unicode_ci');
             $table->string('apellido', 50)->collation('utf8mb4_unicode_ci');
             $table->text('imagen_perfil')->nullable();
