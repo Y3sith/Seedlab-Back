@@ -13,18 +13,16 @@ return new class extends Migration
     {
         Schema::create('apoyo_empresa', function (Blueprint $table) {
             $table->id();
-            $table->integer('documento');
+            $table->string('documento', 50);
             $table->string('nombre', 50);
             $table->string('apellido', 50);
             $table->string('cargo', 50);
             $table->string('telefono', 10)->nullable();
             $table->string('celular', 13);
             $table->string('email');
-
             $table->unsignedBigInteger('id_tipo_documento');
             $table->foreign('id_tipo_documento')->references('id')->on('tipo_documento');
-
-            $table->integer('id_empresa');
+            $table->string('id_empresa', 50);
             $table->foreign('id_empresa')->references('documento')->on('empresa')->onDelete('cascade')->onUpdate('cascade');
         });
     }
