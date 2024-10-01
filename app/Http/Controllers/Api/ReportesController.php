@@ -310,13 +310,25 @@ class ReportesController extends Controller
 
 
     //Procesa las respuestas de un emprendedor y genera un reporte en Excel.
-    public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null)
+    public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null, $tipo_Reporte = null)
     {
+
+    if ($tipo_Reporte == "1") {
+        $respuesta = "verform_pr";  // Asignar valor a la variable
+        $tipo_reporte = "primera_vez";
+    } else {
+        $respuesta = "verform_se";  // Asignar otro valor en caso contrario
+        $tipo_reporte = "segunda_vez";
+    }
+
         // Obtener las respuestas uniendo las tablas 'respuesta', 'empresa' y 'puntaje'.
         $query = DB::table('respuesta')
             ->join('empresa', 'respuesta.id_empresa', '=', 'empresa.documento')
             ->join('puntaje', 'empresa.documento', '=', 'puntaje.documento_empresa') // Unir con 'puntaje'
             ->where('empresa.id_emprendedor', $idEmprendedor)
+            ->where('puntaje.' . $tipo_reporte, '=', 1)
+            ->where('respuesta.' . $respuesta, '=', 1)
+            ->where('empresa.documento', '=', $documentoEmpresa)
             ->select(
                 'respuesta.respuestas_json',
                 'puntaje.info_general',
@@ -328,10 +340,13 @@ class ReportesController extends Controller
                 'puntaje.segunda_vez'
             );
 
+
         // Filtrar por documento de empresa si se proporciona.
         if (!is_null($documentoEmpresa)) {
             $query->where('empresa.documento', $documentoEmpresa);
         }
+
+
 
         // Ejecutar la consulta y obtener las respuestas.
         $respuestas = $query->get();

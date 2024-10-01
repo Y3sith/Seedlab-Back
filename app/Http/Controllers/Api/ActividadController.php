@@ -64,13 +64,13 @@ class ActividadController extends Controller
             ]);
 
             // Obtiene la descripción y valida su longitud
-            $descripcion = $request->input('descripcion');
-            if (strlen($descripcion) < 300) {
-                return response()->json(['message' => 'La descripción debe tener al menos 300 caracteres'], 400);
-            }
-            if (strlen($descripcion) > 470) {
-                return response()->json(['message' => 'La descripción no puede tener más de 470 caracteres'], 400);
-            }
+            // $descripcion = $request->input('descripcion');
+            // if (strlen($descripcion) < 300) {
+            //     return response()->json(['message' => 'La descripción debe tener al menos 300 caracteres'], 400);
+            // }
+            // if (strlen($descripcion) > 470) {
+            //     return response()->json(['message' => 'La descripción no puede tener más de 470 caracteres'], 400);
+            // }
 
             // Verifica si la actividad ya existe
             $existingActividad = Actividad::where([
@@ -115,7 +115,7 @@ class ActividadController extends Controller
             // Crea la actividad en la base de datos
             $actividad = Actividad::create([
                 'nombre' => $validatedData['nombre'],
-                'descripcion' => $descripcion,
+                'descripcion' => $validatedData['descripcion'],
                 'fuente' => $fuente,
                 'id_tipo_dato' => $validatedData['id_tipo_dato'],
                 'id_ruta' => $validatedData['id_ruta'],

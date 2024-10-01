@@ -42,7 +42,7 @@ class OrientadorApiController extends Controller
             }
 
             // Verificar que el usuario tenga permisos para crear un orientador.
-            if (Auth::user()->id_rol !== '1') {
+            if (Auth::user()->id_rol != 1) {
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
 
