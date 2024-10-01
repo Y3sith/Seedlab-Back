@@ -14,7 +14,7 @@ class EmpresaSeeder extends Seeder
     public function run(): void
     {
         Empresa::create([
-            "documento"=> 12345678,
+            "documento"=> "12345678",
             "nombre"=> "Lenovo",
             "cargo"=> "jefe",
             "razonSocial"=> "varias cosas",
@@ -29,10 +29,10 @@ class EmpresaSeeder extends Seeder
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
             "id_municipio"=> 904,
-            "id_emprendedor"=> 12345678
+            "id_emprendedor"=> "0000000001"
         ]);
         Empresa::create([
-            "documento"=> 223456789,
+            "documento"=> "223456789",
             "nombre"=> "Dell",
             "cargo"=> "jefe",
             "razonSocial"=> "varias cosas",
@@ -47,12 +47,12 @@ class EmpresaSeeder extends Seeder
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
             "id_municipio"=> 904,
-            "id_emprendedor"=> 12345678
+            "id_emprendedor"=> "0000000001"
         ]);
 
 
         Empresa::create([
-            "documento"=> 34567891,
+            "documento"=> "34567891",
             "nombre"=> "Homecenter",
             "cargo"=> "jefe",
             "razonSocial"=> "muchas cosas",
@@ -67,11 +67,11 @@ class EmpresaSeeder extends Seeder
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
             "id_municipio"=> 904,
-            "id_emprendedor"=> 23456789
+            "id_emprendedor"=> "0000000002"
         ]);
 
         Empresa::create([
-            "documento"=> 456789123,
+            "documento"=> "456789123",
             "nombre"=> "FritoLay",
             "cargo"=> "jefe",
             "razonSocial"=> "muchas cosas",
@@ -86,12 +86,12 @@ class EmpresaSeeder extends Seeder
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
             "id_municipio"=> 904,
-            "id_emprendedor"=> 23456789
+            "id_emprendedor"=> "0000000002"
         ]);
 
 
         Empresa::create([
-            "documento"=> 567891234,
+            "documento"=> "567891234",
             "nombre"=> "Sony",
             "cargo"=> "jefe",
             "razonSocial"=> " cosas",
@@ -106,11 +106,11 @@ class EmpresaSeeder extends Seeder
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
             "id_municipio"=> 904,
-            "id_emprendedor"=> 34567891
+            "id_emprendedor"=> "0000000003"
         ]);
 
         Empresa::create([
-            "documento"=> 678912345,
+            "documento"=> "678912345",
             "nombre"=> "Xiaomi",
             "cargo"=> "jefe",
             "razonSocial"=> " cosas",
@@ -125,7 +125,7 @@ class EmpresaSeeder extends Seeder
             "id_tipo_documento"=> 1,
             "id_departamento"=> 27,
             "id_municipio"=> 904,
-            "id_emprendedor"=> 34567891
+            "id_emprendedor"=> "0000000003"
         ]);
     }
 }

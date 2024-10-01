@@ -9,6 +9,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Log;
 
 class EmpresaApiController extends Controller
 {
@@ -93,7 +94,7 @@ class EmpresaApiController extends Controller
             // Validar la estructura del request
             $request->validate([
                 'empresa.nombre' => 'required|string|max:255',
-                'empresa.documento' => 'required|integer',
+                'empresa.documento' => 'required|string|max:255',
                 'empresa.cargo' => 'required|string|max:255',
                 'empresa.razonSocial' => 'required|string|max:255',
                 'empresa.url_pagina' => 'nullable|string',
@@ -107,7 +108,6 @@ class EmpresaApiController extends Controller
                 'empresa.id_tipo_documento' => 'required|integer',
                 'empresa.id_departamento' => 'required|integer',
                 'empresa.id_municipio' => 'required|integer',
-                'empresa.id_emprendedor' => 'required|numeric',
             ]);
 
             $empresaexiste = Empresa::where('documento', $request['empresa']['documento'])->first();
@@ -141,6 +141,8 @@ class EmpresaApiController extends Controller
                 }
             }
         } catch (\Exception $e) {
+            Log::error('Error al crear la empresa: ' . $e->getMessage(), ['exception' => $e]);
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
 

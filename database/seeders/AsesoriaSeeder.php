@@ -21,7 +21,7 @@ class AsesoriaSeeder extends Seeder
             "asignacion" => false,
             "fecha" => "2024-05-21 14:30:00",
             "id_aliado" => "1",
-            "doc_emprendedor" => 12345678,
+            "doc_emprendedor" => "0000000001",
         ]);
     
         Asesoria::create([
@@ -32,7 +32,7 @@ class AsesoriaSeeder extends Seeder
             "asignacion" => false,
             "fecha" => "2024-05-22 14:30:00",
             "id_aliado" => "2",
-            "doc_emprendedor" => 12345678,
+            "doc_emprendedor" => "0000000001",
         ]);
 
         Asesoria::create([
@@ -43,7 +43,7 @@ class AsesoriaSeeder extends Seeder
             "asignacion" => false,
             "fecha" => "2024-05-23 14:30:00",
             "id_aliado" => "1",
-            "doc_emprendedor" => 12345678,
+            "doc_emprendedor" => "0000000001",
         ]);
 
         Asesoria::create([
@@ -54,7 +54,7 @@ class AsesoriaSeeder extends Seeder
             "asignacion" => false,
             "fecha" => "2024-05-24 14:30:00",
             "id_aliado" => null,
-            "doc_emprendedor" => 12345678,
+            "doc_emprendedor" => "0000000001",
         ]);
 
         Asesoria::create([
@@ -65,7 +65,7 @@ class AsesoriaSeeder extends Seeder
             "asignacion" => true,
             "fecha" => "2024-05-24 14:30:00",
             "id_aliado" => "3",
-            "doc_emprendedor" => 12345678,
+            "doc_emprendedor" => "0000000001",
         ]);
     }
 }
