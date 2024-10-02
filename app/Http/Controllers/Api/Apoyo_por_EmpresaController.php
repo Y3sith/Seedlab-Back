@@ -7,7 +7,9 @@ use App\Models\ApoyoEmpresa;
 use App\Models\Empresa;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Exception;
 use Illuminate\Support\Facades\Auth;
+use Log;
 
 class Apoyo_por_EmpresaController extends Controller
 {
@@ -37,11 +39,12 @@ class Apoyo_por_EmpresaController extends Controller
     public function crearApoyos(Request $request)
     {
         try {
-
+            // Verifica si el usuario tiene rol 5 (probablemente un rol específico que tiene permiso)
             if (Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'no tienes permiso para acceder']);
             }
 
+            // Crea un nuevo registro de apoyo en la base de datos
             $apoyo = ApoyoEmpresa::create([
                 'documento' => $request->documento,
                 'nombre' => $request->nombre,
@@ -52,10 +55,19 @@ class Apoyo_por_EmpresaController extends Controller
                 'email' => $request->email,
                 'id_tipo_documento' => $request->id_tipo_documento,
                 'id_empresa' => $request->id_empresa,
-
             ]);
+
+            // Devuelve un mensaje de éxito con un código de estado 201
             return response()->json(['message' => 'Apoyo creado con exito'], 201);
+            
         } catch (Exception $e) {
+            // Manejo de excepciones en caso de error
+            Log::error('Error al crear el apoyo: ' . $e->getMessage(), [
+                'exception' => $e,
+                'request_data' => $request->all(), // Log del contenido del request para depuración
+                'user_id' => Auth::id(), // Para saber qué usuario realizó la acción
+            ]);
+
             return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -66,14 +78,16 @@ class Apoyo_por_EmpresaController extends Controller
     public function getApoyosxEmpresa($id_empresa)
     {
         try {
-
+            // Verifica si el usuario tiene rol 5 (probablemente un rol específico que tiene permiso)
             if (Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'no tienes permiso para acceder']);
             }
 
-            $apoyos = ApoyoEmpresa::all()->where('id_empresa', $id_empresa);
+            // Obtiene todos los apoyos relacionados con la empresa especificada
+            $apoyos = ApoyoEmpresa::where('id_empresa', $id_empresa)->get(); // Cambiar all() por get()
             return response()->json($apoyos, 200);
         } catch (Exception $e) {
+            // Manejo de excepciones en caso de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -93,17 +107,20 @@ class Apoyo_por_EmpresaController extends Controller
     public function editarApoyo(Request $request, $documento)
     {
         try {
-
+            // Verifica si el usuario tiene rol 5 (probablemente un rol específico que tiene permiso)
             if (Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'no tienes permiso para acceder']);
             }
 
+            // Busca el apoyo por documento
             $apoyo = ApoyoEmpresa::where('documento', $documento);
 
+            // Verifica si se encontró el apoyo
             if (!$apoyo) {
                 return response()->json(['error' => 'Apoyo no encontrado'], 404);
             }
 
+            // Actualiza los datos del apoyo con la información del request
             $apoyo->update([
                 'documento' => $request->input('documento'),
                 'nombre' => $request->input('nombre'),
@@ -115,28 +132,34 @@ class Apoyo_por_EmpresaController extends Controller
                 'id_tipo_documento' => $request->input('id_tipo_documento'),
             ]);
 
+            // Retorna un mensaje de éxito
             return response()->json([
                 'message' => 'Apoyo editado exitosamente'
             ], 201);
         } catch (Exception $e) {
+            // Manejo de excepciones en caso de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
     public function getApoyoxDocumento($documento)
-    {
-        try {
-
-            if (Auth::user()->id_rol != 5) {
-                return response()->json(['error' => 'no tienes permiso para acceder']);
-            }
-
-            $apoyos = ApoyoEmpresa::all()->where('documento', $documento)->first();
-            return response()->json($apoyos, 200);
-        } catch (Exception $e) {
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+{
+    try {
+        // Verifica si el usuario tiene rol 5 para acceder a esta función
+        if (Auth::user()->id_rol != 5) {
+            return response()->json(['error' => 'no tienes permiso para acceder']);
         }
+
+        // Busca el apoyo en la base de datos utilizando el documento
+        $apoyos = ApoyoEmpresa::all()->where('documento', $documento)->first();
+
+        // Retorna el apoyo encontrado
+        return response()->json($apoyos, 200);
+    } catch (Exception $e) {
+        // Manejo de excepciones en caso de error durante la ejecución
+        return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
+}
 
     /**
      * Remove the specified resource from storage.

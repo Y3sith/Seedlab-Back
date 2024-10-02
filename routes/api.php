@@ -150,7 +150,7 @@ Route::group(
 
 //Reportes
 
-route::get('/exportar-formExcel/{idEmprendedor}/{documentoEmpresa?}', [ReportesController::class, 'procesarRespuestas']);
+route::get('/exportar-formExcel/{idEmprendedor}/{documentoEmpresa?}/{tipo_reporte}', [ReportesController::class, 'procesarRespuestas']);
 Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
 Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
 Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);

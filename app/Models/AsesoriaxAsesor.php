@@ -19,15 +19,19 @@ class AsesoriaxAsesor extends Model
     public $timestamps = false;
 
 
-    public function asesoria()
+    public function asesoria() 
     {
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla Asesoria.
+        // Utiliza 'id_asesoria' como clave foránea para establecer la conexión.
         return $this->belongsTo(Asesoria::class, 'id_asesoria');
     }
-
-    public function asesor()
+    
+    public function asesor() 
     {
+        // Esta relación muestra que el modelo actual está vinculado a un registro en la tabla Asesor.
+        // La columna 'id_asesor' se utiliza como clave foránea.
         return $this->belongsTo(Asesor::class, 'id_asesor');
-    }
+    }    
 
   
 

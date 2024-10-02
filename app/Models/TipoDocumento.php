@@ -18,6 +18,8 @@ class TipoDocumento extends Model
     public $timestamps = false;
 
     public function emprendedor(){
+        // Establece una relación de uno a muchos con el modelo 'Emprendedor'.
+        // Este modelo puede tener múltiples emprendedores asociados a través de la clave foránea 'id_tipo_documento'.
         return $this->hasMany(Emprendedor::class, 'id_tipo_documento');
     }
 }

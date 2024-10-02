@@ -9,28 +9,34 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Log;
 
 class EmpresaApiController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Muestra una lista empresas por emprendedor
      */
     public function index()
     {
-        /*muestras las empresas*/
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol !=2) {
+        // Verifica si el usuario autenticado tiene permiso para acceder a esta ruta.
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
+
+        // Obtiene todas las empresas de la base de datos.
         $empresa = Empresa::all();
+
+        // Devuelve la lista de empresas en formato JSON.
         return response()->json($empresa);
     }
 
     public function obtenerEmpresasPorEmprendedor(Request $request)
     {
+        // Verifica si el usuario autenticado tiene el rol de emprendedor.
         if(Auth::user() -> id_rol !=5){
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
-        
+
         $docEmprendedor = $request->input('doc_emprendedor');
 
         // Obtener solo las empresas asociadas al emprendedor
@@ -40,6 +46,7 @@ class EmpresaApiController extends Controller
             ->where('i.documento', $docEmprendedor)
             ->get();
 
+        // Devuelve la lista de empresas en formato JSON.
         return response()->json($empresas);
     }
 
@@ -101,7 +108,6 @@ class EmpresaApiController extends Controller
                 'empresa.id_tipo_documento' => 'required|integer',
                 'empresa.id_departamento' => 'required|integer',
                 'empresa.id_municipio' => 'required|integer',
-                'empresa.id_emprendedor' => 'required|integer',
             ]);
 
             $empresaexiste = Empresa::where('documento', $request['empresa']['documento'])->first();
@@ -135,6 +141,8 @@ class EmpresaApiController extends Controller
                 }
             }
         } catch (\Exception $e) {
+            Log::error('Error al crear la empresa: ' . $e->getMessage(), ['exception' => $e]);
+
             return response()->json(['error' => $e->getMessage()], 500);
         }
 

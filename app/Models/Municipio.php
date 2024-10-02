@@ -24,14 +24,20 @@ class Municipio extends Model
 
     public function departamento()
     {
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla Departamento.
+        // Se establece una relación de muchos a uno, utilizando 'id_departamento' como clave foránea.
         return $this->belongsTo(Departamento::class, 'id_departamento');
     }
 
     public function emprendedor(){
+        // Esta relación indica que el modelo actual puede tener múltiples registros en la tabla Emprendedor.
+        // Se establece una relación de uno a muchos, usando 'id_municipio' como clave foránea.
         return $this->hasMany(Emprendedor::class, 'id_municipio');
     }
 
     public function empresa(){
+        // Esta relación indica que el modelo actual puede tener múltiples registros en la tabla Empresa.
+        // Se establece una relación de uno a muchos, usando 'id_municipio' como clave foránea.
         return $this->hasMany(Empresa::class, 'id_municipio');
     }
 

@@ -16,6 +16,8 @@ class Rol extends Model
     public $timestamps = false;
 
     public function autenticacion(){
+        // Esta relación indica que el modelo actual puede tener múltiples usuarios asociados.
+        // Se establece una relación de uno a muchos, donde el modelo actual es el "padre" y 'User' es el "hijo".
         return $this->hasMany(User::class);
     }
  }

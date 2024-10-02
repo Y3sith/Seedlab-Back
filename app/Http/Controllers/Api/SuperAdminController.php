@@ -19,20 +19,19 @@ use Illuminate\Support\Facades\Redis;
 class SuperAdminController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Actualiza la personalización del sistema para un superadmin específico.
+     * Solo el rol de superadmin (id_rol = 1) tiene acceso.
      */
-
-
-
     public function personalizacionSis(Request $request, $id)
     {
+        // Verifica si el usuario autenticado es superadmin; de lo contrario, devuelve un error de permisos.
         if (Auth::user()->id_rol != 1) {
             return response()->json([
                 'message' => 'No tienes permiso para acceder a esta ruta'
             ], 401);
         }
 
-        // Buscar la personalización existente
+        // Busca la personalización del sistema por ID.
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
         if (!$personalizacion) {
             return response()->json([
@@ -40,7 +39,7 @@ class SuperAdminController extends Controller
             ], 404);
         }
 
-        // Actualizar otros campos
+        // Actualiza los campos de personalización del sistema con los datos recibidos.
         $personalizacion->nombre_sistema = $request->input('nombre_sistema');
         $personalizacion->color_principal = $request->input('color_principal');
         $personalizacion->color_secundario = $request->input('color_secundario');
@@ -52,19 +51,19 @@ class SuperAdminController extends Controller
         $personalizacion->direccion = $request->input('direccion');
         $personalizacion->ubicacion = $request->input('ubicacion');
 
-        // Manejo de archivos
+        // Maneja la subida del archivo 'logo_footer'.
         if ($request->hasFile('logo_footer') && $request->file('logo_footer')->isValid()) {
             $logoFooterPath = $request->file('logo_footer')->store('public/logos');
-            // Genera la URL completa correctamente
             $personalizacion->logo_footer = asset('storage/logos/' . basename($logoFooterPath));
         }
 
+        // Maneja la subida y conversión de 'imagen_logo' a formato WebP si es necesario.
         if ($request->hasFile('imagen_logo') && $request->file('imagen_logo')->isValid()) {
             $file = $request->file('imagen_logo');
             $fileName = uniqid('logo_') . '.webp';
             $folder = 'logos';
             $path = "public/$folder/$fileName";
-        
+
             $extension = strtolower($file->getClientOriginalExtension());
             if ($extension === 'webp') {
                 // Si ya es WebP, simplemente mover el archivo
@@ -86,11 +85,16 @@ class SuperAdminController extends Controller
             $personalizacion->imagen_logo = asset('storage/' . $folder . '/' . $fileName);
         }
 
+        // Guarda los cambios en la base de datos.
         $personalizacion->save();
 
         return response()->json(['message' => 'Personalización del sistema actualizada correctamente'], 200);
     }
 
+    /**
+     * Crea una imagen a partir del archivo subido.
+     * Convierte diferentes tipos de imagen a un formato compatible.
+     */
     private function createImageFromFile($filePath)
     {
         $imageInfo = getimagesize($filePath);
@@ -100,6 +104,7 @@ class SuperAdminController extends Controller
 
         $mimeType = $imageInfo['mime'];
 
+        // Crea una imagen según el tipo MIME detectado.
         switch ($mimeType) {
             case 'image/jpeg':
                 return imagecreatefromjpeg($filePath);
@@ -116,8 +121,7 @@ class SuperAdminController extends Controller
 
     public function obtenerPersonalizacion($id)
     {
-
-        // Obtener la personalización desde la base de datos
+        //Obtiene la personalización del sistema por su ID.
         $personalizacion = PersonalizacionSistema::where('id', $id)->first();
 
         if (!$personalizacion) {
@@ -125,8 +129,7 @@ class SuperAdminController extends Controller
                 'message' => 'No se encontraron personalizaciones del sistema'
             ], 404);
         }
-
-        // Preparar la respuesta
+        //Devuelve los datos necesarios para ser utilizados en el frontend.
         $personalizacionParaCache = [
             'imagen_logo' => $personalizacion->imagen_logo ? $this->correctImageUrl($personalizacion->imagen_logo) : null,
             'nombre_sistema' => $personalizacion->nombre_sistema,
@@ -140,12 +143,12 @@ class SuperAdminController extends Controller
             'ubicacion' => $personalizacion->ubicacion,
         ];
 
-
-
         return response()->json($personalizacionParaCache, 200);
     }
 
-
+    /**
+     * Corrige la URL de una imagen, asegurándose de que sea accesible para mostrarse.
+     */
     private function correctImageUrl($path)
     {
         // Si ya es una URL completa, devuélvela directamente
@@ -166,29 +169,28 @@ class SuperAdminController extends Controller
         return url('storage/' . $path);
     }
 
-
-
-
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo superadmin, validando los datos ingresados.
      */
     public function crearSuperAdmin(Request $data)
     {
-
         try {
             $response = null;
             $statusCode = 200;
 
+            // Verifica si el usuario tiene permisos de superadmin.
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
+            // Valida que la contraseña tenga al menos 8 caracteres.
             if (strlen($data['password']) < 8) {
                 $statusCode = 400;
                 $response = 'La contraseña debe tener al menos 8 caracteres';
                 return response()->json(['message' => $response], $statusCode);
             }
 
+            // Si la direccion y la fecha de nacimiento estan vacias se colocan estos datos por defecto
             $direccion = $data->input('direccion', 'Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
 
@@ -198,6 +200,7 @@ class SuperAdminController extends Controller
                 $imagen_perfil = Storage::url($imagenPath);
             }
 
+            // Registra al superadmin utilizando un procedimiento almacenado.
             DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
                 $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
@@ -223,39 +226,49 @@ class SuperAdminController extends Controller
                     }
                 }
             });
+
             return response()->json(['message' => $response], $statusCode);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    /**
+     * Obtiene los datos del perfil de un superadmin, junto con la información de su ubicación.
+     */
     public function userProfileAdmin($id)
     {
         try {
+            // Verificar si el usuario autenticado no tiene el rol de SuperAdmin (rol_id 1)
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['message' => 'no tienes permiso para esta funcion']);
+                return response()->json(['message' => 'No tienes permiso para esta función']);
             }
+
+            // Consultar los datos del SuperAdmin con el ID proporcionado
+            // Se hace una unión (join) con las tablas 'municipios' y 'departamentos' para obtener nombres y relaciones geográficas
             $admin = SuperAdmin::where('superadmin.id', $id)
                 ->join('municipios', 'superadmin.id_municipio', '=', 'municipios.id')
                 ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
                 ->select(
-                    'superadmin.id',
-                    'superadmin.nombre',
-                    'superadmin.apellido',
-                    'superadmin.documento',
-                    'superadmin.id_tipo_documento',
-                    'superadmin.fecha_nac',
-                    'superadmin.imagen_perfil',
-                    'superadmin.direccion',
-                    'superadmin.celular',
-                    'superadmin.genero',
-                    'superadmin.id_municipio',
-                    'municipios.nombre as municipio_nombre',
-                    'departamentos.name as departamento_nombre',
-                    'departamentos.id as id_departamento',
-                    'superadmin.id_autentication'
+                    'superadmin.id', // ID del SuperAdmin
+                    'superadmin.nombre', // Nombre del SuperAdmin
+                    'superadmin.apellido', // Apellido del SuperAdmin
+                    'superadmin.documento', // Documento de identificación
+                    'superadmin.id_tipo_documento', // Tipo de documento
+                    'superadmin.fecha_nac', // Fecha de nacimiento
+                    'superadmin.imagen_perfil', // URL de la imagen de perfil
+                    'superadmin.direccion', // Dirección
+                    'superadmin.celular', // Número de celular
+                    'superadmin.genero', // Género
+                    'superadmin.id_municipio', // ID del municipio
+                    'municipios.nombre as municipio_nombre', // Nombre del municipio
+                    'departamentos.name as departamento_nombre', // Nombre del departamento
+                    'departamentos.id as id_departamento', // ID del departamento
+                    'superadmin.id_autentication' // ID de autenticación
                 )
-                ->first();
+                ->first(); // Obtener el primer resultado
 
+            // Retornar un arreglo con los datos del SuperAdmin, transformando algunos campos si es necesario
             return [
                 'id' => $admin->id,
                 'nombre' => $admin->nombre,
@@ -263,71 +276,82 @@ class SuperAdminController extends Controller
                 'documento' => $admin->documento,
                 'id_tipo_documento' => $admin->id_tipo_documento,
                 'fecha_nac' => $admin->fecha_nac,
-                'imagen_perfil' => $admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
+                'imagen_perfil' => $admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null, // Si tiene imagen de perfil, corregir la URL
                 'direccion' => $admin->direccion,
                 'celular' => $admin->celular,
                 'genero' => $admin->genero,
                 'id_departamento' => $admin->id_departamento,
                 'id_municipio' => $admin->id_municipio,
-                'email' => $admin->auth->email,
-                'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo',
+                'email' => $admin->auth->email, // Obtener el email desde la relación 'auth'
+                'estado' => $admin->auth->estado == 1 ? 'Activo' : 'Inactivo', // Comprobar si el estado de autenticación es activo o inactivo
                 'id_auth' => $admin->id_autentication
             ];
         } catch (Exception $e) {
+            // Capturar cualquier excepción y retornar un error con el mensaje
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
+
     public function mostrarSuperAdmins(Request $request)
     {
         try {
+            // Verificar si el usuario autenticado tiene el rol de SuperAdmin (id_rol = 1)
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
+                return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401); // Retornar error si no tiene permiso
             }
 
-            $estado = $request->input('estado', 'Activo'); // Obtener el estado desde el request, por defecto 'Activo'
+            // Obtener el estado desde el request, con un valor por defecto de 'Activo'
+            $estado = $request->input('estado', 'Activo');
 
+            // Convertir el estado recibido en un valor booleano: 1 para 'Activo' y 0 para 'Inactivo'
             $estadoBool = $estado === 'Activo' ? 1 : 0;
 
+            // Obtener los IDs de los usuarios que tienen el rol de SuperAdmin (id_rol = 1) y el estado indicado (activo/inactivo)
             $adminVer = User::where('estado', $estadoBool)
                 ->where('id_rol', 1)
-                ->pluck('id');
+                ->pluck('id'); // Devuelve una lista de IDs de los usuarios con el estado y rol filtrado
 
+            // Obtener los SuperAdmins que coincidan con los IDs de autenticación obtenidos anteriormente
             $admins = SuperAdmin::whereIn('id_autentication', $adminVer)
-                ->with('auth:id,email,estado')
-                ->get(['id', 'nombre', 'apellido', 'id_autentication']);
+                ->with('auth:id,email,estado') // Cargar la relación 'auth' para obtener email y estado
+                ->get(['id', 'nombre', 'apellido', 'id_autentication']); // Seleccionar solo los campos necesarios
 
+            // Recorrer la lista de SuperAdmins y crear un nuevo array con datos detallados (incluyendo email y estado)
             $adminsConEstado = $admins->map(function ($admin) {
-                $user = User::find($admin->id_autentication);
+                $user = User::find($admin->id_autentication); // Obtener el usuario relacionado por id_autentication
 
                 return [
-                    'id' => $admin->id,
-                    'nombre' => $admin->nombre,
-                    'apellido' => $admin->apellido,
-                    'id_auth' => $user->id,
-                    'email' => $user->email,
-                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-
+                    'id' => $admin->id, // ID del SuperAdmin
+                    'nombre' => $admin->nombre, // Nombre del SuperAdmin
+                    'apellido' => $admin->apellido, // Apellido del SuperAdmin
+                    'id_auth' => $user->id, // ID de autenticación (relacionado con el User)
+                    'email' => $user->email, // Email del usuario autenticado
+                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo' // Convertir el estado en texto (Activo o Inactivo)
                 ];
             });
 
+            // Retornar la respuesta JSON con los datos de los SuperAdmins, incluyendo los flags JSON_UNESCAPED_UNICODE y JSON_NUMERIC_CHECK
             return response()->json($adminsConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
         } catch (Exception $e) {
+            // En caso de error, capturar la excepción y retornar un mensaje de error con el código 500
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
 
 
     /**
-     * Update the specified resource in storage.
+     * Actualiza un recurso especificado en el almacenamiento.
      */
     public function editarSuperAdmin(Request $request, $id)
     {
         try {
+            // Verificar si el usuario autenticado tiene el rol de SuperAdmin (id_rol = 1)
             if (Auth::user()->id_rol != 1) {
-                return response()->json(['message' => 'no tienes permiso para esta funcion']);
+                return response()->json(['message' => 'no tienes permiso para esta funcion']); // Retornar error si no tiene permisos
             }
 
+            // Lista de campos requeridos para la actualización del SuperAdmin
             $requiredFields = [
                 'nombre',
                 'apellido',
@@ -342,14 +366,20 @@ class SuperAdminController extends Controller
                 'celular',
                 'email'
             ];
+
+            // Verificar si todos los campos requeridos están presentes en la solicitud
             foreach ($requiredFields as $field) {
                 if (empty($request->input($field))) {
-                    return response()->json(['message' => "Debes completar todos los campos requeridos."], 400);
+                    return response()->json(['message' => "Debes completar todos los campos requeridos."], 400); // Retornar error si algún campo falta
                 }
             }
 
+            // Buscar al SuperAdmin por su ID
             $admin = SuperAdmin::find($id);
+
+            // Si se encuentra al SuperAdmin
             if ($admin) {
+                // Actualizar los campos del SuperAdmin con los datos de la solicitud
                 $admin->nombre = $request->input('nombre');
                 $admin->apellido = $request->input('apellido');
                 $admin->documento = $request->input('documento');
@@ -360,50 +390,62 @@ class SuperAdminController extends Controller
                 $admin->id_departamento = $request->input('id_departamento');
                 $admin->id_municipio = $request->input('id_municipio');
                 $admin->fecha_nac = $request->input('fecha_nac');
+
+                // Verificar si el nuevo número de celular ya está en uso
                 if ($newCelular && $newCelular !== $admin->celular) {
-                    // Verificar si el nuevo email ya está en uso
                     $existing = SuperAdmin::where('celular', $newCelular)->first();
                     if ($existing) {
                         return response()->json(['message' => 'El numero de celular ya ha sido registrado anteriormente'], 402);
                     }
-                    $admin->celular = $newCelular;
+                    $admin->celular = $newCelular; // Actualizar el celular si no está registrado
                 }
 
+                // Verificar si se ha subido una nueva imagen de perfil
                 if ($request->hasFile('imagen_perfil')) {
-                    //Eliminar el logo anterior
+                    // Eliminar la imagen anterior
                     Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
-                    // Guardar el nuevo logo
+
+                    // Guardar la nueva imagen
                     $path = $request->file('imagen_perfil')->store('public/fotoPerfil');
-                    $admin->imagen_perfil = str_replace('public', 'storage', $path);
+                    $admin->imagen_perfil = str_replace('public', 'storage', $path); // Actualizar la ruta de la imagen
                 }
 
+                // Guardar los cambios del SuperAdmin
                 $admin->save();
 
+                // Verificar si el SuperAdmin tiene una relación con el modelo User (auth)
                 if ($admin->auth) {
                     $user = $admin->auth;
 
+                    // Actualizar la contraseña si se proporciona
                     $password = $request->input('password');
                     if ($password) {
-                        $user->password = Hash::make($request->input('password'));
+                        $user->password = Hash::make($password); // Encriptar y actualizar la contraseña
                     }
 
+                    // Verificar si el nuevo correo electrónico ya está en uso
                     $newEmail = $request->input('email');
                     if ($newEmail && $newEmail !== $user->email) {
-                        // Verificar si el nuevo email ya está en uso
                         $existingUser = User::where('email', $newEmail)->first();
                         if ($existingUser) {
                             return response()->json(['message' => 'El correo electrónico ya ha sido registrado anteriormente'], 400);
                         }
-                        $user->email = $newEmail;
+                        $user->email = $newEmail; // Actualizar el email si no está registrado
                     }
+
+                    // Actualizar el estado del usuario (activo o inactivo)
                     $user->estado = $request->input('estado');
-                    $user->save();
+                    $user->save(); // Guardar los cambios en el modelo User
                 }
+
+                // Respuesta exitosa indicando que el SuperAdmin ha sido actualizado correctamente
                 return response()->json(['message' => 'Superadministrador actualizado correctamente', $admin], 200);
             } else {
+                // Si no se encuentra el SuperAdmin, retornar error 404
                 return response()->json(['message' => 'Superadministrador no encontrado'], 404);
             }
         } catch (Exception $e) {
+            // Capturar cualquier excepción y retornar un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -442,7 +484,7 @@ class SuperAdminController extends Controller
 
             // Guardar los cambios
             $personalizacion->save();
-            
+
 
             return response()->json([
                 'message' => 'Personalización restaurada correctamente',
@@ -458,16 +500,21 @@ class SuperAdminController extends Controller
 
     public function listarAliados()
     {
-
         try {
+            // Verifica si el usuario autenticado tiene uno de los roles permitidos (1, 3 o 4)
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
-                return response()->json(['message' => 'No tienes permiso para esta funcion'], 400);
+                return response()->json(['message' => 'No tienes permiso para esta funcion'], 400); // Retorna un error si no tiene permisos
             }
+
+            // Consulta los aliados que tienen el estado '1' (activo)
             $aliados = Aliado::whereHas('auth', function ($query) {
-                $query->where('estado', '1');
-            })->get(['id', 'nombre']);
+                $query->where('estado', '1'); // Filtra aliados cuyo estado sea activo
+            })->get(['id', 'nombre']); // Obtiene solo los campos 'id' y 'nombre' de los aliados activos
+
+            // Retorna la lista de aliados en formato JSON con código de estado 200 (éxito)
             return response()->json($aliados, 200);
         } catch (Exception $e) {
+            // Si ocurre un error, lo captura y devuelve un mensaje de error con un código de estado 401
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
     }

@@ -26,6 +26,8 @@ class PersonalizacionSistema extends Model
     ];
 
     public function superadmins(){
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla Superadmin.
+        // Se establece una relación de muchos a uno, utilizando 'id_superadmin' como clave foránea.
         return $this->belongsTo(Superadmin::class, 'id_superadmin');
     }
 

@@ -22,11 +22,14 @@ class EmprendedorApiController extends Controller
      */
     public function index()
     {
-
+        // Verifica si el usuario autenticado no tiene el rol de emprendedor 
         if (Auth::user()->id_rol = !5) {
             return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
         }
+        // Obtiene todos los registros de emprendedores de la base de datos
         $emprendedor = Emprendedor::all();
+
+        // Devuelve la lista de emprendedores en formato JSON
         return response()->json($emprendedor);
     }
 
@@ -37,20 +40,26 @@ class EmprendedorApiController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Muestra las empresas asociadas a un emprendedor específico.
      */
     public function show($id_emprendedor)
     {
-        /* Muestra las empresas asociadas por el emprendedor */
+        // Verifica si el usuario autenticado tiene el rol de emprendedor.
         if (Auth::user()->id_rol != 5) {
             return response()->json(["message" => "No tienes permisos para acceder a esta ruta"], 401);
         }
+
+        // Obtiene las empresas asociadas al emprendedor.
         $empresa = Empresa::where('id_emprendedor', $id_emprendedor)
             ->select('documento', 'nombre', 'correo', 'direccion', 'id_emprendedor')
             ->paginate();
+
+        // Verifica si no se encontraron empresas.
         if ($empresa->isEmpty()) {
             return response()->json(["message" => "Empresa no encontrada"], 404);
         }
+
+        // Devuelve la lista de empresas en formato JSON.
         return response()->json($empresa->items(), 200);
     }
 
@@ -149,7 +158,6 @@ class EmprendedorApiController extends Controller
         }
         //Se busca emprendedor por documento
         $emprendedor = Emprendedor::find($documento);
-        //dd($emprendedor);
         if (!$emprendedor) {
             return response()->json([
                 'message' => 'Emprendedor no encontrado',

@@ -31,15 +31,17 @@ class NivelesController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crea un nuevo nivel en la base de datos.
      */
     public function store(Request $request)
 {
     try {
+        // Verifica si el usuario autenticado tiene permiso para crear niveles.
         if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
             return response()->json(['error' => 'No tienes permisos para crear niveles'], 401);
         }
 
+        // Comprueba si ya existe un nivel con el mismo nombre para la actividad dada.
         $existingNivel = Nivel::where('nombre', $request->nombre)
             ->where('id_actividad', $request->id_actividad)
             ->first();
@@ -48,35 +50,43 @@ class NivelesController extends Controller
             return response()->json(['message' => 'Ya existe un nivel con este nombre para esta actividad'], 422);
         }
 
+        // Inicializa las variables para asesor y actividad.
         $asesor = null;
         $actividad = null;
 
+        // Busca el asesor si se proporciona un id_asesor.
         if ($request->id_asesor) {
             $asesor = Asesor::find($request->id_asesor);
         }
 
+        // Busca la actividad si se proporciona un id_actividad.
         if ($request->id_actividad) {
             $actividad = Actividad::find($request->id_actividad);
         }
 
+        // Si la actividad no se encuentra, devuelve un error.
         if (!$actividad) {
             return response()->json(['message' => 'No se pudo crear el nivel debido a que la actividad no fue encontrada'], 422);
         }
 
+        // Crea un nuevo nivel con los datos proporcionados.
         $niveles = Nivel::create([
             'nombre' => $request->nombre,
             'id_asesor' => $request->id_asesor,
             'id_actividad' => $request->id_actividad,
         ]);
 
+        // Si hay un asesor asociado y tiene un correo electrónico, envía una notificación.
         if ($asesor && $asesor->auth && $asesor->auth->email) {
             $nombreActividad = $actividad->nombre;
             $nombreniveles = $niveles->nombre;
             Mail::to($asesor->auth->email)->send(new NotificacionesActividadAsesor($nombreActividad, $nombreniveles, $asesor->nombre));
         }
 
+        // Devuelve una respuesta indicando que el nivel fue creado con éxito.
         return response()->json(['message' => 'Nivel creado con éxito', 'nivel' => $niveles], 201);
     } catch (Exception $e) {
+        // Captura cualquier excepción y devuelve un mensaje de error.
         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
     }
 }
@@ -105,7 +115,7 @@ class NivelesController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 3 && Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permisos '], 401);
             }
-            $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre','id_asesor')->get();
+            $nivel = Nivel::where('id_actividad', $id)->select('id', 'nombre', 'id_asesor')->get();
             return response()->json($nivel);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -122,29 +132,29 @@ class NivelesController extends Controller
             if (Auth::user()->id_rol != 4) {
                 return response()->json(['message' => 'No tienes permisos '], 401);
             }
-             // Filtrar los niveles por id_actividad y id_asesor
-        $niveles = Nivel::where('id_actividad', $id_actividad)
-        ->where('id_asesor', $id_asesor)
-        ->with('asesor:id,nombre') // Incluimos el nombre del asesor en la respuesta
-        ->get();
+            // Filtrar los niveles por id_actividad y id_asesor
+            $niveles = Nivel::where('id_actividad', $id_actividad)
+                ->where('id_asesor', $id_asesor)
+                ->with('asesor:id,nombre') // Incluimos el nombre del asesor en la respuesta
+                ->get();
 
-    // Verificar si se encontraron niveles
-    if ($niveles->isEmpty()) {
-        return response()->json(['error' => 'No se encontraron niveles para esta actividad y asesor'], 404);
-    }
+            // Verificar si se encontraron niveles
+            if ($niveles->isEmpty()) {
+                return response()->json(['error' => 'No se encontraron niveles para esta actividad y asesor'], 404);
+            }
 
-    // Formatear la respuesta
-    $respuesta = $niveles->map(function ($nivel) {
-        return [
-            'id' => $nivel->id,
-            'nombre' => $nivel->nombre,
-            'id_asesor'=> $nivel->id_asesor,
-            'asesor' => $nivel->asesor->nombre ?? 'Sin asesor',
-        ];
-    });
+            // Formatear la respuesta
+            $respuesta = $niveles->map(function ($nivel) {
+                return [
+                    'id' => $nivel->id,
+                    'nombre' => $nivel->nombre,
+                    'id_asesor' => $nivel->id_asesor,
+                    'asesor' => $nivel->asesor->nombre ?? 'Sin asesor',
+                ];
+            });
 
-    // Retornar la respuesta en formato JSON
-    return response()->json($respuesta);
+            // Retornar la respuesta en formato JSON
+            return response()->json($respuesta);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
@@ -166,7 +176,7 @@ class NivelesController extends Controller
     {
         //Edita solo el asesor
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol !=3) {
+            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "no estas autorizado para editar"], 401);
             }
             $niveles = Nivel::find($id);

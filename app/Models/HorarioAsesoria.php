@@ -23,6 +23,8 @@ class HorarioAsesoria extends Model
 
     public function asesoria()
     {
+        // Esta relación indica que el modelo actual pertenece a un registro en la tabla Asesoria.
+        // Se establece una relación de muchos a uno, usando 'id_asesoria' como clave foránea.
         return $this->belongsTo(Asesoria::class, 'id_asesoria');
     }
 

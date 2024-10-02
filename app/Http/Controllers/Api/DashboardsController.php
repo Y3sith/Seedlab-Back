@@ -17,14 +17,14 @@ use Illuminate\Support\Facades\Redis;
 
 class DashboardsController extends Controller
 {
-    
+    // Calcula el promedio de asesorías mensuales y anuales para un año específico
     public function averageAsesorias2024(Request $request)
     {
-        
+
 
         $year = $request->input('year', 2024); // Por defecto, 2024 si no se proporciona año
 
-        // cálculo mensual
+        // Cálculo mensual
         $averageAsesoriasByMonth = DB::table('asesoria')
             ->select(
                 DB::raw('MONTH(fecha) as mes'),
@@ -35,7 +35,7 @@ class DashboardsController extends Controller
             ->orderBy(DB::raw('MONTH(fecha)'))
             ->get();
 
-        //  cálculo anual
+        // Cálculo anual
         $averageTotal = DB::table('asesoria')
             ->selectRaw('AVG(asesoria_count) as average_asesorias')
             ->from(DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = ? GROUP BY doc_emprendedor) as asesoria_counts'))
@@ -48,7 +48,7 @@ class DashboardsController extends Controller
             'promedio_anual' => $averageTotal
         ];
 
-        
+
 
         return response()->json($result, 200);
     }
@@ -56,7 +56,7 @@ class DashboardsController extends Controller
 
     public function topAliados()
     {
-        
+
         // Consulta optimizada para obtener los top 5 aliados por número de asesorías
         $topAliados = Aliado::select('aliado.id', 'aliado.nombre') // Asegura que ambos campos están en el GROUP BY
             ->selectRaw('COUNT(asesoria.id) as asesoria')
@@ -66,7 +66,7 @@ class DashboardsController extends Controller
             ->take(5)
             ->get();
 
-       
+
         return response()->json($topAliados, 200);
     }
 
@@ -74,7 +74,7 @@ class DashboardsController extends Controller
 
     public function asesoriasAsignadasSinAsignar()
     {
-        
+
 
         // Una sola consulta para obtener ambos conteos
         $result = DB::table('asesoria')
@@ -84,26 +84,25 @@ class DashboardsController extends Controller
             )
             ->first();
 
-        
+
         return response()->json($result, 200);
     }
 
 
     public function conteoRegistrosAnioYMes()
     {
-        
-
+        // Realiza la consulta a la tabla de usuarios
         $averageMonthlyEmprendedor = DB::table('users')
             ->select(
-                DB::raw("MONTH(fecha_registro) as mes"),
-                DB::raw("COUNT(CASE WHEN id_rol = 5 THEN 1 END) as emprendedores"),
-                DB::raw("COUNT(CASE WHEN id_rol = 3 THEN 1 END) as aliados")
+                DB::raw("MONTH(fecha_registro) as mes"), // Extrae el mes de la fecha de registro
+                DB::raw("COUNT(CASE WHEN id_rol = 5 THEN 1 END) as emprendedores"), // Cuenta los emprendedores
+                DB::raw("COUNT(CASE WHEN id_rol = 3 THEN 1 END) as aliados") // Cuenta los aliados
             )
-            ->groupBy('mes')
-            ->orderBy('mes', 'ASC')
-            ->get();
+            ->groupBy('mes') // Agrupa los resultados por mes
+            ->orderBy('mes', 'ASC') // Ordena los meses de manera ascendente
+            ->get(); // Obtiene los resultados
 
-        
+        // Retorna la respuesta en formato JSON con los promedios mensuales
         return response()->json([
             'promedios' => $averageMonthlyEmprendedor,
         ]);
@@ -117,24 +116,13 @@ class DashboardsController extends Controller
                 return response()->json(['message' => 'No tienes permisos para acceder a esta función'], 404);
             }
 
-            $cacheKey = 'dashboard:emprendedorXdepartamento';
-            $cachedData = Redis::get($cacheKey);
-
-            if ($cachedData) {
-                return response()->json(json_decode($cachedData), 200);
-            }
-
             // Ajusta la consulta utilizando 'documento' en lugar de 'id'
-            $emprendedoresPorDepartamento = Emprendedor::join('municipios', 'emprendedor.id_municipio', '=', 'municipios.id')
-                ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+            $emprendedoresPorDepartamento = Emprendedor::leftJoin('municipios', 'emprendedor.id_municipio', '=', 'municipios.id')
+                ->leftJoin('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
                 ->select('departamentos.name as departamento', DB::raw('COUNT(emprendedor.documento) as total_emprendedores'))
                 ->groupBy('departamentos.id', 'departamentos.name')
                 ->get();
 
-            if (!$cachedData) {
-                Redis::set($cacheKey, json_encode($emprendedoresPorDepartamento));
-                Redis::expire($cacheKey, 3600);
-            }
 
             return response()->json($emprendedoresPorDepartamento);
         } catch (Exception $e) {
@@ -207,7 +195,7 @@ class DashboardsController extends Controller
     public function generos() //contador de cuantos usuarios son mujer/hombres u otros
     {
         try {
-            
+
             $generos = DB::table('emprendedor')
                 ->select('genero', DB::raw('count(*) as total'))
                 ->whereIn('genero', ['Masculino', 'Femenino', 'Otro'])
@@ -233,7 +221,7 @@ class DashboardsController extends Controller
                 ['genero' => 'Otro', 'total' => $otro],
             ];
 
-           
+
             // Devuelve la respuesta con los datos calculados
             return response()->json($result, 200);
         } catch (Exception $e) {
@@ -241,64 +229,80 @@ class DashboardsController extends Controller
         }
     }
 
+
+    //Obtiene el total de asesorías por aliado para un año específico.
     public function asesoriasTotalesAliado(Request $request)
     {
         try {
+            // Verifica que el usuario tenga el rol adecuado para acceder a esta función
             if (Auth::user()->id_rol != 1) {
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
-            $cacheKey = 'dashboard:asesoriasTotalesAliado';
-            $cachedData = Redis::get($cacheKey);
 
+            $cacheKey = 'dashboard:asesoriasTotalesAliado'; // Clave para almacenar en caché
+            $cachedData = Redis::get($cacheKey); // Verifica si ya hay datos en caché
+
+            // Si hay datos en caché, se retornan
             if ($cachedData) {
                 return response()->json(json_decode($cachedData), 200);
             }
-            $anio = $request->input('fecha', date('Y'));
 
+            $anio = $request->input('fecha', date('Y')); // Obtiene el año de la solicitud, por defecto el actual
+
+            // Consulta para obtener el total de asesorías por aliado en el año especificado
             $asesoriasporaliado = Asesoria::whereYear('fecha', $anio)
                 ->join('aliado', 'asesoria.id_aliado', '=', 'aliado.id')
                 ->select('aliado.nombre', DB::raw('COUNT(asesoria.id) as total_asesorias'))
                 ->groupBy('aliado.id', 'aliado.nombre')
                 ->get();
 
+            // Almacena los resultados en caché si no estaban disponibles
             if (!$cachedData) {
                 Redis::set($cacheKey, json_encode($asesoriasporaliado));
-                Redis::expire($cacheKey, 3600);
+                Redis::expire($cacheKey, 3600); // Expira en una hora
             }
 
+            // Retorna los resultados en formato JSON
             return response()->json($asesoriasporaliado, 200);
         } catch (Exception $e) {
+            // Manejo de excepciones, retorna un error si ocurre un problema
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 401);
         }
     }
-
+    //Obtiene el número de asesorías realizadas por un aliado en cada mes del año actual.
     public function asesoriasXmes($id)
     {
         try {
+            // Verifica que el usuario tenga el rol adecuado para acceder a esta función
             if (Auth::user()->id_rol != 3) {
-                return response()->json(['message' => 'No tienes permisos para acceder a esta funciona.']);
+                return response()->json(['message' => 'No tienes permisos para acceder a esta función.']);
             }
-            $cacheKey = 'dashboard:asesoriasXmes' . $id;
-            $cachedData = Redis::get($cacheKey);
+            $cacheKey = 'dashboard:asesoriasXmes' . $id; // Clave de caché específica para el aliado
+            $cachedData = Redis::get($cacheKey); // Verifica si ya hay datos en caché
 
+            // Si hay datos en caché, se retornan
             if ($cachedData) {
                 return response()->json(json_decode($cachedData), 200);
             }
 
-            $ano = date('Y');
+            $ano = date('Y'); // Obtiene el año actual
+            // Consulta para obtener el número de asesorías por mes para el aliado
             $asesorias = Asesoria::where('id_aliado', $id)
                 ->whereYear('fecha', $ano)
-                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //selecciona el mes y luego cuenta las asesorias
-                ->groupBy('mes')
+                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //Selecciona el mes y cuenta las asesorías
+                ->groupBy('mes') // Agrupa por mes
                 ->get();
 
+            // Almacena los resultados en caché si no estaban disponibles
             if (!$cachedData) {
                 Redis::set($cacheKey, json_encode($asesorias));
-                Redis::expire($cacheKey, 3600);
+                Redis::expire($cacheKey, 3600); // Expira en una hora
             }
 
+            // Retorna los resultados en formato JSON
             return response()->json($asesorias);
         } catch (Exception $e) {
+            // Manejo de excepciones, retorna un error si ocurre un problema
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
@@ -396,5 +400,4 @@ class DashboardsController extends Controller
 
         return response()->json($result, 200);
     }
-
 }

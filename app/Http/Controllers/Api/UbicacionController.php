@@ -14,7 +14,7 @@ class UbicacionController extends Controller
         $departamentos = Departamento::select('id', 'name')->get();
         return response()->json($departamentos, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
     }
-
+    //Funcion para traer los municipios del departamento selecionado
     public function listar_munxdep(Request $request)
     {
         // Obtener el ID del departamento del request y convertirlo a entero
@@ -38,7 +38,3 @@ class UbicacionController extends Controller
 
 
 }
-
-// ejemplo de usar el listar municipios por departamento
-// http://127.0.0.1:8000/api/mun/?dep_name=Nariño
-// en postamn llegas y le pones donde dice key: dep:name y en value el nombre del departamento

@@ -23,6 +23,8 @@ class Banner extends Model
     public $timestamps = false;
 
     public function aliado(){
+        // Esta relación indica que el modelo actual puede tener múltiples registros en la tabla Aliado.
+        // Se establece la conexión utilizando 'id_aliado' como clave foránea.
         return $this->hasMany(Aliado::class, 'id_aliado');
     }
 }

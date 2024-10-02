@@ -9,7 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Redis;// Agregar esta línea
+use Illuminate\Support\Facades\Redis; // Agregar esta línea
 
 
 class RespuestasApiController extends Controller
@@ -36,15 +36,17 @@ class RespuestasApiController extends Controller
      */
     public function show(string $id)
     {
+        // Carga la sección junto con sus preguntas, subpreguntas y respuestas relacionadas.
         $seccion = Seccion::with(['preguntas.subpreguntas.respuestas', 'preguntas.respuestas'])
             ->where('id', $id)
             ->first();
 
+        // Verifica si la sección existe; si no, retorna un mensaje de error.
         if (!$seccion) {
             return response()->json(['message' => 'Seccion no encontrada'], 404);
         }
 
-
+        // Retorna la sección en formato JSON con un código de estado 200.
         return response()->json($seccion, 200);
     }
 
@@ -120,7 +122,8 @@ class RespuestasApiController extends Controller
             ->first();
 
         if ($segundaRespuesta) {
-            return response()->json(['contador' => 2], 200);
+            // Ya se ha llenado dos veces
+            return response()->json(['contador' => 3, 'message' => 'Formulario completado dos veces'], 403);
         }
 
         // Si ya se llenó la primera vez pero no la segunda
@@ -131,18 +134,23 @@ class RespuestasApiController extends Controller
 
 
 
+
     public function getAnswers($id_empresa)
     {
+        // Busca las respuestas en la tabla "Respuesta" donde el campo "id_empresa" coincide con el ID proporcionado
         $respuestas = Respuesta::where('id_empresa', $id_empresa)->first();
 
+        // Si no se encuentran respuestas para esa empresa, devolver un mensaje de error en formato JSON con un código de estado 404 (no encontrado)
         if (!$respuestas) {
             return response()->json([
-                'message' => 'No se encontraron respuestas para esta empresa'
+                'message' => 'No se encontraron respuestas para esta empresa' // Mensaje de que no se encontraron respuestas
             ], 404);
         }
 
+        // Si se encuentran respuestas, decodificar el campo 'respuestas_json' que contiene las respuestas en formato JSON
+        // y devolverlo en la respuesta con un código de estado 200 (éxito)
         return response()->json([
-            'respuestas' => json_decode($respuestas->respuestas_json)
+            'respuestas' => json_decode($respuestas->respuestas_json) // Decodificar el JSON de las respuestas
         ], 200);
     }
 
