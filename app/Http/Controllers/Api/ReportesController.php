@@ -222,6 +222,7 @@ class ReportesController extends Controller
                         'empresa.correo',
                         'empresa.fecha_registro',
                         'emprendedor.nombre',
+                        'emprendedor.documento as id_emprendedor',
                         'emprendedor.apellido',
                         'emprendedor.celular as celular_emprendedor'
                     )
@@ -312,14 +313,13 @@ class ReportesController extends Controller
     //Procesa las respuestas de un emprendedor y genera un reporte en Excel.
     public function procesarRespuestas($idEmprendedor, $documentoEmpresa = null, $tipo_Reporte = null)
     {
-
-    if ($tipo_Reporte == "1") {
-        $respuesta = "verform_pr";  // Asignar valor a la variable
-        $tipo_reporte = "primera_vez";
-    } else {
-        $respuesta = "verform_se";  // Asignar otro valor en caso contrario
-        $tipo_reporte = "segunda_vez";
-    }
+        if ($tipo_Reporte == "1") {
+            $respuesta = "verform_pr";  // Asignar valor a la variable
+            $tipo_reporte = "primera_vez";
+        } else {
+            $respuesta = "verform_se";  // Asignar otro valor en caso contrario
+            $tipo_reporte = "segunda_vez";
+        }
 
         // Obtener las respuestas uniendo las tablas 'respuesta', 'empresa' y 'puntaje'.
         $query = DB::table('respuesta')
@@ -340,16 +340,19 @@ class ReportesController extends Controller
                 'puntaje.segunda_vez'
             );
 
-
         // Filtrar por documento de empresa si se proporciona.
         if (!is_null($documentoEmpresa)) {
             $query->where('empresa.documento', $documentoEmpresa);
         }
 
-
-
         // Ejecutar la consulta y obtener las respuestas.
         $respuestas = $query->get();
+        
+        // Verifica si no se encontraron respuestas
+        if ($respuestas->isEmpty()) {
+            Log::info('No se encontraron datos para el emprendedor: ' . $idEmprendedor);
+            return response()->json(['message' => 'No se ha realizado la encuesta para esta empresa.'], 404);
+        }
 
         // Obtener todos los id_pregunta y id_subpregunta únicos del JSON.
         $idsPreguntas = [];
@@ -431,10 +434,10 @@ class ReportesController extends Controller
         $export = new SeccionExport($resultados);
 
         Log::info('Exportación creada, enviando archivo...');
-
         // Devolver el archivo Excel.
         return Excel::download($export, 'Reporte_Formulario.xlsx');
     }
+
 
 
 
@@ -471,7 +474,7 @@ class ReportesController extends Controller
         // Ejecutar la consulta y obtener los resultados.
         $resultados = $query->get();
 
-        if($resultados->isEmpty()){
+        if ($resultados->isEmpty()) {
             return response()->json(['error' => 'No se encontraron resultados'], 404);
         }
 

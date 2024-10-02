@@ -24,6 +24,12 @@ class SeccionExport implements WithMultipleSheets
 
     public function sheets(): array
     {
+        // Verifica si hay resultados
+        if (empty($this->resultados)) {
+            // Puedes lanzar una excepción o manejarlo de alguna otra manera
+            throw new \Exception('No hay datos disponibles para exportar');
+        }
+
         $sheets = []; // Inicializa un array para almacenar las hojas
 
         // Agrupar los resultados por sección
