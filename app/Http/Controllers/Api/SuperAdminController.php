@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NotificacionCrearUsuario;
 use Illuminate\Support\Facades\Auth;
 use App\Models\SuperAdmin;
 use Illuminate\Http\Request;
@@ -15,6 +16,7 @@ use Exception;
 use Illuminate\Support\Facades\Storage;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Redis;
+use Illuminate\Support\Facades\Mail;
 
 class SuperAdminController extends Controller
 {
@@ -195,6 +197,7 @@ class SuperAdminController extends Controller
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
 
             $imagen_perfil = null;
+            $rol = null;
             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
                 $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
                 $imagen_perfil = Storage::url($imagenPath);
@@ -221,8 +224,18 @@ class SuperAdminController extends Controller
 
                 if (!empty($results)) {
                     $response = $results[0]->mensaje;
+                    
                     if ($response === 'El correo electrónico ya ha sido registrado anteriormente' || $response === 'El numero de celular ya ha sido registrado en el sistema') {
                         $statusCode = 400;
+                    }else{
+                        $email = $results[0]->email; 
+                        $rol = 'Super Admin';
+                        if ($email) {
+                            \Log::info("Intentando enviar correo a: " . $email);
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol));
+                        } else {
+                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                        }
                     }
                 }
             });

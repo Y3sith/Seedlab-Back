@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NotificacionCrearUsuario;
 use App\Models\Aliado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class AliadoApiController extends Controller
 {
@@ -364,14 +366,23 @@ class AliadoApiController extends Controller
                 ]);
 
                 if (empty($results)) {
-                    throw new \Exception('No se recibió respuesta del procedimiento almacenado');
+                    throw new Exception('No se recibió respuesta del procedimiento almacenado');
+                }else{
+                    $email = $results[0]->email; 
+                        $rol = 'Aliado';
+                        if ($email) {
+                            \Log::info("Intentando enviar correo a: " . $email);
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol));
+                        } else {
+                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                        }
                 }
 
                 $response = $results[0]->mensaje;
                 $aliadoId = $results[0]->id;
 
                 if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    throw new \Exception($response);
+                    throw new Exception($response);
                 }
 
                 // Procesar el banner
@@ -413,7 +424,7 @@ class AliadoApiController extends Controller
                 Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
 
                 return response()->json(['message' => 'Aliado creado exitosamente'], 201);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 Log::error('Error al crear aliado y banner:', ['message' => $e->getMessage()]);
                 return response()->json(['message' => $e->getMessage()], 400);
