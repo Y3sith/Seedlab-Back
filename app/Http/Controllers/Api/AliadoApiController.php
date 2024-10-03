@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NotificacionCrearUsuario;
 use App\Models\Aliado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Storage;
 use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Mail;
 
 class AliadoApiController extends Controller
 {
@@ -249,12 +251,6 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
-            if (strlen($data['password']) < 8) {
-                return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
-            }
-
-
-
             // Validación del banner
             if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
                 return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
@@ -277,7 +273,20 @@ class AliadoApiController extends Controller
             DB::beginTransaction();
 
             try {
+
+                $generateRandomPassword = function($length = 8) {
+                    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    $password = '';
+                    for ($i = 0; $i < $length; $i++) {
+                        $password .= $characters[rand(0, strlen($characters) - 1)];
+                    }
+                    return $password;
+                };
+                
+
                 $logoUrl = null;
+                $randomPassword = $generateRandomPassword();
+                $hashedPassword = Hash::make($randomPassword);
 
                 if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
                     $image = $data->file('logo');
@@ -359,19 +368,28 @@ class AliadoApiController extends Controller
                     $rutaMulti,
                     $data['urlpagina'],
                     $data['email'],
-                    Hash::make($data['password']),
+                    $hashedPassword,
                     $data['estado'] === 'true' ? 1 : 0,
                 ]);
 
                 if (empty($results)) {
-                    throw new \Exception('No se recibió respuesta del procedimiento almacenado');
-                }
+                    throw new Exception('No se recibió respuesta del procedimiento almacenado');
+                }else{
+                        $email = $results[0]->email; 
+                        $rol = 'Aliado';
+                        if ($email) {
+                            \Log::info("Intentando enviar correo a: " . $email);
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
+                        } else {
+                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                        }
+                    }
 
                 $response = $results[0]->mensaje;
                 $aliadoId = $results[0]->id;
 
                 if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    throw new \Exception($response);
+                    throw new Exception($response);
                 }
 
                 // Procesar el banner
@@ -413,7 +431,7 @@ class AliadoApiController extends Controller
                 Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
 
                 return response()->json(['message' => 'Aliado creado exitosamente'], 201);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 DB::rollBack();
                 Log::error('Error al crear aliado y banner:', ['message' => $e->getMessage()]);
                 return response()->json(['message' => $e->getMessage()], 400);
