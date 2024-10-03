@@ -15,11 +15,12 @@ class NotificacionCrearUsuario extends Mailable
     
     public $email;
     public $rol;
-    public function __construct($email, $rol)
+    public $mensajecontrasena;
+    public function __construct($email, $rol, $mensajecontrasena)
     {
         $this->email = $email;
         $this->rol = $rol;
-
+        $this->mensajecontrasena = $mensajecontrasena;
     }
 
     public function build()
@@ -29,7 +30,8 @@ class NotificacionCrearUsuario extends Mailable
         ->view('notificacion-nuevo-usuario')
         ->with([
             'email' => $this->email,
-            'rol' => $this->rol
+            'rol' => $this->rol,
+            'mensajecontrasena' => $this->mensajecontrasena
         ]);
  }
 }

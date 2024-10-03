@@ -75,8 +75,14 @@
     <div class="container">
         <h1>Nuevo {{ $rol }}</h1>
 
-        <p>¡Bienvenido al sistema, nuevo {{ $rol }}! Para ingresar, utiliza tu correo electrónico
-            <strong>{{ $email }}</strong> y tu contraseña es tu número de documento de identidad. Después de ingresar, es muy
+        <p>¡Bienvenido al sistema, nuevo {{ $rol }}! Estos son tus datos para ingresar al sistema:
+
+            <ul>
+                <li>Correo Electronico: <strong> {{ $email}} </strong> </li>
+                <li>Contraseña: <strong> {{ $mensajecontrasena }} </strong> </li>
+            </ul>
+            
+            Después de ingresar, es muy
             importante que cambies tu contraseña por una más segura. Para hacerlo, dirígete a la sección de tu perfil,
             donde encontrarás la opción para cambiar la contraseña.</p>
 

@@ -176,6 +176,8 @@ class SuperAdminController extends Controller
      */
     public function crearSuperAdmin(Request $data)
     {
+
+        
         try {
             $response = null;
             $statusCode = 200;
@@ -185,26 +187,31 @@ class SuperAdminController extends Controller
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
-            // Valida que la contraseña tenga al menos 8 caracteres.
-            if (strlen($data['password']) < 8) {
-                $statusCode = 400;
-                $response = 'La contraseña debe tener al menos 8 caracteres';
-                return response()->json(['message' => $response], $statusCode);
-            }
+            $generateRandomPassword = function($length = 8) {
+                $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                $password = '';
+                for ($i = 0; $i < $length; $i++) {
+                    $password .= $characters[rand(0, strlen($characters) - 1)];
+                }
+                return $password;
+            };
+            
+            $randomPassword = $generateRandomPassword();
+            $hashedPassword = Hash::make($randomPassword);
 
             // Si la direccion y la fecha de nacimiento estan vacias se colocan estos datos por defecto
             $direccion = $data->input('direccion', 'Dirección por defecto');
             $fecha_nac = $data->input('fecha_nac', '2000-01-01');
 
             $imagen_perfil = null;
-            $rol = null;
+
             if ($data->hasFile('imagen_perfil') && $data->file('imagen_perfil')->isValid()) {
                 $imagenPath = $data->file('imagen_perfil')->store('fotoPerfil', 'public');
                 $imagen_perfil = Storage::url($imagenPath);
             }
 
             // Registra al superadmin utilizando un procedimiento almacenado.
-            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil, $hashedPassword, $randomPassword) {
                 $results = DB::select('CALL sp_registrar_superadmin(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
@@ -218,7 +225,7 @@ class SuperAdminController extends Controller
                     $data['municipio'],
                     $fecha_nac,
                     $data['email'],
-                    Hash::make($data['password']),
+                    $hashedPassword,
                     $data['estado'],
                 ]);
 
@@ -232,7 +239,7 @@ class SuperAdminController extends Controller
                         $rol = 'Super Admin';
                         if ($email) {
                             \Log::info("Intentando enviar correo a: " . $email);
-                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol));
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
                         } else {
                             \Log::warning("No se pudo enviar el correo porque $email está vacío");
                         }

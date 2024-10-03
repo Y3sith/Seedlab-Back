@@ -251,12 +251,6 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
-            if (strlen($data['password']) < 8) {
-                return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
-            }
-
-
-
             // Validación del banner
             if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
                 return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
@@ -279,7 +273,20 @@ class AliadoApiController extends Controller
             DB::beginTransaction();
 
             try {
+
+                $generateRandomPassword = function($length = 8) {
+                    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                    $password = '';
+                    for ($i = 0; $i < $length; $i++) {
+                        $password .= $characters[rand(0, strlen($characters) - 1)];
+                    }
+                    return $password;
+                };
+                
+
                 $logoUrl = null;
+                $randomPassword = $generateRandomPassword();
+                $hashedPassword = Hash::make($randomPassword);
 
                 if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
                     $image = $data->file('logo');
@@ -361,22 +368,22 @@ class AliadoApiController extends Controller
                     $rutaMulti,
                     $data['urlpagina'],
                     $data['email'],
-                    Hash::make($data['password']),
+                    $hashedPassword,
                     $data['estado'] === 'true' ? 1 : 0,
                 ]);
 
                 if (empty($results)) {
                     throw new Exception('No se recibió respuesta del procedimiento almacenado');
                 }else{
-                    $email = $results[0]->email; 
+                        $email = $results[0]->email; 
                         $rol = 'Aliado';
                         if ($email) {
                             \Log::info("Intentando enviar correo a: " . $email);
-                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol));
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
                         } else {
                             \Log::warning("No se pudo enviar el correo porque $email está vacío");
                         }
-                }
+                    }
 
                 $response = $results[0]->mensaje;
                 $aliadoId = $results[0]->id;
