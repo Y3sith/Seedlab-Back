@@ -97,7 +97,7 @@ class AuthController extends Controller
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         // Se establece la expiración del token a 1 hora
-        $token->expires_at = Carbon::now()->addMinutes(3);
+        $token->expires_at = Carbon::now()->addHours(12);
         $token->save();
 
         // Obtener información adicional del usuario
