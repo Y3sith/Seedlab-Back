@@ -57,16 +57,15 @@ class DashboardsController extends Controller
     public function topAliados()
     {
 
-        // Consulta optimizada para obtener los top 5 aliados por número de asesorías
-        $topAliados = Aliado::select('aliado.id', 'aliado.nombre') // Asegura que ambos campos están en el GROUP BY
+        $topAliados = Aliado::select('aliado.id', 'aliado.nombre')
             ->selectRaw('COUNT(asesoria.id) as asesoria')
             ->leftJoin('asesoria', 'aliado.id', '=', 'asesoria.id_aliado')
-            ->groupBy('aliado.id', 'aliado.nombre')  // Agrupa por ambas columnas
+            ->groupBy('aliado.id', 'aliado.nombre')
             ->orderByDesc('asesoria')
             ->take(5)
             ->get();
 
-
+        // Retorna la lista de aliados con la cantidad correcta de asesorías
         return response()->json($topAliados, 200);
     }
 
