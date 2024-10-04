@@ -57,7 +57,7 @@ return new class extends Migration
             VALUES (p_nombre, p_apellido, p_documento, p_imagen_perfil, p_celular, p_genero,
             p_direccion, p_tipo_documento, p_departamento, p_id_municipio, p_fecha_nac,@last_inserted_id);
 
-            SELECT 'El orientador ha sido creado con exito' AS mensaje;
+            SELECT 'El orientador ha sido creado con exito' AS mensaje, p_correo AS email;
     END IF;            
 END");
     }

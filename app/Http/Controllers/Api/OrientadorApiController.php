@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NotificacionCrearUsuario;
 use App\Models\Aliado;
 use App\Models\Asesoria;
 use App\Models\Orientador;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class OrientadorApiController extends Controller
 {
@@ -34,17 +36,22 @@ class OrientadorApiController extends Controller
             $response = null;
             $statusCode = 200;
 
-            // Validar que la contraseña tenga al menos 8 caracteres.
-            if (strlen($data['password']) < 8) {
-                $statusCode = 400;
-                $response = 'La contraseña debe tener al menos 8 caracteres';
-                return response()->json(['message' => $response], $statusCode);
-            }
-
             // Verificar que el usuario tenga permisos para crear un orientador.
             if (Auth::user()->id_rol != 1) {
                 return response()->json(["error" => "No tienes permisos para crear un orientador"], 401);
             }
+
+            $generateRandomPassword = function($length = 8) {
+                $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                $password = '';
+                for ($i = 0; $i < $length; $i++) {
+                    $password .= $characters[rand(0, strlen($characters) - 1)];
+                }
+                return $password;
+            };
+            
+            $randomPassword = $generateRandomPassword();
+            $hashedPassword = Hash::make($randomPassword);
 
             // Obtener dirección y fecha de nacimiento, con valores por defecto si no se proporcionan.
             $direccion = $data->input('direccion', 'Dirección por defecto');
@@ -58,7 +65,7 @@ class OrientadorApiController extends Controller
             }
 
             // Realizar la operación de creación dentro de una transacción.
-            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil, $hashedPassword, $randomPassword) {
                 // Llamada al procedimiento almacenado para registrar el orientador.
                 $results = DB::select('CALL sp_registrar_orientador(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
@@ -73,7 +80,7 @@ class OrientadorApiController extends Controller
                     $data['municipio'],
                     $fecha_nac,
                     $data['email'],
-                    Hash::make($data['password']),
+                    $hashedPassword,
                     $data['estado'],
 
                 ]);
@@ -84,9 +91,19 @@ class OrientadorApiController extends Controller
                     // Verificar si hubo errores de duplicidad.
                     if ($response === 'El correo electrónico ya ha sido registrado anteriormente' || $response === 'El numero de celular ya ha sido registrado en el sistema') {
                         $statusCode = 400;
+                    }else{
+                        $email = $results[0]->email; 
+                        $rol = 'Orientador';
+                        if ($email) {
+                            \Log::info("Intentando enviar correo a: " . $email);
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
+                        } else {
+                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                        }
                     }
                 }
             });
+
 
             // Devolver la respuesta final.
             return response()->json(['message' => $response], $statusCode);

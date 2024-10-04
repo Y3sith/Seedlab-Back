@@ -44,7 +44,7 @@ return new class extends Migration
 
                             SELECT LAST_INSERT_ID() INTO v_id_aliado;
                             
-                            SELECT 'Se ha registrado exitosamente el aliado' AS mensaje,v_id_aliado AS id;
+                            SELECT 'Se ha registrado exitosamente el aliado' AS mensaje,v_id_aliado AS id, p_correo AS email;
                         END IF;
                     END IF;
         END");

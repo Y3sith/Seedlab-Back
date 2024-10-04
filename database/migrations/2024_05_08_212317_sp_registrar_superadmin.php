@@ -46,7 +46,7 @@ return new class extends Migration
          p_direccion, p_tipo_documento, p_departamento, p_id_municipio, p_fecha_nac, last_inserted_id );
 
 
-        SELECT 'Tu SuperAdmin ha sido creado con exito' AS mensaje;
+        SELECT 'Tu SuperAdmin ha sido creado con exito' AS mensaje, p_correo AS email;
     END IF;
 END");
     

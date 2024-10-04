@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Mail\NotificacionCrearUsuario;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Asesor;
 use App\Models\User;
@@ -13,6 +14,7 @@ use App\Models\HorarioAsesoria;
 use App\Models\TipoDocumento;
 use Exception;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Mail;
 
 class AsesorApiController extends Controller
 {
@@ -40,12 +42,17 @@ class AsesorApiController extends Controller
                 return response()->json(['message' => $response], $statusCode);
             }
 
-            // Verifica la longitud de la contraseña
-            if (strlen($data['password']) < 8) {
-                $statusCode = 400;
-                $response = 'La contraseña debe tener al menos 8 caracteres';
-                return response()->json(['message' => $response], $statusCode);
-            }
+            $generateRandomPassword = function($length = 8) {
+                $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+                $password = '';
+                for ($i = 0; $i < $length; $i++) {
+                    $password .= $characters[rand(0, strlen($characters) - 1)];
+                }
+                return $password;
+            };
+            
+            $randomPassword = $generateRandomPassword();
+            $hashedPassword = Hash::make($randomPassword);
 
             // Define valores por defecto
             $direccion = $data->input('direccion', 'Dirección por defecto');
@@ -59,7 +66,7 @@ class AsesorApiController extends Controller
             }
 
             // Transacción de base de datos
-            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil) {
+            DB::transaction(function () use ($data, &$response, &$statusCode, $direccion, $fecha_nac, $imagen_perfil, $hashedPassword, $randomPassword) {
                 $results = DB::select('CALL sp_registrar_asesor(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $data['apellido'],
@@ -74,7 +81,7 @@ class AsesorApiController extends Controller
                     $data['municipio'],
                     $fecha_nac,
                     $data['email'],
-                    Hash::make($data['password']),
+                    $hashedPassword,
                     $data['estado'],
                 ]);
                 // Verifica si hay resultados y maneja errores
@@ -82,6 +89,15 @@ class AsesorApiController extends Controller
                     $response = $results[0]->mensaje;
                     if ($response === 'El numero de celular ya ha sido registrado en el sistema' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
                         $statusCode = 400;
+                    }else{
+                        $email = $results[0]->email; 
+                        $rol = 'Asesor';
+                        if ($email) {
+                            \Log::info("Intentando enviar correo a: " . $email);
+                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
+                        } else {
+                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                        }
                     }
                 }
             });
@@ -164,7 +180,20 @@ class AsesorApiController extends Controller
                 }
 
                 $asesor->save();
-                return response()->json(['message' => 'Asesor actualizado correctamente'], 200);
+
+                if ($asesor->auth) {
+                    $user = $asesor->auth;
+                    $password = $request->input('password');
+                    if ($password) {
+                        if (strlen($password) < 8) {
+                            return response()->json(['message' => 'La contraseña debe tener al menos 8 caracteres'], 400);
+                        }
+                        $user->password =  Hash::make($request->input('password'));
+                    }
+                }
+                $user->save();
+
+            return response()->json(['message' => 'Asesor actualizado correctamente'], 200);
             }
             return response()->json(['message' => 'Asesor no encontrado'], 404);
         } catch (Exception $e) {
