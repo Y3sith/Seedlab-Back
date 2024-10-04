@@ -179,13 +179,45 @@ class NivelesController extends Controller
             if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 4 && Auth::user()->id_rol != 3) {
                 return response()->json(["error" => "no estas autorizado para editar"], 401);
             }
+
+            $asesor = null;
+            $actividad = null;
+
+        // Busca el asesor si se proporciona un id_asesor.
+        if ($request->id_asesor) {
+            $asesor = Asesor::find($request->id_asesor);
+        }
+
+        // Busca la actividad si se proporciona un id_actividad.
+        if ($request->id_actividad) {
+            $actividad = Actividad::find($request->id_actividad);
+        }
+
+        // Si la actividad no se encuentra, devuelve un error.
+        if (!$actividad) {
+            return response()->json(['message' => 'No se pudo crear el nivel debido a que la actividad no fue encontrada'], 422);
+        }
+        
             $niveles = Nivel::find($id);
+
+            $id_asesor_anterior = $niveles->id_asesor;
+
             if (!$niveles) {
                 return response()->json(["error" => "Nivel no encontrado"], 404);
             } else {
                 $niveles->nombre = $request->nombre;
                 $niveles->id_asesor = $request->id_asesor;
                 $niveles->update();
+
+                if ($id_asesor_anterior != $request->id_asesor) {
+                    $nuevoAsesor = Asesor::find($request->id_asesor);
+                    if ($nuevoAsesor && $nuevoAsesor->auth && $nuevoAsesor->auth->email && $actividad) {
+                        $nombreActividad = $actividad->nombre;
+                        $nombreNivel = $niveles->nombre;
+                        Mail::to($nuevoAsesor->auth->email)->send(new NotificacionesActividadAsesor($nombreActividad, $nombreNivel, $nuevoAsesor->nombre));
+                    }
+                }
+
                 return response(["messsaje" => "Nivel actualizado correctamente"], 200);
             }
         } catch (Exception $e) {

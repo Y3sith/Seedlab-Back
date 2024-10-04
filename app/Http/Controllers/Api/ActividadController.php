@@ -125,9 +125,11 @@ class ActividadController extends Controller
 
             // Envía notificación por email al aliado
             $destinatario->load('auth');
-            if ($destinatario->auth && $destinatario->auth->email) {
-                $nombreActividad = $actividad->nombre;
-                Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $destinatario->nombre));
+            if (Auth::user()->id_rol != 3){
+                if ($destinatario->auth && $destinatario->auth->email) {
+                    $nombreActividad = $actividad->nombre;
+                    Mail::to($destinatario->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $destinatario->nombre));
+                }
             }
 
             // Devuelve respuesta de éxito
@@ -182,6 +184,15 @@ class ActividadController extends Controller
                 'estado' => 'required'
             ]);
 
+            $destinatario = null;
+
+            // Busca el aliado correspondiente
+            $aliado = Aliado::find($request['id_aliado']);
+            if (!$aliado) {
+                return response()->json(['message' => 'Aliado no encontrado'], 404);
+            }
+            $destinatario = $aliado;
+
             // Obtener la actividad a editar
             $actividad = Actividad::find($id);
             if (!$actividad) {
@@ -195,6 +206,8 @@ class ActividadController extends Controller
                 $actividad->fuente = str_replace('public', 'storage', $paths);
             }
 
+            $id_aliado_anterior = $actividad->id_aliado;
+
 
             // Actualizar la actividad
             $actividad->update([
@@ -204,6 +217,14 @@ class ActividadController extends Controller
                 'id_aliado' => $validatedData['id_aliado'],
                 'estado' => $validatedData['estado']
             ]);
+
+            if ($id_aliado_anterior != $validatedData['id_aliado'] && Auth::user()->id_rol != 3) {
+                $nuevoAliado = Aliado::find($validatedData['id_aliado']);
+                if ($nuevoAliado && $nuevoAliado->auth && $nuevoAliado->auth->email) {
+                    $nombreActividad = $actividad->nombre;
+                    Mail::to($nuevoAliado->auth->email)->send(new NotificacionActividadAliado($nombreActividad, $nuevoAliado->nombre));
+                }
+            }
 
             return response()->json(['message' => 'Actividad actualizada con éxito', 'actividad' => $actividad], 200);
         } catch (Exception $e) {
