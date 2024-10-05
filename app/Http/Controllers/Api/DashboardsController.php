@@ -159,7 +159,14 @@ class DashboardsController extends Controller
 
 
         //CONTAR # DE ASESORES DE ESE ALIADO
-        $numAsesores = Asesor::where('id_aliado', $idAliado)->count();
+        $numAsesoresActivos = Asesor::where('id_aliado', $idAliado)
+            ->where('estado', 1)
+            ->count();
+
+        $numAsesoresInactivos = Asesor::where('id_aliado', $idAliado)
+            ->where('estado', 0)
+            ->count();
+
 
         $totalAsesorias = $finalizadas + $pendientes;
 
@@ -175,7 +182,8 @@ class DashboardsController extends Controller
                 'Porcentaje Finalizadas' => $porcentajeFinalizadas,
                 'Asesorias Asignadas' => $asignadas,
                 'Asesorias Sin Asignar' => $sinAsignar,
-                'Mis Asesores' => $numAsesores,
+                'Asesores Activos' => $numAsesoresActivos,
+                'Asesores Inactivos' => $numAsesoresInactivos,
             ]));
             Redis::expire($cacheKey, 3600);
         }
@@ -187,7 +195,8 @@ class DashboardsController extends Controller
             'Porcentaje Finalizadas' => $porcentajeFinalizadas,
             'Asesorias Asignadas' => $asignadas,
             'Asesorias Sin Asignar' => $sinAsignar,
-            'Mis Asesores' => $numAsesores,
+            'Asesores Activos' => $numAsesoresActivos,
+            'Asesores Inactivos' => $numAsesoresInactivos,
         ]);
     }
 
