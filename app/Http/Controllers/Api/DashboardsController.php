@@ -111,10 +111,7 @@ class DashboardsController extends Controller
     public function emprendedorXdepartamento()
     {
         try {
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
-                return response()->json(['message' => 'No tienes permisos para acceder a esta función'], 404);
-            }
-
+            
             // Ajusta la consulta utilizando 'documento' en lugar de 'id'
             $emprendedoresPorDepartamento = Emprendedor::leftJoin('municipios', 'emprendedor.id_municipio', '=', 'municipios.id')
                 ->leftJoin('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
@@ -133,12 +130,7 @@ class DashboardsController extends Controller
     //Aliado
     public function dashboardAliado($idAliado)
     {
-        $cacheKey = 'dashboard:aliado' . $idAliado;
-        $cachedData = Redis::get($cacheKey);
-
-        if ($cachedData) {
-            return response()->json(json_decode($cachedData), 200);
-        }
+       
         //CONTAR ASESORIASxALIADO SEGUN SU ESTADO (PENDIENTES O FINALIZADAS)
         $finalizadas = Asesoria::where('id_aliado', $idAliado)->whereHas('horarios', function ($query) {
             $query->where('estado', 'Finalizada');
@@ -160,11 +152,16 @@ class DashboardsController extends Controller
 
         //CONTAR # DE ASESORES DE ESE ALIADO
         $numAsesoresActivos = Asesor::where('id_aliado', $idAliado)
-            ->where('estado', 1)
+            ->whereHas('auth', function ($query) {
+                $query->where('estado', 1);
+            })
             ->count();
 
+
         $numAsesoresInactivos = Asesor::where('id_aliado', $idAliado)
-            ->where('estado', 0)
+            ->whereHas('auth', function ($query) {
+                $query->where('estado', 0);
+            })
             ->count();
 
 
@@ -173,20 +170,6 @@ class DashboardsController extends Controller
         // Calcular los porcentajes
         $porcentajeFinalizadas = $totalAsesorias > 0 ? round(($finalizadas / $totalAsesorias) * 100, 2) . '%' : 0;
         $porcentajePendientes = $totalAsesorias > 0 ? round(($pendientes / $totalAsesorias) * 100, 2) . '%' : 0;
-
-        if (!$cachedData) {
-            Redis::set($cacheKey, json_encode([
-                'Asesorias Pendientes' => $pendientes,
-                'Porcentaje Pendientes' => $porcentajePendientes,
-                'Asesorias Finalizadas' => $finalizadas,
-                'Porcentaje Finalizadas' => $porcentajeFinalizadas,
-                'Asesorias Asignadas' => $asignadas,
-                'Asesorias Sin Asignar' => $sinAsignar,
-                'Asesores Activos' => $numAsesoresActivos,
-                'Asesores Inactivos' => $numAsesoresInactivos,
-            ]));
-            Redis::expire($cacheKey, 3600);
-        }
 
         return response()->json([
             'Asesorias Pendientes' => $pendientes,
@@ -247,14 +230,6 @@ class DashboardsController extends Controller
                 return response()->json(['message' => 'no tienes permiso para esta funcion']);
             }
 
-            $cacheKey = 'dashboard:asesoriasTotalesAliado'; // Clave para almacenar en caché
-            $cachedData = Redis::get($cacheKey); // Verifica si ya hay datos en caché
-
-            // Si hay datos en caché, se retornan
-            if ($cachedData) {
-                return response()->json(json_decode($cachedData), 200);
-            }
-
             $anio = $request->input('fecha', date('Y')); // Obtiene el año de la solicitud, por defecto el actual
 
             // Consulta para obtener el total de asesorías por aliado en el año especificado
@@ -263,12 +238,6 @@ class DashboardsController extends Controller
                 ->select('aliado.nombre', DB::raw('COUNT(asesoria.id) as total_asesorias'))
                 ->groupBy('aliado.id', 'aliado.nombre')
                 ->get();
-
-            // Almacena los resultados en caché si no estaban disponibles
-            if (!$cachedData) {
-                Redis::set($cacheKey, json_encode($asesoriasporaliado));
-                Redis::expire($cacheKey, 3600); // Expira en una hora
-            }
 
             // Retorna los resultados en formato JSON
             return response()->json($asesoriasporaliado, 200);
@@ -285,15 +254,8 @@ class DashboardsController extends Controller
             if (Auth::user()->id_rol != 3) {
                 return response()->json(['message' => 'No tienes permisos para acceder a esta función.']);
             }
-            $cacheKey = 'dashboard:asesoriasXmes' . $id; // Clave de caché específica para el aliado
-            $cachedData = Redis::get($cacheKey); // Verifica si ya hay datos en caché
-
-            // Si hay datos en caché, se retornan
-            if ($cachedData) {
-                return response()->json(json_decode($cachedData), 200);
-            }
-
-            $ano = date('Y'); // Obtiene el año actual
+            
+                        $ano = date('Y'); // Obtiene el año actual
             // Consulta para obtener el número de asesorías por mes para el aliado
             $asesorias = Asesoria::where('id_aliado', $id)
                 ->whereYear('fecha', $ano)
@@ -301,13 +263,7 @@ class DashboardsController extends Controller
                 ->groupBy('mes') // Agrupa por mes
                 ->get();
 
-            // Almacena los resultados en caché si no estaban disponibles
-            if (!$cachedData) {
-                Redis::set($cacheKey, json_encode($asesorias));
-                Redis::expire($cacheKey, 3600); // Expira en una hora
-            }
-
-            // Retorna los resultados en formato JSON
+                        // Retorna los resultados en formato JSON
             return response()->json($asesorias);
         } catch (Exception $e) {
             // Manejo de excepciones, retorna un error si ocurre un problema
@@ -357,13 +313,7 @@ class DashboardsController extends Controller
 
     public function getDashboardData(Request $request)
     {
-        $cacheKey = 'dashboard:allData';
-        $cachedData = Redis::get($cacheKey);
-
-        if ($cachedData) {
-            return response()->json(json_decode($cachedData), 200);
-        }
-
+        
         // Se obtienen todos los datos necesarios
 
         // 1. Contar usuarios por rol y estado
@@ -402,9 +352,6 @@ class DashboardsController extends Controller
         //7. Generos Emprendedores
         $result['generosEmprendedores'] = $this->generos();
 
-        // Almacena el resultado en Redis
-        Redis::set($cacheKey, json_encode($result));
-        Redis::expire($cacheKey, 3600); // 1 hora de caché
 
         return response()->json($result, 200);
     }
