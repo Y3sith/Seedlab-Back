@@ -154,6 +154,17 @@ class RutaApiController extends Controller
         return response()->json($rutasActivas);
     }
 
+    public function rutasmejorado()
+    {
+        if (!in_array(Auth::user()->id_rol, [1, 2, 3, 5])) {
+            return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
+        }
+    
+        $rutasActivas = Ruta::where('estado', 1)->select('id')->get();
+    
+        return response()->json($rutasActivas);
+    }
+
     /**
      * Obtiene todas las rutas activas con sus actividades, niveles, lecciones y contenido.
      * 
@@ -427,9 +438,10 @@ class RutaApiController extends Controller
     {
         try {
             // Verificar si el usuario tiene uno de los roles permitidos (1, 5, 2), de lo contrario, devolver error 401 (No autorizado)
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 2) {
+            if (!in_array(Auth::user()->id_rol, [1, 2, 5])) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
+    
 
             // Obtener la ruta con sus actividades activas (estado 1), niveles, lecciones, contenido de las lecciones y aliado
             $ruta = Ruta::where('id', $id)
@@ -590,18 +602,15 @@ class RutaApiController extends Controller
     public function idRespuestas()
     {
         try {
-            // Verificar si el usuario tiene el rol 5, en caso contrario devolver un error
-            if (Auth::user()->id_rol != 5) {
-                return response()->json(['error' => 'Ocurrió un error al procesar']);
+            if (Auth::user()->id_rol !== 5) {
+                return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 403);
             }
 
-            // Obtener todas las respuestas y devolver solo los IDs en formato JSON
-            $respuestas = Respuesta::get('id');
+            $respuestas = Respuesta::select('id')->get();
 
             return response()->json($respuestas);
         } catch (Exception $e) {
-            // Capturar cualquier excepción y devolver un mensaje de error con código 500
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud'], 500);
         }
     }
 }
