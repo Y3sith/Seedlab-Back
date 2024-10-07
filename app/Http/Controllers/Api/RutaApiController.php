@@ -602,7 +602,7 @@ class RutaApiController extends Controller
     public function idRespuestas()
     {
         try {
-            if (Auth::user()->id_rol !== 5) {
+            if (Auth::user()->id_rol != 5 && Auth::user()->id_rol !=1 && Auth::user()->id_rol !=2) {
                 return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 403);
             }
 
