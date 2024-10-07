@@ -43,7 +43,7 @@ class AuthController extends Controller
 
         // Verificar si la contraseña proporcionada es correcta
         if (!Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Tu contraseña es incorrecta'], 401);
+            return response()->json(['message' => 'Tu contraseña es incorrecta'], 410);
         }
 
         // Verificar si el usuario tiene una contraseña temporal

@@ -608,21 +608,19 @@ class RutaApiController extends Controller
                 return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 403);
             }
     
-            // Buscar la empresa asociada al emprendedor
-            $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->first();
+            // Buscar todas las empresas asociadas al emprendedor
+            $empresas = Empresa::where('id_emprendedor', $id_emprendedor)->get();
     
-            if (!$empresa) {
-                return response()->json(['error' => 'No se encontró una empresa asociada a este emprendedor'], 404);
+            if ($empresas->isEmpty()) {
+                return response()->json(['error' => 'No se encontraron empresas asociadas a este emprendedor'], 404);
             }
     
-            // Verificar si la empresa tiene al menos una respuesta usando la relación
-            $respuestaExiste = $empresa->respuestas()->exists();
+            // Verificar si alguna de las empresas tiene al menos una respuesta
+            $tieneRespuestas = $empresas->contains(function ($empresa) {
+                return $empresa->respuestas()->exists();
+            });
     
-            if ($respuestaExiste) {
-                return response()->json(1); // Si existe una respuesta, devolver 1
-            } else {
-                return response()->json(0); // Si no hay respuestas, devolver 0
-            }
+            return response()->json($tieneRespuestas ? 1 : 0);
     
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud'], 500);
