@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
 use App\Models\ContenidoLeccion;
+use App\Models\Empresa;
 use App\Models\Respuesta;
 use App\Models\Ruta;
 use Carbon\Carbon;
@@ -599,16 +600,30 @@ class RutaApiController extends Controller
         }
     }
 
-    public function idRespuestas()
+    public function idRespuestas($id_emprendedor)
     {
         try {
-            if (Auth::user()->id_rol != 5 && Auth::user()->id_rol !=1 && Auth::user()->id_rol !=2) {
+            // Verificación de roles
+            if (!in_array(Auth::user()->id_rol, [1, 2, 5])) {
                 return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 403);
             }
-
-            $respuestas = Respuesta::select('id')->get();
-
-            return response()->json($respuestas);
+    
+            // Buscar la empresa asociada al emprendedor
+            $empresa = Empresa::where('id_emprendedor', $id_emprendedor)->first();
+    
+            if (!$empresa) {
+                return response()->json(['error' => 'No se encontró una empresa asociada a este emprendedor'], 404);
+            }
+    
+            // Verificar si la empresa tiene al menos una respuesta usando la relación
+            $respuestaExiste = $empresa->respuestas()->exists();
+    
+            if ($respuestaExiste) {
+                return response()->json(1); // Si existe una respuesta, devolver 1
+            } else {
+                return response()->json(0); // Si no hay respuestas, devolver 0
+            }
+    
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud'], 500);
         }
