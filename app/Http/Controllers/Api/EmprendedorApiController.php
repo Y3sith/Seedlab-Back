@@ -100,7 +100,7 @@ class EmprendedorApiController extends Controller
             'id_municipio' => 'required|max:255',
             'id_tipo_documento' => 'required|integer',
             'password' => 'nullable|string|min:8',
-            'imagen_perfil' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048'
+            'imagen_perfil' => 'nullable|image|mimes:jpeg,png,jpg,gif'
 
         ]);
 
