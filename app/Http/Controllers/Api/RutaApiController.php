@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Actividad;
 use App\Models\ContenidoLeccion;
+use App\Models\Empresa;
 use App\Models\Respuesta;
 use App\Models\Ruta;
 use Carbon\Carbon;
@@ -151,6 +152,17 @@ class RutaApiController extends Controller
         $rutasActivas = Ruta::where('estado', 1)->get();
 
         // Retorna las rutas activas en formato JSON
+        return response()->json($rutasActivas);
+    }
+
+    public function rutasmejorado()
+    {
+        if (!in_array(Auth::user()->id_rol, [1, 2, 3, 5])) {
+            return response()->json(['Error' => 'No tienes permiso para realizar esta accion'], 401);
+        }
+    
+        $rutasActivas = Ruta::where('estado', 1)->select('id')->get();
+    
         return response()->json($rutasActivas);
     }
 
@@ -427,9 +439,10 @@ class RutaApiController extends Controller
     {
         try {
             // Verificar si el usuario tiene uno de los roles permitidos (1, 5, 2), de lo contrario, devolver error 401 (No autorizado)
-            if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 5 && Auth::user()->id_rol != 2) {
+            if (!in_array(Auth::user()->id_rol, [1, 2, 5])) {
                 return response()->json(['error' => 'No tienes permisos para realizar esta acción'], 401);
             }
+    
 
             // Obtener la ruta con sus actividades activas (estado 1), niveles, lecciones, contenido de las lecciones y aliado
             $ruta = Ruta::where('id', $id)
@@ -587,21 +600,30 @@ class RutaApiController extends Controller
         }
     }
 
-    public function idRespuestas()
+    public function idRespuestas($id_emprendedor)
     {
         try {
-            // Verificar si el usuario tiene el rol 5, en caso contrario devolver un error
-            if (Auth::user()->id_rol != 5) {
-                return response()->json(['error' => 'Ocurrió un error al procesar']);
+            // Verificación de roles
+            if (!in_array(Auth::user()->id_rol, [1, 2, 5])) {
+                return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 403);
             }
-
-            // Obtener todas las respuestas y devolver solo los IDs en formato JSON
-            $respuestas = Respuesta::get('id');
-
-            return response()->json($respuestas);
+    
+            // Buscar todas las empresas asociadas al emprendedor
+            $empresas = Empresa::where('id_emprendedor', $id_emprendedor)->get();
+    
+            if ($empresas->isEmpty()) {
+                return response()->json(['error' => 'No se encontraron empresas asociadas a este emprendedor'], 404);
+            }
+    
+            // Verificar si alguna de las empresas tiene al menos una respuesta
+            $tieneRespuestas = $empresas->contains(function ($empresa) {
+                return $empresa->respuestas()->exists();
+            });
+    
+            return response()->json($tieneRespuestas ? 1 : 0);
+    
         } catch (Exception $e) {
-            // Capturar cualquier excepción y devolver un mensaje de error con código 500
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud'], 500);
         }
     }
 }

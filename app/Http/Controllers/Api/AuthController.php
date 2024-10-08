@@ -43,7 +43,7 @@ class AuthController extends Controller
 
         // Verificar si la contraseña proporcionada es correcta
         if (!Hash::check($request->password, $user->password)) {
-            return response()->json(['message' => 'Tu contraseña es incorrecta'], 401);
+            return response()->json(['message' => 'Tu contraseña es incorrecta'], 410);
         }
 
         // Verificar si el usuario tiene una contraseña temporal
@@ -96,7 +96,7 @@ class AuthController extends Controller
         // Crear un token de acceso para el usuario
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
-        // Se establece la expiración del token a 1 hora
+        // Se establece la expiración del token
         $token->expires_at = Carbon::now()->addHours(12);
         $token->save();
 

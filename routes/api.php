@@ -182,12 +182,13 @@ Route::group([
     Route::get('/mostrarRutaContenido/{id}', [RutaApiController::class, 'mostrarRutaConContenido'])->name('mostrarRutaContenido');
     Route::get('/rutasActivas', [RutaApiController::class, 'rutasActivas']);
     Route::get('/rutas', [RutaApiController::class, 'rutas']);
+    Route::get('/rutasmejorado', [RutaApiController::class, 'rutasmejorado']);
     Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
     Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
     Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
     Route::get('/actnividadxNivelAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxNivelAsesor']);
     Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
-    Route::get('/idRespuestasHeidy', [RutaApiController::class, 'idRespuestas']);
+    Route::get('/idRespuestasHeidy/{id_emprendedor}', [RutaApiController::class, 'idRespuestas']);
 
 });
 

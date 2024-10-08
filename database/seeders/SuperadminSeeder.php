@@ -33,7 +33,8 @@ class SuperadminSeeder extends Seeder
             "id_departamento"=>"27",
             "id_municipio"=>"866",
             "genero"=>"Masculino",
-            "celular"=>"3000000000",
+            "celular"=>"3000000000
+            ",
             "id_autentication"=> "1",
         ]); 
     }
