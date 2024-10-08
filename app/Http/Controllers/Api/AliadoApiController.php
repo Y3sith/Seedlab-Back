@@ -154,11 +154,10 @@ class AliadoApiController extends Controller
 
     public function traerBanners($status)
     {
-        // Obtener los banners de la base de datos
         $banners = Banner::where('estadobanner', $status)
             ->select('urlImagen', 'estadobanner')
             ->get();
-
+    
         $bannersTransformados = $banners->map(function ($banner) {
             return [
                 'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
@@ -166,9 +165,16 @@ class AliadoApiController extends Controller
             ];
         });
 
-        // Devolver los datos
+        Log::info('Banners Transformados:', $bannersTransformados->toArray());
+    
         return response()->json($bannersTransformados, 200);
     }
+    
+    private function correctImageUrl($path)
+    {
+        return asset($path);
+    }
+    
 
 
 
@@ -229,14 +235,14 @@ class AliadoApiController extends Controller
         }
     }
 
-    private function correctImageUrl($path)
-    {
-        // Elimina cualquier '/storage' inicial
-        $path = ltrim($path, '/storage');
+    // private function correctImageUrl($path)
+    // {
+    //     // Elimina cualquier '/storage' inicial
+    //     $path = ltrim($path, '/storage');
 
-        // Asegúrate de que solo haya un '/storage' al principio
-        return url('storage/' . $path);
-    }
+    //     // Asegúrate de que solo haya un '/storage' al principio
+    //     return url('storage/' . $path);
+    // }
 
     public function crearAliado(Request $data)
     {
@@ -378,10 +384,10 @@ class AliadoApiController extends Controller
                         $email = $results[0]->email; 
                         $rol = 'Aliado';
                         if ($email) {
-                            \Log::info("Intentando enviar correo a: " . $email);
+                            // \Log::info("Intentando enviar correo a: " . $email);
                             Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
                         } else {
-                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                            // \Log::warning("No se pudo enviar el correo porque $email está vacío");
                         }
                     }
 
