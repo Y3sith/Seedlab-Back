@@ -114,7 +114,7 @@ class EmpresaApiController extends Controller
 
             if ($empresaexiste) {
                 return response()->json([
-                    'error' => 'La empresa ya existe',
+                    'message' => 'Ya existe una empresa con este numero de documento',
                 ], 409);
             }
 
