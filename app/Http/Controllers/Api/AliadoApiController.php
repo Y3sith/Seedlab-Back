@@ -24,35 +24,53 @@ class AliadoApiController extends Controller
     /**
      * Display a listing of the resource.
      */
+
+
+    // public function traerAliadosActivos($status)
+    // {
+    //     // Obtiene los aliados que tienen un estado activo según el parámetro recibido
+
+    //     $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
+    //         // Carga las relaciones necesarias para optimizar las consultas
+    //         ->with(['tipoDato:id,nombre', 'auth'])
+    //         // Selecciona los campos relevantes de la tabla Aliado
+    //         ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
+    //         ->get();
+
+    //     // Transforma la colección de aliados para adaptarla a la respuesta deseada
+    //     $aliadosTransformados = $aliados->map(function ($aliado) {
+    //         return [
+    //             'id' => $aliado->id,
+    //             'nombre' => $aliado->nombre,
+    //             'descripcion' => $aliado->descripcion,
+    //             'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
+    //             'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
+    //             'urlpagina' => $aliado->urlpagina,
+    //             'tipo_dato' => $aliado->tipoDato,
+    //             'email' => $aliado->auth->email,
+    //             'estado' => $aliado->auth->estado
+    //         ];
+    //     });
+
+    //     // Devuelve la colección transformada como respuesta en formato JSON
+    //     return response()->json($aliadosTransformados);
+    // }
     public function traerAliadosActivos($status)
     {
-        // Obtiene los aliados que tienen un estado activo según el parámetro recibido
-
-        $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
-            // Carga las relaciones necesarias para optimizar las consultas
-            ->with(['tipoDato:id,nombre', 'auth'])
-            // Selecciona los campos relevantes de la tabla Aliado
+        $aliados = Aliado::whereHas('auth', function ($query) use ($status) {
+            $query->where('estado', $status);
+        })
+            ->with([
+                'tipoDato:id,nombre',
+                'auth:id,email,estado'
+            ])
             ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
             ->get();
 
-        // Transforma la colección de aliados para adaptarla a la respuesta deseada
-        $aliadosTransformados = $aliados->map(function ($aliado) {
-            return [
-                'id' => $aliado->id,
-                'nombre' => $aliado->nombre,
-                'descripcion' => $aliado->descripcion,
-                'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
-                'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
-                'urlpagina' => $aliado->urlpagina,
-                'tipo_dato' => $aliado->tipoDato,
-                'email' => $aliado->auth->email,
-                'estado' => $aliado->auth->estado
-            ];
-        });
-
-        // Devuelve la colección transformada como respuesta en formato JSON
-        return response()->json($aliadosTransformados);
+        // Devuelve los aliados directamente sin transformaciones
+        return response()->json($aliados);
     }
+
 
     public function traerAliadoxId($id)
     {
@@ -125,6 +143,10 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    /*
+    Esta funcion es para la vista de todos los aliados sin autorizacion del middleware, donde solo retorno las imagenes , la url y la ruta multi
+    */
 
     public function traerAliadosiau($id)
     {
@@ -274,7 +296,7 @@ class AliadoApiController extends Controller
 
             try {
 
-                $generateRandomPassword = function($length = 8) {
+                $generateRandomPassword = function ($length = 8) {
                     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
                     $password = '';
                     for ($i = 0; $i < $length; $i++) {
@@ -282,7 +304,7 @@ class AliadoApiController extends Controller
                     }
                     return $password;
                 };
-                
+
 
                 $logoUrl = null;
                 $randomPassword = $generateRandomPassword();
@@ -374,16 +396,16 @@ class AliadoApiController extends Controller
 
                 if (empty($results)) {
                     throw new Exception('No se recibió respuesta del procedimiento almacenado');
-                }else{
-                        $email = $results[0]->email; 
-                        $rol = 'Aliado';
-                        if ($email) {
-                            // \Log::info("Intentando enviar correo a: " . $email);
-                            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
-                        } else {
-                            // \Log::warning("No se pudo enviar el correo porque $email está vacío");
-                        }
+                } else {
+                    $email = $results[0]->email;
+                    $rol = 'Aliado';
+                    if ($email) {
+                        // \Log::info("Intentando enviar correo a: " . $email);
+                        Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
+                    } else {
+                        // \Log::warning("No se pudo enviar el correo porque $email está vacío");
                     }
+                }
 
                 $response = $results[0]->mensaje;
                 $aliadoId = $results[0]->id;
