@@ -1,21 +1,19 @@
 <?php
 
-namespace App\Http\Controllers\Services;
+namespace App\Repositories\Dashboard;
 
-use App\Http\Controllers\Controller;
 use App\Models\Aliado;
 use App\Models\Asesor;
 use App\Models\Asesoria;
 use App\Models\Emprendedor;
 use App\Models\User;
-use Illuminate\Http\Request;
+use App\Repositories\Dashboard\DashboardRepositoryInterface;
 use Illuminate\Support\Facades\DB;
 
-class DashboardService extends Controller
+class DashboardRepository implements DashboardRepositoryInterface
 {
     public function getAverageAsesorias($year)
     {
-        // Cálculo mensual
         $averageAsesoriasByMonth = DB::table('asesoria')
             ->select(
                 DB::raw('MONTH(fecha) as mes'),
@@ -26,14 +24,12 @@ class DashboardService extends Controller
             ->orderBy(DB::raw('MONTH(fecha)'))
             ->get();
 
-        // Cálculo anual
         $averageTotal = DB::table('asesoria')
             ->selectRaw('AVG(asesoria_count) as average_asesorias')
             ->from(DB::raw('(SELECT doc_emprendedor, COUNT(*) as asesoria_count FROM asesoria WHERE YEAR(fecha) = ? GROUP BY doc_emprendedor) as asesoria_counts'))
             ->setBindings([$year])
             ->value('average_asesorias');
-            
-        // Preparar el resultado final
+
         return [
             'promedio_mensual' => $averageAsesoriasByMonth,
             'promedio_anual' => $averageTotal
@@ -53,6 +49,7 @@ class DashboardService extends Controller
         return $topAliados;
     }
 
+    
     public function getAsesoriasAsignadasSinAsignar()
     {
         $result = DB::table('asesoria')
@@ -221,4 +218,5 @@ class DashboardService extends Controller
 
         return $usersByRoleAndState;
     }
+
 }

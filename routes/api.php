@@ -134,13 +134,13 @@ Route::group(
         'middleware' => 'auth:api'
     ],
     function () {
-        Route::get('/emprendedor_departamento', [DashboardsController::class, 'emprendedorXdepartamento']);
-        Route::get('/averageAsesorias2024', [DashboardsController::class, 'averageAsesorias2024']);
+        //Route::get('/emprendedor_departamento', [DashboardsController::class, 'emprendedorXdepartamento']);
+        //Route::get('/averageAsesorias2024', [DashboardsController::class, 'averageAsesorias2024']);
         Route::get('/contar-usuarios', [DashboardsController::class, 'getDashboardData']);
-        Route::get('/conteoAsesorias', [DashboardsController::class, 'asesoriasAsignadasSinAsignar']);
-        Route::get('/listRegistrosAnioMes', [DashboardsController::class, 'conteoRegistrosAnioYMes']);
-        Route::get('/promEmpresas_Mes', [DashboardsController::class, 'promEmpresasXmes']);
-        Route::get('/generoAliado', [DashboardsController::class, 'generos']);
+        //Route::get('/conteoAsesorias', [DashboardsController::class, 'asesoriasAsignadasSinAsignar']);
+        //Route::get('/listRegistrosAnioMes', [DashboardsController::class, 'conteoRegistrosAnioYMes']);
+        //Route::get('/promEmpresas_Mes', [DashboardsController::class, 'promEmpresasXmes']);
+        //Route::get('/generoAliado', [DashboardsController::class, 'generos']);
         Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
         Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
         Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
