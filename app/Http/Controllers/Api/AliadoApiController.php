@@ -154,10 +154,11 @@ class AliadoApiController extends Controller
 
     public function traerBanners($status)
     {
+        // Obtener los banners de la base de datos
         $banners = Banner::where('estadobanner', $status)
             ->select('urlImagen', 'estadobanner')
             ->get();
-    
+
         $bannersTransformados = $banners->map(function ($banner) {
             return [
                 'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
@@ -165,16 +166,9 @@ class AliadoApiController extends Controller
             ];
         });
 
-        Log::info('Banners Transformados:', $bannersTransformados->toArray());
-    
+        // Devolver los datos
         return response()->json($bannersTransformados, 200);
     }
-    
-    private function correctImageUrl($path)
-    {
-        return asset($path);
-    }
-    
 
 
 
@@ -235,14 +229,14 @@ class AliadoApiController extends Controller
         }
     }
 
-    // private function correctImageUrl($path)
-    // {
-    //     // Elimina cualquier '/storage' inicial
-    //     $path = ltrim($path, '/storage');
+    private function correctImageUrl($path)
+    {
+        // Elimina cualquier '/storage' inicial
+        $path = ltrim($path, '/storage');
 
-    //     // Asegúrate de que solo haya un '/storage' al principio
-    //     return url('storage/' . $path);
-    // }
+        // Asegúrate de que solo haya un '/storage' al principio
+        return url('storage/' . $path);
+    }
 
     public function crearAliado(Request $data)
     {

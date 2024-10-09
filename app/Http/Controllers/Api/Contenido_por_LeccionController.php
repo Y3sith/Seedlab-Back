@@ -28,6 +28,33 @@ class Contenido_por_LeccionController extends Controller
         //
     }
 
+    private function createImageFromFile($filePath)
+{
+    $imageInfo = getimagesize($filePath);
+    if ($imageInfo === false) {
+        return false;
+    }
+
+    $mimeType = $imageInfo['mime'];
+
+    switch ($mimeType) {
+        case 'image/jpeg':
+        case 'image/jpg':
+            return imagecreatefromjpeg($filePath);
+        case 'image/png':
+            return imagecreatefrompng($filePath);
+        case 'image/gif':
+            return imagecreatefromgif($filePath);
+        case 'image/bmp':
+        case 'image/x-ms-bmp':
+            return imagecreatefrombmp($filePath);
+        case 'image/webp':
+            return imagecreatefromwebp($filePath);
+        default:
+            return false;
+    }
+}
+
     /**
      * Store a newly created resource in storage.
      */
@@ -59,23 +86,51 @@ class Contenido_por_LeccionController extends Controller
                 // Obtiene el archivo subido
                 $file = $request->file('fuente_contenido');
                 // Crea un nombre único para el archivo
-                $fileName = time() . '_' . $file->getClientOriginalName();
+                $fileName = uniqid('contxlecc_') . '.webp'; // Guardar siempre como .webp
+            
                 // Obtiene el tipo MIME del archivo
                 $mimeType = $file->getMimeType();
-
+            
                 // Determina el folder de almacenamiento según el tipo de archivo
                 if (strpos($mimeType, 'image') !== false) {
                     $folder = 'imagenes'; // Si es una imagen, usa el folder 'imagenes'
+            
+                    // Obtiene la extensión del archivo
+                    $extension = strtolower($file->getClientOriginalExtension());
+            
+                    // Si ya es WebP, simplemente mover el archivo
+                    if ($extension === 'webp') {
+                        $path = $file->storeAs("public/$folder", $fileName);
+                    } else {
+                        // Crear una imagen desde el archivo original
+                        $sourceImage = $this->createImageFromFile($file->path());
+                        if ($sourceImage) {
+                            // Ruta completa de almacenamiento
+                            $path = "public/$folder/" . $fileName;
+                            $fullPath = storage_path('app/' . $path);
+            
+                            // Guardar la imagen como WebP
+                            imagewebp($sourceImage, $fullPath, 80);
+            
+                            // Liberar memoria
+                            imagedestroy($sourceImage);
+                        } else {
+                            return response()->json(['message' => 'Formato de imagen invalido, intente con otro formato'], 400);
+                        }
+                    }
+            
+                    // Guarda la URL de la imagen
+                    $fuente = Storage::url($path);
+            
                 } elseif ($mimeType === 'application/pdf') {
                     $folder = 'documentos'; // Si es un PDF, usa el folder 'documentos'
+                    // Almacena el PDF
+                    $path = $file->storeAs("public/$folder", $file->getClientOriginalName());
+                    $fuente = Storage::url($path);
                 } else {
-                    // Si el tipo de archivo no es soportado, devuelve un mensaje de error con estado 400
+                    // Si el tipo de archivo no es soportado, devuelve un mensaje de error
                     return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
                 }
-
-                // Almacena el archivo y guarda la URL
-                $path = $file->storeAs("public/$folder", $fileName);
-                $fuente = Storage::url($path);
             } elseif ($request->input('fuente_contenido') && filter_var($request->input('fuente_contenido'), FILTER_VALIDATE_URL)) {
                 // Si se envió una URL válida, la asigna a fuente
                 $fuente = $request->input('fuente_contenido');
@@ -135,30 +190,57 @@ class Contenido_por_LeccionController extends Controller
             if ($request->hasFile('fuente_contenido')) {
                 // Si se está subiendo un nuevo archivo
                 $file = $request->file('fuente_contenido');
-                $fileName = time() . '_' . $file->getClientOriginalName();
-
+                
+                // Obtener la extensión del archivo
+                $extension = strtolower($file->getClientOriginalExtension());
+                $fileName = uniqid('contxlecc_') . '.webp';
+            
                 // Determinar el tipo de archivo
                 $mimeType = $file->getMimeType();
-
+            
                 if (strpos($mimeType, 'image') !== false) {
                     $folder = 'imagenes';
+            
+                    // Si ya es WebP, simplemente mover el archivo
+                    if ($extension === 'webp') {
+                        $path = $file->storeAs("public/$folder", $fileName);
+                    } else {
+                        // Crear una imagen desde el archivo original
+                        $sourceImage = $this->createImageFromFile($file->path());
+                        if ($sourceImage) {
+                            // Ruta completa de almacenamiento
+                            $path = "public/$folder/" . $fileName;
+                            $fullPath = storage_path('app/' . $path);
+            
+                            // Guardar la imagen como WebP
+                            imagewebp($sourceImage, $fullPath, 80);
+            
+                            // Liberar memoria
+                            imagedestroy($sourceImage);
+                        } else {
+                            return response()->json(['message' => 'Formato de imagen invalido, intente con otro formato'], 400);
+                        }
+                    }
+            
                 } elseif ($mimeType === 'application/pdf') {
                     $folder = 'documentos';
+                    $fileName = time() . '_' . $file->getClientOriginalName(); // Para PDF usar el nombre original
+                    $path = $file->storeAs("public/$folder", $fileName);
                 } else {
                     return response()->json(['error' => 'Tipo de archivo no soportado'], 400);
                 }
-
+            
                 // Eliminar el archivo anterior si existe
                 if ($contenidoxleccion->fuente_contenido && Storage::exists(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido))) {
                     Storage::delete(str_replace('storage', 'public', $contenidoxleccion->fuente_contenido));
                 }
-
+            
                 // Guardar el nuevo archivo
-                $path = $file->storeAs("public/$folder", $fileName);
                 $contenidoxleccion->fuente_contenido = str_replace('public', 'storage', $path);
+            
             } elseif ($request->filled('fuente_contenido')) {
                 $newFuenteContenido = $request->input('fuente_contenido');
-
+            
                 // Si es una URL (asumiendo que es de YouTube)
                 if (filter_var($newFuenteContenido, FILTER_VALIDATE_URL)) {
                     // Tu código existente para manejar URLs
