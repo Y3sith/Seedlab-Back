@@ -60,4 +60,22 @@ class Aliado extends Model
         return $this->belongsTo(Banner::class, 'id_banner');
     }
 
+    // Accessor para 'logo'
+    public function getLogoAttribute($value)
+    {
+        return $value ? $this->correctImageUrl($value) : null;
+    }
+
+    // Accessor para 'ruta_multi'
+    public function getRutaMultiAttribute($value)
+    {
+        return $value ? $this->correctImageUrl($value) : null;
+    }
+
+     // Método para corregir la URL de la imagen
+     protected function correctImageUrl($url)
+     {
+        return asset('storage/' . $url);
+     }
+
 }
