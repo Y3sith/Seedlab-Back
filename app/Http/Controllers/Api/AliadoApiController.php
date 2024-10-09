@@ -24,37 +24,7 @@ class AliadoApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-
-
-    // public function traerAliadosActivos($status)
-    // {
-    //     // Obtiene los aliados que tienen un estado activo según el parámetro recibido
-
-    //     $aliados = Aliado::whereHas('auth', fn($query) => $query->where('estado', $status))
-    //         // Carga las relaciones necesarias para optimizar las consultas
-    //         ->with(['tipoDato:id,nombre', 'auth'])
-    //         // Selecciona los campos relevantes de la tabla Aliado
-    //         ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
-    //         ->get();
-
-    //     // Transforma la colección de aliados para adaptarla a la respuesta deseada
-    //     $aliadosTransformados = $aliados->map(function ($aliado) {
-    //         return [
-    //             'id' => $aliado->id,
-    //             'nombre' => $aliado->nombre,
-    //             'descripcion' => $aliado->descripcion,
-    //             'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
-    //             'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
-    //             'urlpagina' => $aliado->urlpagina,
-    //             'tipo_dato' => $aliado->tipoDato,
-    //             'email' => $aliado->auth->email,
-    //             'estado' => $aliado->auth->estado
-    //         ];
-    //     });
-
-    //     // Devuelve la colección transformada como respuesta en formato JSON
-    //     return response()->json($aliadosTransformados);
-    // }
+    //Funcion para el fanpage
     public function traerAliadosActivos($status)
     {
         $aliados = Aliado::whereHas('auth', function ($query) use ($status) {
@@ -62,7 +32,7 @@ class AliadoApiController extends Controller
         })
             ->with([
                 'tipoDato:id,nombre',
-                'auth:id,email,estado'
+                'auth:id'
             ])
             ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', 'id_autentication')
             ->get();
@@ -71,7 +41,7 @@ class AliadoApiController extends Controller
         return response()->json($aliados);
     }
 
-
+    //Funcion para el perfil y el editar de aliados
     public function traerAliadoxId($id)
     {
         try {
@@ -99,6 +69,53 @@ class AliadoApiController extends Controller
         }
     }
 
+    //Listar aliados para superadmin
+    // public function mostrarAliados(Request $request)
+    // {
+    //     try {
+    //         // Verifica si el usuario tiene el rol adecuado para realizar la acción
+    //         if (Auth::user()->id_rol != 1) {
+    //             return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
+    //         }
+
+    //         // Obtiene el estado desde la solicitud, por defecto 'Activo'
+    //         $estado = $request->input('estado', 'Activo');
+
+    //         // Convierte el estado a un valor booleano
+    //         $estadoBool = $estado === 'Activo' ? 1 : 0;
+
+    //         // Obtiene los IDs de los usuarios con el estado especificado y rol 3 (aliado)
+    //         $aliadoVer = User::where('estado', $estadoBool)
+    //             ->where('id_rol', 3)
+    //             ->pluck('id');
+
+    //         // Busca los aliados que tienen IDs de autenticación en $aliadoVer
+    //         $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
+    //             ->with('auth:id,email,estado')
+    //             ->get(['id', 'nombre', 'id_autentication']);
+
+    //         // Mapea los aliados para incluir el estado y el email del usuario autenticado
+    //         $aliadosConEstado = $aliados->map(function ($aliado) {
+    //             $user = User::find($aliado->id_autentication);
+
+    //             return [
+    //                 'id' => $aliado->id,
+    //                 'nombre' => $aliado->nombre,
+    //                 'id_auth' => $user->id,
+    //                 'email' => $user->email,
+    //                 'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
+    //             ];
+    //         });
+
+    //         // Devuelve los aliados en formato JSON
+    //         return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+    //     } catch (Exception $e) {
+    //         // Maneja cualquier excepción y devuelve un mensaje de error
+    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+    //     }
+    // }
+
+
     public function mostrarAliados(Request $request)
     {
         try {
@@ -113,36 +130,23 @@ class AliadoApiController extends Controller
             // Convierte el estado a un valor booleano
             $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-            // Obtiene los IDs de los usuarios con el estado especificado y rol 3 (aliado)
-            $aliadoVer = User::where('estado', $estadoBool)
-                ->where('id_rol', 3)
-                ->pluck('id');
+            // Consulta optimizada usando whereHas para filtrar directamente los aliados
+            $aliados = Aliado::whereHas('auth', function ($query) use ($estadoBool) {
+                $query->where('estado', $estadoBool)
+                    ->where('id_rol', 3);
+            })
+                ->with(['auth:id,email,estado'])
+                ->select('id', 'nombre', 'id_autentication')
+                ->get();
 
-            // Busca los aliados que tienen IDs de autenticación en $aliadoVer
-            $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
-                ->with('auth:id,email,estado')
-                ->get(['id', 'nombre', 'id_autentication']);
-
-            // Mapea los aliados para incluir el estado y el email del usuario autenticado
-            $aliadosConEstado = $aliados->map(function ($aliado) {
-                $user = User::find($aliado->id_autentication);
-
-                return [
-                    'id' => $aliado->id,
-                    'nombre' => $aliado->nombre,
-                    'id_auth' => $user->id,
-                    'email' => $user->email,
-                    'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-                ];
-            });
-
-            // Devuelve los aliados en formato JSON
-            return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
-        } catch (Exception $e) {
+            // Retorna los aliados directamente sin transformaciones
+            return response()->json($aliados, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+        } catch (\Exception $e) {
             // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
 
     /*
     Esta funcion es para la vista de todos los aliados sin autorizacion del middleware, donde solo retorno las imagenes , la url y la ruta multi
@@ -174,6 +178,7 @@ class AliadoApiController extends Controller
         }
     }
 
+    //Funcion para traer los banner para el fanpage
     public function traerBanners($status)
     {
         // Obtener los banners de la base de datos
@@ -193,7 +198,7 @@ class AliadoApiController extends Controller
     }
 
 
-
+    //Funcion para mostrar los banner de cada aliado
     public function traerBannersxaliado($id_aliado)
     {
         try {
@@ -225,6 +230,7 @@ class AliadoApiController extends Controller
         }
     }
 
+    //Funcion para para mostrar cada banner para editar
     public function traerBannersxID($id)
     {
         try {
@@ -253,10 +259,10 @@ class AliadoApiController extends Controller
 
     private function correctImageUrl($path)
     {
-        // Elimina cualquier '/storage' inicial
+        if (preg_match('/^(http|https):\/\//', $path)) {
+            return $path;
+        }
         $path = ltrim($path, '/storage');
-
-        // Asegúrate de que solo haya un '/storage' al principio
         return url('storage/' . $path);
     }
 
@@ -826,34 +832,8 @@ class AliadoApiController extends Controller
     }
 
 
-
     /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
-    {
-        //
-
-    }
-
-    /**
-     * Remove the specified resource from storage.
+     * Funcion para desactivar el aliado
      */
     public function destroy($id)
     {
@@ -885,6 +865,7 @@ class AliadoApiController extends Controller
     }
 
 
+    //rutaAliado, RutaAsesor, actividadNivel, reducir consulta
     public function mostrarAsesorAliado(Request $request, $id)
     {
         try {
@@ -956,7 +937,7 @@ class AliadoApiController extends Controller
     }
 
 
-
+    //NO SE ESTA USANDO
     public function gestionarAsesoria(Request $request)
     {
         try {
@@ -988,6 +969,7 @@ class AliadoApiController extends Controller
         }
     }
 
+    //NO SE ESTA USANDO
     public function verEmprendedoresxEmpresa()
     {
         // Verifica si el usuario tiene rol 3 (permiso para ver emprendedores)
@@ -1002,31 +984,5 @@ class AliadoApiController extends Controller
 
         // Devuelve la lista de emprendedores con sus empresas en formato JSON
         return response()->json($emprendedoresConEmpresas);
-    }
-
-    public function asesoriasXmes($id)
-    {
-        try {
-            // Verifica si el usuario tiene rol 3 (permiso para acceder a esta función)
-            if (Auth::user()->id_rol != 3) {
-                return response()->json(['message' => 'No tienes permisos para acceder a esta función.']);
-            }
-
-            // Obtiene el año actual
-            $ano = date('Y');
-
-            // Consulta las asesorías del aliado específico para el año actual
-            $asesorias = Asesoria::where('id_aliado', $id)
-                ->whereYear('fecha', $ano)
-                ->selectRaw('MONTH(fecha) as mes, COUNT(*) as total') //Selecciona el mes y luego cuenta las asesorias
-                ->groupBy('mes')
-                ->get();
-
-            // Devuelve las asesorías en formato JSON
-            return response()->json($asesorias);
-        } catch (Exception $e) {
-            // Manejo de excepciones: devuelve un error en caso de que ocurra un problema
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
     }
 }

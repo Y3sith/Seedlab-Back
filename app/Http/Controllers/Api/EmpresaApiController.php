@@ -16,20 +16,6 @@ class EmpresaApiController extends Controller
     /**
      * Muestra una lista empresas por emprendedor
      */
-    public function index()
-    {
-        // Verifica si el usuario autenticado tiene permiso para acceder a esta ruta.
-        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }
-
-        // Obtiene todas las empresas de la base de datos.
-        $empresa = Empresa::all();
-
-        // Devuelve la lista de empresas en formato JSON.
-        return response()->json($empresa);
-    }
-
     public function obtenerEmpresasPorEmprendedor(Request $request)
     {
         // Verifica si el usuario autenticado tiene el rol de emprendedor.
@@ -50,8 +36,8 @@ class EmpresaApiController extends Controller
         return response()->json($empresas);
     }
 
-
-    public function getOnlyempresa($id_emprendedor, $documento)
+    //Funcion para traer los datos a la vista
+    public function getOnlyEmpresa($id_emprendedor, $documento)
     {
         /* Muestra la empresa específica del emprendedor */
         if (Auth::user()->id_rol != 5) {
@@ -81,7 +67,7 @@ class EmpresaApiController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
+     * Crear empresa con apoyo
      */
     public function store(Request $request)
     {
@@ -141,7 +127,7 @@ class EmpresaApiController extends Controller
                 }
             }
         } catch (\Exception $e) {
-            Log::error('Error al crear la empresa: ' . $e->getMessage(), ['exception' => $e]);
+            //Log::error('Error al crear la empresa: ' . $e->getMessage(), ['exception' => $e]);
 
             return response()->json(['error' => $e->getMessage()], 500);
         }
@@ -198,15 +184,5 @@ class EmpresaApiController extends Controller
         }
 
         return response()->json(["message" => "Empresa actualizada"], 200);
-    }
-
-
-
-    /*
-    Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
-    {
-        //
     }
 }

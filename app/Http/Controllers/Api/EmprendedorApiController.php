@@ -20,25 +20,6 @@ class EmprendedorApiController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
-    {
-        // Verifica si el usuario autenticado no tiene el rol de emprendedor 
-        if (Auth::user()->id_rol = !5) {
-            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
-        }
-        // Obtiene todos los registros de emprendedores de la base de datos
-        $emprendedor = Emprendedor::all();
-
-        // Devuelve la lista de emprendedores en formato JSON
-        return response()->json($emprendedor);
-    }
-
-    public function store(Request $request)
-    {
-        //crear emprendedor
-
-    }
-
     /**
      * Muestra las empresas asociadas a un emprendedor específico.
      */

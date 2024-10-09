@@ -47,7 +47,7 @@ Route::group([
     Route::post('/createApoyo', [Apoyo_por_EmpresaController::class, 'crearApoyos']);
     Route::put('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
     //Route::apiResource('/empresa',EmpresaApiController::class);
-    Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyempresa']);
+    Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyEmpresa']);
     Route::get('/getApoyo/{id_empresa}', [Apoyo_por_EmpresaController::class, 'getApoyosxEmpresa']);
     Route::get('/getApoyoxdocumento/{documento}', [Apoyo_por_EmpresaController::class, 'getApoyoxDocumento']);
     Route::put('/updateApoyo/{documento}', [Apoyo_por_EmpresaController::class, 'editarApoyo']);
@@ -143,7 +143,7 @@ Route::group(
         //Route::get('/generoAliado', [DashboardsController::class, 'generos']);
         Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
         Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
-        Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
+        //Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
         Route::get('/graficaFormulario/{id_empresa}/{tipo}', [DashboardsController::class, 'getRadarChartData']);
     }
 );

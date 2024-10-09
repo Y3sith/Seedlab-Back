@@ -10,24 +10,16 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\Request;
-use App\Models\HorarioAsesoria;
-use App\Models\TipoDocumento;
 use Exception;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Mail;
 
 class AsesorApiController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+    
 
     /**
-     * crear
+     * crear Asesor
      */
     public function store(Request $data)
     {
@@ -105,14 +97,6 @@ class AsesorApiController extends Controller
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
     }
 
     /**
@@ -358,35 +342,6 @@ class AsesorApiController extends Controller
         return response()->json($resultado, 200);
     }
 
-    public function contarAsesorias($idAsesor)
-    {
-        // Busca el asesor por el ID proporcionado
-        $asesor = Asesor::find($idAsesor);
-
-        // Verifica si el asesor existe
-        if (!$asesor) {
-            return response()->json([
-                'error' => 'Asesor no encontrado'
-            ], 404);
-        }
-
-        // Cuenta las asesorías finalizadas asociadas al asesor
-        $finalizadas = $asesor->asesorias()->whereHas('horarios', function ($query) {
-            $query->where('estado', 'Finalizada');
-        })->count();
-
-        // Cuenta las asesorías pendientes asociadas al asesor
-        $pendientes = $asesor->asesorias()->whereHas('horarios', function ($query) {
-            $query->where('estado', 'Pendiente');
-        })->count();
-
-        // Retorna el conteo de asesorías en formato JSON
-        return response()->json([
-            'Asesorias finalizadas' => $finalizadas,
-            'Asesorias Pendientes' => $pendientes,
-        ]);
-    }
-
     private function correctImageUrl($path)
     {
         // Elimina cualquier '/storage' inicial
@@ -449,7 +404,7 @@ class AsesorApiController extends Controller
     }
 
 
-
+    //NO SE ESTA USANDO
     public function listarAsesores()
     {
         try {
