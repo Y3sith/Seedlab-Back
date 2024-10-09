@@ -109,6 +109,7 @@ class SuperAdminController extends Controller
         // Crea una imagen según el tipo MIME detectado.
         switch ($mimeType) {
             case 'image/jpeg':
+            case 'image/jpg':
                 return imagecreatefromjpeg($filePath);
             case 'image/png':
                 return imagecreatefrompng($filePath);
@@ -116,6 +117,13 @@ class SuperAdminController extends Controller
                 return imagecreatefromgif($filePath);
             case 'image/bmp':
                 return imagecreatefrombmp($filePath);
+            case 'image/webp':
+                return imagecreatefromwebp($filePath);
+            case 'image/x-ms-bmp':  // Algunos sistemas pueden usar este MIME type para BMP
+                return imagecreatefrombmp($filePath);
+            case 'image/svg+xml':
+                // SVG requiere un manejo especial, posiblemente convirtiéndolo a un formato de mapa de bits
+                return $this->convertSvgToImage($filePath);
             default:
                 return false;
         }
