@@ -315,7 +315,6 @@ class AliadoApiController extends Controller
                     return $password;
                 };
 
-
                 $logoUrl = null;
                 $randomPassword = $generateRandomPassword();
                 $hashedPassword = Hash::make($randomPassword);
@@ -340,12 +339,12 @@ class AliadoApiController extends Controller
                             imagedestroy($sourceImage);
                         } else {
                             // Manejar el error si no se puede crear la imagen
-                            return null;
+                            return response()->json(['message' => 'No se pudo procesar la imagen del logo'], 400);
                         }
                     }
 
-                    // Obtener la URL del archivo guardado
-                    $logoUrl = Storage::url($path);
+                    // Almacenar la ruta relativa
+                    $logoUrl = 'logos/' . $filename;
                 }
 
                 $rutaMulti = null;
@@ -373,16 +372,18 @@ class AliadoApiController extends Controller
                                 // Liberar memoria
                                 imagedestroy($sourceImagerutamulti);
                             } else {
-                                return response()->json(['message' => 'No se pudo procesar la imagen'], 400);
+                                return response()->json(['message' => 'No se pudo procesar la imagen para ruta_multi'], 400);
                             }
                         }
 
-                        $rutaMulti = Storage::url($path);
+                        // Almacenar la ruta relativa
+                        $rutaMulti = "$folder/$fileNamerutamulti";
                     } elseif ($mimeType === 'application/pdf') {
                         $fileName = time() . '_' . $file->getClientOriginalName();
                         $folder = 'documentos';
                         $path = $file->storeAs("public/$folder", $fileName);
-                        $rutaMulti = Storage::url($path);
+                        // Almacenar la ruta relativa
+                        $rutaMulti = "$folder/$fileName";
                     } else {
                         return response()->json(['message' => 'Tipo de archivo no soportado para ruta_multi'], 400);
                     }
@@ -392,6 +393,7 @@ class AliadoApiController extends Controller
                     // Si se envió un texto en 'ruta_multi', se guarda como texto
                     $rutaMulti = $data->input('ruta_multi');
                 }
+
                 $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
                     $data['nombre'],
                     $logoUrl,
@@ -446,12 +448,12 @@ class AliadoApiController extends Controller
                             imagedestroy($sourceImage);
                         } else {
                             // Manejar el error si no se puede crear la imagen
-                            return null;
+                            return response()->json(['message' => 'No se pudo procesar la imagen del banner'], 400);
                         }
                     }
-                    $bannerUrl = Storage::url($pathbanner);
+                    // Almacenar la ruta relativa
+                    $bannerUrl = 'banners/' . $filenamebanner;
                 }
-                // $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
 
                 Banner::create([
                     'urlImagen' => $bannerUrl,
@@ -472,6 +474,7 @@ class AliadoApiController extends Controller
             return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
 
     private function createImageFromFile($filePath)
     {
