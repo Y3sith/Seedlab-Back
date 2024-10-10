@@ -251,14 +251,18 @@ class AliadoApiController extends Controller
         }
     }
 
-    private function correctImageUrl($path)
+    protected function correctImageUrl($url)
     {
-        // Elimina cualquier '/storage' inicial
-        $path = ltrim($path, '/storage');
-
-        // Asegúrate de que solo haya un '/storage' al principio
-        return url('storage/' . $path);
+       if (preg_match('/^(http|https):\/\//', $url)) {
+           return $url;
+       }
+   
+       // Elimina cualquier '/' inicial y agrega 'storage/'
+       $url = ltrim($url, '/');
+   
+       return asset('storage/' . $url);
     }
+
 
     public function crearAliado(Request $data)
     {
