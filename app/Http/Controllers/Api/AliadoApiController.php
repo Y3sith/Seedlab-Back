@@ -183,7 +183,7 @@ class AliadoApiController extends Controller
 
         $bannersTransformados = $banners->map(function ($banner) {
             return [
-                'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                'urlImagen' => $banner->urlImagen,
                 'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo'
             ];
         });
