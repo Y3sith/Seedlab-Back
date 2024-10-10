@@ -81,11 +81,17 @@ class Aliado extends Model
     // Método para corregir la URL de la imagen
     protected function correctImageUrl($url)
     {
+        // Verifica si la URL ya es completa (empieza con http o https)
         if (preg_match('/^(http|https):\/\//', $url)) {
             return $url;
         }
 
-        // Elimina cualquier '/' inicial y agrega 'storage/'
+        // Verifica si la URL ya comienza con 'storage/'
+        if (strpos($url, 'storage/') === 0) {
+            return asset($url);
+        }
+
+        // Si no, elimina cualquier '/' inicial y agrega 'storage/'
         $url = ltrim($url, '/');
 
         return asset('storage/' . $url);

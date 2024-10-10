@@ -212,7 +212,7 @@ class AliadoApiController extends Controller
                 return [
                     'id' => $banner->id,
                     // Corrige la URL de la imagen si existe
-                    'urlImagen' => $banner->urlImagen ? $this->correctImageUrl($banner->urlImagen) : null,
+                    'urlImagen' => $banner->urlImagen,
                     // Convierte el estado del banner a texto
                     'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo'
                 ];
@@ -241,7 +241,7 @@ class AliadoApiController extends Controller
             // Devuelve los datos del banner encontrado
             return [
                 'id' => $banners->id,
-                'urlImagen' => $banners->urlImagen ? $this->correctImageUrl($banners->urlImagen) : null,
+                'urlImagen' => $banners->urlImagen,
                 'estadobanner' => $banners->estadobanner == 1 ? 'Activo' : 'Inactivo',
                 'id_aliado' => $banners->id_aliado,
             ];
@@ -253,11 +253,17 @@ class AliadoApiController extends Controller
 
     protected function correctImageUrl($url)
     {
+        // Verifica si la URL ya es completa (empieza con http o https)
         if (preg_match('/^(http|https):\/\//', $url)) {
             return $url;
         }
 
-        // Elimina cualquier '/' inicial y agrega 'storage/'
+        // Verifica si la URL ya comienza con 'storage/'
+        if (strpos($url, 'storage/') === 0) {
+            return asset($url);
+        }
+
+        // Si no, elimina cualquier '/' inicial y agrega 'storage/'
         $url = ltrim($url, '/');
 
         return asset('storage/' . $url);
