@@ -70,52 +70,6 @@ class AliadoApiController extends Controller
     }
 
     //Listar aliados para superadmin
-    // public function mostrarAliados(Request $request)
-    // {
-    //     try {
-    //         // Verifica si el usuario tiene el rol adecuado para realizar la acción
-    //         if (Auth::user()->id_rol != 1) {
-    //             return response()->json(['error' => 'No tienes permiso para realizar esta acción'], 401);
-    //         }
-
-    //         // Obtiene el estado desde la solicitud, por defecto 'Activo'
-    //         $estado = $request->input('estado', 'Activo');
-
-    //         // Convierte el estado a un valor booleano
-    //         $estadoBool = $estado === 'Activo' ? 1 : 0;
-
-    //         // Obtiene los IDs de los usuarios con el estado especificado y rol 3 (aliado)
-    //         $aliadoVer = User::where('estado', $estadoBool)
-    //             ->where('id_rol', 3)
-    //             ->pluck('id');
-
-    //         // Busca los aliados que tienen IDs de autenticación en $aliadoVer
-    //         $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
-    //             ->with('auth:id,email,estado')
-    //             ->get(['id', 'nombre', 'id_autentication']);
-
-    //         // Mapea los aliados para incluir el estado y el email del usuario autenticado
-    //         $aliadosConEstado = $aliados->map(function ($aliado) {
-    //             $user = User::find($aliado->id_autentication);
-
-    //             return [
-    //                 'id' => $aliado->id,
-    //                 'nombre' => $aliado->nombre,
-    //                 'id_auth' => $user->id,
-    //                 'email' => $user->email,
-    //                 'estado' => $user->estado == 1 ? 'Activo' : 'Inactivo'
-    //             ];
-    //         });
-
-    //         // Devuelve los aliados en formato JSON
-    //         return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
-    //     } catch (Exception $e) {
-    //         // Maneja cualquier excepción y devuelve un mensaje de error
-    //         return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-    //     }
-    // }
-
-
     public function mostrarAliados(Request $request)
     {
         try {
@@ -130,17 +84,29 @@ class AliadoApiController extends Controller
             // Convierte el estado a un valor booleano
             $estadoBool = $estado === 'Activo' ? 1 : 0;
 
-            // Consulta optimizada usando whereHas para filtrar directamente los aliados
-            $aliados = Aliado::whereHas('auth', function ($query) use ($estadoBool) {
-                $query->where('estado', $estadoBool)
-                    ->where('id_rol', 3);
-            })
-                ->with(['auth:id,email,estado'])
-                ->select('id', 'nombre', 'id_autentication')
-                ->get();
+            // Obtiene los IDs de los usuarios con el estado especificado y rol 3 (aliado)
+            $aliadoVer = User::where('estado', $estadoBool)
+                ->where('id_rol', 3)
+                ->pluck('id');
 
-            // Retorna los aliados directamente sin transformaciones
-            return response()->json($aliados, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
+            // Busca los aliados que tienen IDs de autenticación en $aliadoVer
+            $aliados = Aliado::whereIn('id_autentication', $aliadoVer)
+                ->with(['auth:id,email,estado']) // Eager load para evitar consultas adicionales
+                ->get(['id', 'nombre', 'id_autentication']);
+
+            // Mapea los aliados para incluir el estado y el email del usuario autenticado
+            $aliadosConEstado = $aliados->map(function ($aliado) {
+                return [
+                    'id' => $aliado->id,
+                    'nombre' => $aliado->nombre,
+                    'id_auth' => $aliado->auth->id, // Accede directamente a la relación
+                    'email' => $aliado->auth->email,
+                    'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo'
+                ];
+            });
+
+            // Devuelve los aliados en formato JSON
+            return response()->json($aliadosConEstado, 200, [], JSON_UNESCAPED_UNICODE | JSON_NUMERIC_CHECK);
         } catch (\Exception $e) {
             // Maneja cualquier excepción y devuelve un mensaje de error
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
@@ -148,28 +114,26 @@ class AliadoApiController extends Controller
     }
 
 
+
+
     /*
     Esta funcion es para la vista de todos los aliados sin autorizacion del middleware, donde solo retorno las imagenes , la url y la ruta multi
     */
 
-    public function traerAliadosiau($id)
+    public function getAllAliados($id)
     {
         try {
             // Busca un aliado por su ID y selecciona los campos necesarios
             $aliado = Aliado::where('id', $id)
-                ->select('id', 'nombre', 'descripcion', 'logo', 'ruta_multi', 'urlpagina', 'id_tipo_dato', "id_autentication")
+                ->select('id', 'logo', 'ruta_multi', 'urlpagina', "id_autentication")
                 ->first();
 
             // Prepara la respuesta con los datos del aliado
             return [
                 'id' => $aliado->id,
-                'nombre' => $aliado->nombre,
-                'descripcion' => $aliado->descripcion,
                 'logo' => $aliado->logo ? $this->correctImageUrl($aliado->logo) : null,
                 'ruta_multi' => $aliado->ruta_multi ? $this->correctImageUrl($aliado->ruta_multi) : null,
-                'id_tipo_dato' => $aliado->id_tipo_dato,
                 'urlpagina' => $aliado->urlpagina,
-                'email' => $aliado->auth->email,
                 'estado' => $aliado->auth->estado == 1 ? 'Activo' : 'Inactivo',
             ];
         } catch (Exception $e) {
@@ -178,7 +142,7 @@ class AliadoApiController extends Controller
         }
     }
 
-    //Funcion para traer los banner para el fanpage
+    //Funcion para traer los banner activos para el fanpage
     public function traerBanners($status)
     {
         // Obtener los banners de la base de datos

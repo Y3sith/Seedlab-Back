@@ -161,7 +161,7 @@ Route::get('/obtener_datos_formEmprendedor', [ReportesController::class, 'mostra
 Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
 Route::get('/traerPersonalizacion/{id}', [SuperAdminController::class, 'obtenerPersonalizacion']);
 Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
-Route::get('/traerAliadosiau/{id}', [AliadoApiController::class, 'traerAliadosiau'])->name('traerAliadosiau');
+Route::get('/traerAliadosiau/{id}', [AliadoApiController::class, 'getAllAliados'])->name('traerAliadosiau');
 
 //descargas y buscar ruta
 Route::get('/descargar-archivo/{contenidoId}', [RutaApiController::class, 'descargarArchivoContenido']);

@@ -13,6 +13,21 @@ use Log;
 
 class EmpresaApiController extends Controller
 {
+
+    //Función para traer todas las empresas en la grafica araña dashboards
+    public function index()
+    {
+        // Verifica si el usuario autenticado tiene permiso para acceder a esta ruta.
+        if (Auth::user()->id_rol != 1 && Auth::user()->id_rol != 2) {
+            return response()->json(["error" => "No tienes permisos para acceder a esta ruta"], 401);
+        }
+
+        // Obtiene todas las empresas de la base de datos.
+        $empresa = Empresa::all();
+
+        // Devuelve la lista de empresas en formato JSON.
+        return response()->json($empresa);
+    }
     /**
      * Muestra una lista empresas por emprendedor
      */
