@@ -233,9 +233,7 @@ class AliadoApiController extends Controller
     public function crearAliado(Request $data)
     {
         try {
-            $response = null;
             $statusCode = 200;
-            $aliadoId = null;
             $youtubeRegex = '/^https:\/\/(www\.)?youtube\.com\/watch\?v=[\w-]{11}$/';
             $rutaMulti = trim($data->input('ruta_multi'));
 
@@ -243,195 +241,155 @@ class AliadoApiController extends Controller
                 return response()->json(['message' => 'No tienes permisos para realizar esta acción'], 401);
             }
 
-            // Validación del banner
-            if (!$data->hasFile('banner_urlImagen') || !$data->file('banner_urlImagen')->isValid()) {
-                return response()->json(['message' => 'Se requiere una imagen válida para el banner'], 400);
-            }
-
-            if (!$data->hasFile('logo') || !$data->file('logo')->isValid()) {
-                return response()->json(['message' => 'Se requiere una imagen válida para el logo'], 400);
-            }
-
-            if ($data->input('id_tipo_dato') == 2 || $data->input('id_tipo_dato') == 3) {
-                if (!$data->hasFile('ruta_multi') || !$data->file('ruta_multi')->isValid()) {
-                    return response()->json(['message' => 'Debe seleccionar un archivo pdf o de imagen válido'], 400);
-                }
-            } elseif ($data->input('id_tipo_dato') == 1 || $data->input('id_tipo_dato') == 4) {
-                if (trim($data->input('ruta_multi')) == null) {
-                    return response()->json(['message' => 'El campo de texto no puede estar vacío'], 400);
-                }
-            }
+            // Validación de archivos
+            $this->validarArchivos($data);
 
             DB::beginTransaction();
 
-            try {
+            $randomPassword = $this->generateRandomPassword();
+            $hashedPassword = Hash::make($randomPassword);
 
-                $generateRandomPassword = function ($length = 8) {
-                    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
-                    $password = '';
-                    for ($i = 0; $i < $length; $i++) {
-                        $password .= $characters[rand(0, strlen($characters) - 1)];
-                    }
-                    return $password;
-                };
+            // Manejo del logo
+            $logoUrl = $this->handleFileUpload($data, 'logo', 'public/logos', 'logo_');
 
+            // Manejo de ruta_multi
+            $rutaMulti = $this->handleRutaMulti($data);
 
-                $logoUrl = null;
-                $randomPassword = $generateRandomPassword();
-                $hashedPassword = Hash::make($randomPassword);
+            // Llamada al procedimiento almacenado
+            $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
+                $data['nombre'],
+                $logoUrl,
+                $data['descripcion'],
+                $data['id_tipo_dato'],
+                $rutaMulti,
+                $data['urlpagina'],
+                $data['email'],
+                $hashedPassword,
+                $data['estado'] === 'true' ? 1 : 0,
+            ]);
 
-                if ($data->hasFile('logo') && $data->file('logo')->isValid()) {
-                    $image = $data->file('logo');
-                    $filename = uniqid('logo_') . '.webp';
-                    $path = 'public/logos/' . $filename;
-
-                    // Obtener la extensión del archivo original
-                    $extension = strtolower($image->getClientOriginalExtension());
-
-                    if ($extension === 'webp') {
-                        // Si ya es WebP, simplemente mover el archivo
-                        $image->storeAs('public/logos', $filename);
-                    } else {
-                        // Si no es WebP, convertir la imagen
-                        $sourceImage = $this->createImageFromFile($image->path());
-                        if ($sourceImage) {
-                            $fullPath = storage_path('app/' . $path);
-                            imagewebp($sourceImage, $fullPath, 80);
-                            imagedestroy($sourceImage);
-                        } else {
-                            // Manejar el error si no se puede crear la imagen
-                            return null;
-                        }
-                    }
-
-                    // Obtener la URL del archivo guardado
-                    $logoUrl = Storage::url($path);
-                }
-
-                $rutaMulti = null;
-                if ($data->hasFile('ruta_multi') && $data->file('ruta_multi')->isValid()) {
-                    $file = $data->file('ruta_multi');
-                    $mimeType = $file->getMimeType();
-
-                    if (strpos($mimeType, 'image') !== false) {
-                        // Es una imagen
-                        $fileNamerutamulti = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
-                        $folder = 'imagenes';
-                        $path = "public/$folder/$fileNamerutamulti";
-
-                        $extensionrutamulti = strtolower($file->getClientOriginalExtension());
-                        if ($extensionrutamulti === 'webp') {
-                            // Si ya es WebP, simplemente mover el archivo
-                            $file->storeAs("public/$folder", $fileNamerutamulti);
-                        } else {
-                            // Convertir a WebP
-                            $sourceImagerutamulti = $this->createImageFromFile($file->path());
-                            if ($sourceImagerutamulti) {
-                                $fullPathrutamulti = storage_path('app/' . $path);
-                                // Guardar la imagen como WebP
-                                imagewebp($sourceImagerutamulti, $fullPathrutamulti, 80);
-                                // Liberar memoria
-                                imagedestroy($sourceImagerutamulti);
-                            } else {
-                                return response()->json(['message' => 'No se pudo procesar la imagen'], 400);
-                            }
-                        }
-
-                        $rutaMulti = Storage::url($path);
-                    } elseif ($mimeType === 'application/pdf') {
-                        $fileName = time() . '_' . $file->getClientOriginalName();
-                        $folder = 'documentos';
-                        $path = $file->storeAs("public/$folder", $fileName);
-                        $rutaMulti = Storage::url($path);
-                    } else {
-                        return response()->json(['message' => 'Tipo de archivo no soportado para ruta_multi'], 400);
-                    }
-                } elseif ($data->input('ruta_multi') && filter_var($data->input('ruta_multi'), FILTER_VALIDATE_URL)) {
-                    $rutaMulti = $data->input('ruta_multi');
-                } elseif ($data->input('ruta_multi')) {
-                    // Si se envió un texto en 'ruta_multi', se guarda como texto
-                    $rutaMulti = $data->input('ruta_multi');
-                }
-                $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
-                    $data['nombre'],
-                    $logoUrl,
-                    $data['descripcion'],
-                    $data['id_tipo_dato'],
-                    $rutaMulti,
-                    $data['urlpagina'],
-                    $data['email'],
-                    $hashedPassword,
-                    $data['estado'] === 'true' ? 1 : 0,
-                ]);
-
-                if (empty($results)) {
-                    throw new Exception('No se recibió respuesta del procedimiento almacenado');
-                } else {
-                    $email = $results[0]->email;
-                    $rol = 'Aliado';
-                    if ($email) {
-                        // \Log::info("Intentando enviar correo a: " . $email);
-                        Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
-                    } else {
-                        // \Log::warning("No se pudo enviar el correo porque $email está vacío");
-                    }
-                }
-
-                $response = $results[0]->mensaje;
-                $aliadoId = $results[0]->id;
-
-                if ($response === 'El nombre del aliado ya se encuentra registrado' || $response === 'El correo electrónico ya ha sido registrado anteriormente') {
-                    throw new Exception($response);
-                }
-
-                // Procesar el banner
-                $bannerUrl = null;
-
-                if ($data->hasFile('banner_urlImagen') && $data->file('banner_urlImagen')->isValid()) {
-                    $imagebanner = $data->file('banner_urlImagen');
-                    $filenamebanner = uniqid('banner_') . '.webp';
-                    $pathbanner = 'public/banners/' . $filenamebanner;
-
-                    $extensionbanner = strtolower($imagebanner->getClientOriginalExtension());
-                    // Crear una imagen desde el archivo original
-                    if ($extensionbanner === 'webp') {
-                        // Si ya es WebP, simplemente mover el archivo
-                        $imagebanner->storeAs('public/banners', $filenamebanner);
-                    } else {
-                        // Si no es WebP, convertir la imagen
-                        $sourceImage = $this->createImageFromFile($imagebanner->path());
-                        if ($sourceImage) {
-                            $fullPath = storage_path('app/' . $pathbanner);
-                            imagewebp($sourceImage, $fullPath, 80);
-                            imagedestroy($sourceImage);
-                        } else {
-                            // Manejar el error si no se puede crear la imagen
-                            return null;
-                        }
-                    }
-                    $bannerUrl = Storage::url($pathbanner);
-                }
-                // $bannerPath = $data->file('banner_urlImagen')->store('public/banners');
-
-                Banner::create([
-                    'urlImagen' => $bannerUrl,
-                    'estadobanner' => $data['banner_estadobanner'],
-                    'id_aliado' => $aliadoId,
-                ]);
-
-                DB::commit();
-                Log::info('Aliado y banner creados:', ['aliadoId' => $aliadoId, 'response' => $response]);
-
-                return response()->json(['message' => 'Aliado creado exitosamente'], 201);
-            } catch (Exception $e) {
-                DB::rollBack();
-                Log::error('Error al crear aliado y banner:', ['message' => $e->getMessage()]);
-                return response()->json(['message' => $e->getMessage()], 400);
+            if (empty($results)) {
+                throw new Exception('No se recibió respuesta del procedimiento almacenado');
             }
+
+            $this->sendEmailNotification($results, $randomPassword);
+
+            // Manejo del banner
+            $bannerUrl = $this->handleFileUpload($data, 'banner_urlImagen', 'public/banners', 'banner_');
+
+            Banner::create([
+                'urlImagen' => $bannerUrl,
+                'estadobanner' => $data['banner_estadobanner'],
+                'id_aliado' => $results[0]->id,
+            ]);
+
+            DB::commit();
+            Log::info('Aliado y banner creados:', ['aliadoId' => $results[0]->id]);
+
+            return response()->json(['message' => 'Aliado creado exitosamente'], 201);
         } catch (Exception $e) {
-            return response()->json(['message' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
+            DB::rollBack();
+            Log::error('Error al crear aliado y banner:', ['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
+
+    private function validarArchivos(Request $data)
+    {
+        // Validación del banner
+        $this->validateFile($data, 'banner_urlImagen');
+        $this->validateFile($data, 'logo');
+
+        if (in_array($data->input('id_tipo_dato'), [2, 3])) {
+            $this->validateFile($data, 'ruta_multi');
+        } elseif (in_array($data->input('id_tipo_dato'), [1, 4])) {
+            if (trim($data->input('ruta_multi')) === null) {
+                throw new Exception('El campo de texto no puede estar vacío');
+            }
+        }
+    }
+
+    private function validateFile(Request $data, $fileKey)
+    {
+        if (!$data->hasFile($fileKey) || !$data->file($fileKey)->isValid()) {
+            throw new Exception("Se requiere una imagen válida para $fileKey");
+        }
+    }
+
+    private function generateRandomPassword($length = 8)
+    {
+        $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+        return substr(str_shuffle(str_repeat($characters, ceil($length / strlen($characters)))), 1, $length);
+    }
+
+    private function handleFileUpload(Request $data, $fileKey, $path, $prefix)
+    {
+        if ($data->hasFile($fileKey) && $data->file($fileKey)->isValid()) {
+            $image = $data->file($fileKey);
+            $filename = uniqid($prefix) . '.webp';
+            $fullPath = "$path/$filename";
+
+            if (strtolower($image->getClientOriginalExtension()) !== 'webp') {
+                $sourceImage = $this->createImageFromFile($image->path());
+                imagewebp($sourceImage, storage_path("app/$fullPath"), 80);
+                imagedestroy($sourceImage);
+            } else {
+                $image->storeAs($path, $filename);
+            }
+
+            return Storage::url($fullPath);
+        }
+        return null;
+    }
+
+    private function handleRutaMulti(Request $data)
+    {
+        $rutaMulti = null;
+        if ($data->hasFile('ruta_multi') && $data->file('ruta_multi')->isValid()) {
+            $file = $data->file('ruta_multi');
+            $mimeType = $file->getMimeType();
+
+            if (strpos($mimeType, 'image') !== false) {
+                $rutaMulti = $this->handleImageFile($file, 'imagenes');
+            } elseif ($mimeType === 'application/pdf') {
+                $fileName = time() . '_' . $file->getClientOriginalName();
+                $rutaMulti = Storage::url($file->storeAs('public/documentos', $fileName));
+            } else {
+                throw new Exception('Tipo de archivo no soportado para ruta_multi');
+            }
+        } elseif ($data->input('ruta_multi') && filter_var($data->input('ruta_multi'), FILTER_VALIDATE_URL)) {
+            $rutaMulti = $data->input('ruta_multi');
+        } elseif ($data->input('ruta_multi')) {
+            $rutaMulti = $data->input('ruta_multi');
+        }
+        return $rutaMulti;
+    }
+
+    private function handleImageFile($file, $folder)
+    {
+        $fileName = time() . '_' . pathinfo($file->getClientOriginalName(), PATHINFO_FILENAME) . '.webp';
+        $path = "public/$folder/$fileName";
+
+        if (strtolower($file->getClientOriginalExtension()) !== 'webp') {
+            $sourceImage = $this->createImageFromFile($file->path());
+            imagewebp($sourceImage, storage_path("app/$path"), 80);
+            imagedestroy($sourceImage);
+        } else {
+            $file->storeAs("public/$folder", $fileName);
+        }
+
+        return Storage::url($path);
+    }
+
+    private function sendEmailNotification($results, $randomPassword)
+    {
+        $email = optional($results[0])->email ?? null;
+        $rol = 'Aliado';
+        if ($email) {
+            Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
+        }
+    }
+
 
     private function createImageFromFile($filePath)
     {
