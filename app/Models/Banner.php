@@ -41,9 +41,10 @@ class Banner extends Model
         }
 
         // Verifica si la URL ya comienza con 'storage/'
-        if (strpos($url, 'storage/') === 0) {
-            return asset($url);
+        if (strpos($url, 'storage/') === 0 || strpos($url, '/storage/') === 0) {
+            return asset(ltrim($url, '/'));
         }
+
 
         // Si no, elimina cualquier '/' inicial y agrega 'storage/'
         $url = ltrim($url, '/');
