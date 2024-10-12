@@ -63,15 +63,6 @@ class ActividadController extends Controller
                 'id_aliado' => 'required|integer|exists:aliado,id'
             ]);
 
-            // Obtiene la descripción y valida su longitud
-            // $descripcion = $request->input('descripcion');
-            // if (strlen($descripcion) < 300) {
-            //     return response()->json(['message' => 'La descripción debe tener al menos 300 caracteres'], 400);
-            // }
-            // if (strlen($descripcion) > 470) {
-            //     return response()->json(['message' => 'La descripción no puede tener más de 470 caracteres'], 400);
-            // }
-
             // Verifica si la actividad ya existe
             $existingActividad = Actividad::where([
                 ['nombre', $validatedData['nombre']],
@@ -87,29 +78,52 @@ class ActividadController extends Controller
 
             // Maneja la carga de la fuente (archivo o URL)
             $fuente = null;
+
             if ($request->hasFile('fuente')) {
                 $file = $request->file('fuente');
                 $fileName = time() . '_' . $file->getClientOriginalName();
                 $mimeType = $file->getMimeType();
-
+            
                 // Determina el tipo de carpeta según el tipo de archivo
                 if (strpos($mimeType, 'image') !== false) {
                     $folder = 'imagenes';
+                    $fileName = pathinfo($fileName, PATHINFO_FILENAME) . '.webp';
+                    $path = "public/$folder/$fileName";
+                    
+                    // Convertir la imagen a WebP
+                    $sourceImage = $this->createImageFromFile($file->path());
+                    if ($sourceImage) {
+                        $fullPath = storage_path("app/$path");
+                        imagewebp($sourceImage, $fullPath, 80);
+                        imagedestroy($sourceImage);
+                        $fuente = Storage::url($path);
+                    } else {
+                        return response()->json(['message' => 'Formato de imagen invalido, intente con otro formato'], 400);
+                    }
                 } elseif ($mimeType === 'application/pdf') {
                     $folder = 'documentos';
+                    $path = $file->storeAs("public/$folder", $fileName);
+                    $fuente = Storage::url($path);
                 } else {
-                    return response()->json(['message' => 'Tipo de archivo no soportado para fuente'], 400);
+                    return response()->json(['message' => 'Tipo de archivo no soportado para fuente.'], 400);
                 }
-
-                // Almacena el archivo y obtiene su URL
-                $path = $file->storeAs("public/$folder", $fileName);
-                $fuente = Storage::url($path);
-            } elseif ($request->input('fuente') && filter_var($request->input('fuente'), FILTER_VALIDATE_URL)) {
-                // Maneja URL si se proporciona
-                $fuente = $request->input('fuente');
             } elseif ($request->input('fuente')) {
-                // Si se envía un texto en 'fuente', se guarda como texto
-                $fuente = $request->input('fuente');
+                $fuenteInput = $request->input('fuente');
+                if (filter_var($fuenteInput, FILTER_VALIDATE_URL)) {
+                    // Es una URL válida
+                    $fuente = $fuenteInput;
+                } else {
+                    // Es texto plano
+                    $fileName = time() . '_fuente.txt';
+                    $path = "public/textos/$fileName";
+                    Storage::put($path, $fuenteInput);
+                    $fuente = Storage::url($path);
+                }
+            }
+            
+            // Verifica si $fuente tiene un valor antes de crear la actividad
+            if ($fuente === null) {
+                return response()->json(['message' => 'No se proporcionó una fuente válida.'], 400);
             }
 
             // Crea la actividad en la base de datos
@@ -139,6 +153,33 @@ class ActividadController extends Controller
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
         }
     }
+
+    private function createImageFromFile($filePath)
+{
+    $imageInfo = getimagesize($filePath);
+    if ($imageInfo === false) {
+        return false;
+    }
+
+    $mimeType = $imageInfo['mime'];
+
+    switch ($mimeType) {
+        case 'image/jpeg':
+        case 'image/jpg':
+            return imagecreatefromjpeg($filePath);
+        case 'image/png':
+            return imagecreatefrompng($filePath);
+        case 'image/gif':
+            return imagecreatefromgif($filePath);
+        case 'image/bmp':
+        case 'image/x-ms-bmp':
+            return imagecreatefrombmp($filePath);
+        case 'image/webp':
+            return imagecreatefromwebp($filePath);
+        default:
+            return false;
+    }
+}
 
     /** 
      * Display the specified resource.
@@ -199,11 +240,33 @@ class ActividadController extends Controller
                 return response()->json(['error' => 'Actividad no encontrada'], 404);
             }
             // Actualizar fuente si se ha proporcionado un archivo o una URL
-            if ($request->hasFile(('fuente'))) {
+            if ($request->hasFile('fuente')) {
+                // Eliminar la imagen anterior
                 Storage::delete(str_replace('storage', 'public', $actividad->fuente));
-
-                $paths = $request->file('fuente')->store('public/imagenes');
-                $actividad->fuente = str_replace('public', 'storage', $paths);
+            
+                $file = $request->file('fuente');
+                $fileName = uniqid('actividad_') . '.webp';
+                $path = 'public/imagenes/' . $fileName;
+            
+                $extension = strtolower($file->getClientOriginalExtension());
+                if ($extension === 'webp') {
+                    // Si ya es WebP, simplemente mover el archivo
+                    $file->storeAs('public/imagenes', $fileName);
+                } else {
+                    // Crear una imagen desde el archivo original
+                    $sourceImage = $this->createImageFromFile($file->path());
+            
+                    if ($sourceImage) {
+                        $fullPath = storage_path('app/' . $path);
+                        // Guardar la imagen como WebP
+                        imagewebp($sourceImage, $fullPath, 80);
+                        // Liberar memoria
+                        imagedestroy($sourceImage);
+                    } else {
+                        return response()->json(['message' => 'Formato de imagen invalido, intente con otro formato'], 400);
+                    }
+                }
+                $actividad->fuente = str_replace('public', 'storage', $path);
             }
 
             $id_aliado_anterior = $actividad->id_aliado;

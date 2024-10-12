@@ -27,4 +27,28 @@ class Banner extends Model
         // Se establece la conexión utilizando 'id_aliado' como clave foránea.
         return $this->hasMany(Aliado::class, 'id_aliado');
     }
+
+    public function getUrlImagenAttribute($value)
+    {
+        return $this->correctImageUrl($value);
+    }
+
+    protected function correctImageUrl($url)
+    {
+        // Verifica si la URL ya es completa (empieza con http o https)
+        if (preg_match('/^(http|https):\/\//', $url)) {
+            return $url;
+        }
+
+        // Verifica si la URL ya comienza con 'storage/'
+        if (strpos($url, 'storage/') === 0 || strpos($url, '/storage/') === 0) {
+            return asset(ltrim($url, '/'));
+        }
+
+
+        // Si no, elimina cualquier '/' inicial y agrega 'storage/'
+        $url = ltrim($url, '/');
+
+        return asset('storage/' . $url);
+    }
 }

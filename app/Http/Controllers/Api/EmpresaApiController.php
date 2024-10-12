@@ -94,18 +94,18 @@ class EmpresaApiController extends Controller
 
             // Validar la estructura del request
             $request->validate([
-                'empresa.nombre' => 'required|string|max:255',
-                'empresa.documento' => 'required|string|max:255',
-                'empresa.cargo' => 'required|string|max:255',
-                'empresa.razonSocial' => 'required|string|max:255',
+                'empresa.nombre' => 'required|string|max:50',
+                'empresa.documento' => 'required|string|max:50',
+                'empresa.cargo' => 'required|string|max:50',
+                'empresa.razonSocial' => 'required|string|max:50',
                 'empresa.url_pagina' => 'nullable|string',
                 'empresa.telefono' => 'nullable|string|max:20',
                 'empresa.celular' => 'required|string|max:20',
-                'empresa.direccion' => 'required|string|max:255',
-                'empresa.correo' => 'required|email|max:255',
-                'empresa.profesion' => 'required|string|max:255',
-                'empresa.experiencia' => 'required|string|max:255',
-                'empresa.funciones' => 'required|string|max:255',
+                'empresa.direccion' => 'required|string|max:50',
+                'empresa.correo' => 'required|email|max:100',
+                'empresa.profesion' => 'required|string|max:50',
+                'empresa.experiencia' => 'required|string|max:300',
+                'empresa.funciones' => 'required|string|max:300',
                 'empresa.id_tipo_documento' => 'required|integer',
                 'empresa.id_departamento' => 'required|integer',
                 'empresa.id_municipio' => 'required|integer',
@@ -115,7 +115,7 @@ class EmpresaApiController extends Controller
 
             if ($empresaexiste) {
                 return response()->json([
-                    'error' => 'La empresa ya existe',
+                    'message' => 'Ya existe una empresa con este numero de documento',
                 ], 409);
             }
 

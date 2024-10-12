@@ -177,7 +177,7 @@ class AsesorApiController extends Controller
                 }
                 $user->save();
 
-            return response()->json(['message' => 'Asesor actualizado correctamente'], 200);
+            return response()->json(['message' => 'Asesor actualizado correctamente', $asesor], 200);
             }
             return response()->json(['message' => 'Asesor no encontrado'], 404);
         } catch (Exception $e) {
