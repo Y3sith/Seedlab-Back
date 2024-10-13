@@ -28,15 +28,15 @@ class EnviarNotificacionCrearUsuario implements ShouldQueue
 
     public function handle()
     {
-        Log::info('Iniciando el envío de correo', [
-            'email' => $this->email,
-            'rol' => $this->rol,
-            'password' => $this->password
-        ]);
+        // Log::info('Iniciando el envío de correo', [
+        //     'email' => $this->email,
+        //     'rol' => $this->rol,
+        //     'password' => $this->password
+        // ]);
 
         try {
             Mail::to($this->email)->send(new NotificacionCrearUsuario($this->email, $this->rol, $this->password));
-            Log::info('Correo enviado exitosamente');
+            //Log::info('Correo enviado exitosamente');
         } catch (\Exception $e) {
             Log::error('Error al enviar correo en EnviarNotificacionCrearUsuario:', [
                 'message' => $e->getMessage()

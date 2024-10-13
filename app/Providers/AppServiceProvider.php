@@ -10,10 +10,13 @@ use App\Repositories\Banner\BannerRepository;
 use App\Repositories\Banner\BannerRepositoryInterface;
 use App\Repositories\Dashboard\DashboardRepository;
 use App\Repositories\Dashboard\DashboardRepositoryInterface;
+use App\Repositories\Ubicacion\UbicacionRepository;
+use App\Repositories\Ubicacion\UbicacionRepositoryInterface;
 use App\Services\AliadoService;
 use App\Services\AsesoriaService;
 use App\Services\BannerService;
 use App\Services\ImageService;
+use App\Services\UbicacionService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Schema\Grammars\MySqlGrammar;
@@ -34,6 +37,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AliadoRepositoryInterface::class, AliadoRepository::class);
         $this->app->bind(BannerRepositoryInterface::class, BannerRepository::class);
         $this->app->bind(AsesoriaRepositoryInterface::class, AsesoriaRepository::class);
+        $this->app->bind(UbicacionRepositoryInterface::class, UbicacionRepository::class);
+
+        
 
         // Registro de Servicios
         $this->app->singleton(ImageService::class, function ($app) {
@@ -58,6 +64,10 @@ class AppServiceProvider extends ServiceProvider
             return new AsesoriaService(
                 $app->make(AsesoriaRepositoryInterface::class)
             );
+        });
+    
+        $this->app->singleton(UbicacionService::class, function ($app) {
+            return new UbicacionService($app->make(UbicacionRepositoryInterface::class));
         });
     }
 
