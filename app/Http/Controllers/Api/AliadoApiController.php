@@ -7,7 +7,6 @@ use Illuminate\Http\Request;
 use App\Services\AliadoService;
 use App\Services\BannerService;
 use App\Services\AsesoriaService;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Exception;

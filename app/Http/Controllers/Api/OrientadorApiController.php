@@ -95,10 +95,10 @@ class OrientadorApiController extends Controller
                         $email = $results[0]->email; 
                         $rol = 'Orientador';
                         if ($email) {
-                            \Log::info("Intentando enviar correo a: " . $email);
+                            //Log::info("Intentando enviar correo a: " . $email);
                             Mail::to($email)->send(new NotificacionCrearUsuario($email, $rol, $randomPassword));
                         } else {
-                            \Log::warning("No se pudo enviar el correo porque $email está vacío");
+                            //Log::warning("No se pudo enviar el correo porque $email está vacío");
                         }
                     }
                 }

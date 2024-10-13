@@ -8,6 +8,8 @@ use App\Repositories\Asesorias\AsesoriaRepository;
 use App\Repositories\Asesorias\AsesoriaRepositoryInterface;
 use App\Repositories\Banner\BannerRepository;
 use App\Repositories\Banner\BannerRepositoryInterface;
+use App\Repositories\ContenidoLeccion\ContenidoLeccionRepository;
+use App\Repositories\ContenidoLeccion\ContenidoLeccionRepositoryInterface;
 use App\Repositories\Dashboard\DashboardRepository;
 use App\Repositories\Dashboard\DashboardRepositoryInterface;
 use App\Repositories\Ubicacion\UbicacionRepository;
@@ -15,6 +17,7 @@ use App\Repositories\Ubicacion\UbicacionRepositoryInterface;
 use App\Services\AliadoService;
 use App\Services\AsesoriaService;
 use App\Services\BannerService;
+use App\Services\ContenidoLeccionService;
 use App\Services\ImageService;
 use App\Services\UbicacionService;
 use Illuminate\Support\ServiceProvider;
@@ -38,6 +41,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(BannerRepositoryInterface::class, BannerRepository::class);
         $this->app->bind(AsesoriaRepositoryInterface::class, AsesoriaRepository::class);
         $this->app->bind(UbicacionRepositoryInterface::class, UbicacionRepository::class);
+        $this->app->bind(ContenidoLeccionRepositoryInterface::class, ContenidoLeccionRepository::class);
 
         
 
@@ -68,6 +72,12 @@ class AppServiceProvider extends ServiceProvider
     
         $this->app->singleton(UbicacionService::class, function ($app) {
             return new UbicacionService($app->make(UbicacionRepositoryInterface::class));
+        });
+
+        $this->app->singleton(ContenidoLeccionService::class, function ($app) {
+            return new ContenidoLeccionService(
+                $app->make(ContenidoLeccionRepositoryInterface::class),
+            $app->make(ImageService::class));
         });
     }
 

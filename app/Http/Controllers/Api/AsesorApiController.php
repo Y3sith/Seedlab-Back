@@ -403,24 +403,4 @@ class AsesorApiController extends Controller
         }
     }
 
-
-    //NO SE ESTA USANDO
-    public function listarAsesores()
-    {
-        try {
-            // Verifica si el usuario tiene rol de administrador (id_rol == 1)
-            if (Auth::user()->id_rol != 1) {
-                return response()->json(['error' => 'no tienes permiso para acceder']);
-            }
-
-            // Obtiene todos los asesores, seleccionando solo los campos 'id' y 'nombre'
-            $asesores = Asesor::all()->select('id', 'nombre');
-
-            // Devuelve la lista de asesores en formato JSON
-            return response()->json($asesores);
-        } catch (Exception $e) {
-            // Manejo de excepciones en caso de error
-            return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
-        }
-    }
 }
