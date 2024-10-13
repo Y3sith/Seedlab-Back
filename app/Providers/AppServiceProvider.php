@@ -4,6 +4,8 @@ namespace App\Providers;
 
 use App\Repositories\Aliado\AliadoRepository;
 use App\Repositories\Aliado\AliadoRepositoryInterface;
+use App\Repositories\Asesor\AsesorRepository;
+use App\Repositories\Asesor\AsesorRepositoryInterface;
 use App\Repositories\Asesorias\AsesoriaRepository;
 use App\Repositories\Asesorias\AsesoriaRepositoryInterface;
 use App\Repositories\Banner\BannerRepository;
@@ -16,6 +18,7 @@ use App\Repositories\Ubicacion\UbicacionRepository;
 use App\Repositories\Ubicacion\UbicacionRepositoryInterface;
 use App\Services\AliadoService;
 use App\Services\AsesoriaService;
+use App\Services\AsesorService;
 use App\Services\BannerService;
 use App\Services\ContenidoLeccionService;
 use App\Services\ImageService;
@@ -42,6 +45,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AsesoriaRepositoryInterface::class, AsesoriaRepository::class);
         $this->app->bind(UbicacionRepositoryInterface::class, UbicacionRepository::class);
         $this->app->bind(ContenidoLeccionRepositoryInterface::class, ContenidoLeccionRepository::class);
+        $this->app->bind(AsesorRepositoryInterface::class, AsesorRepository::class);
 
         
 
@@ -78,6 +82,10 @@ class AppServiceProvider extends ServiceProvider
             return new ContenidoLeccionService(
                 $app->make(ContenidoLeccionRepositoryInterface::class),
             $app->make(ImageService::class));
+        });
+
+        $this->app->singleton(AsesorService::class, function ($app) {
+            return new AsesorService($app->make(AsesorRepositoryInterface::class));
         });
     }
 
