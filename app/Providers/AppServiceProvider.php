@@ -2,8 +2,12 @@
 
 namespace App\Providers;
 
+use App\Models\Emprendedor;
 use App\Repositories\Aliado\AliadoRepository;
 use App\Repositories\Aliado\AliadoRepositoryInterface;
+use App\Repositories\Apoyo\ApoyoRepository;
+use App\Repositories\Apoyo\ApoyoRepositoryInterface;
+use App\Repositories\Apoyo\ApoyoService;
 use App\Repositories\Asesor\AsesorRepository;
 use App\Repositories\Asesor\AsesorRepositoryInterface;
 use App\Repositories\Asesorias\AsesoriaRepository;
@@ -14,6 +18,8 @@ use App\Repositories\ContenidoLeccion\ContenidoLeccionRepository;
 use App\Repositories\ContenidoLeccion\ContenidoLeccionRepositoryInterface;
 use App\Repositories\Dashboard\DashboardRepository;
 use App\Repositories\Dashboard\DashboardRepositoryInterface;
+use App\Repositories\Emprendedor\EmprendedorRepository;
+use App\Repositories\Emprendedor\EmprendedorRepositoryInterface;
 use App\Repositories\Ubicacion\UbicacionRepository;
 use App\Repositories\Ubicacion\UbicacionRepositoryInterface;
 use App\Services\AliadoService;
@@ -21,6 +27,7 @@ use App\Services\AsesoriaService;
 use App\Services\AsesorService;
 use App\Services\BannerService;
 use App\Services\ContenidoLeccionService;
+use App\Services\EmprendedorService;
 use App\Services\ImageService;
 use App\Services\UbicacionService;
 use Illuminate\Support\ServiceProvider;
@@ -46,6 +53,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(UbicacionRepositoryInterface::class, UbicacionRepository::class);
         $this->app->bind(ContenidoLeccionRepositoryInterface::class, ContenidoLeccionRepository::class);
         $this->app->bind(AsesorRepositoryInterface::class, AsesorRepository::class);
+        $this->app->bind(EmprendedorRepositoryInterface::class, EmprendedorRepository::class);
+        $this->app->bind(ApoyoRepositoryInterface::class, ApoyoRepository::class);
 
         
 
@@ -86,6 +95,14 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(AsesorService::class, function ($app) {
             return new AsesorService($app->make(AsesorRepositoryInterface::class));
+        });
+
+        $this->app->singleton(EmprendedorService::class, function ($app) {
+            return new EmprendedorService($app->make(EmprendedorRepositoryInterface::class));
+        });
+
+        $this->app->singleton(ApoyoService::class, function ($app) {
+            return new ApoyoService($app->make(ApoyoRepositoryInterface::class));
         });
     }
 

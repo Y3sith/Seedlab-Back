@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Repositories\Apoyo\ApoyoService;
+use App\Services\ApoyoService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
@@ -40,8 +40,8 @@ class Apoyo_por_EmpresaController extends Controller
                 'telefono' => 'nullable|string|max:20',
                 'celular' => 'nullable|string|max:20',
                 'email' => 'required|email|unique:apoyo_empresa,email',
-                'id_tipo_documento' => 'required|integer|exists:tipos_documento,id',
-                'id_empresa' => 'required|integer|exists:empresa,id',
+                'id_tipo_documento' => 'required|integer|exists:tipo_documento,id',
+                'id_empresa' => 'required|integer|exists:empresa,documento',
             ]);
 
             if ($validator->fails()) {
@@ -100,12 +100,10 @@ class Apoyo_por_EmpresaController extends Controller
     public function editarApoyo(Request $request, $documento)
     {
         try {
-            // Verificar el rol del usuario
             if (Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'No tienes permiso para acceder'], 403);
             }
 
-            // Preparar los datos para la actualización
             $data = [
                 'documento' => $request->input('documento'),
                 'nombre' => $request->input('nombre'),
@@ -117,8 +115,11 @@ class Apoyo_por_EmpresaController extends Controller
                 'id_tipo_documento' => $request->input('id_tipo_documento'),
             ];
 
-            // Llamar al servicio para editar el apoyo
-            $this->apoyoEmpresaService->editarApoyo($documento, $data);
+            $apoyo = $this->apoyoEmpresaService->editarApoyo($documento, $data);
+
+            if (!$apoyo) {
+                return response()->json(['error' => 'No se encontró el apoyo con el documento proporcionado'], 404);
+            }
 
             return response()->json(['message' => 'Apoyo editado exitosamente'], 201);
         } catch (Exception $e) {

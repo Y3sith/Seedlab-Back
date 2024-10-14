@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Repositories\Apoyo;
+namespace App\Services;
 
+use App\Repositories\Apoyo\ApoyoRepository;
 use Exception;
 
 class ApoyoService
@@ -22,15 +23,14 @@ class ApoyoService
 
     public function editarApoyo($documento, array $data)
     {
-        $apoyo = $this->apoyoEmpresaRepository->getApoyoxDocumento($documento);
+        $apoyo = $this->apoyoEmpresaRepository->actualizarPorDocumento($documento, $data);
 
         if (!$apoyo) {
             throw new Exception('Apoyo no encontrado');
         }
 
-        $apoyoActualizado = $this->apoyoEmpresaRepository->actualizarPorDocumento($documento, $data);
 
-        return $apoyoActualizado;
+        return $apoyo;
     }
 
     public function getApoyosxEmpresa($id_empresa){
