@@ -2,12 +2,12 @@
 
 namespace App\Providers;
 
-use App\Models\Emprendedor;
+use App\Repositories\Actividad\ActividadRepository;
+use App\Repositories\Actividad\ActividadRepositoryInterface;
 use App\Repositories\Aliado\AliadoRepository;
 use App\Repositories\Aliado\AliadoRepositoryInterface;
 use App\Repositories\Apoyo\ApoyoRepository;
 use App\Repositories\Apoyo\ApoyoRepositoryInterface;
-use App\Repositories\Apoyo\ApoyoService;
 use App\Repositories\Asesor\AsesorRepository;
 use App\Repositories\Asesor\AsesorRepositoryInterface;
 use App\Repositories\Asesorias\AsesoriaRepository;
@@ -20,15 +20,26 @@ use App\Repositories\Dashboard\DashboardRepository;
 use App\Repositories\Dashboard\DashboardRepositoryInterface;
 use App\Repositories\Emprendedor\EmprendedorRepository;
 use App\Repositories\Emprendedor\EmprendedorRepositoryInterface;
+use App\Repositories\Empresa\EmpresaRepository;
+use App\Repositories\Empresa\EmpresaRepositoryInterface;
+use App\Repositories\Leccion\LeccionRepository;
+use App\Repositories\Leccion\LeccionRepositoryInterface;
+use App\Repositories\Nivel\NivelRepository;
+use App\Repositories\Nivel\NivelRepositoryInterface;
 use App\Repositories\Ubicacion\UbicacionRepository;
 use App\Repositories\Ubicacion\UbicacionRepositoryInterface;
+use App\Services\ActividadService;
 use App\Services\AliadoService;
+use App\Services\ApoyoService;
 use App\Services\AsesoriaService;
 use App\Services\AsesorService;
 use App\Services\BannerService;
 use App\Services\ContenidoLeccionService;
 use App\Services\EmprendedorService;
+use App\Services\EmpresaService;
 use App\Services\ImageService;
+use App\Services\LeccionService;
+use App\Services\NivelService;
 use App\Services\UbicacionService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
@@ -46,7 +57,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        $this->app->bind(DashboardRepositoryInterface::class,DashboardRepository::class);
+        $this->app->bind(DashboardRepositoryInterface::class, DashboardRepository::class);
         $this->app->bind(AliadoRepositoryInterface::class, AliadoRepository::class);
         $this->app->bind(BannerRepositoryInterface::class, BannerRepository::class);
         $this->app->bind(AsesoriaRepositoryInterface::class, AsesoriaRepository::class);
@@ -55,8 +66,13 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(AsesorRepositoryInterface::class, AsesorRepository::class);
         $this->app->bind(EmprendedorRepositoryInterface::class, EmprendedorRepository::class);
         $this->app->bind(ApoyoRepositoryInterface::class, ApoyoRepository::class);
+        $this->app->bind(EmpresaRepositoryInterface::class, EmpresaRepository::class);
+        $this->app->bind(NivelRepositoryInterface::class, NivelRepository::class);
+        $this->app->bind(LeccionRepositoryInterface::class, LeccionRepository::class);
+        $this->app->bind(ActividadRepositoryInterface::class, ActividadRepository::class);
 
-        
+
+
 
         // Registro de Servicios
         $this->app->singleton(ImageService::class, function ($app) {
@@ -82,7 +98,7 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(AsesoriaRepositoryInterface::class)
             );
         });
-    
+
         $this->app->singleton(UbicacionService::class, function ($app) {
             return new UbicacionService($app->make(UbicacionRepositoryInterface::class));
         });
@@ -90,7 +106,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ContenidoLeccionService::class, function ($app) {
             return new ContenidoLeccionService(
                 $app->make(ContenidoLeccionRepositoryInterface::class),
-            $app->make(ImageService::class));
+                $app->make(ImageService::class)
+            );
         });
 
         $this->app->singleton(AsesorService::class, function ($app) {
@@ -104,6 +121,30 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ApoyoService::class, function ($app) {
             return new ApoyoService($app->make(ApoyoRepositoryInterface::class));
         });
+
+        $this->app->singleton(EmpresaService::class, function ($app) {
+            return new EmpresaService($app->make(EmpresaRepositoryInterface::class));
+        });
+
+        $this->app->singleton(NivelService::class, function ($app) {
+            return new NivelService(
+                $app->make(NivelRepositoryInterface::class),
+                $app->make(ActividadRepositoryInterface::class),
+                $app->make(AsesorRepositoryInterface::class)
+            );
+        });
+
+        $this->app->singleton(LeccionService::class, function ($app) {
+            return new LeccionService($app->make(LeccionRepositoryInterface::class));
+        });
+
+        $this->app->singleton(ActividadService::class, function ($app) {
+            return new ActividadService(
+                $app->make(ActividadRepositoryInterface::class),
+                $app->make(AliadoRepositoryInterface::class),
+                $app->make(ImageService::class)
+            );
+        });
     }
 
     /**
@@ -111,13 +152,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Blueprint::macro('longBinary', function($column) {
+        Blueprint::macro('longBinary', function ($column) {
             return $this->addColumn('longBinary', $column);
         });
 
         MySqlGrammar::macro('typeLongBinary', function (Fluent $column) {
             return 'longblob'; // Tipo equivalente en MySQL
         });
-
     }
 }

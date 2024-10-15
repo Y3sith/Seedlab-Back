@@ -21,6 +21,11 @@ class Actividad extends Model
         'estado',
     ];
 
+    protected $attributes = [
+        'estado' => 1, // Valor predeterminado para estado
+    ];
+    
+
     public function tiposDatos(){
         // Esta relación indica que el modelo actual está asociado a un registro en la tabla TipoDato.
         // La columna 'id_tipo_dato' en este modelo actúa como clave foránea.
