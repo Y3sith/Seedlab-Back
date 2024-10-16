@@ -28,6 +28,8 @@ use App\Repositories\Nivel\NivelRepository;
 use App\Repositories\Nivel\NivelRepositoryInterface;
 use App\Repositories\Orientador\OrientadorRepository;
 use App\Repositories\Orientador\OrientadorRepositoryInterface;
+use App\Repositories\SuperAdmin\SuperAdminRepository;
+use App\Repositories\SuperAdmin\SuperAdminRepositoryInterface;
 use App\Repositories\Ubicacion\UbicacionRepository;
 use App\Repositories\Ubicacion\UbicacionRepositoryInterface;
 use App\Services\ActividadService;
@@ -43,6 +45,7 @@ use App\Services\ImageService;
 use App\Services\LeccionService;
 use App\Services\NivelService;
 use App\Services\OrientadorService;
+use App\Services\SuperAdminService;
 use App\Services\UbicacionService;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Schema\Blueprint;
@@ -74,6 +77,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(LeccionRepositoryInterface::class, LeccionRepository::class);
         $this->app->bind(ActividadRepositoryInterface::class, ActividadRepository::class);
         $this->app->bind(OrientadorRepositoryInterface::class, OrientadorRepository::class);
+        $this->app->bind(SuperAdminRepositoryInterface::class, SuperAdminRepository::class);
 
 
 
@@ -152,6 +156,13 @@ class AppServiceProvider extends ServiceProvider
 
         $this->app->singleton(OrientadorService::class, function ($app) {
             return new OrientadorService($app->make(OrientadorRepositoryInterface::class));
+        });
+
+        $this->app->singleton(SuperAdminService::class, function ($app) {
+            return new SuperAdminService(
+                $app->make(SuperAdminRepositoryInterface::class),
+                $app->make(ImageService::class)
+            );
         });
     }
 
