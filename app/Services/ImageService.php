@@ -100,12 +100,17 @@ class ImageService
         // Crea la imagen a partir del tipo MIME
         switch ($mimeType) {
             case 'image/jpeg':
+            case 'image/jpg':
                 return imagecreatefromjpeg($filePath);
             case 'image/png':
                 return imagecreatefrompng($filePath);
             case 'image/gif':
                 return imagecreatefromgif($filePath);
             case 'image/bmp':
+                return imagecreatefrombmp($filePath);
+            case 'image/webp':
+                return imagecreatefromwebp($filePath);
+            case 'image/x-ms-bmp':  // Algunos sistemas pueden usar este MIME type para BMP
                 return imagecreatefrombmp($filePath);
             default:
                 return false;

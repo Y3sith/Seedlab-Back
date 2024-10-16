@@ -2,6 +2,7 @@
 
 namespace App\Repositories\SuperAdmin;
 
+use App\Models\Aliado;
 use App\Models\PersonalizacionSistema;
 use App\Models\SuperAdmin;
 use App\Models\User;
@@ -93,14 +94,14 @@ class SuperAdminRepository implements SuperAdminRepositoryInterface{
     public function updateSuperadmin($id, array $data)
     {
         $admin = $this->findSuperAdminById($id);
-        
+
         if (!$admin) {
             return null;
         }
 
         // Actualizar campos del SuperAdmin
         $admin->fill($data);
-        
+
         // Verificar imagen de perfil
         if (isset($data['imagen_perfil']) && isset($admin->imagen_perfil)) {
             Storage::delete(str_replace('storage', 'public', $admin->imagen_perfil));
@@ -137,5 +138,11 @@ class SuperAdminRepository implements SuperAdminRepositoryInterface{
         $personalizacion->save();
 
         return $personalizacion;
+    }
+
+    public function getAliadosActividad(){
+        return Aliado::whereHas('auth', function ($query) {
+            $query->where('estado', '1'); // Filtra aliados cuyo estado sea activo
+         })->get(['id', 'nombre']);
     }
 }

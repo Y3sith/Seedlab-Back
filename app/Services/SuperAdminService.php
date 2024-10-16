@@ -188,26 +188,35 @@ class SuperAdminService
 
     public function editarSuperAdmin($request, $id)
     {
-        
-        // Validar campos requeridos
+        // Verificar campos requeridos
         $requiredFields = [
-            'nombre', 'apellido', 'documento', 'celular', 
-            'genero', 'direccion', 'id_tipo_documento', 
-            'id_departamento', 'id_municipio', 'fecha_nac', 
+            'nombre',
+            'apellido',
+            'documento',
+            'celular',
+            'genero',
+            'direccion',
+            'id_tipo_documento',
+            'id_departamento',
+            'id_municipio',
+            'fecha_nac',
             'email'
         ];
 
         foreach ($requiredFields as $field) {
             if (empty($request->input($field))) {
-                return ['status' => 400, 'message' => "Debes completar todos los campos requeridos."];
+                throw new Exception("Debes completar todos los campos requeridos.", 400);
             }
         }
 
-        // Buscar y actualizar SuperAdmin
-        $admin = $this->superAdminRepository->updateSuperadmin($id, $request->all());
+        // Obtener los datos para actualizar
+        $data = $request->except('password', 'estado', 'email');
+
+        // Actualizar SuperAdmin
+        $admin = $this->superAdminRepository->updateSuperadmin($id, $data);
 
         if (!$admin) {
-            return ['status' => 404, 'message' => 'Superadministrador no encontrado'];
+            throw new Exception('Superadministrador no encontrado', 404);
         }
 
         // Actualizar usuario asociado si existe
@@ -224,7 +233,7 @@ class SuperAdminService
             if ($newEmail && $newEmail !== $user->email) {
                 $existingUser = User::where('email', $newEmail)->first();
                 if ($existingUser) {
-                    return ['status' => 400, 'message' => 'El correo electrónico ya ha sido registrado anteriormente'];
+                    throw new Exception('El correo electrónico ya ha sido registrado anteriormente', 400);
                 }
                 $user->email = $newEmail;
             }
@@ -233,7 +242,7 @@ class SuperAdminService
             $user->save();
         }
 
-        return ['status' => 200, 'message' => 'Superadministrador actualizado correctamente', 'admin' => $admin];
+        return $admin;
     }
 
     public function restore($id)
@@ -245,5 +254,9 @@ class SuperAdminService
         }
 
         return ['status' => 200, 'message' => 'Personalización restaurada correctamente', 'data' => $personalizacion];
+    }
+
+    public function listarAliados(){
+        return $this->superAdminRepository->getAliadosActividad();
     }
 }

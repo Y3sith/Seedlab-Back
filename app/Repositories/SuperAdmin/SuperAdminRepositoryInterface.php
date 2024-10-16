@@ -15,5 +15,6 @@ interface SuperAdminRepositoryInterface{
     public function getSuperAdminsByState($estado);
     public function findSuperAdminById($id);
     public function updateSuperadmin($id, array $data);
+    public function getAliadosActividad();
 
 }
