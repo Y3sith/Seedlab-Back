@@ -23,10 +23,7 @@ use App\Http\Controllers\Api\PuntajeController;
 use App\Http\Controllers\Api\ReportesController;
 use App\Http\Controllers\Api\RespuestasApiController;
 
-
-
-
-
+//Rutas de autenticacion
 Route::group([
     'prefix' => 'auth'
 ], function () {
@@ -48,25 +45,29 @@ Route::group([
     Route::put('/updateEmpresa/{documento}', [EmpresaApiController::class, 'update']);
     Route::get('/getEmpresa/{id_emprendedor}/{documento}', [EmpresaApiController::class, 'getOnlyEmpresa']);
     Route::get('/getApoyo/{id_empresa}', [Apoyo_por_EmpresaController::class, 'getApoyosxEmpresa']);
-    //Route::get('/getApoyoxdocumento/{documento}', [Apoyo_por_EmpresaController::class, 'getApoyoxDocumento']);
     Route::put('/updateApoyo/{documento}', [Apoyo_por_EmpresaController::class, 'editarApoyo']);
-    Route::get('/getAllEmpresa', [EmpresaApiController::class,'index']);
+    Route::get('/getAllEmpresa', [EmpresaApiController::class, 'index']);
     Route::get('/getEmpresaByEmprendedor', [EmpresaApiController::class, 'obtenerEmpresasPorEmprendedor']);
 });
 
 
-//Emprendedor
+//Rutas de Super Admin
 Route::group([
-    'prefix' => 'emprendedor',
-    'middleware' => 'auth:api'
+    'prefix' => 'superadmin',
+    'middleware' => 'auth:api',
 ], function () {
-    Route::apiResource('/emprendedor', EmprendedorApiController::class);
-    Route::post('/editarEmprededor/{documento}', [EmprendedorApiController::class, 'updateEmprendedor']);
-    Route::get('/userProfileEmprendedor/{documento}', [AuthController::class, 'userProfileEmprendedor']);
+    Route::post('/personalizacion/{id}', [SuperAdminController::class, 'personalizacionSis']);
+    Route::post('/restaurarPersonalizacion/{id}', [SuperAdminController::class, 'restore']);
+    Route::post('/crearSuperAdmin', [SuperAdminController::class, 'crearSuperAdmin']);
+    Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
+    Route::post('/editarAdmin/{id}', [SuperAdminController::class, 'editarSuperAdmin']);
+    Route::get('/userProfileAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
+    Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
+    Route::get('/asesor-aliado', [SuperAdminController::class, 'asesorConAliado']);
+    Route::get('/listAliado', [SuperAdminController::class, 'listarAliados']);
 });
-Route::get('/tipo_documento', [EmprendedorApiController::class, 'tipoDocumento']);
 
-//Orientador
+//Rutas de Orientador
 Route::group([
     'prefix' => 'orientador',
     'middleware' => 'auth:api'
@@ -80,35 +81,11 @@ Route::group([
 });
 
 
-//Super Admin
-Route::group([
-    'prefix' => 'superadmin',
-    'middleware' => 'auth:api',
-], function () {
-    Route::post('/personalizacion/{id}', [SuperAdminController::class, 'personalizacionSis']);
-    Route::post('/restaurarPersonalizacion/{id}', [SuperAdminController::class, 'restore']);
-    Route::post('/crearSuperAdmin', [SuperAdminController::class, 'crearSuperAdmin']);
-    Route::delete('/desactivar', [SuperAdminController::class, 'destroy']);
-    Route::post('/editarAdmin/{id}', [SuperAdminController::class, 'editarSuperAdmin']);
-    Route::get('/userProfileAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
-    //Route::get('/perfilAdmin/{id}', [SuperAdminController::class, 'userProfileAdmin']);
-    Route::get('/mostrarSuperAdmins', [SuperAdminController::class, 'mostrarSuperAdmins']);
-    Route::get('/asesor-aliado', [SuperAdminController::class, 'asesorConAliado']);
-    Route::get('/listAliado', [SuperAdminController::class, 'listarAliados']);
-});
-
-
-//UbicacionController
-Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
-Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
-
-//AliadoController
+//Rutas de AliadoController
 Route::group([
     'prefix' => 'aliado',
     'middleware' => 'auth:api',
 ], function () {
-    //Route::get('/verinfoaliado', [AliadoApiController::class, 'mostrarAliado'])->name('mostrarAliado');
-    //Route::match(['post', 'put'],'/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
     Route::post('/editaraliado/{id}', [AliadoApiController::class, 'editarAliado']);
     Route::get('/banner/{id_aliado}', [AliadoApiController::class, 'traerBannersxaliado'])->name('traerBannersxaliado');
     Route::get('/bannerxid/{id}', [AliadoApiController::class, 'traerBannersxID'])->name('traerBannersxID');
@@ -123,131 +100,10 @@ Route::group([
     Route::post('/editarbanner/{id}', [AliadoApiController::class, 'editarBanner']);
     Route::delete('/eliminarbanner/{id}', [AliadoApiController::class, 'eliminarBanner']);
     Route::get('/mostrarAliados', [AliadoApiController::class, 'mostrarAliados']);
-
-});
-
-//Dashboard
-Route::group(
-    [
-        'prefix' => 'dashboard',
-        'middleware' => 'auth:api'
-    ],
-    function () {
-        //Route::get('/emprendedor_departamento', [DashboardsController::class, 'emprendedorXdepartamento']);
-        //Route::get('/averageAsesorias2024', [DashboardsController::class, 'averageAsesorias2024']);
-        Route::get('/contar-usuarios', [DashboardsController::class, 'getDashboardData']);
-        //Route::get('/conteoAsesorias', [DashboardsController::class, 'asesoriasAsignadasSinAsignar']);
-        //Route::get('/listRegistrosAnioMes', [DashboardsController::class, 'conteoRegistrosAnioYMes']);
-        //Route::get('/promEmpresas_Mes', [DashboardsController::class, 'promEmpresasXmes']);
-        //Route::get('/generoAliado', [DashboardsController::class, 'generos']);
-        Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
-        Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
-        //Route::get('/asesorias_mes/{id}', [DashboardsController::class, 'asesoriasXmes']);
-        Route::get('/graficaFormulario/{id_empresa}/{tipo}', [DashboardsController::class, 'getRadarChartData']);
-    }
-);
-
-//Reportes
-
-route::get('/exportar-formExcel/{idEmprendedor}/{documentoEmpresa?}/{tipo_reporte}', [ReportesController::class, 'procesarRespuestas']);
-Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
-Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
-Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);
-Route::post('/exportar_reporte_aliado', [ReportesController::class, 'exportarReportesAliados']);
-Route::get('/obtener_datos_formEmprendedor', [ReportesController::class, 'mostrarReporteFormEmprendedor']);
-
-//FanPage
-Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
-Route::get('/traerPersonalizacion/{id}', [SuperAdminController::class, 'obtenerPersonalizacion']);
-Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
-Route::get('/traerAliadosiau/{id}', [AliadoApiController::class, 'getAllAliados'])->name('traerAliadosiau');
-
-//descargas y buscar ruta
-Route::get('/descargar-archivo/{contenidoId}', [RutaApiController::class, 'descargarArchivoContenido']);
-Route::get('/ultimaruta/{rutaId}', [RutaApiController::class, 'getRutaInfo']);
-//Puntaje
-Route::group([], function () {
-    Route::post('/puntajes/{documento}', [PuntajeController::class, 'store']);
-    Route::get('/puntajeXemprendedor/{id}', [PuntajeController::class, 'getPuntajeXEmpresa']);
 });
 
 
-//Rutas
-Route::group([
-    'prefix' => 'ruta',
-    'middleware' => 'auth:api'
-], function () {
-    Route::apiResource('/ruta', RutaApiController::class);
-    Route::get('/mostrarRutaContenido/{id}', [RutaApiController::class, 'mostrarRutaConContenido'])->name('mostrarRutaContenido');
-    Route::get('/rutasActivas', [RutaApiController::class, 'rutasActivas']);
-    Route::get('/rutas', [RutaApiController::class, 'rutas']);
-    Route::get('/rutasmejorado', [RutaApiController::class, 'rutasmejorado']);
-    Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
-    Route::get('/actnivleccontXruta/{id}', [RutaApiController::class,'actnivleccontXruta']);
-    Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class,'actnividadxAliado']);
-    Route::get('/actnividadxNivelAsesor/{id}/{id_asesor}', [RutaApiController::class,'actnividadxNivelAsesor']);
-    Route::get('/actividadcompleta/{id}', [RutaApiController::class,'actividadCompletaxruta']);
-    Route::get('/idRespuestasHeidy/{id_emprendedor}', [RutaApiController::class, 'idRespuestas']);
-
-});
-
-
-//Actividad
-Route::group([
-    'prefix' => 'actividad',
-    'middleware' => 'auth:api'
-], function () {
-    Route::apiResource('/actividad', ActividadController::class);
-    Route::post('/crearActividad', [ActividadController::class, 'store']);
-    Route::post('/editar_actividad/{id}', [ActividadController::class, 'editarActividad']);
-    Route::get('/tipo_dato', [ActividadController::class, 'tipoDato']);
-    Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
-    Route::put('/activar_desactivar_actividad/{id}', [ActividadController::class, 'Activar_Desactivar_Actividad']);
-    Route::get('/ActiNivelLeccionContenido/{id}', [ActividadController::class, 'ActiNivelLeccionContenido']);
-    Route::get('/ActividadAsesor/{id}', [ActividadController::class, 'actividadAsesor']);
-
-});
-
-//Nivel
-Route::group([
-    'prefix' => 'nivel',
-    'middleware' => 'auth:api'
-], function () {
-    Route::apiResource('/nivel', NivelesController::class)->middleware('auth:api');
-    Route::post('/crearNivel', [NivelesController::class, 'store']);
-    Route::put('/editar_nivel/{id}', [NivelesController::class, 'editarNivel']);
-    Route::get('/listar_Nivel', [NivelesController::class, 'listarNiveles']);
-    Route::get('/nivelXactividad/{id}', [NivelesController::class, 'NivelxActividad']);
-    Route::get('/NivelxActividadxAsesor/{id_actividad}/{id_asesor}', [NivelesController::class, 'NivelxActividadxAsesor']);
-});
-
-//Leccion
-Route::group([
-    'prefix' => 'leccion',
-    'middleware' => 'auth:api'
-],function(){
-    Route::apiResource('/leccion',LeccionController::class);
-    Route::post('/crearLeccion',[LeccionController::class,'store']);
-    Route::get('/leccionXnivel/{id}',[LeccionController::class,'LeccionxNivel']);
-    Route::put('/editar_leccion/{id}',[LeccionController::class,'editarLeccion']);
-    //Route::apiResource('/leccion',LeccionController::class)->middleware('auth:api');
-});
-
-
-//Contenido_por_Leccion
-Route::group([
-    'prefix' => 'contenido_por_leccion',
-    'middleware' => 'auth:api'
-],function(){
-    Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class);
-    Route::post('/crearContenidoPorLeccion',[Contenido_por_LeccionController::class,'store']);
-    Route::post('/editarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'editarContenidoLeccion']);
-    Route::get('/tipo_dato',[Contenido_por_LeccionController::class,'tipoDatoContenido']);
-    Route::get('/mostrarContenidoPorLeccion/{id}',[Contenido_por_LeccionController::class,'verContenidoPorLeccion']);
-});
-//Route::apiResource('/contenido_por_leccion',Contenido_por_LeccionController::class)->middleware('auth:api');
-
-//Asesor
+//Rutas Asesor
 Route::group([
     'prefix' => 'asesor',
     'middleware' => 'auth:api'
@@ -259,6 +115,53 @@ Route::group([
     Route::get('/contarAsesorias/{idAsesor}', [AsesorApiController::class, 'contarAsesorias']);
     Route::get('/userProfileAsesor/{id}', [AsesorApiController::class, 'userProfileAsesor'])->name('UserProfileAsesor');
     Route::get('/listadoAsesores', [AsesorApiController::class, 'listarAsesores']);
+});
+
+//Rutas de Emprendedor
+Route::group([
+    'prefix' => 'emprendedor',
+    'middleware' => 'auth:api'
+], function () {
+    Route::apiResource('/emprendedor', EmprendedorApiController::class);
+    Route::post('/editarEmprededor/{documento}', [EmprendedorApiController::class, 'updateEmprendedor']);
+    Route::get('/userProfileEmprendedor/{documento}', [AuthController::class, 'userProfileEmprendedor']);
+});
+
+
+
+//Dashboard
+Route::group(
+    [
+        'prefix' => 'dashboard',
+        'middleware' => 'auth:api'
+    ],
+    function () {
+        Route::get('/contar-usuarios', [DashboardsController::class, 'getDashboardData']);
+        Route::get('/dashboardAliado/{idAliado}', [DashboardsController::class, 'dashboardAliado']);
+        Route::get('/asesoriasTotalesAliado', [DashboardsController::class, 'asesoriasTotalesAliado']);
+        Route::get('/graficaFormulario/{id_empresa}/{tipo}', [DashboardsController::class, 'getRadarChartData']);
+    }
+);
+
+
+
+
+//Rutas de ruta de aprendizaje
+Route::group([
+    'prefix' => 'ruta',
+    'middleware' => 'auth:api'
+], function () {
+    Route::apiResource('/ruta', RutaApiController::class);
+    //pendiente Route::get('/mostrarRutaContenido/{id}', [RutaApiController::class, 'mostrarRutaConContenido'])->name('mostrarRutaContenido');
+    Route::get('/rutasActivas', [RutaApiController::class, 'rutasActivas']);
+    Route::get('/rutas', [RutaApiController::class, 'rutas']);
+    Route::get('/rutasmejorado', [RutaApiController::class, 'rutaParaMostrarContenido']);
+    Route::get('/rutaXid/{id}', [RutaApiController::class, 'rutaxId']);
+    Route::get('/actnivleccontXruta/{id}', [RutaApiController::class, 'actnivleccontXruta']);
+    Route::get('/actnividadxAliado/{id}/{id_aliado}', [RutaApiController::class, 'actnividadxAliado']);
+    Route::get('/actnividadxNivelAsesor/{id}/{id_asesor}', [RutaApiController::class, 'actnividadxNivelAsesor']);
+    Route::get('/actividadcompleta/{id}', [RutaApiController::class, 'actividadCompletaxruta']);
+    Route::get('/idRespuestasHeidy/{id_emprendedor}', [RutaApiController::class, 'idRespuestas']);
 });
 
 
@@ -279,6 +182,59 @@ Route::group([
     Route::post('/gestionar', [AliadoApiController::class, 'gestionarAsesoria']);
 });
 
+//Actividad
+Route::group([
+    'prefix' => 'actividad',
+    'middleware' => 'auth:api'
+], function () {
+    Route::apiResource('/actividad', ActividadController::class);
+    Route::post('/crearActividad', [ActividadController::class, 'store']);
+    Route::post('/editar_actividad/{id}', [ActividadController::class, 'editarActividad']);
+    Route::get('/tipo_dato', [ActividadController::class, 'tipoDato']);
+    Route::get('/verActividadAliado/{id}', [ActividadController::class, 'VerActividadAliado']);
+    Route::put('/activar_desactivar_actividad/{id}', [ActividadController::class, 'Activar_Desactivar_Actividad']);
+    Route::get('/ActiNivelLeccionContenido/{id}', [ActividadController::class, 'ActiNivelLeccionContenido']);
+    Route::get('/ActividadAsesor/{id}', [ActividadController::class, 'actividadAsesor']);
+});
+
+//Nivel
+Route::group([
+    'prefix' => 'nivel',
+    'middleware' => 'auth:api'
+], function () {
+    Route::apiResource('/nivel', NivelesController::class)->middleware('auth:api');
+    Route::post('/crearNivel', [NivelesController::class, 'store']);
+    Route::put('/editar_nivel/{id}', [NivelesController::class, 'editarNivel']);
+    Route::get('/listar_Nivel', [NivelesController::class, 'listarNiveles']);
+    Route::get('/nivelXactividad/{id}', [NivelesController::class, 'NivelxActividad']);
+    Route::get('/NivelxActividadxAsesor/{id_actividad}/{id_asesor}', [NivelesController::class, 'NivelxActividadxAsesor']);
+});
+
+//Leccion
+Route::group([
+    'prefix' => 'leccion',
+    'middleware' => 'auth:api'
+], function () {
+    Route::apiResource('/leccion', LeccionController::class);
+    Route::post('/crearLeccion', [LeccionController::class, 'store']);
+    Route::get('/leccionXnivel/{id}', [LeccionController::class, 'LeccionxNivel']);
+    Route::put('/editar_leccion/{id}', [LeccionController::class, 'editarLeccion']);
+});
+
+
+//Contenido_por_Leccion
+Route::group([
+    'prefix' => 'contenido_por_leccion',
+    'middleware' => 'auth:api'
+], function () {
+    Route::apiResource('/contenido_por_leccion', Contenido_por_LeccionController::class);
+    Route::post('/crearContenidoPorLeccion', [Contenido_por_LeccionController::class, 'store']);
+    Route::post('/editarContenidoPorLeccion/{id}', [Contenido_por_LeccionController::class, 'editarContenidoLeccion']);
+    Route::get('/tipo_dato', [Contenido_por_LeccionController::class, 'tipoDatoContenido']);
+    Route::get('/mostrarContenidoPorLeccion/{id}', [Contenido_por_LeccionController::class, 'verContenidoPorLeccion']);
+});
+
+
 //Respuestas formulario
 Route::group([
     'prefix' => 'respuestas',
@@ -290,5 +246,36 @@ Route::group([
     Route::get('/form/section/{sectionId}', [FormResponsesController::class, 'getSection']);
     Route::get('/getRespuestasRedis/{empresaId}', [FormResponsesController::class, 'getAllRespuestasFromRedis']);
     Route::get('/verificarEstadoForm/{id_empresa}', [RespuestasApiController::class, 'verificarEstadoFormulario']);
+});
+
+//Ruta para traer tipo documento
+Route::get('/tipo_documento', [EmprendedorApiController::class, 'tipoDocumento']);
+
+//UbicacionController
+Route::get('/deps/all', [UbicacionController::class, 'listar_dep'])->name('listar_dep');
+Route::get('/mun', [UbicacionController::class, 'listar_munxdep'])->name('listar_munxdep');
+
+//Reportes
+route::get('/exportar-formExcel/{idEmprendedor}/{documentoEmpresa?}/{tipo_reporte}', [ReportesController::class, 'procesarRespuestas']);
+Route::post('/exportar_reporte', [ReportesController::class, 'exportarReporte']);
+Route::get('/obtener_datos_reporte', [ReportesController::class, 'obtenerDatosReporte']);
+Route::get('/obtener_datos_aliados', [ReportesController::class, 'mostrarReportesAliados']);
+Route::post('/exportar_reporte_aliado', [ReportesController::class, 'exportarReportesAliados']);
+Route::get('/obtener_datos_formEmprendedor', [ReportesController::class, 'mostrarReporteFormEmprendedor']);
+
+//FanPage
+Route::get('/aliado/{status}', [AliadoApiController::class, 'traerAliadosActivos'])->name('Traeraliadosactivos');
+Route::get('/traerPersonalizacion/{id}', [SuperAdminController::class, 'obtenerPersonalizacion']);
+Route::get('/banner/{status}', [AliadoApiController::class, 'traerBanners']);
+Route::get('/traerAliadosiau/{id}', [AliadoApiController::class, 'getAllAliados'])->name('traerAliadosiau');
+
+//descargas y buscar ruta
+Route::get('/descargar-archivo/{contenidoId}', [RutaApiController::class, 'descargarArchivoContenido']);
+Route::get('/ultimaruta/{rutaId}', [RutaApiController::class, 'getRutaInfo']);
+
+//Puntaje
+Route::group([], function () {
+    Route::post('/puntajes/{documento}', [PuntajeController::class, 'store']);
+    Route::get('/puntajeXemprendedor/{id}', [PuntajeController::class, 'getPuntajeXEmpresa']);
 });
 

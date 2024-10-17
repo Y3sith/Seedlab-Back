@@ -28,6 +28,8 @@ use App\Repositories\Nivel\NivelRepository;
 use App\Repositories\Nivel\NivelRepositoryInterface;
 use App\Repositories\Orientador\OrientadorRepository;
 use App\Repositories\Orientador\OrientadorRepositoryInterface;
+use App\Repositories\Ruta\RutaRepository;
+use App\Repositories\Ruta\RutaRepositoryInterface;
 use App\Repositories\SuperAdmin\SuperAdminRepository;
 use App\Repositories\SuperAdmin\SuperAdminRepositoryInterface;
 use App\Repositories\Ubicacion\UbicacionRepository;
@@ -45,6 +47,7 @@ use App\Services\ImageService;
 use App\Services\LeccionService;
 use App\Services\NivelService;
 use App\Services\OrientadorService;
+use App\Services\RutaService;
 use App\Services\SuperAdminService;
 use App\Services\UbicacionService;
 use Illuminate\Support\ServiceProvider;
@@ -78,6 +81,7 @@ class AppServiceProvider extends ServiceProvider
         $this->app->bind(ActividadRepositoryInterface::class, ActividadRepository::class);
         $this->app->bind(OrientadorRepositoryInterface::class, OrientadorRepository::class);
         $this->app->bind(SuperAdminRepositoryInterface::class, SuperAdminRepository::class);
+        $this->app->bind(RutaRepositoryInterface::class, RutaRepository::class);
 
 
 
@@ -163,6 +167,10 @@ class AppServiceProvider extends ServiceProvider
                 $app->make(SuperAdminRepositoryInterface::class),
                 $app->make(ImageService::class)
             );
+        });
+
+        $this->app->singleton(RutaService::class, function ($app) {
+            return new RutaService($app->make(RutaRepositoryInterface::class));
         });
     }
 
