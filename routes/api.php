@@ -35,7 +35,8 @@ Route::group([
 });
 
 
-//Empresa
+
+//Rutas Empresa
 Route::group([
     'prefix' => 'empresa',
     'middleware' => 'auth:api'
