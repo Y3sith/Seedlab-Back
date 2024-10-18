@@ -220,7 +220,7 @@ class RutaService
             return $actividad;
         });
 
-        return ['status' => 200, 'data' => $ruta];
+        return ['status' => 200, 'data' => [$ruta]];
     }
 
     public function descargarArchivoContenido($contenidoId)
