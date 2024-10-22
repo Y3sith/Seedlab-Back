@@ -53,7 +53,10 @@ class BannerService
 
             // Crea el banner en la base de datos
             $banner = $this->bannerRepository->crearBanner([
-                'urlImagen' => $bannerUrl,
+                'urlImagenSmall' => $bannerUrl['small'],
+                'urlImagenMedium' => $bannerUrl['medium'],
+                'urlImagenLarge' => $bannerUrl['large'],
+                //'urlImagen' => $bannerUrl,
                 'estadobanner' => $data['estadobanner'],
                 'id_aliado' => $data['id_aliado'],
             ]);
@@ -83,23 +86,17 @@ class BannerService
 
     public function traerBanners(int $status)
     {
-        return Banner::where('estadobanner', $status)
-            ->select('urlImagen', 'estadobanner')
-            ->get();
+        return $this->bannerRepository->traerBanners($status);
     }
 
     public function traerBannersxaliado($id_aliado)
     {
-        return Banner::where('id_aliado', $id_aliado)
-            ->select('id', 'urlImagen', 'estadobanner', 'id_aliado')
-            ->get();
+        return $this->bannerRepository->traerBannersxaliado($id_aliado);
     }
 
     public function traerBannersxID(int $id)
     {
-        return Banner::where('id', $id)
-            ->select('id', 'urlImagen', 'estadobanner', 'id_aliado')
-            ->first();
+        return $this->bannerRepository->traerBannersxID($id);
     }
 
     /**
@@ -125,21 +122,25 @@ class BannerService
             throw new Exception('Banner no encontrado', 404);
         }
 
-        // Actualiza la imagen si se proporciona una nueva
+        // Si se proporciona una nueva imagen
         if ($imageFile && $imageFile->isValid()) {
-            // Elimina la imagen anterior
-            Storage::delete(str_replace('storage', 'public', $banner->urlImagen));
+            // Elimina las imágenes anteriores
+            Storage::delete(str_replace('storage', 'public', $banner->urlImagenSmall));
+            Storage::delete(str_replace('storage', 'public', $banner->urlImagenMedium));
+            Storage::delete(str_replace('storage', 'public', $banner->urlImagenLarge));
 
             // Procesa y almacena la nueva imagen
-            $bannerUrl = $this->imageService->procesarImagen($imageFile, 'banners');
+            $bannerUrls = $this->imageService->procesarImagen($imageFile, 'banners');
 
-            // Actualiza el banner
+            // Actualiza el banner con las nuevas URLs de imagen
             $banner = $this->bannerRepository->editarBanner($id, [
-                'urlImagen' => $bannerUrl,
+                'urlImagenSmall' => $bannerUrls['small'],
+                'urlImagenMedium' => $bannerUrls['medium'],
+                'urlImagenLarge' => $bannerUrls['large'],
                 'estadobanner' => $data['estadobanner'] ?? $banner->estadobanner,
             ]);
         } else {
-            // Solo actualiza el estado si se proporciona
+            // Si no se proporciona una nueva imagen, solo actualizar el estado
             $banner = $this->bannerRepository->editarBanner($id, [
                 'estadobanner' => $data['estadobanner'] ?? $banner->estadobanner,
             ]);
@@ -150,6 +151,7 @@ class BannerService
             'banner' => $banner
         ];
     }
+
 
     /**
      * Elimina un banner existente.

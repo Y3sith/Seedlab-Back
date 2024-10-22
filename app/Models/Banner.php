@@ -13,7 +13,10 @@ class Banner extends Model
     protected $table = 'banner';
 
     protected $fillable = [
-        'urlImagen', 
+        //'urlImagen',
+        'urlImagenSmall',
+        'urlImagenMedium',
+        'urlImagenLarge', 
         'descripcion', 
         'estadobanner',
         'color',

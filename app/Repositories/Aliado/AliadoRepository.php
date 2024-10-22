@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Log;
 
 class AliadoRepository implements AliadoRepositoryInterface
 {
@@ -55,9 +56,12 @@ class AliadoRepository implements AliadoRepositoryInterface
 
     public function crearAliado(array $data)
     {
+        
+        $logoUrl = $data['logoUrl']['medium'];
+
         $results = DB::select('CALL sp_registrar_aliado(?, ?, ?, ?, ?, ?, ?, ?, ?)', [
             $data['nombre'],
-            $data['logoUrl'],
+            $logoUrl,
             $data['descripcion'],
             $data['id_tipo_dato'],
             $data['ruta_multi'],

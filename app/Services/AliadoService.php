@@ -3,6 +3,7 @@
 namespace App\Services;
 
 
+use App\Repositories\Banner\BannerRepositoryInterface;
 use Illuminate\Support\Facades\Hash;
 use App\Jobs\EnviarNotificacionCrearUsuario;
 use App\Models\User;
@@ -18,11 +19,13 @@ class AliadoService
 {
     protected $aliadoRepository;
     protected $imageService;
+    protected $bannerRepository;
 
-    public function __construct(AliadoRepositoryInterface $aliadoRepository, ImageService $imageService)
+    public function __construct(AliadoRepositoryInterface $aliadoRepository, ImageService $imageService, BannerRepositoryInterface $bannerRepository)
     {
         $this->aliadoRepository = $aliadoRepository;
         $this->imageService = $imageService;
+        $this->bannerRepository = $bannerRepository;
     }
 
     public function traerAliadosActivos(int $status)
@@ -70,21 +73,36 @@ class AliadoService
         DB::beginTransaction();
 
         try {
-            //Log::info('Iniciando creación de aliado en el servicio', ['data' => $data]);
+            Log::info('Iniciando creación de aliado en el servicio', ['data' => $data]);
 
             // 1. Generar contraseña aleatoria y su hash
             $randomPassword = $this->generateRandomPassword();
             $hashedPassword = Hash::make($randomPassword);
 
             // 2. Procesar logo
-            //Log::info('Procesando logo');
+            Log::info('Procesando logo');
             $logoUrl = $this->imageService->procesarImagen($logoFile, 'logos');
-            //Log::info('Logo procesado', ['logoUrl' => $logoUrl]);
+            Log::info('Logo procesado', ['logoUrl' => $logoUrl]);
 
-            // 3. Procesar ruta_multi según tipo
-            //Log::info('Procesando ruta_multi');
-            $rutaMulti = $this->procesarRutaMulti($data, $rutaMultiFile);
-            //Log::info('Ruta multi procesada', ['ruta_multi' => $rutaMulti]);
+            // 3. Procesar ruta_multi si es un archivo subido o un enlace de video
+            if ($rutaMultiFile instanceof UploadedFile) {
+                // Caso cuando es un archivo subido
+                Log::info('Procesando ruta_multi como archivo');
+                $rutaMulti = $this->imageService->procesarImagen($rutaMultiFile, 'ruta_multi');
+                Log::info('Ruta multi procesada como archivo', ['ruta_multi' => $rutaMulti]);
+
+                // Seleccionamos la versión 'medium' de la imagen
+                $rutaMultiSeleccionada = $rutaMulti['medium'];
+            } elseif (is_string($data['ruta_multi']) && filter_var($data['ruta_multi'], FILTER_VALIDATE_URL)) {
+                // Caso cuando es un enlace de video
+                Log::info('Procesando ruta_multi como un enlace de video');
+                $rutaMultiSeleccionada = $data['ruta_multi'];  // Aquí usas directamente el enlace de video
+            } else {
+                // Si no es un archivo válido ni un enlace de video
+                throw new Exception("El campo 'ruta_multi' no es un archivo válido ni un enlace de video.");
+            }
+
+            Log::info('Ruta multi procesada', ['ruta_multi' => $rutaMultiSeleccionada]);
 
             // 4. Preparar datos para el procedimiento almacenado
             $aliadoData = [
@@ -92,7 +110,7 @@ class AliadoService
                 'logoUrl' => $logoUrl,
                 'descripcion' => $data['descripcion'],
                 'id_tipo_dato' => $data['id_tipo_dato'],
-                'ruta_multi' => $rutaMulti,
+                'ruta_multi' => $rutaMultiSeleccionada,  // Usamos la imagen o el enlace de video
                 'urlpagina' => $data['urlpagina'],
                 'email' => $data['email'],
                 'hashedPassword' => $hashedPassword,
@@ -100,9 +118,9 @@ class AliadoService
             ];
 
             // 5. Crear Aliado usando el Repositorio
-            //Log::info('Creando aliado en el repositorio');
+            Log::info('Creando aliado en el repositorio');
             $result = $this->aliadoRepository->crearAliado($aliadoData);
-            //Log::info('Respuesta del repositorio', ['result' => $result]);
+            Log::info('Respuesta del repositorio', ['result' => $result]);
 
             // 6. Manejar la respuesta del procedimiento almacenado
             $response = $result->mensaje;
@@ -122,23 +140,26 @@ class AliadoService
             }
 
             // 8. Procesar banner si se proporciona
+            // Si hay un banner, procesarlo
             if ($bannerFile && $bannerFile->isValid()) {
-                //Log::info('Procesando banner');
-                $bannerUrl = $this->imageService->procesarImagen($bannerFile, 'banners');
-                //Log::info('Banner procesado', ['bannerUrl' => $bannerUrl]);
+                Log::info('Procesando banner');
+                $bannerUrls = $this->imageService->procesarImagen($bannerFile, 'banners');
+                Log::info('Banner procesado', ['bannerUrls' => $bannerUrls]);
 
-                // Crear Banner usando el Repositorio
+                // Preparar los datos del banner
                 $bannerData = [
-                    'urlImagen' => $bannerUrl,
+                    'urlImagenSmall' => $bannerUrls['small'],
+                    'urlImagenMedium' => $bannerUrls['medium'],
+                    'urlImagenLarge' => $bannerUrls['large'],
                     'estadobanner' => $data['banner_estadobanner'] ?? true,
-                    'id_aliado' => $aliadoId,
+                    'id_aliado' => $result->id, // Asociar con el aliado recién creado
                 ];
-                //Log::info('Creando banner');
-                app('App\Repositories\BannerRepositoryInterface')->crearBanner($bannerData);
-            }
 
+                Log::info('Creando banner en el repositorio');
+                $this->bannerRepository->crearBanner($bannerData); // Usar el repositorio inyectado
+            }
             DB::commit();
-            //Log::info('Transacción completada, aliado creado exitosamente');
+            Log::info('Transacción completada, aliado creado exitosamente');
 
             return ['message' => 'Aliado creado exitosamente', 'aliadoId' => $aliadoId];
         } catch (Exception $e) {

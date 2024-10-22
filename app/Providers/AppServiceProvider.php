@@ -94,7 +94,8 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(AliadoService::class, function ($app) {
             return new AliadoService(
                 $app->make(AliadoRepositoryInterface::class),
-                $app->make(ImageService::class)
+                $app->make(ImageService::class),
+                $app->make(BannerRepositoryInterface::class)
             );
         });
 

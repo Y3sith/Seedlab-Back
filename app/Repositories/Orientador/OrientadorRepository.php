@@ -67,7 +67,7 @@ class OrientadorRepository implements OrientadorRepositoryInterface
 
     public function mostrarOrientadores($status)
     {
-        return Orientador::select('orientador.id', 'orientador.nombre', 'orientador.apellido', 'orientador.celular', 'orientador.id_autentication')
+        return Orientador::select('orientador.id', 'orientador.nombre', 'orientador.apellido', 'orientador.celular', 'orientador.id_autentication', 'users.email', 'users.estado')
             ->join('users', 'orientador.id_autentication', '=', 'users.id')
             ->where('users.estado', $status)
             ->get();
@@ -93,7 +93,8 @@ class OrientadorRepository implements OrientadorRepositoryInterface
         return Orientador::where('orientador.id', $id)
             ->join('municipios', 'orientador.id_municipio', '=', 'municipios.id')
             ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
-            ->select('orientador.*', 'municipios.nombre as municipio_nombre', 'departamentos.name as departamento_nombre', 'departamentos.id as id_departamento')
+            ->join('users', 'orientador.id_autentication', '=', 'users.id' )
+            ->select('orientador.*', 'municipios.nombre as municipio_nombre', 'departamentos.name as departamento_nombre', 'departamentos.id as id_departamento', 'users.email', 'users.estado')
             ->first();
     }
 }

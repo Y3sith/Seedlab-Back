@@ -131,8 +131,11 @@ class AliadoApiController extends Controller
 
             $bannersTransformados = $banners->map(function ($banner) {
                 return [
-                    'urlImagen' => $banner->urlImagen,
-                    'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo'
+                    'urlImagenSmall' => $banner->urlImagenSmall, // Devolvemos la imagen pequeña
+                    'urlImagenMedium' => $banner->urlImagenMedium, // Devolvemos la imagen mediana
+                    'urlImagenLarge' => $banner->urlImagenLarge, // Devolvemos la imagen grande
+                    'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo',
+
                 ];
             });
 
@@ -142,6 +145,7 @@ class AliadoApiController extends Controller
             return response()->json(['error' => 'Error al obtener banners'], 500);
         }
     }
+
 
     /**
      * Función para mostrar los banners de cada aliado.
@@ -154,7 +158,9 @@ class AliadoApiController extends Controller
             $bannersTransformados = $banners->map(function ($banner) {
                 return [
                     'id' => $banner->id,
-                    'urlImagen' => $banner->urlImagen,
+                    'urlImagenSmall' => $banner->urlImagenSmall,
+                    'urlImagenMedium' => $banner->urlImagenMedium,
+                    'urlImagenLarge' => $banner->urlImagenLarge,
                     'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo'
                 ];
             });
@@ -179,7 +185,9 @@ class AliadoApiController extends Controller
 
             return response()->json([
                 'id' => $banner->id,
-                'urlImagen' => $banner->urlImagen,
+                'urlImagenSmall' => $banner->urlImagenSmall,
+                'urlImagenMedium' => $banner->urlImagenMedium,
+                'urlImagenLarge' => $banner->urlImagenLarge,
                 'estadobanner' => $banner->estadobanner == 1 ? 'Activo' : 'Inactivo',
                 'id_aliado' => $banner->id_aliado,
             ], 200);
@@ -195,7 +203,7 @@ class AliadoApiController extends Controller
     public function crearAliado(Request $request)
     {
         try {
-            //Log::info('Iniciando creación de aliado', ['request' => $request->except(['logoFile', 'ruta_multi', 'bannerFile'])]);
+            Log::info('Iniciando creación de aliado', ['request' => $request->except(['logoFile', 'ruta_multi', 'bannerFile'])]);
 
             // 1. Validar los datos entrantes
             $validatedData = $request->validate([
@@ -210,7 +218,7 @@ class AliadoApiController extends Controller
                 'bannerFile' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:5120',
             ]);
 
-            //Log::info('Validación exitosa');
+            Log::info('Validación exitosa');
 
             // 2. Extraer los datos relevantes del request
             $data = $request->only([
@@ -228,7 +236,7 @@ class AliadoApiController extends Controller
             $rutaMultiFile = $request->file('ruta_multi');
             $bannerFile = $request->file('bannerFile');
 
-            //Log::info('Llamando al servicio crearAliado');
+            Log::info('Llamando al servicio crearAliado');
 
             // 4. Llamar al método del servicio con los argumentos correctos
             $resultado = $this->aliadoService->crearAliado($data, $logoFile, $rutaMultiFile, $bannerFile);
