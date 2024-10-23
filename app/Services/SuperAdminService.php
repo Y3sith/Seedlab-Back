@@ -114,8 +114,8 @@ class SuperAdminService
 
                     // Envia el correo utilizando un Job
                     if ($email) {
-                        Log::info('Despachando job para enviar notificación', ['email' => $email]);
-                        EnviarNotificacionCrearUsuario::dispatch($email, 'Aliado', $originalPassword);
+                        Log::info('Despachando job para enviar notificación', ['email' => $email, 'password'=>$randomPassword]);
+                        EnviarNotificacionCrearUsuario::dispatch($email, 'SuperAdmin', $randomPassword);
                     }
 
 
@@ -148,7 +148,7 @@ class SuperAdminService
                 'documento' => $admin->documento,
                 'id_tipo_documento' => $admin->id_tipo_documento,
                 'fecha_nac' => $admin->fecha_nac,
-                'imagen_perfil' => $admin->imagen_perfil ? $this->correctImageUrl($admin->imagen_perfil) : null,
+                'imagen_perfil' => $admin->imagen_perfil,
                 'direccion' => $admin->direccion,
                 'celular' => $admin->celular,
                 'genero' => $admin->genero,
