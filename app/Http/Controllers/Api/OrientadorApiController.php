@@ -19,8 +19,20 @@ class OrientadorApiController extends Controller
     {
         $data = $request->all();
         $response = $this->orientadorService->crearOrientador($data);
-        return response()->json(['message' => $response], 200);
+
+        // Verifica si se ha producido un error y ajusta el código de estado
+        if ($response['status'] === 200) {
+            return response()->json([
+                'message' => $response['mensaje'],
+                'email' => $response['email']
+            ], 200);
+        } else {
+            return response()->json([
+                'message' => $response['mensaje']
+            ], $response['status']);
+        }
     }
+
 
     public function asignarAsesoriaAliado(Request $request, $idAsesoria)
     {
