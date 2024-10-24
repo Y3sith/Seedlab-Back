@@ -123,7 +123,8 @@ class SuperAdminController extends Controller
                 return response()->json(['message' => 'No tienes permiso para acceder a esta ruta'], 401);
             }
             $response = $this->superAdminService->restore($id);
-            return response()->json($response['message'], $response['status']);
+            return response()->json(['message' => $response['message']], $response['status']);
+
         } catch (Exception $e) {
             return response()->json([
                 'message' => 'Error al restaurar la personalización',
