@@ -62,8 +62,9 @@ class ActividadService
 
         if (isset($data['fuente']) && $data['fuente'] instanceof UploadedFile) {
             $folder = 'imagenes';
-            $webpPath = $this->imageService->procesarImagen($data['fuente'], $folder);
-            $data['fuente'] = Storage::url($webpPath);
+            $webpPaths = $this->imageService->procesarImagen($data['fuente'], $folder);
+            
+            $data['fuente'] = isset($webpPaths['medium']) ? Storage::url($webpPaths['medium']) : Storage::url($webpPaths[0]);
         } else {
             throw new Exception('No se proporcionó una fuente de imagen válida');
         }

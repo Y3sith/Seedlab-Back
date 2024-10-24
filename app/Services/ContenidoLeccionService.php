@@ -28,8 +28,16 @@ class ContenidoLeccionService
 
         // Procesar la fuente del contenido
         $fuente = null;
+
         if ($fuenteContenido) {
-            $fuente = $this->imageService->procesarRutaMulti($fuenteContenido);
+            $rutas = $this->imageService->procesarRutaMulti($fuenteContenido);
+
+            // Si $rutas es un array, selecciona solo la versión que necesitas
+            if (is_array($rutas)) {
+                $fuente = $rutas['medium'] ?? current($rutas); // Elige 'medium' o la primera opción disponible
+            } else {
+                $fuente = $rutas; // Si es una sola ruta, úsala directamente
+            }
         } elseif (filter_var($data['fuente_contenido'], FILTER_VALIDATE_URL)) {
             $fuente = $data['fuente_contenido'];
         } else {
@@ -40,6 +48,7 @@ class ContenidoLeccionService
 
         return $this->contenidoLeccionRepository->crearContenido($data);
     }
+
 
     public function editarContenido($id, array $data, $fuenteContenido)
     {
