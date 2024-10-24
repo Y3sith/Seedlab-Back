@@ -44,6 +44,7 @@ class AsesorRepository implements AsesorRepositoryInterface
         return Asesor::where('asesor.id', $id)
             ->join('municipios', 'asesor.id_municipio', '=', 'municipios.id')
             ->join('departamentos', 'municipios.id_departamento', '=', 'departamentos.id')
+            ->join('users', 'asesor.id_autentication', '=', 'users.id')
             ->select(
                 'asesor.id',
                 'asesor.nombre',
@@ -57,8 +58,20 @@ class AsesorRepository implements AsesorRepositoryInterface
                 'asesor.genero',
                 'asesor.id_municipio',
                 'departamentos.id as id_departamento',
-                'asesor.id_autentication'
+                'asesor.id_autentication',
+                'users.email',
+                'users.estado'
             )
             ->first();
+    }
+
+    public function findByCelular($celular)
+    {
+        return Asesor::where('celular', $celular)->first();
+    }
+
+    public function updateAsesorAliado($asesor)
+    {
+        $asesor->save();
     }
 }

@@ -25,7 +25,7 @@ class AuthServiceProvider extends ServiceProvider
         $this->registerPolicies();
 
         // Configurar expiración de tokens
-        Passport::tokensExpireIn(Carbon::now()->addHours(12)); // Tokens de acceso expiran en 12 horas
+        Passport::tokensExpireIn(Carbon::now()->addMinutes(1)); // Tokens de acceso expiran en 12 horas
         Passport::refreshTokensExpireIn(Carbon::now()->addDays(30)); // Tokens de actualización expiran en 30 días
         Passport::personalAccessTokensExpireIn(Carbon::now()->addMonths(6)); // Tokens de acceso personal expiran en 6 meses
     }

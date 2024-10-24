@@ -93,12 +93,18 @@ class AuthController extends Controller
             }
         }
 
+        // Establecer la zona horaria por defecto
+        Carbon::setLocale('es');
+        date_default_timezone_set('America/Bogota');
+
         // Crear un token de acceso para el usuario
         $tokenResult = $user->createToken('Personal Access Token');
         $token = $tokenResult->token;
         // Se establece la expiración del token
-        $token->expires_at = Carbon::now()->addHours(12);
+        $token->expires_at = Carbon::now()->addMinutes(1);
         $token->save();
+
+        
 
         // Obtener información adicional del usuario
         $additionalInfo = $this->getAdditionalInfo($user);

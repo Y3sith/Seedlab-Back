@@ -62,6 +62,22 @@ class AsesorApiController extends Controller
         }
     }
 
+    public function updateAsesorxAliado(Request $request, $id)
+    {
+        try {
+            if (Auth::user()->id_rol != 3) {
+                return response()->json(['message' => 'no tienes permiso para esta funcion'], 403);
+            }
+
+            $data = $request->all();
+            $message = $this->asesorService->updateAsesorxAliado($data, $id);
+
+            return response()->json(['message' => $message], 200);
+        } catch (Exception $e) {
+            return response()->json(['message' => $e->getMessage()], $e->getCode() ?: 500);
+        }
+    }
+
     public function mostrarAsesoriasAsesor($id, $conHorario)
     {
         try {
@@ -76,9 +92,9 @@ class AsesorApiController extends Controller
     {
         try {
             $asesor = $this->asesorService->obtenerAsesorConUbicacion($id);
-            if ($asesor->imagen_perfil) {
-                $asesor->imagen_perfil = url(str_replace('public', 'storage', $asesor->imagen_perfil));
-            }
+            // if ($asesor->imagen_perfil) {
+            //     $asesor->imagen_perfil = url(str_replace('public', 'storage', $asesor->imagen_perfil));
+            // }
             
             return response()->json($asesor, 200);
         } catch (Exception $e) {
