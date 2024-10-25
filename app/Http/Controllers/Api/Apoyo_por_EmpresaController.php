@@ -4,17 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Services\ApoyoService;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Exception;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 
 class Apoyo_por_EmpresaController extends Controller
 {
     protected $apoyoEmpresaService;
 
+    // Constructor que inyecta el servicio de apoyo empresa.
     public function __construct(ApoyoService $apoyoEmpresaService)
     {
         $this->apoyoEmpresaService = $apoyoEmpresaService;
@@ -76,7 +75,7 @@ class Apoyo_por_EmpresaController extends Controller
     }
 
     /**
-     * Función para traer los apoyos de cada empresa
+     * Endpoint para obtener los apoyos asociados a una empresa específica.
      */
     public function getApoyosxEmpresa($id_empresa)
     {
@@ -95,15 +94,17 @@ class Apoyo_por_EmpresaController extends Controller
         }
     }
     /**
-     * Función para editar elos apoyos
+     * Endpoint para editar un apoyo basado en su documento.
      */
     public function editarApoyo(Request $request, $documento)
     {
         try {
+            // Verifica que el usuario tenga el rol 5.
             if (Auth::user()->id_rol != 5) {
                 return response()->json(['error' => 'No tienes permiso para acceder'], 403);
             }
 
+            // Recopila los datos proporcionados en el request.
             $data = [
                 'documento' => $request->input('documento'),
                 'nombre' => $request->input('nombre'),
@@ -115,12 +116,15 @@ class Apoyo_por_EmpresaController extends Controller
                 'id_tipo_documento' => $request->input('id_tipo_documento'),
             ];
 
+            // Llama al servicio para actualizar el apoyo basado en el documento.
             $apoyo = $this->apoyoEmpresaService->editarApoyo($documento, $data);
 
+            // Si no se encuentra el apoyo, retorna un error.
             if (!$apoyo) {
                 return response()->json(['error' => 'No se encontró el apoyo con el documento proporcionado'], 404);
             }
 
+            // Retorna una respuesta exitosa indicando que el apoyo fue editado.
             return response()->json(['message' => 'Apoyo editado exitosamente'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'Ocurrió un error al procesar la solicitud: ' . $e->getMessage()], 500);
