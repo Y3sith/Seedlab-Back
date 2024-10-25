@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AsesorService
 {
+    //Inyección de repository
     protected $asesorRepository;
 
     public function __construct(AsesorRepositoryInterface $asesorRepository)
@@ -19,21 +20,28 @@ class AsesorService
         $this->asesorRepository = $asesorRepository;
     }
 
+    /**
+     * Crear un nuevo asesor en la base de datos.
+     * 
+     * @param array $data - Los datos del asesor a crear.
+     * @param UploadedFile|null $imagenPerfil - La imagen de perfil del asesor.
+     * @return string - Un mensaje indicando el éxito de la operación.
+     */
     public function crearAsesor(array $data, $imagenPerfil)
     {
-        // Procesar la imagen de perfil
+        // Procesar la imagen de perfil y la almacena si es válida.
         $data['imagen_perfil'] = null;
         if ($imagenPerfil && $imagenPerfil->isValid()) {
             $data['imagen_perfil'] = Storage::url($imagenPerfil->store('fotoPerfil', 'public'));
         }
 
-        // contraseña generada antes de hashearla
+        // Guarda la contraseña sin hashear para enviar por correo.
         $originalPassword = $data['password'];
 
         // Hashear la contraseña
         $data['password'] = Hash::make($data['password']);
 
-        // Ordenar los parámetros según el orden del procedimiento almacenado
+        // Define los parámetros para llamar al procedimiento almacenado en el repositorio.
         $params = [
             $data['nombre'],
             $data['apellido'],
@@ -54,9 +62,10 @@ class AsesorService
 
         //Log::info('Parámetros enviados a sp_registrar_asesor:', $params);
 
+        // Llama al repositorio para crear el asesor.
         $results = $this->asesorRepository->crearAsesor($params);
 
-        // Enviar notificación de correo
+        // Enviar una notificación por correo al asesor recién creado con su contraseña original.
         if (!empty($results) && isset($results[0]->email)) {
             Mail::to($results[0]->email)->send(new NotificacionCrearUsuario($results[0]->email, 'Asesor', $originalPassword));
         }
@@ -65,7 +74,15 @@ class AsesorService
     }
 
 
-
+    /**
+     * Actualizar los datos de un asesor.
+     * 
+     * @param int $id - El ID del asesor a actualizar.
+     * @param array $data - Los datos a actualizar.
+     * @param UploadedFile|null $imagenPerfil - La nueva imagen de perfil (si se proporciona).
+     * @return Asesor - El asesor actualizado.
+     * @throws Exception - Si el asesor no es encontrado.
+     */
     public function actualizarAsesor($id, array $data, $imagenPerfil = null)
     {
         $asesor = $this->asesorRepository->buscarAsesorPorId($id);
@@ -74,6 +91,7 @@ class AsesorService
             throw new Exception('Asesor no encontrado');
         }
 
+        // Si se proporciona una nueva imagen de perfil, la almacena y elimina la anterior.
         if ($imagenPerfil && $imagenPerfil->isValid()) {
             Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
             $data['imagen_perfil'] = Storage::url($imagenPerfil->store('fotoPerfil', 'public'));
@@ -82,14 +100,31 @@ class AsesorService
         return $this->asesorRepository->actualizarAsesor($asesor, $data);
     }
 
+    /**
+     * Obtener las asesorías de un asesor por su ID.
+     * 
+     * @param int $id - El ID del asesor.
+     * @param string $conHorario - Filtro para asesorías con o sin horario.
+     * @return \Illuminate\Database\Eloquent\Collection - Las asesorías encontradas.
+     */
     public function obtenerAsesoriasPorId($id, $conHorario)
     {
+        // Obtiene las asesorías relacionadas con el asesor.
         $asesorias = $this->asesorRepository->buscarAsesoriasPorId($id);
+
+        // Filtra las asesorías según si tienen o no horarios.
         return $asesorias->filter(function ($asesoria) use ($conHorario) {
             return ($conHorario === 'true' && $asesoria->horarios->isNotEmpty()) || ($conHorario === 'false' && $asesoria->horarios->isEmpty());
         });
     }
 
+    /**
+     * Obtener un asesor por su ID junto con la información de ubicación.
+     * 
+     * @param int $id - El ID del asesor.
+     * @return array - Los datos del asesor con ubicación.
+     * @throws Exception - Si el asesor no es encontrado.
+     */
     public function obtenerAsesorConUbicacion($id)
     {
         $asesor = $this->asesorRepository->buscarAsesorConUbicacion($id);
@@ -98,7 +133,8 @@ class AsesorService
             throw new Exception('Asesor no encontrado', 404);
         }
 
-        return[
+        // Retorna los datos del asesor con su ubicación.
+        return [
             'id' => $asesor->id,
             'nombre' => $asesor->nombre,
             'apellido' => $asesor->apellido,
@@ -118,6 +154,14 @@ class AsesorService
         ];
     }
 
+    /**
+     * Actualizar un asesor desde un aliado.
+     * 
+     * @param array $data - Los datos del asesor a actualizar.
+     * @param int $id - El ID del asesor a actualizar.
+     * @return string - Un mensaje de éxito.
+     * @throws Exception - Si el asesor o su número de celular o correo ya existen.
+     */
     public function updateAsesorxAliado($data, $id)
     {
         $asesor = $this->asesorRepository->buscarAsesorPorId($id);
@@ -126,6 +170,7 @@ class AsesorService
             throw new Exception('Asesor no encontrado', 404);
         }
 
+        // Actualiza los datos básicos del asesor.
         $asesor->nombre = $data['nombre'];
         $asesor->apellido = $data['apellido'];
         $newCelular = $data['celular'];
@@ -137,6 +182,7 @@ class AsesorService
         $asesor->id_departamento = $data['id_departamento'];
         $asesor->id_municipio = $data['id_municipio'];
 
+        // Verifica si el nuevo número de celular ya está registrado.
         if ($newCelular && $newCelular !== $asesor->celular) {
             $existing = $this->asesorRepository->findByCelular($newCelular);
             if ($existing) {
@@ -145,6 +191,7 @@ class AsesorService
             $asesor->celular = $newCelular;
         }
 
+        // Actualiza la imagen de perfil si se proporciona una nueva.
         if (isset($data['imagen_perfil']) && $data['imagen_perfil']->isValid()) {
             Storage::delete(str_replace('storage', 'public', $asesor->imagen_perfil));
             $path = $data['imagen_perfil']->store('public/fotoPerfil');
@@ -153,6 +200,7 @@ class AsesorService
 
         $this->asesorRepository->updateAsesorAliado($asesor);
 
+        // Si el asesor tiene una cuenta de usuario (auth), actualiza también su correo y contraseña.
         if ($asesor->auth) {
             $user = $asesor->auth;
             if (isset($data['password'])) {
@@ -170,7 +218,7 @@ class AsesorService
                 }
                 $user->email = $newEmail;
             }
-
+            // Actualiza el estado del usuario.
             $user->estado = $data['estado'];
             $user->save();
         }
