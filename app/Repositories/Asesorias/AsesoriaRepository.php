@@ -38,27 +38,31 @@ class AsesoriaRepository implements AsesoriaRepositoryInterface
         return Asesoria::create($data);
     }
 
+    //Fución que busca emprendedor por documento
     public function encontrarEmprendedor($docEmprendedor)
     {
         return Emprendedor::find($docEmprendedor);
     }
 
+    //Función que busca Aliado por nombre
     public function encontrarAliadoPorNombre($nombre)
     {
         return Aliado::where('nombre', $nombre)->first();
     }
 
-    //
+    //Función que busca asesoria por su id
     public function obtenerAsesoriaPorId($id)
     {
         return Asesoria::find($id);
     }
 
+    //Función que busca asesorias asignadas a un asesor
     public function verificarAsesoriaAsignada($idAsesoria)
     {
         return AsesoriaxAsesor::where('id_asesoria', $idAsesoria)->first();
     }
 
+    //Función que asigna asesorias a un asesor
     public function asignarAsesor($data)
     {
         return Asesoriaxasesor::create($data);
@@ -72,17 +76,20 @@ class AsesoriaRepository implements AsesoriaRepositoryInterface
         return $asesoria;
     }
 
+    //Función para traer los asesores por id
     public function obtenerAsesorPorId($idAsesor)
     {
         return Asesor::find($idAsesor);
     }
 
+    //Función para traer las asesorias de un asesor
     public function obtenerAsesorPorAsesoriaId($idAsesoria)
     {
         $asignacion = AsesoriaxAsesor::where('id_asesoria', $idAsesoria)->first();
         return $asignacion ? Asesor::find($asignacion->id_asesor) : null;
     }
 
+    
     public function verificarHorarioExistente($idAsesoria)
     {
         return HorarioAsesoria::where('id_asesoria', $idAsesoria)->first();
@@ -98,6 +105,7 @@ class AsesoriaRepository implements AsesoriaRepositoryInterface
         return AsesoriaxAsesor::where('id_asesoria', $idAsesoria)->first();
     }
 
+    //Función para traer asesorias por documento del emprendedor
     public function obtenerAsesoriasPorEmprendedor($documento, $asignacion)
     {
         $query = DB::table('asesoria as o')
@@ -136,6 +144,7 @@ class AsesoriaRepository implements AsesoriaRepositoryInterface
         return $query->get();
     }
 
+    //Función para traer asesorias por el id del aliado
     public function obtenerAsesoriasPorAliado($aliadoId, $asignacion)
     {
         return Asesoria::with(['emprendedor', 'asesoriaxAsesor.asesor', 'horarios'])

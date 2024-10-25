@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Jobs\EnviarNotificacionAsesoria;
-use App\Models\Asesor;
 use App\Repositories\Asesorias\AsesoriaRepositoryInterface;
 use Illuminate\Support\Facades\Auth;
 use Exception;
@@ -41,7 +40,13 @@ class AsesoriaService
         ];
     }
 
-    //Crear asesoría emprendedor
+     /**
+     * Crear una asesoría para un emprendedor.
+     * 
+     * @param array $data - Datos de la asesoría proporcionados por el emprendedor.
+     * @return string - Mensaje de éxito o error.
+     * @throws Exception - Lanza excepción si no se encuentra al emprendedor o si falla la asignación.
+     */
     public function guardarAsesoria(array $data)
     {
         // Busca al emprendedor
@@ -103,7 +108,13 @@ class AsesoriaService
     }
 
 
-    //Fucnión para asignar asesoría Aliado
+    /**
+     * Asignar un asesor a una asesoría para un aliado.
+     * 
+     * @param array $data - Datos de la asesoría y del asesor.
+     * @return string - Mensaje de éxito o error.
+     * @throws Exception - Lanza excepción si ya está asignada o si ocurre un error.
+     */
     public function asignarAsesoria($data)
     {
         // Verificar si ya está asignada
@@ -139,6 +150,13 @@ class AsesoriaService
     }
 
 
+    /**
+     * Definir un horario para la asesoría.
+     * 
+     * @param array $data - Datos del horario y la asesoría.
+     * @return string - Mensaje de éxito o error.
+     * @throws Exception - Lanza excepción si ya existe un horario o si hay problemas con los datos.
+     */
     public function definirHorarioAsesoria(array $data)
     {
         // Verificar si la asesoría existe
@@ -186,36 +204,65 @@ class AsesoriaService
         return 'Se le ha asignado un horario a su asesoría';
     }
 
-
+    /**
+     * Obtener asesorías por emprendedor.
+     * 
+     * @param string $documento - Documento del emprendedor.
+     * @param string $asignacion - Estado de la asignación (ej. "pendiente").
+     * @return Collection - Colección de asesorías del emprendedor.
+     */
     public function obtenerAsesoriasPorEmprendedor($documento, $asignacion)
     {
         return $this->asesoriaRepository->obtenerAsesoriasPorEmprendedor($documento, $asignacion);
     }
 
+    /**
+     * Obtener asesorías por aliado.
+     * 
+     * @param int $aliadoId - ID del aliado.
+     * @param string $asignacion - Estado de la asignación.
+     * @return Collection - Colección de asesorías del aliado.
+     */
     public function obtenerAsesoriasPorAliado($aliadoId, $asignacion)
     {
         return $this->asesoriaRepository->obtenerAsesoriasPorAliado($aliadoId, $asignacion);
     }
 
+
+    /**
+     * Listar asesores disponibles para un aliado.
+     * 
+     * @param int $idAliado - ID del aliado.
+     * @return Collection - Colección de asesores disponibles.
+     */
     public function listarAsesoresDisponibles($idAliado)
     {
         return $this->asesoriaRepository->obtenerAsesoresDisponiblesPorAliado($idAliado);
     }
 
+    /**
+     * Obtener el siguiente orientador disponible para una asesoría.
+     * 
+     * @return Orientador|null - Devuelve el próximo orientador disponible o null si no hay.
+     */
     public function siguienteOrientador()
     {
+        // Obtiene los orientadores activos.
         $orientadoresActivos = $this->asesoriaRepository->obtenerOrientadoresActivos();
 
         if ($orientadoresActivos->isEmpty()) {
             return null;
         }
 
+        // Obtiene la última asesoría asignada a un orientador.
         $ultimaAsesoria = $this->asesoriaRepository->obtenerUltimaAsesoriaConOrientador();
 
+        // Si no hay última asesoría, devuelve el primer orientador.
         if (!$ultimaAsesoria) {
             return $orientadoresActivos->first();
         }
 
+        // Busca el índice del último orientador asignado.
         $ultimoIndex = $orientadoresActivos->search(function ($orientador) use ($ultimaAsesoria) {
             return $orientador->id == $ultimaAsesoria->id_orientador;
         });
@@ -224,6 +271,7 @@ class AsesoriaService
             return $orientadoresActivos->first();
         }
 
+        // Calcula el índice del próximo orientador disponible.
         $proximoIndex = ($ultimoIndex + 1) % $orientadoresActivos->count();
         return $orientadoresActivos[$proximoIndex];
     }

@@ -207,6 +207,7 @@ class AsesoriasController extends Controller
     }
     
 
+    //Función para listar asesores disponibles
     public function listarAsesoresDisponibles($idAliado)
     {
         try {
