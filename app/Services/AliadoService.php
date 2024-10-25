@@ -60,13 +60,6 @@ class AliadoService
 
     /**
      * Crea un nuevo aliado.
-     *
-     * @param array $data
-     * @param UploadedFile $logoFile
-     * @param UploadedFile|null $rutaMultiFile
-     * @param UploadedFile|null $bannerFile
-     * @return array
-     * @throws Exception
      */
     public function crearAliado(array $data, $logoFile, $rutaMultiFile = null, $bannerFile = null): array
     {
@@ -173,14 +166,8 @@ class AliadoService
     }
 
     /**
-     * Edita un aliado existente.
-     *
-     * @param int $id
-     * @param array $data
-     * @param UploadedFile|null $logoFile
-     * @param UploadedFile|null $rutaMultiFile
-     * @return array
-     * @throws Exception
+     * 
+     *Edita un aliado existente.
      */
     public function editarAliado(int $id, array $data, $logoFile = null, $rutaMultiFile = null): array
     {
@@ -242,11 +229,6 @@ class AliadoService
 
     /**
      * Procesa el campo 'ruta_multi' según el tipo de dato.
-     *
-     * @param array $data
-     * @param UploadedFile|null $rutaMultiFile
-     * @return string|null
-     * @throws Exception
      */
     protected function procesarRutaMulti(array $data, $rutaMultiFile = null)
     {
@@ -266,9 +248,6 @@ class AliadoService
 
     /**
      * Genera una contraseña aleatoria.
-     *
-     * @param int $length
-     * @return string
      */
     protected function generateRandomPassword(int $length = 8): string
     {
