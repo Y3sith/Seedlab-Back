@@ -12,11 +12,15 @@ class EmprendedorApiController extends Controller
 {
     protected $emprendedorService;
 
+    // Constructor que inicializa el servicio del emprendedor
     public function __construct(EmprendedorService $emprendedorService)
     {
         $this->emprendedorService = $emprendedorService;
     }
 
+    /**
+     * Muestra las empresas asociadas a un emprendedor específico.
+     */
     public function show($id_emprendedor)
     {
         try {
@@ -24,6 +28,7 @@ class EmprendedorApiController extends Controller
                 return response()->json(["message" => "No tienes permisos para acceder a esta ruta"], 401);
             }
 
+            // Llama al servicio para obtener las empresas del emprendedor.
             $empresas = $this->emprendedorService->obtenerEmpresas($id_emprendedor);
             return response()->json($empresas, 200);
         } catch (Exception $e) {
@@ -31,6 +36,9 @@ class EmprendedorApiController extends Controller
         }
     }
 
+     /**
+     * Actualiza los datos del perfil del emprendedor.
+     */
     public function updateEmprendedor(Request $request, $documento)
     {
         try {
@@ -39,6 +47,7 @@ class EmprendedorApiController extends Controller
             }
 
             $data = $request->all();
+            // Llama al servicio para actualizar el perfil del emprendedor.
             $this->emprendedorService->actualizarEmprendedor($documento, $data);
 
             return response()->json(['message' => 'Datos del emprendedor actualizados correctamente'], 200);
@@ -47,6 +56,9 @@ class EmprendedorApiController extends Controller
         }
     }
 
+     /**
+     * Desactiva la cuenta de un emprendedor específico.
+     */
     public function destroy($documento)
     {
         try {
@@ -54,6 +66,7 @@ class EmprendedorApiController extends Controller
                 return response()->json(["error" => "No tienes permisos para desactivar la cuenta"], 401);
             }
 
+            // Llama al servicio para desactivar la cuenta del emprendedor.
             $this->emprendedorService->desactivarEmprendedor($documento);
 
             return response()->json(['message' => 'Emprendedor desactivado exitosamente'], 200);
@@ -61,9 +74,13 @@ class EmprendedorApiController extends Controller
             return response()->json(['error' => $e->getMessage()], $e->getCode());
         }
     }
-
+    
+    /**
+     * Obtiene los tipos de documento disponibles para emprendedores.
+     */
     public function tipoDocumento()
     {
+        // Llama al servicio para obtener los tipos de documentos y los devuelve en la respuesta.
         return response()->json($this->emprendedorService->obtenerTiposDocumento());
     }
 }
