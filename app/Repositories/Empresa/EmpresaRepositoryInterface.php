@@ -10,4 +10,6 @@ interface EmpresaRepositoryInterface{
     public function obtenerEmpresaPorIdYDocumento($idEmprendedor, $documento);
     public function crearEmpresa(array $data);
     public function actualizarEmpresa($documento, array $data);
+
+    public function crearApoyo(array $data);
 }

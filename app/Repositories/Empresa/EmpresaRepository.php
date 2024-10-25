@@ -5,14 +5,15 @@ namespace App\Repositories\Empresa;
 use App\Models\ApoyoEmpresa;
 use App\Models\Empresa;
 
-class EmpresaRepository implements EmpresaRepositoryInterface{
+class EmpresaRepository implements EmpresaRepositoryInterface
+{
 
     public function obtenerEmpresas()
     {
         return Empresa::all();
     }
 
-    
+
     public function obtenerEmpresasPorEmprendedor($docEmprendedor)
     {
         return Empresa::where('id_emprendedor', $docEmprendedor)->get(['documento', 'nombre']);
@@ -20,19 +21,18 @@ class EmpresaRepository implements EmpresaRepositoryInterface{
 
     public function obtenerEmpresaPorIdYDocumento($idEmprendedor, $documento)
     {
-        $empresa = Empresa::where('id_emprendedor', $idEmprendedor)
+        $empresa = Empresa::with('apoyos') // Utilizamos la relación con apoyos
+            ->where('id_emprendedor', $idEmprendedor)
             ->where('documento', $documento)
             ->first();
 
         if ($empresa) {
-            $apoyo = ApoyoEmpresa::where('id_empresa', $empresa->documento)->first();
-            $data = $empresa->toArray();
-            $data['apoyo'] = $apoyo;
-            return $data;
+            return $empresa->toArray(); // Esto incluirá automáticamente los apoyos
         }
 
         return null;
     }
+
 
     public function crearEmpresa(array $data)
     {
@@ -47,5 +47,10 @@ class EmpresaRepository implements EmpresaRepositoryInterface{
             return $empresa;
         }
         return null;
+    }
+
+    public function crearApoyo(array $data)
+    {
+        return ApoyoEmpresa::create($data);
     }
 }
