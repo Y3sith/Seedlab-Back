@@ -55,10 +55,10 @@ class Empresa extends Model
         return $this->belongsTo(Municipio::class, 'id_municipio');
     }
 
-    public function apoyoxempresa(){
+    public function apoyos(){
         // Esta relación indica que el modelo actual puede tener múltiples registros en la tabla ApoyoEmpresa.
         // Se establece una relación de uno a muchos, usando 'id_empresa' como clave foránea.
-        return $this->hasMany(ApoyoEmpresa::class, 'id_empresa');
+        return $this->hasMany(ApoyoEmpresa::class, 'id_empresa', 'documento');
     }
 
     public function respuestas(){

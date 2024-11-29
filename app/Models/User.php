@@ -83,5 +83,10 @@ class User extends Authenticatable
         return $this->hasOne(Aliado::class, 'id_autentication');
     }
 
+    public function getEstadoTextoAttribute()
+    {
+        return $this->estado == 1 ? 'Activo' : 'Inactivo';
+    }
+
     public $timestamps = false;
 }

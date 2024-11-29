@@ -19,7 +19,7 @@ return [
 
     'allowed_methods' => ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
 
-    'allowed_origins' => ['http://localhost:4200'],
+    'allowed_origins' => ['https://uccemprende.com'], //https://uccemprende.com
 
     'allowed_origins_patterns' => [],
 

@@ -13,7 +13,10 @@ return new class extends Migration
     {
         Schema::create('banner', function (Blueprint $table) {
             $table->id();
-            $table->text('urlImagen');
+            $table->string('urlImagenSmall')->nullable();
+            $table->string('urlImagenMedium')->nullable();
+            $table->string('urlImagenLarge')->nullable();
+            //$table->text('urlImagen');
             $table->boolean('estadobanner');
             $table->unsignedBigInteger('id_aliado');
             $table->foreign('id_aliado')->references('id')->on('aliado')->onDelete('cascade');
